@@ -24,7 +24,7 @@
 
 import { BOS_BASE_URI } from "../../constant";
 import * as express from "express";
-import { DigitalTwinService } from '../../services'
+import { BuildingService } from '../../services'
 
 export default function redirectRoutes(app: express.Express) {
     app.all(`${BOS_BASE_URI}/:building_id/*`, async function (req: express.Request, res: express.Response) {

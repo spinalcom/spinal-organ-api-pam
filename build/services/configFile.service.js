@@ -64,11 +64,12 @@ class ConfigFileService {
         return graph;
     }
     _initServices() {
-        const services = [_1.APIService, _1.AppProfileService, _1.AppService, _1.DigitalTwinService, _1.OrganListService, _1.RoleService, _1.UserProfileService];
+        const services = [_1.APIService, _1.AppProfileService, _1.AppService, _1.BuildingService, _1.OrganListService, _1.RoleService, _1.UserProfileService];
         const promises = services.map(service => {
             try {
                 const instance = service.getInstance();
-                return instance.init();
+                if (typeof instance.init === "function")
+                    return instance.init();
             }
             catch (error) {
                 console.error(error);

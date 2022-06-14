@@ -23,7 +23,7 @@
  * <http://resources.spinalcom.com/licenses.pdf>.
  */
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.BOS_BASE_URI = exports.PAM_BASE_URI = exports.routesToProxy = exports.CANNOT_CREATE_INTERNAL_ERROR = exports.USER_NOT_FOUND = exports.USER_BASE_EMPTY = exports.ROLE_METHODS = exports.DEFAULT_ROLES = exports.LST_PTR_TYPE = exports.PTR_LST_TYPE = exports.CONTEXT_TO_API_ROUTE = exports.CONTEXT_TO_DIGITAL_TWIN_RELATION_NAME = exports.CONTEXT_TO_USER_RELATION_NAME = exports.CONTEXT_TO_ROLE_RELATION_NAME = exports.CONTEXT_TO_APP_PROFILE_RELATION_NAME = exports.CONTEXT_TO_USER_PROFILE_RELATION_NAME = exports.CONTEXT_TO_APP_RELATION_NAME = exports.APP_GROUP_TO_APP_RELATION_NAME = exports.CATEGORY_TO_APP_GROUP_RELATION_NAME = exports.CONTEXT_TO_APP_CATEGORY = exports.API_ROUTE_TYPE = exports.DIGITAL_TWIN_TYPE = exports.APP_TYPE = exports.APP_GROUP_TYPE = exports.APP_CATEGORY_TYPE = exports.APP_PROFILE_TYPE = exports.USER_PROFILE_TYPE = exports.ROLE_TYPE = exports.ORGAN_LIST_CONTEXT_TYPE = exports.API_ROUTES_CONTEXT_TYPE = exports.DIGITAL_TWIN_CONTEXT_TYPE = exports.APP_LIST_CONTEXT_TYPE = exports.ROLES_CONTEXT_TYPE = exports.USER_LIST_CONTEXT_TYPE = exports.APP_PROFILE_CONTEXT_TYPE = exports.USER_PROFILE_CONTEXT_TYPE = exports.ORGAN_LIST_CONTEXT_NAME = exports.API_ROUTES_CONTEXT_NAME = exports.DIGITAL_TWIN_CONTEXT_NAME = exports.APP_LIST_CONTEXT_NAME = exports.ROLES_CONTEXT_NAME = exports.USER_LIST_CONTEXT_NAME = exports.APP_PROFILE_CONTEXT_NAME = exports.USER_PROFILE_CONTEXT_NAME = exports.CONFIG_GRAPH_NAME = exports.CONFIG_FILE_MODEl_TYPE = void 0;
+exports.BOS_BASE_URI = exports.PAM_BASE_URI = exports.routesToProxy = exports.CANNOT_CREATE_INTERNAL_ERROR = exports.USER_NOT_FOUND = exports.USER_BASE_EMPTY = exports.ROLE_METHODS = exports.DEFAULT_ROLES = exports.LST_PTR_TYPE = exports.PTR_LST_TYPE = exports.CONTEXT_TO_API_ROUTE = exports.CONTEXT_TO_DIGITALTWIN_RELATION_NAME = exports.CONTEXT_TO_BUILDING_RELATION_NAME = exports.CONTEXT_TO_USER_RELATION_NAME = exports.CONTEXT_TO_ROLE_RELATION_NAME = exports.CONTEXT_TO_APP_PROFILE_RELATION_NAME = exports.CONTEXT_TO_USER_PROFILE_RELATION_NAME = exports.CONTEXT_TO_APP_RELATION_NAME = exports.APP_GROUP_TO_APP_RELATION_NAME = exports.CATEGORY_TO_APP_GROUP_RELATION_NAME = exports.CONTEXT_TO_APP_CATEGORY = exports.API_ROUTE_TYPE = exports.DIGITALTWIN_TYPE = exports.BUILDING_TYPE = exports.APP_TYPE = exports.APP_GROUP_TYPE = exports.APP_CATEGORY_TYPE = exports.APP_PROFILE_TYPE = exports.USER_PROFILE_TYPE = exports.ROLE_TYPE = exports.ORGAN_LIST_CONTEXT_TYPE = exports.API_ROUTES_CONTEXT_TYPE = exports.DIGITALTWIN_CONTEXT_TYPE = exports.BUILDING_CONTEXT_TYPE = exports.APP_LIST_CONTEXT_TYPE = exports.ROLES_CONTEXT_TYPE = exports.USER_LIST_CONTEXT_TYPE = exports.APP_PROFILE_CONTEXT_TYPE = exports.USER_PROFILE_CONTEXT_TYPE = exports.ORGAN_LIST_CONTEXT_NAME = exports.API_ROUTES_CONTEXT_NAME = exports.DIGITALTWIN_CONTEXT_NAME = exports.BUILDING_CONTEXT_NAME = exports.APP_LIST_CONTEXT_NAME = exports.ROLES_CONTEXT_NAME = exports.USER_LIST_CONTEXT_NAME = exports.APP_PROFILE_CONTEXT_NAME = exports.USER_PROFILE_CONTEXT_NAME = exports.CONFIG_GRAPH_NAME = exports.CONFIG_FILE_MODEl_TYPE = void 0;
 const spinal_env_viewer_graph_service_1 = require("spinal-env-viewer-graph-service");
 const interfaces_1 = require("./interfaces");
 exports.CONFIG_FILE_MODEl_TYPE = "SpinalPAM";
@@ -34,7 +34,8 @@ exports.APP_PROFILE_CONTEXT_NAME = 'AppProfileList';
 exports.USER_LIST_CONTEXT_NAME = 'UserList';
 exports.ROLES_CONTEXT_NAME = 'RoleList';
 exports.APP_LIST_CONTEXT_NAME = 'AppList';
-exports.DIGITAL_TWIN_CONTEXT_NAME = 'DigitalTwin';
+exports.BUILDING_CONTEXT_NAME = 'Buildings';
+exports.DIGITALTWIN_CONTEXT_NAME = 'DigitalTwins';
 exports.API_ROUTES_CONTEXT_NAME = 'ApiListContext';
 exports.ORGAN_LIST_CONTEXT_NAME = 'OrganListContext';
 //Contexts types
@@ -43,7 +44,8 @@ exports.APP_PROFILE_CONTEXT_TYPE = 'AppProfileList';
 exports.USER_LIST_CONTEXT_TYPE = 'UserList';
 exports.ROLES_CONTEXT_TYPE = 'RoleList';
 exports.APP_LIST_CONTEXT_TYPE = 'AppList';
-exports.DIGITAL_TWIN_CONTEXT_TYPE = 'DigitalTwinContext';
+exports.BUILDING_CONTEXT_TYPE = 'BuildingContextList';
+exports.DIGITALTWIN_CONTEXT_TYPE = 'DigitalTwinContext';
 exports.API_ROUTES_CONTEXT_TYPE = 'ApiListContext';
 exports.ORGAN_LIST_CONTEXT_TYPE = 'OrganListContext';
 // types
@@ -53,7 +55,8 @@ exports.APP_PROFILE_TYPE = "AppProfile";
 exports.APP_CATEGORY_TYPE = "AdminAppCategory";
 exports.APP_GROUP_TYPE = "AdminAppGroup";
 exports.APP_TYPE = 'AdminApp';
-exports.DIGITAL_TWIN_TYPE = 'DigitalTwin';
+exports.BUILDING_TYPE = 'Building';
+exports.DIGITALTWIN_TYPE = 'DigitalTwin';
 exports.API_ROUTE_TYPE = 'ApiRoute';
 // RelationName
 exports.CONTEXT_TO_APP_CATEGORY = "hasAppCategory";
@@ -64,7 +67,8 @@ exports.CONTEXT_TO_USER_PROFILE_RELATION_NAME = 'hasUserProfile';
 exports.CONTEXT_TO_APP_PROFILE_RELATION_NAME = 'hasAppProfile';
 exports.CONTEXT_TO_ROLE_RELATION_NAME = 'hasRole';
 exports.CONTEXT_TO_USER_RELATION_NAME = 'hasUser';
-exports.CONTEXT_TO_DIGITAL_TWIN_RELATION_NAME = 'hasDigitalTwin';
+exports.CONTEXT_TO_BUILDING_RELATION_NAME = 'hasBuilding';
+exports.CONTEXT_TO_DIGITALTWIN_RELATION_NAME = 'hasDigitalTwin';
 exports.CONTEXT_TO_API_ROUTE = 'hasApiRoute';
 // Relation Type
 exports.PTR_LST_TYPE = spinal_env_viewer_graph_service_1.SPINAL_RELATION_PTR_LST_TYPE;

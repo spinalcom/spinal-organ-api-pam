@@ -24,7 +24,7 @@
 
 import { BOS_BASE_URI } from "../../constant";
 import * as express from "express";
-import { DigitalTwinService } from '../../services'
+import { BuildingService } from '../../services'
 import * as proxy from "express-http-proxy";
 
 interface IApiData { url: string; clientId: string; secretId: string }
@@ -33,7 +33,7 @@ export default async function redirectRoutes(app: express.Express) {
     let apiData: IApiData = { url: "", clientId: "", secretId: "" };
     app.use(`${BOS_BASE_URI}/:building_id/*`, async (req: express.Request, res: express.Response, next: express.NextFunction) => {
         const { building_id } = req.params;
-        const node = await DigitalTwinService.getInstance().getDigitalTwin(building_id);
+        const node = await BuildingService.getInstance().getBuilding(building_id);
         if (!node) return res.status(404).send(`No building found for ${building_id}`);
 
         apiData = { url: "", clientId: "", secretId: "" };

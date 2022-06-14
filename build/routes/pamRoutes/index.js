@@ -23,7 +23,7 @@
  * <http://resources.spinalcom.com/licenses.pdf>.
  */
 Object.defineProperty(exports, "__esModule", { value: true });
-const digitalTwin_1 = require("./digitalTwin");
+const building_1 = require("./building");
 const apps_1 = require("./apps");
 const apis_1 = require("./apis");
 const appProfile_1 = require("./appProfile");
@@ -32,7 +32,7 @@ const role_1 = require("./role");
 const organList_1 = require("./organList");
 const user_1 = require("./user");
 function routes(app) {
-    (0, digitalTwin_1.default)(app);
+    (0, building_1.default)(app);
     (0, apps_1.default)(app);
     (0, apis_1.default)(app);
     (0, appProfile_1.default)(app);

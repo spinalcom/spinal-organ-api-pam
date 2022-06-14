@@ -38,7 +38,7 @@ __exportStar(require("./apis.service"), exports);
 __exportStar(require("./apps.service"), exports);
 __exportStar(require("./appProfile.service"), exports);
 __exportStar(require("./userProfile.service"), exports);
-__exportStar(require("./digitalTwin.service"), exports);
+__exportStar(require("./building.service"), exports);
 __exportStar(require("./organList.service"), exports);
 __exportStar(require("./role.service"), exports);
 // export * from "./graph.service";

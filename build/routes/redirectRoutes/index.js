@@ -40,7 +40,7 @@ function redirectRoutes(app) {
         let apiData = { url: "", clientId: "", secretId: "" };
         app.use(`${constant_1.BOS_BASE_URI}/:building_id/*`, (req, res, next) => __awaiter(this, void 0, void 0, function* () {
             const { building_id } = req.params;
-            const node = yield services_1.DigitalTwinService.getInstance().getDigitalTwin(building_id);
+            const node = yield services_1.BuildingService.getInstance().getBuilding(building_id);
             if (!node)
                 return res.status(404).send(`No building found for ${building_id}`);
             apiData = { url: "", clientId: "", secretId: "" };
