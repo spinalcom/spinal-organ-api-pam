@@ -1,0 +1,31 @@
+{
+  "compilerOptions": {
+    "module": "CommonJS",
+    "noImplicitAny": false,
+    "noImplicitReturns": false,
+    "noImplicitThis": true,
+    "sourceMap": true,
+    "downlevelIteration": true,
+    "baseUrl": "src",
+    "outDir": "build",
+    "target": "es6"
+  },
+  "experimentalDecorators": true,
+  "paths": {
+    "@/*": [
+      "src/*"
+    ],
+    "/@/*": [
+      "src/*"
+    ],
+    "/@/img/*": [
+      "src/assets/img/*"
+    ],
+  },
+  "exclude": [
+    "node_modules"
+  ],
+  "inclure": [
+    "./src/**/*"
+  ]
+}
