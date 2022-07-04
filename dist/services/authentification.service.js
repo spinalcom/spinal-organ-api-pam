@@ -118,7 +118,6 @@ class AuthentificationService {
             const endpoint = "register";
             const adminCredential = !update ? yield this._getOrCreateAdminCredential(true) : {};
             const data = yield this._getRequestBody(update, bosCredential, adminCredential);
-            console.log("data", data);
             return axios_1.default.put(`${bosCredential.urlAdmin}/${endpoint}`, data, {
                 headers: {
                     'Content-Type': 'application/json',

@@ -32,7 +32,7 @@ import * as morgan from "morgan";
 import { PAM_BASE_URI } from "./constant";
 
 var proxy = require('express-http-proxy');
-const { spinalConnector: { host, port }, config: { server_port } } = require("../config");
+// const { spinalConnector: { host, port }, config: { server_port } } = require("../config");
 import { routesToProxy } from "./constant";
 
 // const path = require('path');
@@ -43,7 +43,7 @@ export default function initExpress() {
   // const absPath = '../../../.browser_organs'.split('/');
   // const root = path.join(__dirname, ...absPath);
 
-  const HUB_HOST = `http://${host}:${port}`;
+  const HUB_HOST = `http://${process.env.HUB_HOST}:${process.env.HUB_PORT}`;
 
   var app = express();
 
@@ -106,6 +106,7 @@ export default function initExpress() {
   //   .route(`/${BASE_URI}/getAllProfileApp`)
   //   .get(serviceAppProfile.getAllProfileApp.bind(serviceAppProfile));
 
+  const server_port = process.env.SERVER_PORT || 2022;
   const server = app.listen(server_port, () => console.log(`Example app listening on port ${server_port}!`));
   return { server, app }
 }

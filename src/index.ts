@@ -23,17 +23,17 @@
  */
 
 
-
+require("dotenv").config();
 import { spinalCore } from 'spinal-core-connectorjs_type';
 import { configServiceInstance } from './services/configFile.service';
-const { spinalConnector: { user, password, host, port }, config: { directory_path, fileName } } = require("../config");
+// const { spinalConnector: { user, password, host, port }, config: { directory_path, fileName } } = require("../config");
 
 import initExpress from './initExpress';
 import initSwagger from "./swagger";
 
 import routes from "./routes";
 
-const conn = spinalCore.connect(`http://${user}:${password}@${host}:${port}/`);
+const conn = spinalCore.connect(`http://${process.env.USER_ID}:${process.env.USER_MDP}@${process.env.HUB_HOST}:${process.env.HUB_PORT}/`);
 
 
 configServiceInstance.init(conn).then((result) => {

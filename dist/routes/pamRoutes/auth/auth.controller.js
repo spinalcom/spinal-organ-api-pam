@@ -109,7 +109,7 @@ class AuthController {
         return __awaiter(this, void 0, void 0, function* () {
             try {
                 const resp = yield serviceInstance.sendDataToAdmin(true);
-                return res.status(constant_1.HTTP_CODES.OK).send(resp.data);
+                return res.status(constant_1.HTTP_CODES.OK).send("updated");
             }
             catch (error) {
                 return res.status(constant_1.HTTP_CODES.INTERNAL_ERROR).send(error.message);

@@ -7,8 +7,8 @@
   "author": "",
   "license": "ISC",
   "scripts": {
-    "build": "rm -rf build && tsc",
-    "start": "npm run build && node build/index.js"
+    "build": "rm -rf dist && tsc",
+    "start": "npm run build && node dist/index.js"
   },
   "dependencies": {
     "axios": "^0.27.2",

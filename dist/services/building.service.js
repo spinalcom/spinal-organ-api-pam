@@ -37,9 +37,9 @@ const constant_1 = require("../constant");
 const spinal_env_viewer_graph_service_1 = require("spinal-env-viewer-graph-service");
 const digitalTwin_service_1 = require("./digitalTwin.service");
 const openGeocoder = require("node-open-geocoder");
-const { config: { server_port } } = require("../../config");
+// const { config: { server_port } } = require("../../config");
 const axios_1 = require("axios");
-const axiosInstance = axios_1.default.create({ baseURL: `http://localhost:${server_port}` });
+const axiosInstance = axios_1.default.create({ baseURL: `http://localhost:${process.env.HUB_PORT}` });
 // import * as NodeGeocoder from "node-geocoder";
 class BuildingService {
     constructor() { }

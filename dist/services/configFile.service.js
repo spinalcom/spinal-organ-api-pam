@@ -29,7 +29,9 @@ const spinal_core_connectorjs_type_1 = require("spinal-core-connectorjs_type");
 const spinal_model_graph_1 = require("spinal-model-graph");
 const constant_1 = require("../constant");
 const _1 = require(".");
-const { config: { directory_path, fileName } } = require("../../config");
+// const { config: { directory_path, fileName } } = require("../../config");
+const directory_path = process.env.CONFIG_DIRECTORY_PATH || "/__users__/admin/";
+const fileName = process.env.CONFIG_FILE_NAME || "PAMConfig";
 class ConfigFileService {
     constructor() { }
     static getInstance() {

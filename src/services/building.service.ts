@@ -27,10 +27,10 @@ import { SpinalContext, SpinalGraph, SpinalGraphService, SpinalNode } from "spin
 import { DigitalTwinService } from "./digitalTwin.service";
 import { IBuilding, ILocation } from "interfaces";
 import * as openGeocoder from "node-open-geocoder";
-const { config: { server_port } } = require("../../config");
+// const { config: { server_port } } = require("../../config");
 
 import axios from "axios";
-const axiosInstance = axios.create({ baseURL: `http://localhost:${server_port}` });
+const axiosInstance = axios.create({ baseURL: `http://localhost:${process.env.HUB_PORT}` });
 // import * as NodeGeocoder from "node-geocoder";
 
 

@@ -34,8 +34,11 @@ import {
     UserProfileService, DigitalTwinService
 } from ".";
 
-const { config: { directory_path, fileName } } = require("../../config");
+// const { config: { directory_path, fileName } } = require("../../config");
 
+
+const directory_path = process.env.CONFIG_DIRECTORY_PATH || "/__users__/admin/";
+const fileName = process.env.CONFIG_FILE_NAME || "PAMConfig";
 
 export default class ConfigFileService {
     private static instance: ConfigFileService;
