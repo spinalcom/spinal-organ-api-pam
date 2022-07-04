@@ -29,6 +29,7 @@ export default function routes(app: express.Express) {
 
     app
         .post(`${PAM_BASE_URI}/create_api_route`, controller.createApiRoute)
+        .post(`${PAM_BASE_URI}/upload_apis_routes`, controller.uploadSwaggerFile)
         .put(`${PAM_BASE_URI}/update_api_route/:id`, controller.updateApiRoute)
         .get(`${PAM_BASE_URI}/get_api_route/:id`, controller.getApiRouteById)
         .get(`${PAM_BASE_URI}/get_all_api_route`, controller.getAllApiRoute)

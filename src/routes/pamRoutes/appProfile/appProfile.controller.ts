@@ -22,13 +22,15 @@
  * <http://resources.spinalcom.com/licenses.pdf>.
  */
 
+import { HTTP_CODES } from "../../../constant";
 import * as express from "express";
+import { IAppProfile, IAppProfileRes } from "../../../interfaces";
+import { SpinalNode } from "spinal-env-viewer-graph-service";
 import { AppProfileService } from "../../../services";
 
 const serviceInstance = AppProfileService.getInstance();
 
 export class AppProfileController {
-
   private static instance: AppProfileController;
 
   private constructor() { }
@@ -44,31 +46,34 @@ export class AppProfileController {
   public async createAppProfile(req: express.Request, res: express.Response) {
     try {
       const data = req.body;
-      const node = await serviceInstance.createAppProfile(data);
-      return res.status(200).send(node.info.get());
+
+      if (!data.name) return res.status(HTTP_CODES.BAD_REQUEST).send("The profile name is required");
+      const profile = await serviceInstance.createAppProfile(data);
+      return res.status(HTTP_CODES.CREATED).send(_formatUserProfile(profile));
+
     } catch (error) {
-      res.status(500).send(error.message);
+      res.status(HTTP_CODES.INTERNAL_ERROR).send(error.message);
     }
   }
 
   public async getAppProfile(req: express.Request, res: express.Response) {
     try {
       const { id } = req.params;
-      const node = await serviceInstance.getAppProfile(id);
-      if (node) return res.status(200).send(node.info.get());
-      return res.status(404).send(`no profile found for ${id}`);
+      const data = await serviceInstance.getAppProfile(id);
+      if (data) return res.status(HTTP_CODES.OK).send(_formatUserProfile(data));
+      return res.status(HTTP_CODES.NOT_FOUND).send(`no profile found for ${id}`);
     } catch (error) {
-      res.status(500).send(error.message);
+      res.status(HTTP_CODES.INTERNAL_ERROR).send(error.message);
     }
   }
 
   public async getAllAppProfile(req: express.Request, res: express.Response) {
     try {
       const nodes = await serviceInstance.getAllAppProfile();
-      if (nodes) return res.status(200).send(nodes.map(el => el.info.get()));
-      return res.status(200).send([]);
+      if (nodes) return res.status(HTTP_CODES.OK).send(nodes.map(el => _formatUserProfile(el)));
+      return res.status(HTTP_CODES.OK).send([]);
     } catch (error) {
-      res.status(500).send(error.message);
+      res.status(HTTP_CODES.INTERNAL_ERROR).send(error.message);
     }
   }
 
@@ -78,10 +83,10 @@ export class AppProfileController {
       const data = req.body;
 
       const node = await serviceInstance.updateAppProfile(id, data);
-      if (node) return res.status(200).send(node.info.get());
-      return res.status(404).send(`no profile found for ${id}`);
+      if (node) return res.status(HTTP_CODES.OK).send(_formatUserProfile(node));
+      return res.status(HTTP_CODES.NOT_FOUND).send(`no profile found for ${id}`);
     } catch (error) {
-      res.status(500).send(error.message);
+      res.status(HTTP_CODES.INTERNAL_ERROR).send(error.message);
     }
   }
 
@@ -90,14 +95,174 @@ export class AppProfileController {
       const { id } = req.params;
 
       await serviceInstance.deleteAppProfile(id);
-      return res.status(200).send("app profile deleted");
+      return res.status(HTTP_CODES.OK).send("user profile deleted");
 
     } catch (error) {
-      res.status(500).send(error.message);
+      res.status(HTTP_CODES.INTERNAL_ERROR).send(error.message);
     }
   }
 
+  public async authorizeToAccessApps(req: express.Request, res: express.Response) {
+    try {
+      const { profileId } = req.params;
+      const { authorizeApps } = req.body;
+
+      const nodes = await serviceInstance.authorizeToAccessApps(profileId, authorizeApps);
+      if (nodes) return res.status(HTTP_CODES.OK).send(_getNodeListInfo(nodes));
+
+      return res.status(HTTP_CODES.NOT_FOUND).send(`no profile found for ${profileId}`);
+
+    } catch (error) {
+      return res.status(HTTP_CODES.INTERNAL_ERROR).send(error.message);
+    }
+  }
+
+  public async unauthorizeToAccessApps(req: express.Request, res: express.Response) {
+    try {
+      const { profileId } = req.params;
+      const { unauthorizeApps } = req.body;
+
+      const nodes = await serviceInstance.unauthorizeToAccessApps(profileId, unauthorizeApps);
+      if (nodes) return res.status(HTTP_CODES.OK).send(nodes.filter(el => el));
+
+      return res.status(HTTP_CODES.NOT_FOUND).send(`no profile found for ${profileId}`);
+    } catch (error) {
+      return res.status(HTTP_CODES.INTERNAL_ERROR).send(error.message);
+    }
+  }
+
+  public async getAuthorizedApps(req: express.Request, res: express.Response) {
+    try {
+      const { profileId } = req.params;
+
+      const nodes = await serviceInstance.getAuthorizedApps(profileId);
+      if (nodes) return res.status(HTTP_CODES.OK).send(_getNodeListInfo(nodes));
+
+      return res.status(HTTP_CODES.NOT_FOUND).send(`no profile found for ${profileId}`);
+    } catch (error) {
+      return res.status(HTTP_CODES.INTERNAL_ERROR).send(error.message);
+    }
+  }
+
+  public async authorizeToAccessApis(req: express.Request, res: express.Response) {
+    try {
+      const { profileId } = req.params;
+      const { authorizeApis } = req.body;
+
+      const nodes = await serviceInstance.authorizeToAccessApis(profileId, authorizeApis);
+      if (nodes) return res.status(HTTP_CODES.OK).send(_getNodeListInfo(nodes));
+
+      return res.status(HTTP_CODES.NOT_FOUND).send(`no profile found for ${profileId}`);
+    } catch (error) {
+      return res.status(HTTP_CODES.INTERNAL_ERROR).send(error.message);
+    }
+  }
+
+  public async unauthorizeToAccessApis(req: express.Request, res: express.Response) {
+    try {
+      const { profileId } = req.params;
+      const { unauthorizeApis } = req.body;
+
+      const nodes = await serviceInstance.unauthorizeToAccessApis(profileId, unauthorizeApis);
+      if (nodes) return res.status(HTTP_CODES.OK).send(nodes.filter(el => el));
+
+      return res.status(HTTP_CODES.NOT_FOUND).send(`no profile found for ${profileId}`);
+    } catch (error) {
+      return res.status(HTTP_CODES.INTERNAL_ERROR).send(error.message);
+    }
+  }
+
+  public async getAuthorizedApis(req: express.Request, res: express.Response) {
+    try {
+      const { profileId } = req.params;
+
+      const nodes = await serviceInstance.getAuthorizedApis(profileId);
+      if (nodes) return res.status(HTTP_CODES.OK).send(_getNodeListInfo(nodes));
+
+      return res.status(HTTP_CODES.NOT_FOUND).send(`no profile found for ${profileId}`);
+    } catch (error) {
+      return res.status(HTTP_CODES.INTERNAL_ERROR).send(error.message);
+    }
+  }
+
+
+  public async authorizeProfileToAccessBos(req: express.Request, res: express.Response) {
+    try {
+      const { profileId } = req.params;
+      const { authorizeBos } = req.body;
+
+      const nodes = await serviceInstance.authorizeToAccessBos(profileId, authorizeBos);
+      if (nodes) return res.status(HTTP_CODES.OK).send(_getNodeListInfo(nodes));
+
+      return res.status(HTTP_CODES.NOT_FOUND).send(`no profile found for ${profileId}`);
+
+    } catch (error) {
+      return res.status(HTTP_CODES.INTERNAL_ERROR).send(error.message);
+    }
+  }
+
+  public async unauthorizeProfileToAccessBos(req: express.Request, res: express.Response) {
+    try {
+      const { profileId } = req.params;
+      const { unauthorizeBos } = req.body;
+
+      const nodes = await serviceInstance.unauthorizeToAccessBos(profileId, unauthorizeBos);
+      if (nodes) return res.status(HTTP_CODES.OK).send(nodes.filter(el => el));
+
+      return res.status(HTTP_CODES.NOT_FOUND).send(`no profile found for ${profileId}`);
+    } catch (error) {
+      return res.status(HTTP_CODES.INTERNAL_ERROR).send(error.message);
+    }
+  }
+
+  public async getAuthorizedBos(req: express.Request, res: express.Response) {
+    try {
+      const { profileId } = req.params;
+
+      const nodes = await serviceInstance.getAuthorizedBos(profileId);
+      if (nodes) return res.status(HTTP_CODES.OK).send(_getNodeListInfo(nodes));
+
+      return res.status(HTTP_CODES.NOT_FOUND).send(`no profile found for ${profileId}`);
+    } catch (error) {
+      return res.status(HTTP_CODES.INTERNAL_ERROR).send(error.message);
+    }
+  }
+
+
+  ////////////////////////////////////////////////
+  //                    PRIVATES                //
+  ////////////////////////////////////////////////
+
+
+
+
 }
 
+
+function _formatUserProfile(data: IAppProfileRes) {
+  return {
+    ...data.node.info.get(),
+    authorizedApps: _getNodeListInfo(data.authorizedApps),
+    authorizedRoutes: _getNodeListInfo(data.authorizedRoutes),
+    authorizedBos: _getNodeListInfo(data.authorizedBos)
+  }
+}
+
+function _getNodeListInfo(nodes: SpinalNode[]): any[] {
+  return nodes.map(el => el.info.get());
+}
+
+function _formatUserProfileKeys(userProfile: IAppProfile): IAppProfile {
+  const res: any = {};
+
+  for (const key in userProfile) {
+    if (Object.prototype.hasOwnProperty.call(userProfile, key)) {
+      const element = userProfile[key];
+      res[key] = typeof element === "string" && element.trim()[0] === "[" ? JSON.parse(element.trim()) : element;
+    }
+  }
+
+  return res;
+}
 
 export default AppProfileController.getInstance();

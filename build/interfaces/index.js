@@ -39,6 +39,9 @@ __exportStar(require("./IGroup"), exports);
 __exportStar(require("./IRole"), exports);
 __exportStar(require("./IUser"), exports);
 __exportStar(require("./IUserProfile"), exports);
-__exportStar(require("./IDigitalTwin"), exports);
+__exportStar(require("./IBuilding"), exports);
 __exportStar(require("./IApiRoute"), exports);
+__exportStar(require("./IDigitalTwin"), exports);
+__exportStar(require("./ISwaggerFile"), exports);
+__exportStar(require("./IAdmin"), exports);
 //# sourceMappingURL=index.js.map

@@ -22,22 +22,9 @@
  * <http://resources.spinalcom.com/licenses.pdf>.
  */
 
-export interface ILocation {
-    lat: number;
-    lng: number;
-    [key: string]: any;
-
-}
-
-export interface IBuilding {
+export interface IDigitalTwin {
+    id: string;
     name: string;
-    aliasName: string;
-    bosUrl: string;
-    apiUrl: string;
-    clientId: string;
-    clientSecret: string;
-    address: string;
-    description: string;
-    location: ILocation;
+    path: string;
     [key: string]: any;
 }

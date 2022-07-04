@@ -21,10 +21,25 @@
  * with this file. If not, see
  * <http://resources.spinalcom.com/licenses.pdf>.
  */
+import { SpinalNode } from 'spinal-env-viewer-graph-service';
 
 export interface IUserProfile {
-  name?: string;
-  appList?: [];
-  buildContextList?: [];
+  name: string;
+  authorizeApps?: string[];
+  unauthorizeApps: string[];
+  authorizeApis?: string[];
+  unauthorizeApis?: string[];
+  authorizeBos?: string[];
+  unauthorizeBos?: string[];
   [key: string]: any;
+
+  // buildContextList?: [];
+}
+
+
+export interface IUserProfileRes {
+  node: SpinalNode;
+  authorizedApps?: SpinalNode[];
+  authorizedRoutes?: SpinalNode[];
+  authorizedBos?: SpinalNode[];
 }

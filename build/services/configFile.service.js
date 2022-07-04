@@ -40,6 +40,7 @@ class ConfigFileService {
     }
     init(connect) {
         return this.loadOrMakeConfigFile(connect).then((graph) => {
+            this.hubConnect = connect;
             this.graph = graph;
             return this._initServices();
         });
@@ -64,7 +65,16 @@ class ConfigFileService {
         return graph;
     }
     _initServices() {
-        const services = [_1.APIService, _1.AppProfileService, _1.AppService, _1.BuildingService, _1.OrganListService, _1.RoleService, _1.UserProfileService];
+        const services = [
+            _1.APIService,
+            _1.AppProfileService,
+            _1.AppService,
+            // BuildingService,
+            _1.OrganListService,
+            _1.RoleService,
+            _1.UserProfileService,
+            _1.DigitalTwinService
+        ];
         const promises = services.map(service => {
             try {
                 const instance = service.getInstance();
@@ -76,6 +86,10 @@ class ConfigFileService {
             }
         });
         return Promise.all(promises);
+        // .then((result) => {
+        // this._initChildrenServices();
+        // return result;
+        // })
     }
 }
 exports.default = ConfigFileService;

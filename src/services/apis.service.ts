@@ -22,10 +22,10 @@
  * <http://resources.spinalcom.com/licenses.pdf>.
  */
 
-import { API_ROUTES_CONTEXT_NAME, API_ROUTES_CONTEXT_TYPE, API_ROUTE_TYPE, CONTEXT_TO_API_ROUTE, PTR_LST_TYPE } from "../constant";
+import { API_ROUTES_CONTEXT_NAME, API_ROUTES_CONTEXT_TYPE, API_ROUTE_TYPE, CONTEXT_TO_API_ROUTE_RELATION_NAME, PTR_LST_TYPE } from "../constant";
 import { SpinalContext, SpinalGraphService, SpinalNode } from "spinal-env-viewer-graph-service";
 import { configServiceInstance } from "./configFile.service";
-import { IApiRoute } from "interfaces";
+import { IApiRoute, ISwaggerFile, ISwaggerPath, ISwaggerPathData } from "../interfaces";
 
 export class APIService {
     private static instance: APIService;
@@ -48,12 +48,12 @@ export class APIService {
 
     public async createApiRoute(route: IApiRoute): Promise<SpinalNode> {
         const apiExist = await this.getApiRouteByRoute(route);
-        if (apiExist) throw `route ${route.method.toUpperCase()} ${route.route} already exists`;
+        if (apiExist) return apiExist;
         delete route.id;
         route.type = API_ROUTE_TYPE;
         const routeId = SpinalGraphService.createNode(route, undefined);
         const node = SpinalGraphService.getRealNode(routeId);
-        return this.context.addChildInContext(node, CONTEXT_TO_API_ROUTE, PTR_LST_TYPE, this.context);
+        return this.context.addChildInContext(node, CONTEXT_TO_API_ROUTE_RELATION_NAME, PTR_LST_TYPE, this.context);
     }
 
     public async updateApiRoute(routeId: string, newValue: IApiRoute) {
@@ -102,5 +102,64 @@ export class APIService {
         return routeId;
     }
 
+    public async uploadSwaggerFile(buffer: Buffer): Promise<any[]> {
+        const swaggerData = await this._readBuffer(buffer);
+        const routes = await this._formatSwaggerFile(swaggerData);
+        const promises = routes.map(route => {
+            try {
+                return this.createApiRoute(route);
+            } catch (error) { }
+        })
+
+        return Promise.all(promises);
+    }
+
+
+    private _formatSwaggerFile(swaggerFile: ISwaggerFile): Promise<IApiRoute[]> {
+        try {
+            const paths = swaggerFile.paths || [];
+            const data: any = [];
+
+            for (const key in paths) {
+                if (Object.prototype.hasOwnProperty.call(paths, key)) {
+                    const method = this._getMethod(paths[key]);
+                    let item = {
+                        route: key,
+                        method: method && method.toUpperCase(),
+                        tag: this._getTags(paths[key][method]),
+                        scope: this._getScope(paths[key][method])
+                    };
+
+                    data.push(item);
+                }
+            }
+
+            return data;
+        } catch (error) {
+            throw new Error("Invalid swagger file");
+        }
+    }
+
+    private _getMethod(path: ISwaggerPath): string {
+        const keys = Object.keys(path);
+        return keys.length > 0 && keys[0];
+    }
+
+    private _getTags(item: ISwaggerPathData): string {
+        return (item.tags && item.tags[0]) || "";
+    }
+
+    private _getScope(item: ISwaggerPathData): string {
+        return (
+            (item.security &&
+                item.security[0] &&
+                item.security[0].OauthSecurity &&
+                item.security[0].OauthSecurity[0]) || ""
+        );
+    }
+
+    private _readBuffer(buffer: Buffer): Promise<ISwaggerFile> {
+        return JSON.parse(buffer.toString())
+    }
 
 }

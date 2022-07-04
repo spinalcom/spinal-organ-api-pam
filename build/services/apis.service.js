@@ -55,12 +55,12 @@ class APIService {
         return __awaiter(this, void 0, void 0, function* () {
             const apiExist = yield this.getApiRouteByRoute(route);
             if (apiExist)
-                throw `route ${route.method.toUpperCase()} ${route.route} already exists`;
+                return apiExist;
             delete route.id;
             route.type = constant_1.API_ROUTE_TYPE;
             const routeId = spinal_env_viewer_graph_service_1.SpinalGraphService.createNode(route, undefined);
             const node = spinal_env_viewer_graph_service_1.SpinalGraphService.getRealNode(routeId);
-            return this.context.addChildInContext(node, constant_1.CONTEXT_TO_API_ROUTE, constant_1.PTR_LST_TYPE, this.context);
+            return this.context.addChildInContext(node, constant_1.CONTEXT_TO_API_ROUTE_RELATION_NAME, constant_1.PTR_LST_TYPE, this.context);
         });
     }
     updateApiRoute(routeId, newValue) {
@@ -110,6 +110,57 @@ class APIService {
             yield route.removeFromGraph();
             return routeId;
         });
+    }
+    uploadSwaggerFile(buffer) {
+        return __awaiter(this, void 0, void 0, function* () {
+            const swaggerData = yield this._readBuffer(buffer);
+            const routes = yield this._formatSwaggerFile(swaggerData);
+            const promises = routes.map(route => {
+                try {
+                    return this.createApiRoute(route);
+                }
+                catch (error) { }
+            });
+            return Promise.all(promises);
+        });
+    }
+    _formatSwaggerFile(swaggerFile) {
+        try {
+            const paths = swaggerFile.paths || [];
+            const data = [];
+            for (const key in paths) {
+                if (Object.prototype.hasOwnProperty.call(paths, key)) {
+                    const method = this._getMethod(paths[key]);
+                    let item = {
+                        route: key,
+                        method: method && method.toUpperCase(),
+                        tag: this._getTags(paths[key][method]),
+                        scope: this._getScope(paths[key][method])
+                    };
+                    data.push(item);
+                }
+            }
+            return data;
+        }
+        catch (error) {
+            throw new Error("Invalid swagger file");
+        }
+    }
+    _getMethod(path) {
+        const keys = Object.keys(path);
+        return keys.length > 0 && keys[0];
+    }
+    _getTags(item) {
+        return (item.tags && item.tags[0]) || "";
+    }
+    _getScope(item) {
+        return ((item.security &&
+            item.security[0] &&
+            item.security[0].OauthSecurity &&
+            item.security[0].OauthSecurity[0]) || "");
+    }
+    _readBuffer(buffer) {
+        return JSON.parse(buffer.toString());
     }
 }
 exports.APIService = APIService;

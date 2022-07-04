@@ -24,6 +24,7 @@
 
 import { APIService } from "../../../services";
 import * as express from "express";
+import { HTTP_CODES } from "../../../constant";
 
 const apiService = APIService.getInstance();
 
@@ -42,9 +43,9 @@ export class APIController {
         try {
             const data = req.body;
             const node = await apiService.createApiRoute(data);
-            return res.status(200).send(node.info.get());
+            return res.status(HTTP_CODES.CREATED).send(node.info.get());
         } catch (error) {
-            return res.status(500).send(error.message);
+            return res.status(HTTP_CODES.INTERNAL_ERROR).send(error.message);
         }
     }
 
@@ -54,11 +55,9 @@ export class APIController {
             const data = req.body;
 
             const node = await apiService.updateApiRoute(id, data);
-            return res.status(200).send(node.info.get());
+            return res.status(HTTP_CODES.OK).send(node.info.get());
         } catch (error) {
-            console.error(error);
-
-            return res.status(500).send(error.message);
+            return res.status(HTTP_CODES.INTERNAL_ERROR).send(error.message);
         }
     }
 
@@ -67,10 +66,10 @@ export class APIController {
             const { id } = req.params;
 
             const node = await apiService.getApiRouteById(id);
-            if (node) return res.status(200).send(node.info.get());
-            return res.status(404).send(`node api route found for ${id}`);
+            if (node) return res.status(HTTP_CODES.OK).send(node.info.get());
+            return res.status(HTTP_CODES.NOT_FOUND).send(`node api route found for ${id}`);
         } catch (error) {
-            return res.status(500).send(error.message);
+            return res.status(HTTP_CODES.INTERNAL_ERROR).send(error.message);
         }
     }
 
@@ -79,9 +78,9 @@ export class APIController {
         try {
 
             const routes = await apiService.getAllApiRoute();
-            return res.status(200).send(routes.map(el => el.info.get()));
+            return res.status(HTTP_CODES.OK).send(routes.map(el => el.info.get()));
         } catch (error) {
-            return res.status(500).send(error.message);
+            return res.status(HTTP_CODES.INTERNAL_ERROR).send(error.message);
         }
     }
 
@@ -90,9 +89,29 @@ export class APIController {
             const { id } = req.params;
 
             await apiService.deleteApiRoute(id);
-            return res.status(200).send(`api route deleted`);
+            return res.status(HTTP_CODES.OK).send(`api route deleted`);
         } catch (error) {
-            return res.status(500).send(error.message);
+            return res.status(HTTP_CODES.INTERNAL_ERROR).send(error.message);
+        }
+    }
+
+    public async uploadSwaggerFile(req: express.Request, res: express.Response) {
+        try {
+            const files = (<any>req).files;
+            if (!files) return res.status(HTTP_CODES.BAD_REQUEST).send("No file uploaded");
+            const firstFile = Object.keys(files)[0];
+            if (firstFile) {
+                const file = files[firstFile];
+                if (!/.*\.json$/.test(file.name))
+                    return res.status(HTTP_CODES.BAD_REQUEST).send("The selected file must be a json file");
+
+                const apis = await apiService.uploadSwaggerFile(file.data);
+                return res.status(HTTP_CODES.OK).send(apis.map(el => el.info.get()));
+            }
+
+            return res.status(HTTP_CODES.BAD_REQUEST).send("No file uploaded");
+        } catch (error) {
+            return res.status(HTTP_CODES.INTERNAL_ERROR).send(error.message);
         }
     }
 

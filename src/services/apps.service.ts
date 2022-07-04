@@ -23,12 +23,9 @@
  */
 
 import { SpinalContext, SpinalGraphService, SpinalNode } from "spinal-env-viewer-graph-service";
-import { CANNOT_CREATE_INTERNAL_ERROR, APP_LIST_CONTEXT_NAME, APP_LIST_CONTEXT_TYPE, APP_CATEGORY_TYPE, CONTEXT_TO_APP_CATEGORY, PTR_LST_TYPE, APP_GROUP_TYPE, CATEGORY_TO_APP_GROUP_RELATION_NAME, APP_TYPE, APP_GROUP_TO_APP_RELATION_NAME, CONTEXT_TO_APP_RELATION_NAME } from "../constant";
+import { CANNOT_CREATE_INTERNAL_ERROR, APP_LIST_CONTEXT_NAME, APP_LIST_CONTEXT_TYPE, APP_CATEGORY_TYPE, CONTEXT_TO_APP_CATEGORY_RELATION_NAME, PTR_LST_TYPE, APP_GROUP_TYPE, CATEGORY_TO_APP_GROUP_RELATION_NAME, APP_TYPE, APP_GROUP_TO_APP_RELATION_NAME, CONTEXT_TO_APP_RELATION_NAME } from "../constant";
 import { IApp, IGroup } from "../interfaces";
 import { configServiceInstance } from "./configFile.service";
-import { GraphService } from "./graph.service";
-
-let spinalTwinGraph = GraphService.getInstance();
 
 export class AppService {
   private static instance: AppService;
@@ -60,7 +57,7 @@ export class AppService {
     const nodeId = SpinalGraphService.createNode({ name: categoryName, type: APP_CATEGORY_TYPE }, undefined);
     const node = SpinalGraphService.getRealNode(nodeId);
 
-    return this.context.addChildInContext(node, CONTEXT_TO_APP_CATEGORY, PTR_LST_TYPE, this.context);
+    return this.context.addChildInContext(node, CONTEXT_TO_APP_CATEGORY_RELATION_NAME, PTR_LST_TYPE, this.context);
   }
 
   public async getAppCategory(categoryIdOrName: string): Promise<SpinalNode> {

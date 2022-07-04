@@ -35,7 +35,7 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.BuildingService = void 0;
 const constant_1 = require("../constant");
 const spinal_env_viewer_graph_service_1 = require("spinal-env-viewer-graph-service");
-const configFile_service_1 = require("./configFile.service");
+const digitalTwin_service_1 = require("./digitalTwin.service");
 const openGeocoder = require("node-open-geocoder");
 const { config: { server_port } } = require("../../config");
 const axios_1 = require("axios");
@@ -48,30 +48,48 @@ class BuildingService {
             this.instance = new BuildingService();
         return this.instance;
     }
-    init() {
+    getContext() {
         return __awaiter(this, void 0, void 0, function* () {
-            this.context = yield configFile_service_1.configServiceInstance.getContext(constant_1.BUILDING_CONTEXT_NAME);
-            if (!this.context)
-                this.context = yield configFile_service_1.configServiceInstance.addContext(constant_1.BUILDING_CONTEXT_NAME, constant_1.BUILDING_CONTEXT_TYPE);
-            return this.context;
+            const digitalTwinGraph = yield this._getDigitalTwinGraph();
+            if (digitalTwinGraph) {
+                var context = yield digitalTwinGraph.getContext(constant_1.BUILDING_CONTEXT_NAME);
+                if (!context) {
+                    context = new spinal_env_viewer_graph_service_1.SpinalContext(constant_1.BUILDING_CONTEXT_NAME, constant_1.BUILDING_CONTEXT_TYPE);
+                    return digitalTwinGraph.addContext(context);
+                }
+                return context;
+            }
         });
     }
     addBuilding(buildingInfo) {
-        buildingInfo.type = constant_1.BUILDING_TYPE;
-        const buildingId = spinal_env_viewer_graph_service_1.SpinalGraphService.createNode(buildingInfo, undefined);
-        const node = spinal_env_viewer_graph_service_1.SpinalGraphService.getRealNode(buildingId);
-        return this.context.addChildInContext(node, constant_1.CONTEXT_TO_BUILDING_RELATION_NAME, constant_1.PTR_LST_TYPE, this.context);
+        return __awaiter(this, void 0, void 0, function* () {
+            const context = yield this.getContext();
+            if (!context)
+                throw new Error("Make sure you set a default digitalTwin");
+            buildingInfo.type = constant_1.BUILDING_TYPE;
+            const buildingId = spinal_env_viewer_graph_service_1.SpinalGraphService.createNode(buildingInfo, undefined);
+            const node = spinal_env_viewer_graph_service_1.SpinalGraphService.getRealNode(buildingId);
+            return context.addChildInContext(node, constant_1.CONTEXT_TO_BUILDING_RELATION_NAME, constant_1.PTR_LST_TYPE, context);
+        });
     }
     getBuilding(buildingId) {
         return __awaiter(this, void 0, void 0, function* () {
+            const context = yield this.getContext();
+            if (!context)
+                throw new Error("Make sure you set a default digitalTwin");
             const node = spinal_env_viewer_graph_service_1.SpinalGraphService.getRealNode(buildingId);
             if (node)
                 return node;
-            return this._findChildInContext(this.context, buildingId);
+            return this._findChildInContext(context, buildingId, context);
         });
     }
     getAllBuilding() {
-        return this.context.getChildrenInContext();
+        return __awaiter(this, void 0, void 0, function* () {
+            const context = yield this.getContext();
+            if (!context)
+                throw new Error("Make sure you set a default digitalTwin");
+            return context.getChildrenInContext();
+        });
     }
     updateBuilding(buildingId, newData) {
         return __awaiter(this, void 0, void 0, function* () {
@@ -149,9 +167,9 @@ class BuildingService {
     /////////////////////////////////////////////////////
     //                  PRIVATES                       //
     /////////////////////////////////////////////////////
-    _findChildInContext(startNode, nodeIdOrName) {
+    _findChildInContext(startNode, nodeIdOrName, context) {
         return __awaiter(this, void 0, void 0, function* () {
-            const children = yield startNode.getChildrenInContext(this.context);
+            const children = yield startNode.getChildrenInContext(context);
             return children.find(el => {
                 if (el.getId().get() === nodeIdOrName || el.getName().get() === nodeIdOrName) {
                     //@ts-ignore
@@ -168,7 +186,7 @@ class BuildingService {
             return this._countTypeHelper(res.data);
         })
             .catch(error => {
-            console.error(error);
+            // console.error("try to get Building details, but got", error.message);
             return {};
         });
     }
@@ -197,6 +215,9 @@ class BuildingService {
         };
         countType(building);
         return obj;
+    }
+    _getDigitalTwinGraph() {
+        return digitalTwin_service_1.DigitalTwinService.getInstance().getActualDigitalTwinGraph();
     }
 }
 exports.BuildingService = BuildingService;

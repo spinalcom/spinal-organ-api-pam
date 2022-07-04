@@ -36,8 +36,6 @@ exports.AppService = void 0;
 const spinal_env_viewer_graph_service_1 = require("spinal-env-viewer-graph-service");
 const constant_1 = require("../constant");
 const configFile_service_1 = require("./configFile.service");
-const graph_service_1 = require("./graph.service");
-let spinalTwinGraph = graph_service_1.GraphService.getInstance();
 class AppService {
     constructor() { }
     static getInstance() {
@@ -61,7 +59,7 @@ class AppService {
                 throw new Error(`${categoryName} already exist`);
             const nodeId = spinal_env_viewer_graph_service_1.SpinalGraphService.createNode({ name: categoryName, type: constant_1.APP_CATEGORY_TYPE }, undefined);
             const node = spinal_env_viewer_graph_service_1.SpinalGraphService.getRealNode(nodeId);
-            return this.context.addChildInContext(node, constant_1.CONTEXT_TO_APP_CATEGORY, constant_1.PTR_LST_TYPE, this.context);
+            return this.context.addChildInContext(node, constant_1.CONTEXT_TO_APP_CATEGORY_RELATION_NAME, constant_1.PTR_LST_TYPE, this.context);
         });
     }
     getAppCategory(categoryIdOrName) {

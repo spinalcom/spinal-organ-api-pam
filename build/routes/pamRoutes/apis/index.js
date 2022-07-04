@@ -28,6 +28,7 @@ const apis_controller_1 = require("./apis.controller");
 function routes(app) {
     app
         .post(`${constant_1.PAM_BASE_URI}/create_api_route`, apis_controller_1.default.createApiRoute)
+        .post(`${constant_1.PAM_BASE_URI}/upload_apis_routes`, apis_controller_1.default.uploadSwaggerFile)
         .put(`${constant_1.PAM_BASE_URI}/update_api_route/:id`, apis_controller_1.default.updateApiRoute)
         .get(`${constant_1.PAM_BASE_URI}/get_api_route/:id`, apis_controller_1.default.getApiRouteById)
         .get(`${constant_1.PAM_BASE_URI}/get_all_api_route`, apis_controller_1.default.getAllApiRoute)

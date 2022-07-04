@@ -23,9 +23,11 @@
  */
 
 
+// import * as bodyParser from 'body-parser';
 import * as cors from 'cors';
-import * as bodyParser from 'body-parser';
 import * as express from 'express';
+import * as fileUpload from 'express-fileupload';
+import * as morgan from "morgan";
 
 import { PAM_BASE_URI } from "./constant";
 
@@ -44,6 +46,16 @@ export default function initExpress() {
   const HUB_HOST = `http://${host}:${port}`;
 
   var app = express();
+
+  app.all(
+    `/${PAM_BASE_URI}*`,
+    authenticateRequest,
+    (req: any, res: any, next: any) => {
+      next();
+    }
+  );
+
+
   const proxyHub = proxy(HUB_HOST, {
     limit: '1tb',
     proxyReqPathResolver: function (req: any) {
@@ -58,21 +70,21 @@ export default function initExpress() {
     app.use(routeToProxy, proxyHub);
   }
 
-  app.use(express.json());
-  app.use(
-    bodyParser.urlencoded({
-      extended: true,
-    })
-  );
+
+
   app.use(cors({ origin: '*' }));
-  app.options('*', cors({ origin: '*' }));
-  app.all(
-    `/${PAM_BASE_URI}*`,
-    authenticateRequest,
-    (req: any, res: any, next: any) => {
-      next();
-    }
-  );
+  app.use(fileUpload({ createParentPath: true }));
+  app.use(express.json());
+  app.use(express.urlencoded({ extended: true }));
+  app.use(morgan('dev'));
+  // app.options('*', cors({ origin: '*' }));
+
+  // app.use(bodyParser.json());
+  // app.use(bodyParser.urlencoded({
+  //   extended: true,
+  // }));
+
+
   // app.use(express.static(root));
   // app
   //   .route(`/sendRegisterMail`)

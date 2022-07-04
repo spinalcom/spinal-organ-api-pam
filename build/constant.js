@@ -23,7 +23,8 @@
  * <http://resources.spinalcom.com/licenses.pdf>.
  */
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.BOS_BASE_URI = exports.PAM_BASE_URI = exports.routesToProxy = exports.CANNOT_CREATE_INTERNAL_ERROR = exports.USER_NOT_FOUND = exports.USER_BASE_EMPTY = exports.ROLE_METHODS = exports.DEFAULT_ROLES = exports.LST_PTR_TYPE = exports.PTR_LST_TYPE = exports.CONTEXT_TO_API_ROUTE = exports.CONTEXT_TO_DIGITALTWIN_RELATION_NAME = exports.CONTEXT_TO_BUILDING_RELATION_NAME = exports.CONTEXT_TO_USER_RELATION_NAME = exports.CONTEXT_TO_ROLE_RELATION_NAME = exports.CONTEXT_TO_APP_PROFILE_RELATION_NAME = exports.CONTEXT_TO_USER_PROFILE_RELATION_NAME = exports.CONTEXT_TO_APP_RELATION_NAME = exports.APP_GROUP_TO_APP_RELATION_NAME = exports.CATEGORY_TO_APP_GROUP_RELATION_NAME = exports.CONTEXT_TO_APP_CATEGORY = exports.API_ROUTE_TYPE = exports.DIGITALTWIN_TYPE = exports.BUILDING_TYPE = exports.APP_TYPE = exports.APP_GROUP_TYPE = exports.APP_CATEGORY_TYPE = exports.APP_PROFILE_TYPE = exports.USER_PROFILE_TYPE = exports.ROLE_TYPE = exports.ORGAN_LIST_CONTEXT_TYPE = exports.API_ROUTES_CONTEXT_TYPE = exports.DIGITALTWIN_CONTEXT_TYPE = exports.BUILDING_CONTEXT_TYPE = exports.APP_LIST_CONTEXT_TYPE = exports.ROLES_CONTEXT_TYPE = exports.USER_LIST_CONTEXT_TYPE = exports.APP_PROFILE_CONTEXT_TYPE = exports.USER_PROFILE_CONTEXT_TYPE = exports.ORGAN_LIST_CONTEXT_NAME = exports.API_ROUTES_CONTEXT_NAME = exports.DIGITALTWIN_CONTEXT_NAME = exports.BUILDING_CONTEXT_NAME = exports.APP_LIST_CONTEXT_NAME = exports.ROLES_CONTEXT_NAME = exports.USER_LIST_CONTEXT_NAME = exports.APP_PROFILE_CONTEXT_NAME = exports.USER_PROFILE_CONTEXT_NAME = exports.CONFIG_GRAPH_NAME = exports.CONFIG_FILE_MODEl_TYPE = void 0;
+exports.CONTEXT_TO_API_ROUTE_RELATION_NAME = exports.CONTEXT_TO_DIGITALTWIN_RELATION_NAME = exports.CONTEXT_TO_BUILDING_RELATION_NAME = exports.CONTEXT_TO_USER_RELATION_NAME = exports.CONTEXT_TO_ROLE_RELATION_NAME = exports.CONTEXT_TO_APP_PROFILE_RELATION_NAME = exports.CONTEXT_TO_USER_PROFILE_RELATION_NAME = exports.CONTEXT_TO_APP_RELATION_NAME = exports.APP_GROUP_TO_APP_RELATION_NAME = exports.CATEGORY_TO_APP_GROUP_RELATION_NAME = exports.CONTEXT_TO_APP_CATEGORY_RELATION_NAME = exports.API_ROUTE_TYPE = exports.DIGITALTWIN_TYPE = exports.BUILDING_TYPE = exports.APP_TYPE = exports.APP_GROUP_TYPE = exports.APP_CATEGORY_TYPE = exports.APP_PROFILE_TYPE = exports.USER_PROFILE_TYPE = exports.ROLE_TYPE = exports.ADMIN_CREDENTIAL_CONTEXT_TYPE = exports.BOS_CREDENTIAL_CONTEXT_TYPE = exports.AUTHORIZED_BOS_CONTEXT_TYPE = exports.AUTHORIZED_API_CONTEXT_TYPE = exports.AUTHORIZED_APPS_CONTEXT_TYPE = exports.ORGAN_LIST_CONTEXT_TYPE = exports.API_ROUTES_CONTEXT_TYPE = exports.DIGITALTWIN_CONTEXT_TYPE = exports.BUILDING_CONTEXT_TYPE = exports.APP_LIST_CONTEXT_TYPE = exports.ROLES_CONTEXT_TYPE = exports.USER_LIST_CONTEXT_TYPE = exports.APP_PROFILE_CONTEXT_TYPE = exports.USER_PROFILE_CONTEXT_TYPE = exports.ADMIN_CREDENTIAL_CONTEXT_NAME = exports.BOS_CREDENTIAL_CONTEXT_NAME = exports.AUTHORIZED_BOS_CONTEXT_NAME = exports.AUTHORIZED_API_CONTEXT_NAME = exports.AUTHORIZED_APP_CONTEXT_NAME = exports.ORGAN_LIST_CONTEXT_NAME = exports.API_ROUTES_CONTEXT_NAME = exports.DIGITALTWIN_CONTEXT_NAME = exports.BUILDING_CONTEXT_NAME = exports.APP_LIST_CONTEXT_NAME = exports.ROLES_CONTEXT_NAME = exports.USER_LIST_CONTEXT_NAME = exports.APP_PROFILE_CONTEXT_NAME = exports.USER_PROFILE_CONTEXT_NAME = exports.CONFIG_GRAPH_NAME = exports.CONFIG_FILE_MODEl_TYPE = void 0;
+exports.HTTP_CODES = exports.BOS_BASE_URI = exports.PAM_BASE_URI = exports.routesToProxy = exports.CANNOT_CREATE_INTERNAL_ERROR = exports.USER_NOT_FOUND = exports.USER_BASE_EMPTY = exports.ROLE_METHODS = exports.DEFAULT_ROLES = exports.LST_PTR_TYPE = exports.PTR_LST_TYPE = exports.CONTEXT_TO_AUTHORIZED_BOS_RELATION_NAME = exports.CONTEXT_TO_AUTHORIZED_APIS_RELATION_NAME = exports.CONTEXT_TO_AUTHORIZED_APPS_RELATION_NAME = void 0;
 const spinal_env_viewer_graph_service_1 = require("spinal-env-viewer-graph-service");
 const interfaces_1 = require("./interfaces");
 exports.CONFIG_FILE_MODEl_TYPE = "SpinalPAM";
@@ -38,6 +39,11 @@ exports.BUILDING_CONTEXT_NAME = 'Buildings';
 exports.DIGITALTWIN_CONTEXT_NAME = 'DigitalTwins';
 exports.API_ROUTES_CONTEXT_NAME = 'ApiListContext';
 exports.ORGAN_LIST_CONTEXT_NAME = 'OrganListContext';
+exports.AUTHORIZED_APP_CONTEXT_NAME = "Authorized Apps";
+exports.AUTHORIZED_API_CONTEXT_NAME = "Authorized Apis Routes";
+exports.AUTHORIZED_BOS_CONTEXT_NAME = "Authorized BOS";
+exports.BOS_CREDENTIAL_CONTEXT_NAME = "BosCredential";
+exports.ADMIN_CREDENTIAL_CONTEXT_NAME = "AdminCredential";
 //Contexts types
 exports.USER_PROFILE_CONTEXT_TYPE = 'UserProfileList';
 exports.APP_PROFILE_CONTEXT_TYPE = 'AppProfileList';
@@ -48,6 +54,11 @@ exports.BUILDING_CONTEXT_TYPE = 'BuildingContextList';
 exports.DIGITALTWIN_CONTEXT_TYPE = 'DigitalTwinContext';
 exports.API_ROUTES_CONTEXT_TYPE = 'ApiListContext';
 exports.ORGAN_LIST_CONTEXT_TYPE = 'OrganListContext';
+exports.AUTHORIZED_APPS_CONTEXT_TYPE = "AuthorizedAppContext";
+exports.AUTHORIZED_API_CONTEXT_TYPE = "AuthorizedApisContext";
+exports.AUTHORIZED_BOS_CONTEXT_TYPE = "AuthorizedBosContext";
+exports.BOS_CREDENTIAL_CONTEXT_TYPE = "BosCredential";
+exports.ADMIN_CREDENTIAL_CONTEXT_TYPE = "AdminCredential";
 // types
 exports.ROLE_TYPE = "role";
 exports.USER_PROFILE_TYPE = "UserProfile";
@@ -56,10 +67,10 @@ exports.APP_CATEGORY_TYPE = "AdminAppCategory";
 exports.APP_GROUP_TYPE = "AdminAppGroup";
 exports.APP_TYPE = 'AdminApp';
 exports.BUILDING_TYPE = 'Building';
-exports.DIGITALTWIN_TYPE = 'DigitalTwin';
+exports.DIGITALTWIN_TYPE = 'PAMDigitalTwin';
 exports.API_ROUTE_TYPE = 'ApiRoute';
 // RelationName
-exports.CONTEXT_TO_APP_CATEGORY = "hasAppCategory";
+exports.CONTEXT_TO_APP_CATEGORY_RELATION_NAME = "hasAppCategory";
 exports.CATEGORY_TO_APP_GROUP_RELATION_NAME = 'hasAppGroup';
 exports.APP_GROUP_TO_APP_RELATION_NAME = 'groupHasApp';
 exports.CONTEXT_TO_APP_RELATION_NAME = 'hasApps';
@@ -69,7 +80,10 @@ exports.CONTEXT_TO_ROLE_RELATION_NAME = 'hasRole';
 exports.CONTEXT_TO_USER_RELATION_NAME = 'hasUser';
 exports.CONTEXT_TO_BUILDING_RELATION_NAME = 'hasBuilding';
 exports.CONTEXT_TO_DIGITALTWIN_RELATION_NAME = 'hasDigitalTwin';
-exports.CONTEXT_TO_API_ROUTE = 'hasApiRoute';
+exports.CONTEXT_TO_API_ROUTE_RELATION_NAME = 'hasApiRoute';
+exports.CONTEXT_TO_AUTHORIZED_APPS_RELATION_NAME = "profileHasApps";
+exports.CONTEXT_TO_AUTHORIZED_APIS_RELATION_NAME = "profileHasApis";
+exports.CONTEXT_TO_AUTHORIZED_BOS_RELATION_NAME = "profileHasBos";
 // Relation Type
 exports.PTR_LST_TYPE = spinal_env_viewer_graph_service_1.SPINAL_RELATION_PTR_LST_TYPE;
 exports.LST_PTR_TYPE = spinal_env_viewer_graph_service_1.SPINAL_RELATION_LST_PTR_TYPE;
@@ -100,6 +114,17 @@ exports.routesToProxy = [
 ];
 exports.PAM_BASE_URI = "/api/v1/pam";
 exports.BOS_BASE_URI = "/api/v1/building";
+var HTTP_CODES;
+(function (HTTP_CODES) {
+    HTTP_CODES[HTTP_CODES["OK"] = 200] = "OK";
+    HTTP_CODES[HTTP_CODES["CREATED"] = 201] = "CREATED";
+    HTTP_CODES[HTTP_CODES["ACCEPTED"] = 202] = "ACCEPTED";
+    HTTP_CODES[HTTP_CODES["BAD_REQUEST"] = 400] = "BAD_REQUEST";
+    HTTP_CODES[HTTP_CODES["UNAUTHORIZED"] = 401] = "UNAUTHORIZED";
+    HTTP_CODES[HTTP_CODES["FORBIDDEN"] = 403] = "FORBIDDEN";
+    HTTP_CODES[HTTP_CODES["NOT_FOUND"] = 404] = "NOT_FOUND";
+    HTTP_CODES[HTTP_CODES["INTERNAL_ERROR"] = 500] = "INTERNAL_ERROR";
+})(HTTP_CODES = exports.HTTP_CODES || (exports.HTTP_CODES = {}));
 // export const AUTH_SERVER_URI = 'http://localhost:3054';
 // export const SPINALTWIN_CLIENT_ID = 'm9T3YOTHRq';
 // export const SPINALTWIN_CLIENT_SECRET = 'kRBmqiUyofHSL9j8zrNI4bUSwcM3eO';

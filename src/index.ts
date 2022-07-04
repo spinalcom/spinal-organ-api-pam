@@ -29,6 +29,8 @@ import { configServiceInstance } from './services/configFile.service';
 const { spinalConnector: { user, password, host, port }, config: { directory_path, fileName } } = require("../config");
 
 import initExpress from './initExpress';
+import initSwagger from "./swagger";
+
 import routes from "./routes";
 
 const conn = spinalCore.connect(`http://${user}:${password}@${host}:${port}/`);
@@ -36,6 +38,7 @@ const conn = spinalCore.connect(`http://${user}:${password}@${host}:${port}/`);
 
 configServiceInstance.init(conn).then((result) => {
   const { app } = initExpress();
+  initSwagger(app);
   routes(app);
 }).catch((err: Error) => {
   console.error(err);

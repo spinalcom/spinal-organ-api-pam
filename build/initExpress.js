@@ -24,9 +24,11 @@
  */
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.authenticateRequest = void 0;
+// import * as bodyParser from 'body-parser';
 const cors = require("cors");
-const bodyParser = require("body-parser");
 const express = require("express");
+const fileUpload = require("express-fileupload");
+const morgan = require("morgan");
 const constant_1 = require("./constant");
 var proxy = require('express-http-proxy');
 const { spinalConnector: { host, port }, config: { server_port } } = require("../config");
@@ -37,6 +39,9 @@ function initExpress() {
     // const root = path.join(__dirname, ...absPath);
     const HUB_HOST = `http://${host}:${port}`;
     var app = express();
+    app.all(`/${constant_1.PAM_BASE_URI}*`, authenticateRequest, (req, res, next) => {
+        next();
+    });
     const proxyHub = proxy(HUB_HOST, {
         limit: '1tb',
         proxyReqPathResolver: function (req) {
@@ -46,15 +51,16 @@ function initExpress() {
     for (const routeToProxy of constant_2.routesToProxy) {
         app.use(routeToProxy, proxyHub);
     }
-    app.use(express.json());
-    app.use(bodyParser.urlencoded({
-        extended: true,
-    }));
     app.use(cors({ origin: '*' }));
-    app.options('*', cors({ origin: '*' }));
-    app.all(`/${constant_1.PAM_BASE_URI}*`, authenticateRequest, (req, res, next) => {
-        next();
-    });
+    app.use(fileUpload({ createParentPath: true }));
+    app.use(express.json());
+    app.use(express.urlencoded({ extended: true }));
+    app.use(morgan('dev'));
+    // app.options('*', cors({ origin: '*' }));
+    // app.use(bodyParser.json());
+    // app.use(bodyParser.urlencoded({
+    //   extended: true,
+    // }));
     // app.use(express.static(root));
     // app
     //   .route(`/sendRegisterMail`)

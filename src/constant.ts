@@ -39,6 +39,12 @@ export const BUILDING_CONTEXT_NAME = 'Buildings';
 export const DIGITALTWIN_CONTEXT_NAME = 'DigitalTwins';
 export const API_ROUTES_CONTEXT_NAME = 'ApiListContext';
 export const ORGAN_LIST_CONTEXT_NAME = 'OrganListContext';
+export const AUTHORIZED_APP_CONTEXT_NAME = "Authorized Apps";
+export const AUTHORIZED_API_CONTEXT_NAME = "Authorized Apis Routes";
+export const AUTHORIZED_BOS_CONTEXT_NAME = "Authorized BOS";
+export const BOS_CREDENTIAL_CONTEXT_NAME = "BosCredential";
+export const ADMIN_CREDENTIAL_CONTEXT_NAME = "AdminCredential";
+
 
 //Contexts types
 export const USER_PROFILE_CONTEXT_TYPE = 'UserProfileList';
@@ -50,6 +56,12 @@ export const BUILDING_CONTEXT_TYPE = 'BuildingContextList';
 export const DIGITALTWIN_CONTEXT_TYPE = 'DigitalTwinContext';
 export const API_ROUTES_CONTEXT_TYPE = 'ApiListContext';
 export const ORGAN_LIST_CONTEXT_TYPE = 'OrganListContext';
+export const AUTHORIZED_APPS_CONTEXT_TYPE = "AuthorizedAppContext";
+export const AUTHORIZED_API_CONTEXT_TYPE = "AuthorizedApisContext";
+export const AUTHORIZED_BOS_CONTEXT_TYPE = "AuthorizedBosContext";
+export const BOS_CREDENTIAL_CONTEXT_TYPE = "BosCredential";
+export const ADMIN_CREDENTIAL_CONTEXT_TYPE = "AdminCredential";
+
 
 
 
@@ -61,12 +73,12 @@ export const APP_CATEGORY_TYPE = "AdminAppCategory";
 export const APP_GROUP_TYPE = "AdminAppGroup";
 export const APP_TYPE = 'AdminApp';
 export const BUILDING_TYPE = 'Building';
-export const DIGITALTWIN_TYPE = 'DigitalTwin';
+export const DIGITALTWIN_TYPE = 'PAMDigitalTwin';
 export const API_ROUTE_TYPE = 'ApiRoute';
 
 
 // RelationName
-export const CONTEXT_TO_APP_CATEGORY = "hasAppCategory";
+export const CONTEXT_TO_APP_CATEGORY_RELATION_NAME = "hasAppCategory";
 export const CATEGORY_TO_APP_GROUP_RELATION_NAME = 'hasAppGroup';
 export const APP_GROUP_TO_APP_RELATION_NAME = 'groupHasApp';
 export const CONTEXT_TO_APP_RELATION_NAME = 'hasApps';
@@ -76,7 +88,10 @@ export const CONTEXT_TO_ROLE_RELATION_NAME = 'hasRole';
 export const CONTEXT_TO_USER_RELATION_NAME = 'hasUser';
 export const CONTEXT_TO_BUILDING_RELATION_NAME = 'hasBuilding';
 export const CONTEXT_TO_DIGITALTWIN_RELATION_NAME = 'hasDigitalTwin';
-export const CONTEXT_TO_API_ROUTE = 'hasApiRoute';
+export const CONTEXT_TO_API_ROUTE_RELATION_NAME = 'hasApiRoute';
+export const CONTEXT_TO_AUTHORIZED_APPS_RELATION_NAME = "profileHasApps";
+export const CONTEXT_TO_AUTHORIZED_APIS_RELATION_NAME = "profileHasApis";
+export const CONTEXT_TO_AUTHORIZED_BOS_RELATION_NAME = "profileHasBos";
 
 // Relation Type
 export const PTR_LST_TYPE = SPINAL_RELATION_PTR_LST_TYPE;
@@ -115,6 +130,18 @@ export const routesToProxy = [
 
 export const PAM_BASE_URI = "/api/v1/pam";
 export const BOS_BASE_URI = "/api/v1/building"
+
+
+export enum HTTP_CODES {
+    OK = 200,
+    CREATED = 201,
+    ACCEPTED = 202,
+    BAD_REQUEST = 400,
+    UNAUTHORIZED = 401,
+    FORBIDDEN = 403,
+    NOT_FOUND = 404,
+    INTERNAL_ERROR = 500
+}
 
 // export const AUTH_SERVER_URI = 'http://localhost:3054';
 

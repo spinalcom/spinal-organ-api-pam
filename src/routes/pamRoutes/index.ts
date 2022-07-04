@@ -31,7 +31,8 @@ import userProfileRoutes from "./userProfile";
 import roleRoutes from "./role";
 import organListRoutes from "./organList";
 import userRoutes from "./user";
-
+import digitaltwinRoutes from "./digitalTwin";
+import authRoutes from './auth'
 export default function routes(app: express.Express): void {
     BOSRoutes(app);
     appsRoutes(app);
@@ -41,4 +42,6 @@ export default function routes(app: express.Express): void {
     roleRoutes(app);
     organListRoutes(app);
     userRoutes(app);
+    digitaltwinRoutes(app);
+    authRoutes(app);
 }

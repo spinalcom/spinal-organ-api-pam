@@ -27,7 +27,12 @@ import { spinalCore } from "spinal-core-connectorjs_type";
 import { SpinalGraph, SpinalContext } from "spinal-model-graph";
 import { CONFIG_GRAPH_NAME, CONFIG_FILE_MODEl_TYPE } from "../constant";
 
-import { APIService, AppProfileService, AppService, BuildingService, OrganListService, RoleService, UserProfileService } from ".";
+import {
+    APIService, AppProfileService,
+    AppService, BuildingService,
+    OrganListService, RoleService,
+    UserProfileService, DigitalTwinService
+} from ".";
 
 const { config: { directory_path, fileName } } = require("../../config");
 
@@ -35,6 +40,7 @@ const { config: { directory_path, fileName } } = require("../../config");
 export default class ConfigFileService {
     private static instance: ConfigFileService;
     public graph: SpinalGraph;
+    public hubConnect: spinal.FileSystem;
 
     private constructor() { }
 
@@ -45,8 +51,9 @@ export default class ConfigFileService {
         return ConfigFileService.instance;
     }
 
-    public init(connect: spinal.FileSystem) {
+    public init(connect: spinal.FileSystem): Promise<SpinalContext[]> {
         return this.loadOrMakeConfigFile(connect).then((graph: SpinalGraph) => {
+            this.hubConnect = connect;
             this.graph = graph;
             return this._initServices();
         })
@@ -79,7 +86,16 @@ export default class ConfigFileService {
     }
 
     private _initServices() {
-        const services = [APIService, AppProfileService, AppService, BuildingService, OrganListService, RoleService, UserProfileService];
+        const services = [
+            APIService,
+            AppProfileService,
+            AppService,
+            // BuildingService,
+            OrganListService,
+            RoleService,
+            UserProfileService,
+            DigitalTwinService
+        ];
 
         const promises = services.map(service => {
             try {
@@ -91,8 +107,29 @@ export default class ConfigFileService {
             }
         })
 
-        return Promise.all(promises);
+        return Promise.all(promises)
+        // .then((result) => {
+        // this._initChildrenServices();
+        // return result;
+        // })
     }
+
+
+    // private _initChildrenServices() {
+    //     const services = [BuildingService];
+
+    //     const promises = services.map(service => {
+    //         try {
+    //             const instance = service.getInstance();
+    //             if (typeof instance.init === "function") return instance.init();
+
+    //         } catch (error) {
+    //             console.error(error);
+    //         }
+    //     })
+
+    //     return Promise.all(promises);
+    // }
 
 }
 

@@ -23,8 +23,8 @@
  */
 
 import { BOS_BASE_URI, CONTEXT_TO_BUILDING_RELATION_NAME, BUILDING_CONTEXT_NAME, BUILDING_CONTEXT_TYPE, BUILDING_TYPE, PTR_LST_TYPE } from "../constant";
-import { SpinalContext, SpinalGraphService, SpinalNode } from "spinal-env-viewer-graph-service";
-import { configServiceInstance } from "./configFile.service";
+import { SpinalContext, SpinalGraph, SpinalGraphService, SpinalNode } from "spinal-env-viewer-graph-service";
+import { DigitalTwinService } from "./digitalTwin.service";
 import { IBuilding, ILocation } from "interfaces";
 import * as openGeocoder from "node-open-geocoder";
 const { config: { server_port } } = require("../../config");
@@ -36,7 +36,6 @@ const axiosInstance = axios.create({ baseURL: `http://localhost:${server_port}` 
 
 export class BuildingService {
     private static instance: BuildingService;
-    public context: SpinalContext;
 
     private constructor() { }
 
@@ -46,30 +45,45 @@ export class BuildingService {
         return this.instance;
     }
 
-    public async init(): Promise<SpinalContext> {
-        this.context = await configServiceInstance.getContext(BUILDING_CONTEXT_NAME);
-        if (!this.context) this.context = await configServiceInstance.addContext(BUILDING_CONTEXT_NAME, BUILDING_CONTEXT_TYPE);
-        return this.context;
+    public async getContext(): Promise<SpinalContext> {
+        const digitalTwinGraph = await this._getDigitalTwinGraph();
+        if (digitalTwinGraph) {
+            var context = await digitalTwinGraph.getContext(BUILDING_CONTEXT_NAME);
+            if (!context) {
+                context = new SpinalContext(BUILDING_CONTEXT_NAME, BUILDING_CONTEXT_TYPE)
+                return digitalTwinGraph.addContext(context);
+            }
+            return context;
+        }
     }
 
-    public addBuilding(buildingInfo: IBuilding): Promise<SpinalNode> {
+    public async addBuilding(buildingInfo: IBuilding): Promise<SpinalNode> {
+        const context = await this.getContext();
+        if (!context) throw new Error("Make sure you set a default digitalTwin");
+
         buildingInfo.type = BUILDING_TYPE;
 
         const buildingId = SpinalGraphService.createNode(buildingInfo, undefined);
         const node = SpinalGraphService.getRealNode(buildingId);
 
-        return this.context.addChildInContext(node, CONTEXT_TO_BUILDING_RELATION_NAME, PTR_LST_TYPE, this.context);
+        return context.addChildInContext(node, CONTEXT_TO_BUILDING_RELATION_NAME, PTR_LST_TYPE, context);
     }
 
     public async getBuilding(buildingId: string): Promise<void | SpinalNode> {
+        const context = await this.getContext();
+        if (!context) throw new Error("Make sure you set a default digitalTwin");
+
         const node = SpinalGraphService.getRealNode(buildingId);
         if (node) return node;
 
-        return this._findChildInContext(this.context, buildingId)
+        return this._findChildInContext(context, buildingId, context);
     }
 
-    public getAllBuilding(): Promise<SpinalNode[]> {
-        return this.context.getChildrenInContext();
+    public async getAllBuilding(): Promise<SpinalNode[]> {
+        const context = await this.getContext();
+        if (!context) throw new Error("Make sure you set a default digitalTwin");
+
+        return context.getChildrenInContext();
     }
 
     public async updateBuilding(buildingId: string, newData: IBuilding): Promise<SpinalNode> {
@@ -146,8 +160,9 @@ export class BuildingService {
     /////////////////////////////////////////////////////
     //                  PRIVATES                       //
     /////////////////////////////////////////////////////
-    private async _findChildInContext(startNode: SpinalNode, nodeIdOrName: string): Promise<SpinalNode> {
-        const children = await startNode.getChildrenInContext(this.context);
+
+    private async _findChildInContext(startNode: SpinalNode, nodeIdOrName: string, context: SpinalContext): Promise<SpinalNode> {
+        const children = await startNode.getChildrenInContext(context);
         return children.find(el => {
             if (el.getId().get() === nodeIdOrName || el.getName().get() === nodeIdOrName) {
                 //@ts-ignore
@@ -164,7 +179,7 @@ export class BuildingService {
                 return this._countTypeHelper(res.data);
             })
             .catch(error => {
-                console.error(error);
+                // console.error("try to get Building details, but got", error.message);
                 return {}
             });
     }
@@ -197,4 +212,7 @@ export class BuildingService {
         return obj;
     }
 
+    private _getDigitalTwinGraph(): Promise<SpinalGraph | void> {
+        return DigitalTwinService.getInstance().getActualDigitalTwinGraph();
+    }
 }

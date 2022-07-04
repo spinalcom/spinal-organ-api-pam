@@ -31,6 +31,8 @@ const userProfile_1 = require("./userProfile");
 const role_1 = require("./role");
 const organList_1 = require("./organList");
 const user_1 = require("./user");
+const digitalTwin_1 = require("./digitalTwin");
+const auth_1 = require("./auth");
 function routes(app) {
     (0, building_1.default)(app);
     (0, apps_1.default)(app);
@@ -40,6 +42,8 @@ function routes(app) {
     (0, role_1.default)(app);
     (0, organList_1.default)(app);
     (0, user_1.default)(app);
+    (0, digitalTwin_1.default)(app);
+    (0, auth_1.default)(app);
 }
 exports.default = routes;
 //# sourceMappingURL=index.js.map

@@ -34,6 +34,7 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.APIController = void 0;
 const services_1 = require("../../../services");
+const constant_1 = require("../../../constant");
 const apiService = services_1.APIService.getInstance();
 class APIController {
     constructor() { }
@@ -47,10 +48,10 @@ class APIController {
             try {
                 const data = req.body;
                 const node = yield apiService.createApiRoute(data);
-                return res.status(200).send(node.info.get());
+                return res.status(constant_1.HTTP_CODES.CREATED).send(node.info.get());
             }
             catch (error) {
-                return res.status(500).send(error.message);
+                return res.status(constant_1.HTTP_CODES.INTERNAL_ERROR).send(error.message);
             }
         });
     }
@@ -60,11 +61,10 @@ class APIController {
                 const { id } = req.params;
                 const data = req.body;
                 const node = yield apiService.updateApiRoute(id, data);
-                return res.status(200).send(node.info.get());
+                return res.status(constant_1.HTTP_CODES.OK).send(node.info.get());
             }
             catch (error) {
-                console.error(error);
-                return res.status(500).send(error.message);
+                return res.status(constant_1.HTTP_CODES.INTERNAL_ERROR).send(error.message);
             }
         });
     }
@@ -74,11 +74,11 @@ class APIController {
                 const { id } = req.params;
                 const node = yield apiService.getApiRouteById(id);
                 if (node)
-                    return res.status(200).send(node.info.get());
-                return res.status(404).send(`node api route found for ${id}`);
+                    return res.status(constant_1.HTTP_CODES.OK).send(node.info.get());
+                return res.status(constant_1.HTTP_CODES.NOT_FOUND).send(`node api route found for ${id}`);
             }
             catch (error) {
-                return res.status(500).send(error.message);
+                return res.status(constant_1.HTTP_CODES.INTERNAL_ERROR).send(error.message);
             }
         });
     }
@@ -86,10 +86,10 @@ class APIController {
         return __awaiter(this, void 0, void 0, function* () {
             try {
                 const routes = yield apiService.getAllApiRoute();
-                return res.status(200).send(routes.map(el => el.info.get()));
+                return res.status(constant_1.HTTP_CODES.OK).send(routes.map(el => el.info.get()));
             }
             catch (error) {
-                return res.status(500).send(error.message);
+                return res.status(constant_1.HTTP_CODES.INTERNAL_ERROR).send(error.message);
             }
         });
     }
@@ -98,10 +98,31 @@ class APIController {
             try {
                 const { id } = req.params;
                 yield apiService.deleteApiRoute(id);
-                return res.status(200).send(`api route deleted`);
+                return res.status(constant_1.HTTP_CODES.OK).send(`api route deleted`);
             }
             catch (error) {
-                return res.status(500).send(error.message);
+                return res.status(constant_1.HTTP_CODES.INTERNAL_ERROR).send(error.message);
+            }
+        });
+    }
+    uploadSwaggerFile(req, res) {
+        return __awaiter(this, void 0, void 0, function* () {
+            try {
+                const files = req.files;
+                if (!files)
+                    return res.status(constant_1.HTTP_CODES.BAD_REQUEST).send("No file uploaded");
+                const firstFile = Object.keys(files)[0];
+                if (firstFile) {
+                    const file = files[firstFile];
+                    if (!/.*\.json$/.test(file.name))
+                        return res.status(constant_1.HTTP_CODES.BAD_REQUEST).send("The selected file must be a json file");
+                    const apis = yield apiService.uploadSwaggerFile(file.data);
+                    return res.status(constant_1.HTTP_CODES.OK).send(apis.map(el => el.info.get()));
+                }
+                return res.status(constant_1.HTTP_CODES.BAD_REQUEST).send("No file uploaded");
+            }
+            catch (error) {
+                return res.status(constant_1.HTTP_CODES.INTERNAL_ERROR).send(error.message);
             }
         });
     }
