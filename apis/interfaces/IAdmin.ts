@@ -1,0 +1,86 @@
+/*
+ * Copyright 2022 SpinalCom - www.spinalcom.com
+ * 
+ * This file is part of SpinalCore.
+ * 
+ * Please read all of the following terms and conditions
+ * of the Free Software license Agreement (Agreement)
+ * carefully.
+ * 
+ * This Agreement is a legally binding contract between
+ * the Licensee (as defined below) and SpinalCom that
+ * sets forth the terms and conditions that govern your
+ * use of the Program. By installing and/or using the
+ * Program, you agree to abide by all the terms and
+ * conditions stated or referenced herein.
+ * 
+ * If you do not agree to abide by these terms and
+ * conditions, do not demonstrate your acceptance and do
+ * not install or use the Program.
+ * You should have received a copy of the license along
+ * with this file. If not, see
+ * <http://resources.spinalcom.com/licenses.pdf>.
+ */
+
+
+export interface IAdmin {
+    name: string;
+    urlAdmin: string;
+    registerKey: string;
+}
+
+export interface IPamInfo {
+    name: string;
+    url: string;
+    address?: string;
+    statusPlatform?: string;
+}
+
+export interface IBosCredential {
+    id: string;
+    type: string;
+    name: string;
+    statusPlatform: string;
+    address: string;
+    tokenBosAdmin: string;
+    bosName?: string;
+    idPlateform?: string;
+    urlAdmin?: string;
+}
+
+export interface IAdminCredential {
+    TokenAdminBos: string;
+    idPlatformOfAdmin: string;
+}
+
+export interface IAdminUserProfile {
+    userProfileId: string;
+    label: string;
+}
+
+export interface IAdminAppProfile {
+    appProfileId: string;
+    label: string;
+}
+
+export interface IAdminOrgan {
+    label: string;
+    type: string;
+}
+
+export interface IJsonData {
+    userProfileList?: IAdminUserProfile[];
+    appProfileList?: IAdminAppProfile[];
+    organList?: IAdminOrgan[];
+    appList?: any[]
+}
+
+export interface IUserCredential {
+    userName: string;
+    password: string;
+}
+
+export interface IAppCredential {
+    clientId: string;
+    clientSecret: string;
+}
