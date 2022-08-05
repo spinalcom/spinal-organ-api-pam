@@ -1,0 +1,30 @@
+import { SpinalNode } from "spinal-env-viewer-graph-service";
+export default class AuthorizationService {
+    private static instance;
+    private constructor();
+    static getInstance(): AuthorizationService;
+    profileHasAccess(profile: SpinalNode, element: SpinalNode, elementType: string): Promise<boolean>;
+    authorizeProfileToAccessApp(profile: SpinalNode, appIds: string | string[]): Promise<SpinalNode[]>;
+    unauthorizeProfileToAccessApp(profile: SpinalNode, appIds: string | string[]): Promise<string[]>;
+    getAuthorizedAppsFromProfile(profile: SpinalNode): Promise<SpinalNode[]>;
+    authorizeProfileToAccessApisRoutes(profile: SpinalNode, apiRoutesIds: string | string[]): Promise<SpinalNode[]>;
+    unauthorizeProfileToAccessApisRoutes(profile: SpinalNode, apiRoutesIds: string | string[]): Promise<string[]>;
+    getAuthorizedApisRoutesFromProfile(profile: SpinalNode): Promise<SpinalNode[]>;
+    authorizeProfileToAccessBos(profile: SpinalNode, bosIds: string | string[]): Promise<SpinalNode[]>;
+    unauthorizeProfileToAccessBos(profile: SpinalNode, bosIds: string | string[]): Promise<string[]>;
+    getAuthorizedBosFromProfile(profile: SpinalNode): Promise<SpinalNode[]>;
+    private _getAuthorizedAppsContext;
+    private _getAuthorizedApisRoutesContext;
+    private _getAuthorizedBosContext;
+    private _getProfileGraph;
+    private _addAppToContext;
+    private _addApiToContext;
+    private _addBosToContext;
+    private _removeAppToContext;
+    private _removeApiToContext;
+    private _removeBosToContext;
+    private _getOrCreateContext;
+    private _getContextByType;
+}
+declare const authorizationInstance: AuthorizationService;
+export { authorizationInstance, AuthorizationService };

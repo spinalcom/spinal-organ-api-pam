@@ -7,11 +7,8 @@
   "author": "",
   "license": "ISC",
   "scripts": {
-    "build:server": "rm -rf build && tsc",
-    "serve:client": "cd client && vue-cli-service serve",
-    "build:client": "cd client && vue-cli-service build",
-    "build": "npm run build:server && npm run build:client",
-    "start": "npm run build && node build/index.js"
+    "build": "rm -rf dist declarations && tsc",
+    "start": "npm run build && node dist/index.js"
   },
   "dependencies": {
     "axios": "^0.27.2",
@@ -31,12 +28,10 @@
     "node-geocoder": "^4.0.0",
     "node-open-geocoder": "^4.0.1",
     "q": "^1.5.1",
-    "spinal-env-pam-apps-portail": "file:client",
     "spinal-env-viewer-graph-service": "git+https://github.com/spinalcom/Spinal-Graph-Service.git",
     "ts-node": "^10.2.1",
     "typescript": "^4.4.3",
-    "uuid": "^8.3.2",
-    "vue-cookie": "^1.1.4"
+    "uuid": "^8.3.2"
   },
   "devDependencies": {
     "@types/cors": "^2.8.12",
@@ -47,17 +42,7 @@
     "@types/node-fetch": "^3.0.3",
     "@types/node-geocoder": "^3.24.4",
     "@types/q": "^1.5.5",
-    "@vue/cli-plugin-babel": "~5.0.0",
-    "@vue/cli-plugin-router": "~5.0.0",
-    "@vue/cli-plugin-typescript": "~5.0.0",
-    "@vue/cli-plugin-vuex": "~5.0.0",
-    "@vue/cli-service": "~5.0.0",
-    "sass": "~1.32.0",
-    "sass-loader": "^10.0.0",
     "swagger-jsdoc-generator": "^1.0.3",
-    "typescript": "~4.5.5",
-    "vue-cli-plugin-vuetify": "~2.5.1",
-    "vue-template-compiler": "^2.6.14",
-    "vuetify-loader": "^1.7.0"
+    "typescript": "~4.5.5"
   }
 }

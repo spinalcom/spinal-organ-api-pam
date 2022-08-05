@@ -5,18 +5,20 @@
     "noImplicitReturns": false,
     "noImplicitThis": true,
     "sourceMap": true,
+    "declaration": true,
+    "declarationDir": "declarations",
     "downlevelIteration": true,
     "baseUrl": "server",
-    "outDir": "build",
+    "outDir": "dist",
     "target": "es6",
     "skipLibCheck": true
   },
   "experimentalDecorators": true,
   "paths": {
-    "@/*": ["apis/*"],
-    "/@/*": ["apis/*"],
-    "/@/img/*": ["apis/assets/img/*"]
+    "@/*": ["src/*"],
+    "/@/*": ["src/*"],
+    "/@/img/*": ["src/assets/img/*"]
   },
   "exclude": ["node_modules", "client"],
-  "inclure": ["./apis/**/*"]
+  "inclure": ["./src/**/*"]
 }

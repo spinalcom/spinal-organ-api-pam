@@ -1,0 +1,32 @@
+import { SpinalGraph, SpinalContext, SpinalNode } from 'spinal-env-viewer-graph-service';
+import { IUserProfile, IUserProfileRes } from '../interfaces';
+export declare class UserProfileService {
+    private static instance;
+    context: SpinalContext;
+    private constructor();
+    static getInstance(): UserProfileService;
+    init(): Promise<SpinalContext>;
+    createUserProfile(userProfile: IUserProfile): Promise<IUserProfileRes>;
+    getUserProfile(userProfile: string | SpinalNode): Promise<IUserProfileRes>;
+    updateUserProfile(userProfileId: string, userProfile: IUserProfile): Promise<IUserProfileRes>;
+    getAllUserProfile(): Promise<IUserProfileRes[]>;
+    getAllUserProfilesNodes(): Promise<SpinalNode[]>;
+    deleteUserProfile(userProfileId: string): Promise<string>;
+    authorizeToAccessApps(userProfile: string | SpinalNode, appIds?: string | string[]): Promise<SpinalNode[]>;
+    unauthorizeToAccessApps(userProfile: string | SpinalNode, appIds?: string | string[]): Promise<string[]>;
+    getAuthorizedApps(userProfile: string | SpinalNode): Promise<SpinalNode[]>;
+    authorizeToAccessApis(userProfile: string | SpinalNode, apisIds?: string | string[]): Promise<SpinalNode[]>;
+    unauthorizeToAccessApis(userProfile: string | SpinalNode, apisIds?: string | string[]): Promise<string[]>;
+    getAuthorizedApis(userProfile: string | SpinalNode): Promise<SpinalNode[]>;
+    authorizeToAccessBos(profile: string | SpinalNode, bosIds: string | string[]): Promise<SpinalNode[]>;
+    unauthorizeToAccessBos(userProfile: string | SpinalNode, bosIds: string | string[]): Promise<string[]>;
+    getAuthorizedBos(userProfile: string | SpinalNode): Promise<SpinalNode[]>;
+    _getUserProfileNodeGraph(profileId: string): Promise<SpinalGraph | void>;
+    private _findChildInContext;
+    private _filterAuthList;
+    private _createUserProfileNode;
+    private _getUserProfileNode;
+    private _renameProfile;
+    private _unauthorizeOnEdit;
+    private _authorizeOnEdit;
+}
