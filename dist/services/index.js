@@ -47,5 +47,7 @@ __exportStar(require("./organList.service"), exports);
 __exportStar(require("./role.service"), exports);
 __exportStar(require("./digitalTwin.service"), exports);
 __exportStar(require("./authentification.service"), exports);
+__exportStar(require("./portofolio.service"), exports);
+__exportStar(require("./users.services"), exports);
 // export * from "./graph.service";
 //# sourceMappingURL=index.js.map

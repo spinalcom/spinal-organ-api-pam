@@ -22,6 +22,15 @@
  * with this file. If not, see
  * <http://resources.spinalcom.com/licenses.pdf>.
  */
+var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
+    function adopt(value) { return value instanceof P ? value : new P(function (resolve) { resolve(value); }); }
+    return new (P || (P = Promise))(function (resolve, reject) {
+        function fulfilled(value) { try { step(generator.next(value)); } catch (e) { reject(e); } }
+        function rejected(value) { try { step(generator["throw"](value)); } catch (e) { reject(e); } }
+        function step(result) { result.done ? resolve(result.value) : adopt(result.value).then(fulfilled, rejected); }
+        step((generator = generator.apply(thisArg, _arguments || [])).next());
+    });
+};
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.configServiceInstance = void 0;
 const path = require("path");
@@ -30,8 +39,8 @@ const spinal_model_graph_1 = require("spinal-model-graph");
 const constant_1 = require("../constant");
 const _1 = require(".");
 // const { config: { directory_path, fileName } } = require("../../config");
-const directory_path = process.env.CONFIG_DIRECTORY_PATH || "/__users__/admin/";
-const fileName = process.env.CONFIG_FILE_NAME || "PAMConfig";
+const directory_path = process.env.CONFIG_DIRECTORY_PATH || constant_1.CONFIG_DEFAULT_DIRECTORY_PATH;
+const fileName = process.env.CONFIG_FILE_NAME || constant_1.CONFIG_DEFAULT_NAME;
 class ConfigFileService {
     constructor() { }
     static getInstance() {
@@ -44,7 +53,10 @@ class ConfigFileService {
         return this.loadOrMakeConfigFile(connect).then((graph) => {
             this.hubConnect = connect;
             this.graph = graph;
-            return this._initServices();
+            return this._initServices().then((result) => __awaiter(this, void 0, void 0, function* () {
+                yield _1.DigitalTwinService.getInstance().createDigitalTwin("PAM DigitalTwin", constant_1.CONFIG_DEFAULT_DIRECTORY_PATH);
+                return result;
+            }));
         });
     }
     getContext(contextName) {
@@ -61,8 +73,8 @@ class ConfigFileService {
             }));
         });
     }
-    _createFile(directory, fileName = "PAMConfig") {
-        const graph = new spinal_model_graph_1.SpinalGraph(constant_1.CONFIG_GRAPH_NAME);
+    _createFile(directory, fileName = constant_1.CONFIG_DEFAULT_NAME) {
+        const graph = new spinal_model_graph_1.SpinalGraph(constant_1.CONFIG_DEFAULT_NAME);
         directory.force_add_file(fileName, graph, { model_type: constant_1.CONFIG_FILE_MODEl_TYPE });
         return graph;
     }
@@ -71,11 +83,12 @@ class ConfigFileService {
             _1.APIService,
             _1.AppProfileService,
             _1.AppService,
-            // BuildingService,
+            _1.BuildingService,
             _1.OrganListService,
             _1.RoleService,
             _1.UserProfileService,
-            _1.DigitalTwinService
+            // DigitalTwinService,
+            _1.PortofolioService
         ];
         const promises = services.map(service => {
             try {

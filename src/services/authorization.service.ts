@@ -25,18 +25,18 @@
 import {
     AUTHORIZED_API_CONTEXT_NAME,
     AUTHORIZED_API_CONTEXT_TYPE,
-    AUTHORIZED_APPS_CONTEXT_TYPE,
-    AUTHORIZED_APP_CONTEXT_NAME,
+    AUTHORIZED_PORTOFOLIO_CONTEXT_TYPE,
+    AUTHORIZED_PORTOFOLIO_CONTEXT_NAME,
     AUTHORIZED_BOS_CONTEXT_NAME,
     AUTHORIZED_BOS_CONTEXT_TYPE,
     CONTEXT_TO_AUTHORIZED_APIS_RELATION_NAME,
-    CONTEXT_TO_AUTHORIZED_APPS_RELATION_NAME,
-    CONTEXT_TO_AUTHORIZED_BOS_RELATION_NAME, PTR_LST_TYPE
+    PROFILE_TO_AUTHORIZED_PORTOFOLIO_RELATION,
+    PTR_LST_TYPE, APP_RELATION_NAME, PROFILE_TO_AUTHORIZED_BOS_RELATION
 } from "../constant";
 import { SpinalContext, SpinalGraph, SpinalGraphService, SpinalNode } from "spinal-env-viewer-graph-service";
 import { APIService } from "./apis.service";
-import { AppService } from './apps.service';
 import { BuildingService } from "./building.service";
+import { PortofolioService } from "./portofolio.service";
 
 export default class AuthorizationService {
     private static instance: AuthorizationService;
@@ -49,44 +49,120 @@ export default class AuthorizationService {
         return this.instance;
     }
 
-    public async profileHasAccess(profile: SpinalNode, element: SpinalNode, elementType: string): Promise<boolean> {
+    public async profileHasAccess(profile: SpinalNode, node: SpinalNode, elementType: string): Promise<boolean> {
         const context = await this._getContextByType(profile, elementType);
         if (!context) return false;
-        return element.belongsToContext(context);
+        return node.belongsToContext(context);
     }
 
-    //////////////////////////////////////////////////////////
-    //                  APPS AUTHORIZATION                  //
-    //////////////////////////////////////////////////////////
+    public async removePortofolioReferences(profile: SpinalNode, portofolioId: string): Promise<void> {
+        const promises = [this._getAuthorizedBosContext(profile, false), this._getAuthorizedPortofolioContext(profile, false)]
+        return Promise.all(promises).then(async ([bosContext, PortofolioContext]) => {
+            if (PortofolioContext) await this.unauthorizeProfileToAccessPortofolio(profile, portofolioId);
+        }).catch((err) => {
 
-    public async authorizeProfileToAccessApp(profile: SpinalNode, appIds: string | string[]): Promise<SpinalNode[]> {
+        });
+    }
+
+
+    /////////////////////////////////////////////////////////
+    //                  PORTOFOLIO AUTH                    //
+    /////////////////////////////////////////////////////////
+
+    public async authorizeProfileToAccessPortofolio(profile: SpinalNode, portofolioId: string): Promise<SpinalNode> {
+
+        const context = await this._getAuthorizedPortofolioContext(profile, true);
+        let reference = await this._getReference(context, portofolioId);
+        if (reference) return reference;
+
+        const portofolio = await PortofolioService.getInstance().getPortofolio(portofolioId);
+        if (!portofolio) return;
+        reference = await this._createNodeReference(portofolio);
+        return context.addChildInContext(reference, PROFILE_TO_AUTHORIZED_PORTOFOLIO_RELATION, PTR_LST_TYPE, context);
+    }
+
+    public async unauthorizeProfileToAccessPortofolio(profile: SpinalNode, portofolioId: string): Promise<void> {
+
+        const context = await this._getAuthorizedPortofolioContext(profile, false);
+        if (!context) return;
+
+        let reference = await this._getReference(context, portofolioId);
+        if (!reference) return;
+
+        return context.removeChild(reference, PROFILE_TO_AUTHORIZED_PORTOFOLIO_RELATION, PTR_LST_TYPE);
+    }
+
+    public async authorizeProfileToAccessPortofolioApp(profile: SpinalNode, portofolioId: string, appIds: string | string[], portofolioRef?: SpinalNode): Promise<SpinalNode[]> {
         if (!Array.isArray(appIds)) appIds = [appIds];
-        const authAppcontext = await this._getAuthorizedAppsContext(profile, true);
-        if (!authAppcontext) return;
 
-        const promises = appIds.map(id => this._addAppToContext(authAppcontext, id))
+        const reference = portofolioRef || await this.authorizeProfileToAccessPortofolio(profile, portofolioId);
 
-        return Promise.all(promises).then((result) => {
-            return authAppcontext.getChildren(CONTEXT_TO_AUTHORIZED_APPS_RELATION_NAME)
-        })
+        const context = await this._getAuthorizedPortofolioContext(profile, true);
+        return appIds.reduce(async (prom, id) => {
+            let liste = await prom;
+            const app = await PortofolioService.getInstance().getAppFromPortofolio(portofolioId, id);
+            if (app) {
+                const appExist = reference.getChildrenIds().find(id => id === app.getId().get());
+                if (!appExist) await reference.addChildInContext(app, APP_RELATION_NAME, PTR_LST_TYPE, context);
+                liste.push(app);
+            }
+
+            return liste;
+        }, Promise.resolve([]));
     }
 
-    public async unauthorizeProfileToAccessApp(profile: SpinalNode, appIds: string | string[]): Promise<string[]> {
+    public async unauthorizeProfileToAccessPortofolioApp(profile: SpinalNode, portofolioId: string, appIds: string | string[]): Promise<SpinalNode[]> {
         if (!Array.isArray(appIds)) appIds = [appIds];
-        const authAppcontext = await this._getAuthorizedAppsContext(profile);
-        if (!authAppcontext) return;
+        const context = await this._getAuthorizedPortofolioContext(profile, false);
+        if (!context) return;
+        const reference = await this._getReference(context, portofolioId);
+        if (!reference) return;
 
-        const promises = appIds.map(el => this._removeAppToContext(authAppcontext, el));
+        const data = await appIds.reduce(async (prom, id) => {
+            let liste = await prom;
+            const app = await PortofolioService.getInstance().getAppFromPortofolio(portofolioId, id);
 
-        return Promise.all(promises);
+            if (app) {
+                await reference.removeChild(app, APP_RELATION_NAME, PTR_LST_TYPE);
+                liste.push(app);
+            }
+
+            return liste;
+        }, Promise.resolve([]));
+
+        await this._checkPortofolioValidity(profile, portofolioId, reference);
+
+        return data;
     }
 
-    public async getAuthorizedAppsFromProfile(profile: SpinalNode): Promise<SpinalNode[]> {
-        const authAppcontext = await this._getAuthorizedAppsContext(profile);
-        if (!authAppcontext) return [];
+    public async getAuthorizedPortofolioFromProfile(profile: SpinalNode): Promise<SpinalNode[]> {
+        const context = await this._getAuthorizedPortofolioContext(profile, false);
+        if (!context) return [];
+        const children = await context.getChildren([PROFILE_TO_AUTHORIZED_PORTOFOLIO_RELATION]);
 
-        return authAppcontext.getChildren(CONTEXT_TO_AUTHORIZED_APPS_RELATION_NAME);
+        return children.reduce(async (prom, item) => {
+            const liste = await prom;
+
+            if (item) {
+                const element = await item.getElement();
+                liste.push(element);
+            }
+
+            return liste
+        }, Promise.resolve([]))
     }
+
+    public async getAuthorizedPortofolioAppFromProfile(profile: SpinalNode, portofolioId: string): Promise<SpinalNode[]> {
+        const context = await this._getAuthorizedPortofolioContext(profile, false);
+        if (!context) return [];
+
+        const reference = await this._getReference(context, portofolioId);
+        if (!reference) return [];
+
+        return reference.getChildren(APP_RELATION_NAME);
+    }
+
+
 
     //////////////////////////////////////////////////////////
     //            API's ROUTES AUTHORIZATION                //
@@ -109,7 +185,7 @@ export default class AuthorizationService {
         const authcontext = await this._getAuthorizedApisRoutesContext(profile);
         if (!authcontext) return;
 
-        const promises = apiRoutesIds.map(el => this._removeApiToContext(authcontext, el));
+        const promises = apiRoutesIds.map(el => this._removeApiFromContext(authcontext, el));
 
         return Promise.all(promises);
     }
@@ -121,37 +197,102 @@ export default class AuthorizationService {
         return authAppcontext.getChildren(CONTEXT_TO_AUTHORIZED_APIS_RELATION_NAME);
     }
 
-    //////////////////////////////////////////////////////////
-    //                  BOS AUTHORIZATION                   //
-    //////////////////////////////////////////////////////////
+    // //////////////////////////////////////////////////////////
+    // //                  BOS AUTHORIZATION                   //
+    // //////////////////////////////////////////////////////////
 
-    public async authorizeProfileToAccessBos(profile: SpinalNode, bosIds: string | string[]): Promise<SpinalNode[]> {
-        if (!Array.isArray(bosIds)) bosIds = [bosIds];
-        const authApicontext = await this._getAuthorizedBosContext(profile, true);
-        if (!authApicontext) return;
+    public async authorizeProfileToAccessBos(profile: SpinalNode, BosId: string): Promise<SpinalNode> {
 
-        const promises = bosIds.map(id => this._addBosToContext(authApicontext, id))
+        const context = await this._getAuthorizedBosContext(profile, true);
+        let reference = await this._getReference(context, BosId);
+        if (reference) return reference;
 
-        return Promise.all(promises).then((result) => {
-            return authApicontext.getChildren(CONTEXT_TO_AUTHORIZED_BOS_RELATION_NAME);
-        })
+        const bos = await BuildingService.getInstance().getBuildingById(BosId);
+        if (!bos) return;
+        reference = await this._createNodeReference(bos);
+        return context.addChildInContext(reference, PROFILE_TO_AUTHORIZED_BOS_RELATION, PTR_LST_TYPE, context);
     }
 
-    public async unauthorizeProfileToAccessBos(profile: SpinalNode, bosIds: string | string[]): Promise<string[]> {
-        if (!Array.isArray(bosIds)) bosIds = [bosIds];
-        const authcontext = await this._getAuthorizedBosContext(profile);
-        if (!authcontext) return;
+    public async unauthorizeProfileToAccessBos(profile: SpinalNode, BosId: string): Promise<void> {
 
-        const promises = bosIds.map(el => this._removeBosToContext(authcontext, el));
+        const context = await this._getAuthorizedBosContext(profile, false);
+        if (!context) return;
 
-        return Promise.all(promises);
+        let reference = await this._getReference(context, BosId);
+        if (!reference) return;
+
+        return context.removeChild(reference, PROFILE_TO_AUTHORIZED_BOS_RELATION, PTR_LST_TYPE);
+    }
+
+    public async authorizeProfileToAccessBosApp(profile: SpinalNode, BosId: string, appIds: string | string[], BosRef?: SpinalNode): Promise<SpinalNode[]> {
+        if (!Array.isArray(appIds)) appIds = [appIds];
+        const reference = BosRef || await this.authorizeProfileToAccessBos(profile, BosId);
+
+        const context = await this._getAuthorizedBosContext(profile, true);
+        return appIds.reduce(async (prom, id) => {
+            let liste = await prom;
+            const app = await BuildingService.getInstance().getAppFromBuilding(BosId, id);
+
+            if (app) {
+                const appExist = reference.getChildrenIds().find(id => id === app.getId().get())
+                if (!appExist) await reference.addChildInContext(app, APP_RELATION_NAME, PTR_LST_TYPE, context);
+                liste.push(app);
+            }
+
+            return liste;
+        }, Promise.resolve([]));
+
+    }
+
+    public async unauthorizeProfileToAccessBosApp(profile: SpinalNode, BosId: string, appIds: string | string[]): Promise<SpinalNode[]> {
+        if (!Array.isArray(appIds)) appIds = [appIds];
+        const context = await this._getAuthorizedBosContext(profile, false);
+        if (!context) return;
+
+        let reference = await this._getReference(context, BosId);
+        if (!reference) return;
+
+        const data = await appIds.reduce(async (prom, id) => {
+            let liste = await prom;
+            const app = await BuildingService.getInstance().getAppFromBuilding(BosId, id);
+
+            if (app) {
+                await reference.removeChild(app, APP_RELATION_NAME, PTR_LST_TYPE);
+                liste.push(app);
+            }
+
+            return liste;
+        }, Promise.resolve([]));
+
+        await this._checkBosValidity(profile, BosId, reference);
+        return data;
     }
 
     public async getAuthorizedBosFromProfile(profile: SpinalNode): Promise<SpinalNode[]> {
-        const authAppcontext = await this._getAuthorizedBosContext(profile);
-        if (!authAppcontext) return [];
+        const context = await this._getAuthorizedBosContext(profile, false);
+        if (!context) return [];
+        const children = await context.getChildren([PROFILE_TO_AUTHORIZED_BOS_RELATION]);
 
-        return authAppcontext.getChildren(CONTEXT_TO_AUTHORIZED_BOS_RELATION_NAME);
+        return children.reduce(async (prom, item) => {
+            const liste = await prom;
+
+            if (item) {
+                const element = await item.getElement();
+                liste.push(element);
+            }
+
+            return liste
+        }, Promise.resolve([]))
+    }
+
+    public async getAuthorizedBosAppFromProfile(profile: SpinalNode, bosId: string): Promise<SpinalNode[]> {
+        const context = await this._getAuthorizedBosContext(profile, false);
+        if (!context) return [];
+
+        const reference = await this._getReference(context, bosId);
+        if (!reference) return [];
+
+        return reference.getChildren(APP_RELATION_NAME);
     }
 
 
@@ -159,8 +300,8 @@ export default class AuthorizationService {
     //                     PRIVATES                         //
     //////////////////////////////////////////////////////////
 
-    private async _getAuthorizedAppsContext(profile: SpinalNode, createIfNotExist: boolean = false): Promise<SpinalContext> {
-        return this._getOrCreateContext(profile, AUTHORIZED_APP_CONTEXT_NAME, createIfNotExist, AUTHORIZED_APPS_CONTEXT_TYPE);
+    private async _getAuthorizedPortofolioContext(profile: SpinalNode, createIfNotExist: boolean = false): Promise<SpinalContext> {
+        return this._getOrCreateContext(profile, AUTHORIZED_PORTOFOLIO_CONTEXT_NAME, createIfNotExist, AUTHORIZED_PORTOFOLIO_CONTEXT_TYPE);
     }
 
     private async _getAuthorizedApisRoutesContext(profile: SpinalNode, createIfNotExist: boolean = false): Promise<SpinalContext> {
@@ -171,60 +312,25 @@ export default class AuthorizationService {
         return this._getOrCreateContext(profile, AUTHORIZED_BOS_CONTEXT_NAME, createIfNotExist, AUTHORIZED_BOS_CONTEXT_TYPE)
     }
 
-    private async _getProfileGraph(profile: SpinalNode): Promise<SpinalGraph | void> {
-        if (profile) return profile.getElement();
-    }
-
-    private async _addAppToContext(context: SpinalContext, id: string) {
-        try {
-            const node = await AppService.getInstance().getAppById(id);
-            if (node) return context.addChildInContext(node, CONTEXT_TO_AUTHORIZED_APPS_RELATION_NAME, PTR_LST_TYPE, context);
-        } catch (error) { }
-    }
 
     private async _addApiToContext(context: SpinalContext, id: string): Promise<SpinalNode> {
         try {
             const node = await APIService.getInstance().getApiRouteById(id);
-            if (node)
-                return context.addChildInContext(node, CONTEXT_TO_AUTHORIZED_APIS_RELATION_NAME, PTR_LST_TYPE, context);
-
-        } catch (error) { }
-    }
-
-    private async _addBosToContext(context, id: string): Promise<SpinalNode> {
-        try {
-            const node = await BuildingService.getInstance().getBuilding(id);
-            if (node)
-                return context.addChildInContext(node, CONTEXT_TO_AUTHORIZED_BOS_RELATION_NAME, PTR_LST_TYPE, context);
-
-        } catch (error) { }
-    }
-
-    private async _removeAppToContext(context: SpinalContext, id: string) {
-        try {
-            const node = await AppService.getInstance().getAppById(id);
             if (node) {
-                await context.removeChild(node, CONTEXT_TO_AUTHORIZED_APPS_RELATION_NAME, PTR_LST_TYPE);
-                return node.getId().get()
+                const apiExist = context.getChildrenIds().find(id => id === node.getId().get());
+                if (!apiExist) return context.addChildInContext(node, CONTEXT_TO_AUTHORIZED_APIS_RELATION_NAME, PTR_LST_TYPE, context);
+
+                return node;
             }
+
         } catch (error) { }
     }
 
-    private async _removeApiToContext(context: SpinalContext, id: string) {
+    private async _removeApiFromContext(context: SpinalContext, id: string): Promise<string> {
         try {
             const node = await APIService.getInstance().getApiRouteById(id);
             if (node) {
                 await context.removeChild(node, CONTEXT_TO_AUTHORIZED_APIS_RELATION_NAME, PTR_LST_TYPE);
-                return node.getId().get();
-            }
-        } catch (error) { }
-    }
-
-    private async _removeBosToContext(context: SpinalContext, id: string) {
-        try {
-            const node = await BuildingService.getInstance().getBuilding(id);
-            if (node) {
-                await context.removeChild(node, CONTEXT_TO_AUTHORIZED_BOS_RELATION_NAME, PTR_LST_TYPE);
                 return node.getId().get();
             }
         } catch (error) { }
@@ -242,16 +348,49 @@ export default class AuthorizationService {
         }
     }
 
+    private async _getProfileGraph(profile: SpinalNode): Promise<SpinalGraph | void> {
+        if (profile) return profile.getElement();
+    }
+
+    private async _getReference(context: SpinalContext, referenceId: string): Promise<SpinalNode> {
+        const children = await context.getChildren();
+
+        for (const child of children) {
+            const element: any = await child.getElement(true);
+            if (element && element.getId().get() === referenceId) return child;
+        }
+    }
+
+    private async _createNodeReference(node: SpinalNode): Promise<SpinalNode> {
+        const refNode = new SpinalNode(node.getName().get(), node.getType().get(), node);
+        refNode.info.name.set(node.info.name);
+        return refNode;
+    }
+
     private _getContextByType(profile: SpinalNode, elementType: string): Promise<SpinalContext | void> {
         switch (elementType) {
             case AUTHORIZED_API_CONTEXT_TYPE:
                 return this._getAuthorizedApisRoutesContext(profile);
-            case AUTHORIZED_APPS_CONTEXT_TYPE:
-                return this._getAuthorizedAppsContext(profile)
+            case AUTHORIZED_PORTOFOLIO_CONTEXT_TYPE:
+                return this._getAuthorizedPortofolioContext(profile);
+            case AUTHORIZED_BOS_CONTEXT_TYPE:
+                return this._getAuthorizedBosContext(profile);
 
             default:
                 break;
         }
+    }
+
+    private async _checkPortofolioValidity(profile: SpinalNode, portofolioId: string, reference: SpinalNode) {
+        const children = await reference.getChildren(APP_RELATION_NAME);
+        if (children.length > 0) return;
+        return this.unauthorizeProfileToAccessPortofolio(profile, portofolioId);
+    }
+
+    private async _checkBosValidity(profile: SpinalNode, bosId: string, reference: SpinalNode) {
+        const children = await reference.getChildren(APP_RELATION_NAME);
+        if (children.length > 0) return;
+        return this.unauthorizeProfileToAccessBos(profile, bosId);
     }
 }
 

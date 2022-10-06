@@ -7,21 +7,21 @@ export interface IPamInfo {
     name: string;
     url: string;
     address?: string;
-    statusPlatform?: string;
+    statusPlatform?: "online" | "fail" | 'stop';
 }
-export interface IBosCredential {
+export interface IPamCredential {
     id: string;
     type: string;
     name: string;
     statusPlatform: string;
     address: string;
-    tokenBosAdmin: string;
-    bosName?: string;
+    tokenPamToAdmin: string;
+    pamName?: string;
     idPlateform?: string;
     urlAdmin?: string;
 }
 export interface IAdminCredential {
-    TokenAdminBos: string;
+    TokenAdminToPam: string;
     idPlatformOfAdmin: string;
 }
 export interface IAdminUserProfile {

@@ -23,12 +23,22 @@
  * <http://resources.spinalcom.com/licenses.pdf>.
  */
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.CONTEXT_TO_API_ROUTE_RELATION_NAME = exports.CONTEXT_TO_DIGITALTWIN_RELATION_NAME = exports.CONTEXT_TO_BUILDING_RELATION_NAME = exports.CONTEXT_TO_USER_RELATION_NAME = exports.CONTEXT_TO_ROLE_RELATION_NAME = exports.CONTEXT_TO_APP_PROFILE_RELATION_NAME = exports.CONTEXT_TO_USER_PROFILE_RELATION_NAME = exports.CONTEXT_TO_APP_RELATION_NAME = exports.APP_GROUP_TO_APP_RELATION_NAME = exports.CATEGORY_TO_APP_GROUP_RELATION_NAME = exports.CONTEXT_TO_APP_CATEGORY_RELATION_NAME = exports.API_ROUTE_TYPE = exports.DIGITALTWIN_TYPE = exports.BUILDING_TYPE = exports.APP_TYPE = exports.APP_GROUP_TYPE = exports.APP_CATEGORY_TYPE = exports.APP_PROFILE_TYPE = exports.USER_PROFILE_TYPE = exports.ROLE_TYPE = exports.ADMIN_CREDENTIAL_CONTEXT_TYPE = exports.BOS_CREDENTIAL_CONTEXT_TYPE = exports.AUTHORIZED_BOS_CONTEXT_TYPE = exports.AUTHORIZED_API_CONTEXT_TYPE = exports.AUTHORIZED_APPS_CONTEXT_TYPE = exports.ORGAN_LIST_CONTEXT_TYPE = exports.API_ROUTES_CONTEXT_TYPE = exports.DIGITALTWIN_CONTEXT_TYPE = exports.BUILDING_CONTEXT_TYPE = exports.APP_LIST_CONTEXT_TYPE = exports.ROLES_CONTEXT_TYPE = exports.USER_LIST_CONTEXT_TYPE = exports.APP_PROFILE_CONTEXT_TYPE = exports.USER_PROFILE_CONTEXT_TYPE = exports.ADMIN_CREDENTIAL_CONTEXT_NAME = exports.BOS_CREDENTIAL_CONTEXT_NAME = exports.AUTHORIZED_BOS_CONTEXT_NAME = exports.AUTHORIZED_API_CONTEXT_NAME = exports.AUTHORIZED_APP_CONTEXT_NAME = exports.ORGAN_LIST_CONTEXT_NAME = exports.API_ROUTES_CONTEXT_NAME = exports.DIGITALTWIN_CONTEXT_NAME = exports.BUILDING_CONTEXT_NAME = exports.APP_LIST_CONTEXT_NAME = exports.ROLES_CONTEXT_NAME = exports.USER_LIST_CONTEXT_NAME = exports.APP_PROFILE_CONTEXT_NAME = exports.USER_PROFILE_CONTEXT_NAME = exports.CONFIG_GRAPH_NAME = exports.CONFIG_FILE_MODEl_TYPE = void 0;
-exports.HTTP_CODES = exports.BOS_BASE_URI = exports.PAM_BASE_URI = exports.routesToProxy = exports.CANNOT_CREATE_INTERNAL_ERROR = exports.USER_NOT_FOUND = exports.USER_BASE_EMPTY = exports.ROLE_METHODS = exports.DEFAULT_ROLES = exports.LST_PTR_TYPE = exports.PTR_LST_TYPE = exports.CONTEXT_TO_AUTHORIZED_BOS_RELATION_NAME = exports.CONTEXT_TO_AUTHORIZED_APIS_RELATION_NAME = exports.CONTEXT_TO_AUTHORIZED_APPS_RELATION_NAME = void 0;
+exports.PORTOFOLIO_TYPE = exports.API_ROUTE_TYPE = exports.DIGITALTWIN_TYPE = exports.BUILDING_TYPE = exports.APP_TYPE = exports.APP_GROUP_TYPE = exports.APP_CATEGORY_TYPE = exports.APP_PROFILE_TYPE = exports.USER_PROFILE_TYPE = exports.ROLE_TYPE = exports.PORTOFOLIO_CONTEXT_TYPE = exports.ADMIN_CREDENTIAL_CONTEXT_TYPE = exports.PAM_CREDENTIAL_CONTEXT_TYPE = exports.AUTHORIZED_BOS_CONTEXT_TYPE = exports.AUTHORIZED_API_CONTEXT_TYPE = exports.AUTHORIZED_PORTOFOLIO_CONTEXT_TYPE = exports.ORGAN_LIST_CONTEXT_TYPE = exports.API_ROUTES_CONTEXT_TYPE = exports.DIGITALTWIN_CONTEXT_TYPE = exports.BUILDING_CONTEXT_TYPE = exports.APP_LIST_CONTEXT_TYPE = exports.ROLES_CONTEXT_TYPE = exports.USER_LIST_CONTEXT_TYPE = exports.APP_PROFILE_CONTEXT_TYPE = exports.USER_PROFILE_CONTEXT_TYPE = exports.BUILDING_APPS_GROUP_NAME = exports.PORTOFOLIO_APPS_GROUP_NAME = exports.ADMIN_APPS_GROUP_NAME = exports.PORTOFOLIO_CONTEXT_NAME = exports.ADMIN_CREDENTIAL_CONTEXT_NAME = exports.PAM_CREDENTIAL_CONTEXT_NAME = exports.AUTHORIZED_BOS_CONTEXT_NAME = exports.AUTHORIZED_API_CONTEXT_NAME = exports.AUTHORIZED_PORTOFOLIO_CONTEXT_NAME = exports.ORGAN_LIST_CONTEXT_NAME = exports.API_ROUTES_CONTEXT_NAME = exports.DIGITALTWIN_CONTEXT_NAME = exports.BUILDING_CONTEXT_NAME = exports.APP_LIST_CONTEXT_NAME = exports.ROLES_CONTEXT_NAME = exports.USER_LIST_CONTEXT_NAME = exports.APP_PROFILE_CONTEXT_NAME = exports.USER_PROFILE_CONTEXT_NAME = exports.USER_TYPES = exports.CONTEXT_TO_ADMIN_USER_RELATION = exports.ADMIN_USER_TYPE = exports.ADMIN_USERNAME = exports.CONFIG_DEFAULT_DIRECTORY_PATH = exports.CONFIG_DEFAULT_NAME = exports.CONFIG_FILE_MODEl_TYPE = void 0;
+exports.HTTP_CODES = exports.BOS_BASE_URI = exports.PAM_BASE_URI = exports.routesToProxy = exports.CANNOT_CREATE_INTERNAL_ERROR = exports.USER_NOT_FOUND = exports.USER_BASE_EMPTY = exports.ROLE_METHODS = exports.DEFAULT_ROLES = exports.LST_PTR_TYPE = exports.PTR_LST_TYPE = exports.PROFILE_TO_AUTHORIZED_BOS_RELATION = exports.PROFILE_TO_AUTHORIZED_PORTOFOLIO_RELATION = exports.BUILDING_RELATION_NAME = exports.APP_RELATION_NAME = exports.CONTEXT_TO_AUTHORIZED_APIS_RELATION_NAME = exports.CONTEXT_TO_PORTOFOLIO_RELATION_NAME = exports.CONTEXT_TO_API_ROUTE_RELATION_NAME = exports.CONTEXT_TO_DIGITALTWIN_RELATION_NAME = exports.CONTEXT_TO_USER_RELATION_NAME = exports.CONTEXT_TO_ROLE_RELATION_NAME = exports.CONTEXT_TO_APP_PROFILE_RELATION_NAME = exports.CONTEXT_TO_USER_PROFILE_RELATION_NAME = exports.CONTEXT_TO_APPS_GROUP = exports.BUILDING_APP_TYPE = exports.PORTOFOLIO_APP_TYPE = exports.ADMIN_APP_TYPE = exports.BUILDING_APPS_GROUP_TYPE = exports.PORTOFOLIO_APPS_GROUP_TYPE = exports.ADMIN_APPS_GROUP_TYPE = void 0;
 const spinal_env_viewer_graph_service_1 = require("spinal-env-viewer-graph-service");
 const interfaces_1 = require("./interfaces");
 exports.CONFIG_FILE_MODEl_TYPE = "SpinalPAM";
-exports.CONFIG_GRAPH_NAME = "pam";
+exports.CONFIG_DEFAULT_NAME = "PAMConfig";
+exports.CONFIG_DEFAULT_DIRECTORY_PATH = "/__users__/admin/";
+exports.ADMIN_USERNAME = "admin";
+exports.ADMIN_USER_TYPE = "admin";
+exports.CONTEXT_TO_ADMIN_USER_RELATION = "hasAdminUser";
+exports.USER_TYPES = Object.freeze({
+    ADMIN: "1",
+    USER: "2",
+    1: "ADMIN",
+    2: "USER"
+});
 //Contexts names
 exports.USER_PROFILE_CONTEXT_NAME = 'UserProfileList';
 exports.APP_PROFILE_CONTEXT_NAME = 'AppProfileList';
@@ -39,11 +49,15 @@ exports.BUILDING_CONTEXT_NAME = 'Buildings';
 exports.DIGITALTWIN_CONTEXT_NAME = 'DigitalTwins';
 exports.API_ROUTES_CONTEXT_NAME = 'ApiListContext';
 exports.ORGAN_LIST_CONTEXT_NAME = 'OrganListContext';
-exports.AUTHORIZED_APP_CONTEXT_NAME = "Authorized Apps";
+exports.AUTHORIZED_PORTOFOLIO_CONTEXT_NAME = "Authorized Portofolio";
 exports.AUTHORIZED_API_CONTEXT_NAME = "Authorized Apis Routes";
 exports.AUTHORIZED_BOS_CONTEXT_NAME = "Authorized BOS";
-exports.BOS_CREDENTIAL_CONTEXT_NAME = "BosCredential";
+exports.PAM_CREDENTIAL_CONTEXT_NAME = "PAMToAuthCredential";
 exports.ADMIN_CREDENTIAL_CONTEXT_NAME = "AdminCredential";
+exports.PORTOFOLIO_CONTEXT_NAME = "Portofolio description Context";
+exports.ADMIN_APPS_GROUP_NAME = "Admin apps";
+exports.PORTOFOLIO_APPS_GROUP_NAME = "Portofolio apps";
+exports.BUILDING_APPS_GROUP_NAME = "Building apps";
 //Contexts types
 exports.USER_PROFILE_CONTEXT_TYPE = 'UserProfileList';
 exports.APP_PROFILE_CONTEXT_TYPE = 'AppProfileList';
@@ -54,11 +68,12 @@ exports.BUILDING_CONTEXT_TYPE = 'BuildingContextList';
 exports.DIGITALTWIN_CONTEXT_TYPE = 'DigitalTwinContext';
 exports.API_ROUTES_CONTEXT_TYPE = 'ApiListContext';
 exports.ORGAN_LIST_CONTEXT_TYPE = 'OrganListContext';
-exports.AUTHORIZED_APPS_CONTEXT_TYPE = "AuthorizedAppContext";
+exports.AUTHORIZED_PORTOFOLIO_CONTEXT_TYPE = "AuthorizedPortofolioContext";
 exports.AUTHORIZED_API_CONTEXT_TYPE = "AuthorizedApisContext";
 exports.AUTHORIZED_BOS_CONTEXT_TYPE = "AuthorizedBosContext";
-exports.BOS_CREDENTIAL_CONTEXT_TYPE = "BosCredential";
+exports.PAM_CREDENTIAL_CONTEXT_TYPE = "PamCredential";
 exports.ADMIN_CREDENTIAL_CONTEXT_TYPE = "AdminCredential";
+exports.PORTOFOLIO_CONTEXT_TYPE = "PortofolioContext";
 // types
 exports.ROLE_TYPE = "role";
 exports.USER_PROFILE_TYPE = "UserProfile";
@@ -67,23 +82,35 @@ exports.APP_CATEGORY_TYPE = "AdminAppCategory";
 exports.APP_GROUP_TYPE = "AdminAppGroup";
 exports.APP_TYPE = 'AdminApp';
 exports.BUILDING_TYPE = 'Building';
-exports.DIGITALTWIN_TYPE = 'PAMDigitalTwin';
+exports.DIGITALTWIN_TYPE = 'Digital twin';
 exports.API_ROUTE_TYPE = 'ApiRoute';
+exports.PORTOFOLIO_TYPE = 'Portofolio';
+exports.ADMIN_APPS_GROUP_TYPE = "AdminAppsGroup";
+exports.PORTOFOLIO_APPS_GROUP_TYPE = "PortofolioAppsGroup";
+exports.BUILDING_APPS_GROUP_TYPE = "BuildingAppsGroup";
+exports.ADMIN_APP_TYPE = "AdminApp";
+exports.PORTOFOLIO_APP_TYPE = "PortofolioApp";
+exports.BUILDING_APP_TYPE = "BuildingApp";
 // RelationName
-exports.CONTEXT_TO_APP_CATEGORY_RELATION_NAME = "hasAppCategory";
-exports.CATEGORY_TO_APP_GROUP_RELATION_NAME = 'hasAppGroup';
-exports.APP_GROUP_TO_APP_RELATION_NAME = 'groupHasApp';
-exports.CONTEXT_TO_APP_RELATION_NAME = 'hasApps';
+// export const CONTEXT_TO_APP_CATEGORY_RELATION_NAME = "hasAppCategory";
+// export const CATEGORY_TO_APP_GROUP_RELATION_NAME = 'hasAppGroup';
+// export const APP_GROUP_TO_APP_RELATION_NAME = 'groupHasApp';
+// export const CONTEXT_TO_APP_RELATION_NAME = 'hasApps';
+exports.CONTEXT_TO_APPS_GROUP = "hasAppsGroups";
 exports.CONTEXT_TO_USER_PROFILE_RELATION_NAME = 'hasUserProfile';
 exports.CONTEXT_TO_APP_PROFILE_RELATION_NAME = 'hasAppProfile';
 exports.CONTEXT_TO_ROLE_RELATION_NAME = 'hasRole';
 exports.CONTEXT_TO_USER_RELATION_NAME = 'hasUser';
-exports.CONTEXT_TO_BUILDING_RELATION_NAME = 'hasBuilding';
 exports.CONTEXT_TO_DIGITALTWIN_RELATION_NAME = 'hasDigitalTwin';
 exports.CONTEXT_TO_API_ROUTE_RELATION_NAME = 'hasApiRoute';
-exports.CONTEXT_TO_AUTHORIZED_APPS_RELATION_NAME = "profileHasApps";
+exports.CONTEXT_TO_PORTOFOLIO_RELATION_NAME = "hasPortofolio";
+// export const CONTEXT_TO_AUTHORIZED_APPS_RELATION_NAME = "profileHasApps";
 exports.CONTEXT_TO_AUTHORIZED_APIS_RELATION_NAME = "profileHasApis";
-exports.CONTEXT_TO_AUTHORIZED_BOS_RELATION_NAME = "profileHasBos";
+// export const CONTEXT_TO_AUTHORIZED_BOS_RELATION_NAME = "profileHasBos";
+exports.APP_RELATION_NAME = "hasApps";
+exports.BUILDING_RELATION_NAME = 'hasBuilding';
+exports.PROFILE_TO_AUTHORIZED_PORTOFOLIO_RELATION = "hasAccessToPortofolio";
+exports.PROFILE_TO_AUTHORIZED_BOS_RELATION = "hasAccessToBos";
 // Relation Type
 exports.PTR_LST_TYPE = spinal_env_viewer_graph_service_1.SPINAL_RELATION_PTR_LST_TYPE;
 exports.LST_PTR_TYPE = spinal_env_viewer_graph_service_1.SPINAL_RELATION_LST_PTR_TYPE;

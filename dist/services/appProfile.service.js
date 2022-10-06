@@ -4,7 +4,7 @@
  *
  * This file is part of SpinalCore.
  *
- * Please read all of the followi../interfaces/IAppProfileResitions
+ * Please read all of the followi../interfaces/IProfileResitions
  * of the Free Software license Agreement ("Agreement")
  * carefully.
  *
@@ -37,6 +37,7 @@ const spinal_env_viewer_graph_service_1 = require("spinal-env-viewer-graph-servi
 const constant_1 = require("../constant");
 const authorization_service_1 = require("./authorization.service");
 const configFile_service_1 = require("./configFile.service");
+const profileUtils_1 = require("../utils/profileUtils");
 class AppProfileService {
     constructor() { }
     static getInstance() {
@@ -57,10 +58,17 @@ class AppProfileService {
     createAppProfile(appProfile) {
         return __awaiter(this, void 0, void 0, function* () {
             const node = yield this._createAppProfileNode(appProfile);
-            let authorizedApps = yield this.authorizeToAccessApps(node, appProfile.authorizeApps);
-            let authorizedRoutes = yield this.authorizeToAccessApis(node, appProfile.authorizeApis);
-            let authorizedBos = yield this.authorizeToAccessBos(node, appProfile.authorizeBos);
-            return { node, authorizedApps: authorizedApps || [], authorizedRoutes: authorizedRoutes || [], authorizedBos: authorizedBos || [] };
+            const { authorizeApis, authorizeBos, authorizePortofolio } = (0, profileUtils_1._formatAuthorizationData)(appProfile);
+            let authorizedPortofolio = yield this.authorizeToAccessPortofolioApp(node, authorizePortofolio);
+            let authorizedRoutes = yield this.authorizeToAccessApis(node, authorizeApis);
+            let authorizedBos = yield this.authorizeToAccessBosApp(node, authorizeBos);
+            yield this._addProfileToGraph(node);
+            return {
+                node,
+                authorizedPortofolio: authorizedPortofolio || [],
+                authorizedRoutes: authorizedRoutes || [],
+                authorizedBos: authorizedBos || []
+            };
         });
     }
     getAppProfile(appProfile) {
@@ -70,14 +78,14 @@ class AppProfileService {
                 return;
             return Promise.all([
                 this.getAuthorizedApis(appProfile),
-                this.getAuthorizedApps(appProfile),
-                this.getAuthorizedBos(appProfile)
-            ]).then(([authorizedRoutes, authorizedApps, authorizedBos]) => {
+                this.getPortofolioAuthStructure(appProfile),
+                this.getBosAuthStructure(appProfile)
+            ]).then(([authorizedRoutes, authorizedPortofolio, authorizedBos]) => {
                 return {
                     node,
-                    authorizedRoutes,
-                    authorizedApps,
-                    authorizedBos
+                    authorizedPortofolio: authorizedPortofolio || [],
+                    authorizedRoutes: authorizedRoutes || [],
+                    authorizedBos: authorizedBos || []
                 };
             });
         });
@@ -88,15 +96,13 @@ class AppProfileService {
             if (!profileNode)
                 return;
             this._renameProfile(profileNode, appProfile.name);
-            const unauthorizedAppsIds = appProfile.unauthorizeApps || [];
-            const unauthorizedApisIds = appProfile.unauthorizeApis || [];
-            const unauthorizedBosIds = appProfile.unauthorizeBos || [];
-            yield this._unauthorizeOnEdit(profileNode, unauthorizedAppsIds, unauthorizedApisIds, unauthorizedBosIds);
-            const filteredApps = this._filterAuthList(appProfile.authorizeApps, unauthorizedAppsIds);
-            const filteredApis = this._filterAuthList(appProfile.authorizeApis, unauthorizedApisIds);
-            const filteredBos = this._filterAuthList(appProfile.authorizeBos, unauthorizedBosIds);
-            const [authorizedApps, authorizedApis, authorizedBos] = yield this._authorizeOnEdit(profileNode, filteredApps, filteredApis, filteredBos);
-            return { node: profileNode, authorizedApps: authorizedApps || [], authorizedRoutes: authorizedApis || [], authorizedBos: authorizedBos || [] };
+            const { authorizeApis, authorizeBos, authorizePortofolio, unauthorizeApis, unauthorizeBos, unauthorizePortofolio } = (0, profileUtils_1._formatAuthorizationData)(appProfile);
+            yield this._unauthorizeOnEdit(profileNode, unauthorizeApis, unauthorizeBos, unauthorizePortofolio);
+            const filteredPortofolio = (0, profileUtils_1._filterPortofolioList)(authorizePortofolio, unauthorizePortofolio);
+            const filteredApis = (0, profileUtils_1._filterApisList)(authorizeApis, unauthorizeApis);
+            const filteredBos = (0, profileUtils_1._filterBosList)(authorizeBos, unauthorizeBos);
+            yield this._authorizeOnEdit(profileNode, filteredApis, filteredBos, filteredPortofolio);
+            return this.getAppProfile(profileNode);
         });
     }
     getAllAppProfile() {
@@ -120,35 +126,97 @@ class AppProfileService {
     }
     /// END CRUD
     /// AUTH BEGIN
-    //apps
-    authorizeToAccessApps(appProfile, appIds) {
+    //////////////////////////////////////////////////////
+    //                      PORTOFOLIO                  //
+    //////////////////////////////////////////////////////
+    authorizePortofolio(profile, portofolioId) {
         return __awaiter(this, void 0, void 0, function* () {
-            if (!appIds)
+            portofolioId = Array.isArray(portofolioId) ? portofolioId : [portofolioId];
+            const node = profile instanceof spinal_env_viewer_graph_service_1.SpinalNode ? profile : yield this._getAppProfileNode(profile);
+            if (!(node instanceof spinal_env_viewer_graph_service_1.SpinalNode))
                 return;
-            const node = appProfile instanceof spinal_env_viewer_graph_service_1.SpinalNode ? appProfile : yield this._getAppProfileNode(appProfile);
-            if (node)
-                return authorization_service_1.authorizationInstance.authorizeProfileToAccessApp(node, appIds) || [];
+            const promises = portofolioId.map((id) => __awaiter(this, void 0, void 0, function* () {
+                return authorization_service_1.authorizationInstance.authorizeProfileToAccessPortofolio(node, id);
+            }));
+            return Promise.all(promises);
         });
     }
-    unauthorizeToAccessApps(appProfile, appIds) {
+    unauthorizeToAccessPortofolio(profile, portofolioId) {
         return __awaiter(this, void 0, void 0, function* () {
-            if (!appIds)
+            portofolioId = Array.isArray(portofolioId) ? portofolioId : [portofolioId];
+            const node = profile instanceof spinal_env_viewer_graph_service_1.SpinalNode ? profile : yield this._getAppProfileNode(profile);
+            if (!(node instanceof spinal_env_viewer_graph_service_1.SpinalNode))
                 return;
-            const node = appProfile instanceof spinal_env_viewer_graph_service_1.SpinalNode ? appProfile : yield this._getAppProfileNode(appProfile);
-            if (node)
-                return authorization_service_1.authorizationInstance.unauthorizeProfileToAccessApp(node, appIds);
+            const promises = portofolioId.map((id) => __awaiter(this, void 0, void 0, function* () {
+                return authorization_service_1.authorizationInstance.unauthorizeProfileToAccessPortofolio(node, id);
+            }));
+            return Promise.all(promises);
         });
     }
-    getAuthorizedApps(appProfile) {
+    authorizeToAccessPortofolioApp(profile, data) {
         return __awaiter(this, void 0, void 0, function* () {
-            const node = appProfile instanceof spinal_env_viewer_graph_service_1.SpinalNode ? appProfile : yield this._getAppProfileNode(appProfile);
-            if (!node)
+            data = Array.isArray(data) ? data : [data];
+            const node = profile instanceof spinal_env_viewer_graph_service_1.SpinalNode ? profile : yield this._getAppProfileNode(profile);
+            if (!(node instanceof spinal_env_viewer_graph_service_1.SpinalNode))
                 return;
-            // if (!node) throw new Error(`no user profile Found for ${userProfile}`);
-            return authorization_service_1.authorizationInstance.getAuthorizedAppsFromProfile(node);
+            return data.reduce((prom, { appsIds, portofolioId }) => __awaiter(this, void 0, void 0, function* () {
+                const liste = yield prom;
+                const reference = yield authorization_service_1.authorizationInstance.authorizeProfileToAccessPortofolio(node, portofolioId);
+                const apps = yield authorization_service_1.authorizationInstance.authorizeProfileToAccessPortofolioApp(node, portofolioId, appsIds, reference);
+                liste.push({
+                    portofolio: reference,
+                    apps
+                });
+                return liste;
+            }), Promise.resolve([]));
         });
     }
-    //apis
+    unauthorizeToAccessPortofolioApp(profile, data) {
+        return __awaiter(this, void 0, void 0, function* () {
+            data = Array.isArray(data) ? data : [data];
+            const node = profile instanceof spinal_env_viewer_graph_service_1.SpinalNode ? profile : yield this._getAppProfileNode(profile);
+            if (!(node instanceof spinal_env_viewer_graph_service_1.SpinalNode))
+                return;
+            const promises = data.map(({ appsIds, portofolioId }) => __awaiter(this, void 0, void 0, function* () {
+                return authorization_service_1.authorizationInstance.unauthorizeProfileToAccessPortofolioApp(node, portofolioId, appsIds);
+            }));
+            return Promise.all(promises);
+        });
+    }
+    getAuthorizedPortofolio(profile) {
+        return __awaiter(this, void 0, void 0, function* () {
+            const node = profile instanceof spinal_env_viewer_graph_service_1.SpinalNode ? profile : yield this._getAppProfileNode(profile);
+            if (!(node instanceof spinal_env_viewer_graph_service_1.SpinalNode))
+                return;
+            return authorization_service_1.authorizationInstance.getAuthorizedPortofolioFromProfile(node);
+        });
+    }
+    getAuthorizedPortofolioApp(profile, portofolioId) {
+        return __awaiter(this, void 0, void 0, function* () {
+            const node = profile instanceof spinal_env_viewer_graph_service_1.SpinalNode ? profile : yield this._getAppProfileNode(profile);
+            if (!(node instanceof spinal_env_viewer_graph_service_1.SpinalNode))
+                return;
+            return authorization_service_1.authorizationInstance.getAuthorizedPortofolioAppFromProfile(node, portofolioId);
+        });
+    }
+    getPortofolioAuthStructure(profile) {
+        return __awaiter(this, void 0, void 0, function* () {
+            const node = profile instanceof spinal_env_viewer_graph_service_1.SpinalNode ? profile : yield this._getAppProfileNode(profile);
+            if (!(node instanceof spinal_env_viewer_graph_service_1.SpinalNode))
+                return;
+            const portofolios = yield this.getAuthorizedPortofolio(profile);
+            const promises = portofolios.map((portofolio) => __awaiter(this, void 0, void 0, function* () {
+                return {
+                    portofolio,
+                    apps: yield this.getAuthorizedPortofolioApp(profile, portofolio.getId().get())
+                };
+            }));
+            return Promise.all(promises);
+        });
+    }
+    //////////////////////////////////////////////////////
+    //                      APIS                        //
+    //////////////////////////////////////////////////////
     authorizeToAccessApis(appProfile, apisIds) {
         return __awaiter(this, void 0, void 0, function* () {
             if (!apisIds)
@@ -170,41 +238,95 @@ class AppProfileService {
     getAuthorizedApis(appProfile) {
         return __awaiter(this, void 0, void 0, function* () {
             const node = appProfile instanceof spinal_env_viewer_graph_service_1.SpinalNode ? appProfile : yield this._getAppProfileNode(appProfile);
-            // if (!node) throw new Error(`no user profile Found for ${appProfile}`);
             if (!node)
                 return;
             return authorization_service_1.authorizationInstance.getAuthorizedApisRoutesFromProfile(node);
         });
     }
-    // bos
-    authorizeToAccessBos(profile, bosIds) {
+    /////////////////////////////////////////////
+    //                  BOS                    //
+    /////////////////////////////////////////////
+    authorizeToAccessBos(profile, BosId) {
         return __awaiter(this, void 0, void 0, function* () {
-            if (!bosIds)
-                return;
+            BosId = Array.isArray(BosId) ? BosId : [BosId];
             const node = profile instanceof spinal_env_viewer_graph_service_1.SpinalNode ? profile : yield this._getAppProfileNode(profile);
-            if (node)
-                return authorization_service_1.authorizationInstance.authorizeProfileToAccessBos(node, bosIds);
+            if (!(node instanceof spinal_env_viewer_graph_service_1.SpinalNode))
+                return;
+            const promises = BosId.map(id => authorization_service_1.authorizationInstance.authorizeProfileToAccessBos(node, id));
+            return Promise.all(promises);
         });
     }
-    unauthorizeToAccessBos(appProfile, bosIds) {
+    unauthorizeToAccessBos(profile, BosId) {
         return __awaiter(this, void 0, void 0, function* () {
-            if (!bosIds)
+            BosId = Array.isArray(BosId) ? BosId : [BosId];
+            const node = profile instanceof spinal_env_viewer_graph_service_1.SpinalNode ? profile : yield this._getAppProfileNode(profile);
+            if (!(node instanceof spinal_env_viewer_graph_service_1.SpinalNode))
                 return;
-            const node = appProfile instanceof spinal_env_viewer_graph_service_1.SpinalNode ? appProfile : yield this._getAppProfileNode(appProfile);
-            if (node)
-                return authorization_service_1.authorizationInstance.unauthorizeProfileToAccessBos(node, bosIds);
+            const promises = BosId.map(id => authorization_service_1.authorizationInstance.unauthorizeProfileToAccessBos(node, id));
+            return Promise.all(promises);
         });
     }
-    getAuthorizedBos(appProfile) {
+    authorizeToAccessBosApp(profile, data) {
         return __awaiter(this, void 0, void 0, function* () {
-            const node = appProfile instanceof spinal_env_viewer_graph_service_1.SpinalNode ? appProfile : yield this._getAppProfileNode(appProfile);
-            if (!node)
+            data = Array.isArray(data) ? data : [data];
+            const node = profile instanceof spinal_env_viewer_graph_service_1.SpinalNode ? profile : yield this._getAppProfileNode(profile);
+            if (!(node instanceof spinal_env_viewer_graph_service_1.SpinalNode))
                 return;
-            // if (!node) throw new Error(`no user profile Found for ${userProfile}`);
+            return data.reduce((prom, { buildingId, appsIds }) => __awaiter(this, void 0, void 0, function* () {
+                const liste = yield prom;
+                const reference = yield authorization_service_1.authorizationInstance.authorizeProfileToAccessBos(node, buildingId);
+                const apps = yield authorization_service_1.authorizationInstance.authorizeProfileToAccessBosApp(node, buildingId, appsIds, reference);
+                liste.push({
+                    building: reference,
+                    apps
+                });
+                return liste;
+            }), Promise.resolve([]));
+        });
+    }
+    unauthorizeToAccessBosApp(profile, data) {
+        return __awaiter(this, void 0, void 0, function* () {
+            data = Array.isArray(data) ? data : [data];
+            const node = profile instanceof spinal_env_viewer_graph_service_1.SpinalNode ? profile : yield this._getAppProfileNode(profile);
+            if (!(node instanceof spinal_env_viewer_graph_service_1.SpinalNode))
+                return;
+            const promises = data.map(({ buildingId, appsIds }) => {
+                return authorization_service_1.authorizationInstance.unauthorizeProfileToAccessBosApp(node, buildingId, appsIds);
+            });
+            return Promise.all(promises);
+        });
+    }
+    getAuthorizedBos(profile) {
+        return __awaiter(this, void 0, void 0, function* () {
+            const node = profile instanceof spinal_env_viewer_graph_service_1.SpinalNode ? profile : yield this._getAppProfileNode(profile);
+            if (!(node instanceof spinal_env_viewer_graph_service_1.SpinalNode))
+                return;
             return authorization_service_1.authorizationInstance.getAuthorizedBosFromProfile(node);
         });
     }
-    /// END AUTH
+    getAuthorizedBosApp(profile, bosId) {
+        return __awaiter(this, void 0, void 0, function* () {
+            const node = profile instanceof spinal_env_viewer_graph_service_1.SpinalNode ? profile : yield this._getAppProfileNode(profile);
+            if (!(node instanceof spinal_env_viewer_graph_service_1.SpinalNode))
+                return;
+            return authorization_service_1.authorizationInstance.getAuthorizedBosAppFromProfile(node, bosId);
+        });
+    }
+    getBosAuthStructure(profile) {
+        return __awaiter(this, void 0, void 0, function* () {
+            const node = profile instanceof spinal_env_viewer_graph_service_1.SpinalNode ? profile : yield this._getAppProfileNode(profile);
+            if (!(node instanceof spinal_env_viewer_graph_service_1.SpinalNode))
+                return;
+            const buildings = yield this.getAuthorizedBos(profile);
+            const promises = buildings.map((building) => __awaiter(this, void 0, void 0, function* () {
+                return {
+                    building,
+                    apps: yield this.getAuthorizedBosApp(profile, building.getId().get())
+                };
+            }));
+            return Promise.all(promises);
+        });
+    }
     ///////////////////////////////////////////////////////////
     ///                       PRIVATES                      //
     //////////////////////////////////////////////////////////
@@ -228,12 +350,8 @@ class AppProfileService {
             });
         });
     }
-    _filterAuthList(authorizedIds = [], unauthorizedIds = []) {
-        if (!unauthorizedIds.length)
-            return authorizedIds;
-        const unAuthObj = {};
-        unauthorizedIds.map(id => unAuthObj[id] = id);
-        return authorizedIds.filter(id => !unAuthObj[id]);
+    _addProfileToGraph(node) {
+        return this.context.addChildInContext(node, constant_1.CONTEXT_TO_APP_PROFILE_RELATION_NAME, constant_1.PTR_LST_TYPE, this.context);
     }
     _createAppProfileNode(appProfile) {
         return __awaiter(this, void 0, void 0, function* () {
@@ -244,7 +362,6 @@ class AppProfileService {
             const graph = new spinal_env_viewer_graph_service_1.SpinalGraph(appProfile.name);
             const profileId = spinal_env_viewer_graph_service_1.SpinalGraphService.createNode(info, graph);
             const node = spinal_env_viewer_graph_service_1.SpinalGraphService.getRealNode(profileId);
-            yield this.context.addChildInContext(node, constant_1.CONTEXT_TO_APP_PROFILE_RELATION_NAME, constant_1.PTR_LST_TYPE, this.context);
             return node;
         });
     }
@@ -260,21 +377,23 @@ class AppProfileService {
         if (newName && newName.trim())
             node.info.name.set(newName);
     }
-    _unauthorizeOnEdit(node, unauthorizedAppsIds, unauthorizedApisIds, unauthorizedBosIds) {
+    _unauthorizeOnEdit(node, unauthorizeApis, unauthorizeBos, unauthorizePortofolio) {
         const promises = [
-            authorization_service_1.authorizationInstance.unauthorizeProfileToAccessApp(node, unauthorizedAppsIds),
-            authorization_service_1.authorizationInstance.unauthorizeProfileToAccessApisRoutes(node, unauthorizedApisIds),
-            authorization_service_1.authorizationInstance.unauthorizeProfileToAccessBos(node, unauthorizedBosIds)
+            this.unauthorizeToAccessApis(node, unauthorizeApis),
+            this.unauthorizeToAccessBosApp(node, unauthorizeBos),
+            this.unauthorizeToAccessPortofolioApp(node, unauthorizePortofolio)
         ];
         return Promise.all(promises);
     }
-    _authorizeOnEdit(node, authorizedAppsIds, authorizedApisIds, _authorizeOnEdit) {
-        const promises = [
-            authorization_service_1.authorizationInstance.authorizeProfileToAccessApp(node, authorizedAppsIds),
-            authorization_service_1.authorizationInstance.authorizeProfileToAccessApisRoutes(node, authorizedApisIds),
-            authorization_service_1.authorizationInstance.authorizeProfileToAccessBos(node, _authorizeOnEdit)
-        ];
-        return Promise.all(promises);
+    _authorizeOnEdit(node, authorizeApis, authorizeBos, authorizePortofolio) {
+        return __awaiter(this, void 0, void 0, function* () {
+            const promises = [
+                this.authorizeToAccessPortofolioApp(node, authorizePortofolio),
+                this.authorizeToAccessApis(node, authorizeApis),
+                this.authorizeToAccessBosApp(node, authorizeBos),
+            ];
+            return Promise.all(promises);
+        });
     }
 }
 exports.AppProfileService = AppProfileService;

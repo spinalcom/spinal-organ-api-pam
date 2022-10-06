@@ -25,20 +25,20 @@
 import * as path from 'path';
 import { spinalCore } from "spinal-core-connectorjs_type";
 import { SpinalGraph, SpinalContext } from "spinal-model-graph";
-import { CONFIG_GRAPH_NAME, CONFIG_FILE_MODEl_TYPE } from "../constant";
+import { CONFIG_DEFAULT_NAME, CONFIG_FILE_MODEl_TYPE, CONFIG_DEFAULT_DIRECTORY_PATH } from "../constant";
 
 import {
     APIService, AppProfileService,
     AppService, BuildingService,
     OrganListService, RoleService,
-    UserProfileService, DigitalTwinService
+    UserProfileService, PortofolioService, DigitalTwinService
 } from ".";
 
 // const { config: { directory_path, fileName } } = require("../../config");
 
 
-const directory_path = process.env.CONFIG_DIRECTORY_PATH || "/__users__/admin/";
-const fileName = process.env.CONFIG_FILE_NAME || "PAMConfig";
+const directory_path = process.env.CONFIG_DIRECTORY_PATH || CONFIG_DEFAULT_DIRECTORY_PATH;
+const fileName = process.env.CONFIG_FILE_NAME || CONFIG_DEFAULT_NAME;
 
 export default class ConfigFileService {
     private static instance: ConfigFileService;
@@ -58,7 +58,10 @@ export default class ConfigFileService {
         return this.loadOrMakeConfigFile(connect).then((graph: SpinalGraph) => {
             this.hubConnect = connect;
             this.graph = graph;
-            return this._initServices();
+            return this._initServices().then(async (result) => {
+                await DigitalTwinService.getInstance().createDigitalTwin("PAM DigitalTwin", CONFIG_DEFAULT_DIRECTORY_PATH)
+                return result;
+            })
         })
     }
 
@@ -82,8 +85,8 @@ export default class ConfigFileService {
         });
     }
 
-    private _createFile(directory: spinal.Directory, fileName: string = "PAMConfig"): SpinalGraph {
-        const graph = new SpinalGraph(CONFIG_GRAPH_NAME);
+    private _createFile(directory: spinal.Directory, fileName: string = CONFIG_DEFAULT_NAME): SpinalGraph {
+        const graph = new SpinalGraph(CONFIG_DEFAULT_NAME);
         directory.force_add_file(fileName, graph, { model_type: CONFIG_FILE_MODEl_TYPE });
         return graph;
     }
@@ -93,11 +96,12 @@ export default class ConfigFileService {
             APIService,
             AppProfileService,
             AppService,
-            // BuildingService,
+            BuildingService,
             OrganListService,
             RoleService,
             UserProfileService,
-            DigitalTwinService
+            // DigitalTwinService,
+            PortofolioService
         ];
 
         const promises = services.map(service => {

@@ -22,20 +22,24 @@
  * <http://resources.spinalcom.com/licenses.pdf>.
  */
 
-import { BOS_BASE_URI, CONTEXT_TO_BUILDING_RELATION_NAME, BUILDING_CONTEXT_NAME, BUILDING_CONTEXT_TYPE, BUILDING_TYPE, PTR_LST_TYPE } from "../constant";
-import { SpinalContext, SpinalGraph, SpinalGraphService, SpinalNode } from "spinal-env-viewer-graph-service";
-import { DigitalTwinService } from "./digitalTwin.service";
-import { IBuilding, ILocation } from "../interfaces";
+import {
+    BOS_BASE_URI, BUILDING_CONTEXT_NAME, BUILDING_CONTEXT_TYPE, BUILDING_TYPE, BUILDING_RELATION_NAME, PTR_LST_TYPE, APP_RELATION_NAME
+} from "../constant";
+import { SpinalContext, SpinalGraphService, SpinalNode } from "spinal-env-viewer-graph-service";
+import { IBuilding, IEditBuilding, ILocation } from "../interfaces";
 import * as openGeocoder from "node-open-geocoder";
 // const { config: { server_port } } = require("../../config");
 
 import axios from "axios";
+import { PortofolioService } from "./portofolio.service";
+import { AppService, configServiceInstance } from ".";
 const axiosInstance = axios.create({ baseURL: `http://localhost:${process.env.HUB_PORT}` });
 // import * as NodeGeocoder from "node-geocoder";
 
 
 export class BuildingService {
     private static instance: BuildingService;
+    public context: SpinalContext;
 
     private constructor() { }
 
@@ -45,49 +49,74 @@ export class BuildingService {
         return this.instance;
     }
 
-    public async getContext(): Promise<SpinalContext> {
-        const digitalTwinGraph = await this._getDigitalTwinGraph();
-        if (digitalTwinGraph) {
-            var context = await digitalTwinGraph.getContext(BUILDING_CONTEXT_NAME);
-            if (!context) {
-                context = new SpinalContext(BUILDING_CONTEXT_NAME, BUILDING_CONTEXT_TYPE)
-                return digitalTwinGraph.addContext(context);
-            }
-            return context;
-        }
+    public async init(): Promise<SpinalContext> {
+        this.context = await configServiceInstance.getContext(BUILDING_CONTEXT_NAME);
+        if (!this.context) this.context = await configServiceInstance.addContext(BUILDING_CONTEXT_NAME, BUILDING_CONTEXT_TYPE);
+        return this.context;
     }
 
-    public async addBuilding(buildingInfo: IBuilding): Promise<SpinalNode> {
-        const context = await this.getContext();
-        if (!context) throw new Error("Make sure you set a default digitalTwin");
-
+    public async createBuilding(buildingInfo: IBuilding): Promise<SpinalNode> {
         buildingInfo.type = BUILDING_TYPE;
-
-        const buildingId = SpinalGraphService.createNode(buildingInfo, undefined);
-        const node = SpinalGraphService.getRealNode(buildingId);
-
-        return context.addChildInContext(node, CONTEXT_TO_BUILDING_RELATION_NAME, PTR_LST_TYPE, context);
+        const id = SpinalGraphService.createNode(buildingInfo, undefined);
+        const node = SpinalGraphService.getRealNode(id);
+        this.context.addChildInContext(node, BUILDING_RELATION_NAME, PTR_LST_TYPE, this.context);
+        return node;
     }
 
-    public async getBuilding(buildingId: string): Promise<void | SpinalNode> {
-        const context = await this.getContext();
-        if (!context) throw new Error("Make sure you set a default digitalTwin");
-
-        const node = SpinalGraphService.getRealNode(buildingId);
-        if (node) return node;
-
-        return this._findChildInContext(context, buildingId, context);
+    public async getAllBuildings(): Promise<SpinalNode[]> {
+        return this.context.getChildren([BUILDING_RELATION_NAME]);
     }
 
-    public async getAllBuilding(): Promise<SpinalNode[]> {
-        const context = await this.getContext();
-        if (!context) throw new Error("Make sure you set a default digitalTwin");
 
-        return context.getChildrenInContext();
+    public async getAllBuildingsApps(): Promise<{ node: SpinalNode, apps: SpinalNode[] }[]> {
+        const buildings = await this.getAllBuildings();
+        return buildings.reduce(async (prom, el) => {
+            const liste = await prom;
+            const apps = await this.getAppsFromBuilding(el);
+            if (apps) {
+                liste.push({
+                    node: el,
+                    apps
+                })
+            }
+            return liste;
+        }, Promise.resolve([]))
     }
 
-    public async updateBuilding(buildingId: string, newData: IBuilding): Promise<SpinalNode> {
-        const node = await this.getBuilding(buildingId);
+    public async getBuildingById(id: string): Promise<SpinalNode> {
+        const children = await this.context.getChildren([BUILDING_RELATION_NAME]);
+        return children.find(el => el.getId().get() === id);
+    }
+
+    public async deleteBuilding(id: string): Promise<boolean> {
+        const building = await this.getBuildingById(id);
+        if (building) {
+            await building.removeFromGraph();
+            return true
+        }
+
+        return false;
+    }
+
+    public async addBuildingToPortofolio(portfolioId: string, buildingId: string | string[]): Promise<SpinalNode[]> {
+        const data = await PortofolioService.getInstance().addBuildingToPortofolio(portfolioId, buildingId);
+        return data;
+    }
+
+    public async getBuildingFromPortofolio(portofolioId: string, buildingId: string): Promise<void | SpinalNode> {
+        return PortofolioService.getInstance().portofolioHasBuilding(portofolioId, buildingId);
+    }
+
+    public async getAllBuildingsFromPortofolio(portfolioId: string): Promise<SpinalNode[]> {
+        return PortofolioService.getInstance().getPortofolioBuildings(portfolioId);
+        // const context = await this.getContext();
+        // if (!context) throw new Error("Make sure you set a default digitalTwin");
+
+        // return context.getChildrenInContext();
+    }
+
+    public async updateBuilding(buildingId: string, newData: IEditBuilding): Promise<SpinalNode> {
+        const node = await this.getBuildingById(buildingId);
         if (!node) throw new Error(`no Building found for ${buildingId}`);
 
         for (const key in newData) {
@@ -100,12 +129,12 @@ export class BuildingService {
         return node;
     }
 
-    public async deleteBuilding(buildingId: string): Promise<string> {
-        const node = await this.getBuilding(buildingId);
-        if (!node) throw new Error(`no building found for ${buildingId}`);
-        await node.removeFromGraph();
-        return buildingId;
-    }
+    // public async deleteBuildingFromPortofolio(portofolioId: string, buildingId: string | string[]): Promise<string> {
+    // const node = await this.getBuildingFromPortofolio(portofolioId, buildingId);
+    // if (!node) throw new Error(`no building found for ${buildingId}`);
+    // await node.removeFromGraph();
+    // return buildingId;
+    // }
 
     public validateBuilding(buildingInfo: IBuilding): { isValid: boolean; message?: string } {
         if (!buildingInfo.name) return { isValid: false, message: "The name is required" };
@@ -114,7 +143,7 @@ export class BuildingService {
         return { isValid: true }
     }
 
-    public async setLocation(buildingInfo: IBuilding): Promise<IBuilding> {
+    public async setLocation(buildingInfo: IEditBuilding): Promise<IEditBuilding> {
         if (!buildingInfo.address) return;
 
         if (!buildingInfo.location || !buildingInfo.location.latlng) {
@@ -156,6 +185,75 @@ export class BuildingService {
         data.details = await this.getBuildingDetails(data.id);
         return data;
     }
+
+
+    //////////////////////////////////////////////////////
+    //                      APPS                        //
+    //////////////////////////////////////////////////////
+
+    public async addAppToBuilding(building: string | SpinalNode, applicationId: string | string[]): Promise<SpinalNode[]> {
+        if (typeof building === "string") building = await this.getBuildingById(building);
+        if (!(building instanceof SpinalNode)) throw new Error(`No building found for ${building}`);
+
+        if (!Array.isArray(applicationId)) applicationId = [applicationId];
+
+        return applicationId.reduce(async (prom, appId: string) => {
+            const liste = await prom;
+            const appNode = await AppService.getInstance().getBuildingApp(appId);
+            if (!(appNode instanceof SpinalNode)) return liste;
+
+            const childrenIds = (<SpinalNode>building).getChildrenIds();
+            const isChild = childrenIds.find(el => el === appId);
+
+            if (!isChild) await (<SpinalNode>building).addChildInContext(appNode, APP_RELATION_NAME, PTR_LST_TYPE, this.context);
+            liste.push(appNode);
+            return liste;
+        }, Promise.resolve([]));
+
+
+    }
+
+    public async getAppsFromBuilding(building: string | SpinalNode): Promise<SpinalNode[]> {
+        if (typeof building === "string") building = await this.getBuildingById(building);
+        if (!(building instanceof SpinalNode)) return [];
+
+        return building.getChildren([APP_RELATION_NAME]);
+    }
+
+    public async getAppFromBuilding(building: string | SpinalNode, appId: string): Promise<SpinalNode> {
+        const children = await this.getAppsFromBuilding(building);
+        return children.find(el => el.getId().get() === appId);
+    }
+
+    public async removeAppFromBuilding(building: string | SpinalNode, applicationId: string | string[]): Promise<string[]> {
+        if (typeof building === "string") building = await this.getBuildingById(building);
+        if (!(building instanceof SpinalNode)) return [];
+        if (!Array.isArray(applicationId)) applicationId = [applicationId];
+
+        return applicationId.reduce(async (prom, appId: string) => {
+
+            const liste = await prom;
+            const appNode = await this.getAppFromBuilding(building, appId);
+            if (!(appNode instanceof SpinalNode)) return liste;
+
+            try {
+                await (<SpinalNode>building).removeChild(appNode, APP_RELATION_NAME, PTR_LST_TYPE);
+                liste.push(appId);
+            } catch (error) { }
+
+            return liste;
+
+
+        }, Promise.resolve([]))
+
+    }
+
+    public async buildingHasApp(building: string | SpinalNode, appId: string): Promise<boolean> {
+        const app = await this.getAppFromBuilding(building, appId);
+        return app ? true : false;
+    }
+
+
 
     /////////////////////////////////////////////////////
     //                  PRIVATES                       //
@@ -212,7 +310,7 @@ export class BuildingService {
         return obj;
     }
 
-    private _getDigitalTwinGraph(): Promise<SpinalGraph | void> {
-        return DigitalTwinService.getInstance().getActualDigitalTwinGraph();
-    }
+    // private _getDigitalTwinGraph(): Promise<SpinalGraph | void> {
+    //     return DigitalTwinService.getInstance().getActualDigitalTwinGraph();
+    // }
 }

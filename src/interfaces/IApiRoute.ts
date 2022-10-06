@@ -34,8 +34,6 @@
 
 
 export interface IApiRoute {
-    id?: string;
-    type?: string;
     group: string;
     method: string;
     route: string;

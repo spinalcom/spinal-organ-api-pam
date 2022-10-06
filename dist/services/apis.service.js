@@ -51,14 +51,15 @@ class APIService {
             return this.context;
         });
     }
-    createApiRoute(route) {
+    createApiRoute(routeInfo) {
         return __awaiter(this, void 0, void 0, function* () {
-            const apiExist = yield this.getApiRouteByRoute(route);
+            const apiExist = yield this.getApiRouteByRoute(routeInfo);
             if (apiExist)
                 return apiExist;
-            delete route.id;
-            route.type = constant_1.API_ROUTE_TYPE;
-            const routeId = spinal_env_viewer_graph_service_1.SpinalGraphService.createNode(route, undefined);
+            delete routeInfo.id;
+            routeInfo.type = constant_1.API_ROUTE_TYPE;
+            routeInfo.name = routeInfo.route;
+            const routeId = spinal_env_viewer_graph_service_1.SpinalGraphService.createNode(routeInfo, undefined);
             const node = spinal_env_viewer_graph_service_1.SpinalGraphService.getRealNode(routeId);
             return this.context.addChildInContext(node, constant_1.CONTEXT_TO_API_ROUTE_RELATION_NAME, constant_1.PTR_LST_TYPE, this.context);
         });

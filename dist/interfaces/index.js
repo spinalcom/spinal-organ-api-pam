@@ -42,10 +42,14 @@ __exportStar(require("./IAppProfile"), exports);
 __exportStar(require("./IGroup"), exports);
 __exportStar(require("./IRole"), exports);
 __exportStar(require("./IUser"), exports);
-__exportStar(require("./IUserProfile"), exports);
+__exportStar(require("./IProfile"), exports);
 __exportStar(require("./IBuilding"), exports);
 __exportStar(require("./IApiRoute"), exports);
 __exportStar(require("./IDigitalTwin"), exports);
 __exportStar(require("./ISwaggerFile"), exports);
 __exportStar(require("./IAdmin"), exports);
+__exportStar(require("./IPortofolioDetails"), exports);
+__exportStar(require("./IAuthToken"), exports);
+__exportStar(require("./IProfileData"), exports);
+__exportStar(require("./IUserInfo"), exports);
 //# sourceMappingURL=index.js.map

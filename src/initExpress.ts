@@ -26,13 +26,14 @@
 // import * as bodyParser from 'body-parser';
 import * as cors from 'cors';
 import * as express from 'express';
-import * as fileUpload from 'express-fileupload';
+// import * as fileUpload from 'express-fileupload';
 import * as morgan from "morgan";
 import * as path from "path";
-import { HTTP_CODES, PAM_BASE_URI, routesToProxy } from "./constant";
+import { HTTP_CODES, routesToProxy } from "./constant";
 import { AuthentificationService } from './services';
 import AuthorizationService from './services/authorization.service';
 var proxy = require('express-http-proxy');
+import * as swaggerUi from "swagger-ui-express";
 
 
 // const path = require('path');
@@ -41,7 +42,7 @@ var proxy = require('express-http-proxy');
 function useApiMiddleWare(app: express.Express) {
 
   app.use(cors({ origin: '*' }));
-  app.use(fileUpload({ createParentPath: true }));
+  // app.use(fileUpload({ createParentPath: true }));
   app.use(express.json());
   app.use(express.urlencoded({ extended: true }));
 
@@ -62,25 +63,41 @@ function useHubProxy(app: express.Express) {
 
 function useClientMiddleWare(app: express.Express) {
   const oneDay = 1000 * 60 * 60 * 24;
-  const clientDir = path.resolve(__dirname, '../client/dist')
-  app.use(express.static(clientDir));
-  // app.use(cookieParser());
-  // const options = {
-  //   genid: (req) => uuidv4(),
-  //   secret: "randomSessionStringmklsdkljvio156463187+qsfcsw",
-  //   saveUninitialized: true,
-  //   cookie: { maxAge: oneDay, secure: false },
-  //   resave: false
-  // }
-  // if (app.get('env') === 'production') {
-  //   app.set('trust proxy', 1) // trust first proxy
-  //   options.cookie.secure = true // serve secure cookies
-  // }
-  // app.use(sessions(options))
+  const root = path.resolve(__dirname, '..')
+  app.use(express.static(root));
 
-  app.all(/^\/(?!api).*$/, function (req, res) {
-    res.sendFile(path.resolve(clientDir, "index.html"));
+
+  // app.all(/^\/(?!api).*$/, function (req, res) {
+  //   res.sendFile(path.resolve(root, "index.html"));
+  // });
+
+  app.get("/", (req, res) => {
+    res.redirect("/docs");
+  })
+}
+
+function initSwagger(app: express.Express) {
+  app.use("/swagger.json", (req, res) => {
+    res.sendFile(path.resolve(__dirname, "./swagger/swagger.json"));
+  })
+
+  app.get('/logo.png', (req, res) => {
+    res.sendFile('spinalcore.png', { root: path.resolve(__dirname, "./assets") });
   });
+
+  app.use("/docs", swaggerUi.serve, async (req, res) => {
+    return res.send(
+      swaggerUi.generateHTML(await import("./swagger/swagger.json"))
+      // swaggerUi.setup(undefined, {
+      //   swaggerOptions: { url: "/swagger.json" },
+      //   customSiteTitle: "PAM APIs",
+      //   customCss: '.topbar-wrapper img {content: url(/logo.png);} .swagger-ui .topbar {background: #dbdbdb;}'
+      // })
+    )
+
+  }
+
+  );
 }
 
 export default function initExpress() {
@@ -89,11 +106,12 @@ export default function initExpress() {
 
 
   var app = express();
-  // app.use(morgan('dev'));
+  app.use(morgan('dev'));
 
   useHubProxy(app);
   useApiMiddleWare(app);
   useClientMiddleWare(app);
+  initSwagger(app);
 
   const server_port = process.env.SERVER_PORT || 2022;
   const server = app.listen(server_port, () => console.log(`Example app listening on port ${server_port}!`));

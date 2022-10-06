@@ -22,17 +22,17 @@
  * <http://resources.spinalcom.com/licenses.pdf>.
  */
 
-import { IAdmin, IAdminAppProfile, IAdminCredential, IAdminOrgan, IAdminUserProfile, IBosCredential, IJsonData, IPamInfo, IUserCredential, IAppCredential } from "../interfaces";
+import { IAdmin, IAdminAppProfile, IAdminCredential, IAdminOrgan, IAdminUserProfile, IPamCredential, IJsonData, IPamInfo, IUserCredential, IAppCredential, IApplicationToken, IUserToken } from "../interfaces";
 import axios from "axios";
 import { SpinalContext } from "spinal-env-viewer-graph-service";
 import { configServiceInstance } from "./configFile.service";
-import { ADMIN_CREDENTIAL_CONTEXT_NAME, ADMIN_CREDENTIAL_CONTEXT_TYPE, BOS_CREDENTIAL_CONTEXT_NAME, BOS_CREDENTIAL_CONTEXT_TYPE, HTTP_CODES } from "../constant";
-import * as globalCache from 'global-cache';
+import { ADMIN_CREDENTIAL_CONTEXT_NAME, ADMIN_CREDENTIAL_CONTEXT_TYPE, PAM_CREDENTIAL_CONTEXT_NAME, PAM_CREDENTIAL_CONTEXT_TYPE, HTTP_CODES } from "../constant";
 const jwt = require('jsonwebtoken');
 import { v4 as uuidv4 } from 'uuid';
 import { UserProfileService } from "./userProfile.service";
 import { AppProfileService } from "./appProfile.service";
 
+import * as globalCache from 'global-cache';
 const tokenKey = '9b1deb4d-3b7d-4bad-9bdd-2b0d7b3dcb6d';
 
 
@@ -45,58 +45,54 @@ export class AuthentificationService {
         return this.instance;
     }
 
-    public async authenticate(info: IUserCredential | IAppCredential) {
-        const adminCredential = await this.getBosToAdminCredential();
-        if (!adminCredential) return;
+    public async authenticate(info: IUserCredential | IAppCredential): Promise<{ code: number; data: string | IApplicationToken | IUserToken }> {
+        const adminCredential = await this.getPamToAdminCredential();
+        if (!adminCredential) throw new Error("No authentication platform is registered");
 
-        const isUser = (<IUserCredential>info).userName && (<IUserCredential>info).password ? true : false;
+        const isUser = "userName" in info && "password" in info ? true : false;
         const url = `${adminCredential.urlAdmin}/${isUser ? 'users' : 'applications'}/login`;
 
         return this._sendLoginRequest(url, info, adminCredential, isUser);
     }
 
-    public tokenIsValid(token: string): boolean {
-        const data = globalCache.get(token);
+    public async tokenIsValid(token: string): Promise<boolean> {
+        const data = await this._getTokenData(token);
         const expirationTime = data?.expieredToken;
         const tokenExpired = expirationTime ? Date.now() >= expirationTime * 1000 : true;
         if (!data || tokenExpired) return false;
         return true;
     }
 
-    public getTokenData(token: string): boolean {
-        return globalCache.get(token);
-    }
 
-    // BOS Credential
-    public registerToAdmin(pamInfo: IPamInfo, adminInfo: IAdmin): Promise<IBosCredential> {
+    // PAM Credential
+    public registerToAdmin(pamInfo: IPamInfo, adminInfo: IAdmin): Promise<IPamCredential> {
         return axios.post(`${adminInfo.urlAdmin}/register`, {
             platformCreationParms: pamInfo,
             registerKey: adminInfo.registerKey
         }).then((result) => {
             result.data.url = adminInfo.urlAdmin;
             result.data.registerKey = adminInfo.registerKey;
-            return this.editBosCredential(result.data)
+            return this._editPamCredential(result.data)
         })
     }
 
-    public async getBosToAdminCredential(): Promise<IBosCredential> {
-        let context = await configServiceInstance.getContext(BOS_CREDENTIAL_CONTEXT_NAME);
+    public async getPamToAdminCredential(): Promise<IPamCredential> {
+        let context = await configServiceInstance.getContext(PAM_CREDENTIAL_CONTEXT_NAME);
         if (!context) return;
 
         return context.info.get();
     }
 
-    public async editBosCredential(bosCredential: any): Promise<IBosCredential> {
-        const context = await this._getOrCreateContext(BOS_CREDENTIAL_CONTEXT_NAME, BOS_CREDENTIAL_CONTEXT_TYPE);
-        const contextInfo = context.info;
 
-        if (bosCredential.TokenBosAdmin) contextInfo.mod_attr("tokenBosAdmin", bosCredential.TokenBosAdmin);
-        if (bosCredential.name) contextInfo.mod_attr("bosName", bosCredential.name);
-        if (bosCredential.id) contextInfo.mod_attr("idPlateform", bosCredential.id);
-        if (bosCredential.url) contextInfo.mod_attr("urlAdmin", bosCredential.url);
-        if (bosCredential.registerKey) contextInfo.mod_attr("registerKey", bosCredential.registerKey);
 
-        return contextInfo.get();
+    public async deleteCredentials() {
+        let context = await configServiceInstance.getContext(PAM_CREDENTIAL_CONTEXT_NAME);
+        if (context) await context.removeFromGraph();
+
+        let adminContext = await configServiceInstance.getContext(ADMIN_CREDENTIAL_CONTEXT_NAME);
+        if (!adminContext) await adminContext.removeFromGraph();
+
+        return { removed: true }
     }
 
     // Admin credential
@@ -107,14 +103,14 @@ export class AuthentificationService {
 
         return this.editAdminCredential({
             idPlatformOfAdmin: clientId,
-            TokenAdminBos: token
+            TokenAdminToPam: token
         })
     }
 
     public async editAdminCredential(admin: IAdminCredential): Promise<IAdminCredential> {
         const context = await this._getOrCreateContext(ADMIN_CREDENTIAL_CONTEXT_NAME, ADMIN_CREDENTIAL_CONTEXT_TYPE);
         context.info.mod_attr("idPlatformOfAdmin", admin.idPlatformOfAdmin);
-        context.info.mod_attr("TokenAdminBos", admin.TokenAdminBos);
+        context.info.mod_attr("TokenAdminToPam", admin.TokenAdminToPam);
         return admin;
     }
 
@@ -126,7 +122,7 @@ export class AuthentificationService {
     }
 
     public async sendDataToAdmin(update: boolean = false) {
-        const bosCredential = await this.getBosToAdminCredential();
+        const bosCredential = await this.getPamToAdminCredential();
         if (!bosCredential) throw new Error("No admin registered, register an admin and retry !");
 
         // const endpoint = update ? "update" : "register";
@@ -144,33 +140,7 @@ export class AuthentificationService {
         })
     }
 
-    private async _getOrCreateAdminCredential(createIfNotExist: boolean = false): Promise<IAdminCredential> {
-        const credentials = await this.getAdminCredential();
-        if (credentials) return credentials;
-        if (createIfNotExist) return this.createAdminCredential();
-    }
 
-    private async getJsonData(): Promise<IJsonData> {
-        return {
-            userProfileList: await this._formatUserProfiles(),
-            appProfileList: await this._formatAppProfiles(),
-            organList: await this._formatOrganList(),
-            // appList: await this._formatAppList()
-        }
-    }
-
-    private async _getRequestBody(update: boolean, bosCredential: IBosCredential, adminCredential: IAdminCredential) {
-        return JSON.stringify({
-            TokenBosAdmin: bosCredential.tokenBosAdmin,
-            platformId: bosCredential.idPlateform,
-            jsonData: await this.getJsonData(),
-            ...(!update && {
-                URLBos: `http://localhost:8060`,
-                TokenAdminBos: adminCredential.TokenAdminBos,
-                idPlatformOfAdmin: adminCredential.idPlatformOfAdmin
-            }),
-        })
-    }
 
     // public async updateToken(oldToken: string) {
     //     const adminInfo = await this.getAdminCredential();
@@ -182,15 +152,59 @@ export class AuthentificationService {
 
 
 
+    //////////////////////////////////////////////////
+    //                      PRIVATE                 //
+    //////////////////////////////////////////////////
+
+    private async _getOrCreateAdminCredential(createIfNotExist: boolean = false): Promise<IAdminCredential> {
+        const credentials = await this.getAdminCredential();
+        if (credentials) return credentials;
+        if (createIfNotExist) return this.createAdminCredential();
+    }
+
+    private async getJsonData(): Promise<IJsonData> {
+        return {
+            userProfileList: await this._formatUserProfiles(),
+            appProfileList: await this._formatAppProfiles(),
+            organList: [],
+            // appList: await this._formatAppList()
+        }
+    }
+
+    private async _getRequestBody(update: boolean, bosCredential: IPamCredential, adminCredential: IAdminCredential) {
+        return JSON.stringify({
+            TokenBosAdmin: bosCredential.tokenPamToAdmin,
+            platformId: bosCredential.idPlateform,
+            jsonData: await this.getJsonData(),
+            ...(!update && {
+                URLBos: `http://localhost:8060`,
+                TokenAdminBos: adminCredential.TokenAdminToPam,
+                idPlatformOfAdmin: adminCredential.idPlatformOfAdmin
+            }),
+        })
+    }
+
+    private async _editPamCredential(bosCredential: any): Promise<IPamCredential> {
+        const context = await this._getOrCreateContext(PAM_CREDENTIAL_CONTEXT_NAME, PAM_CREDENTIAL_CONTEXT_TYPE);
+        const contextInfo = context.info;
+
+        if (bosCredential.TokenBosAdmin) contextInfo.mod_attr("tokenPamToAdmin", bosCredential.TokenBosAdmin);
+        if (bosCredential.name) contextInfo.mod_attr("pamName", bosCredential.name);
+        if (bosCredential.id) contextInfo.mod_attr("idPlateform", bosCredential.id);
+        if (bosCredential.url) contextInfo.mod_attr("urlAdmin", bosCredential.url);
+        if (bosCredential.registerKey) contextInfo.mod_attr("registerKey", bosCredential.registerKey);
+
+        return contextInfo.get();
+    }
 
 
-    private _sendLoginRequest(url: string, info: IUserCredential | IAppCredential, adminCredential: IBosCredential, isUser: boolean = true) {
+    private _sendLoginRequest(url: string, info: IUserCredential | IAppCredential, adminCredential: IPamCredential, isUser: boolean = true): Promise<{ code: number; data: string | IApplicationToken | IUserToken }> {
 
         return axios.post(url, info).then(async (result) => {
             const data = result.data;
             data.profile = await this._getProfileInfo(data.token, adminCredential, isUser);
             if (isUser) data.userInfo = await this._getUserInfo(data.userId, adminCredential, data.token);
-            globalCache.set(data.token, data);
+            this._saveUserToken(data);
             return {
                 code: HTTP_CODES.OK,
                 data
@@ -203,7 +217,7 @@ export class AuthentificationService {
         })
     }
 
-    private _getProfileInfo(userToken: string, adminCredential: IBosCredential, isUser: boolean) {
+    private _getProfileInfo(userToken: string, adminCredential: IPamCredential, isUser: boolean) {
         let urlAdmin = adminCredential.urlAdmin;
         let endpoint = isUser ? "/tokens/getUserProfileByToken" : "";
         return axios.post(urlAdmin + endpoint, {
@@ -219,7 +233,7 @@ export class AuthentificationService {
         })
     }
 
-    private _getUserInfo(userId: string, adminCredential: IBosCredential, userToken: string) {
+    private _getUserInfo(userId: string, adminCredential: IPamCredential, userToken: string) {
         const config = {
             headers: {
                 'Content-Type': 'application/json',
@@ -252,14 +266,6 @@ export class AuthentificationService {
         })
     }
 
-    private _formatAppList() {
-        return []
-    }
-
-    private _formatOrganList(): IAdminOrgan[] {
-        return []
-    }
-
 
     private async _getOrCreateContext(contextName: string, contextType: string): Promise<SpinalContext> {
         let context = await configServiceInstance.getContext(contextName);
@@ -267,4 +273,15 @@ export class AuthentificationService {
         return context;
     }
 
+
+    private async _saveUserToken(data: IUserToken | IApplicationToken): Promise<void> {
+        globalCache.set(data.token, data);
+    }
+
+    public async _getTokenData(token: string): Promise<IApplicationToken | IUserToken> {
+        const data = globalCache.get(token);
+        if (data) return data;
+
+        // Edit here
+    }
 }

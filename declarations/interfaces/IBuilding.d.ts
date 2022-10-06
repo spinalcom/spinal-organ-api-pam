@@ -12,6 +12,17 @@ export interface IBuilding {
     clientSecret: string;
     address: string;
     description: string;
-    location: ILocation;
+    location?: ILocation;
     [key: string]: any;
+}
+export interface IEditBuilding {
+    name?: string;
+    aliasName?: string;
+    bosUrl?: string;
+    apiUrl?: string;
+    clientId?: string;
+    clientSecret?: string;
+    address?: string;
+    description?: string;
+    location?: ILocation;
 }

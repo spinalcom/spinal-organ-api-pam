@@ -46,12 +46,13 @@ export class APIService {
     }
 
 
-    public async createApiRoute(route: IApiRoute): Promise<SpinalNode> {
-        const apiExist = await this.getApiRouteByRoute(route);
+    public async createApiRoute(routeInfo: IApiRoute): Promise<SpinalNode> {
+        const apiExist = await this.getApiRouteByRoute(routeInfo);
         if (apiExist) return apiExist;
-        delete route.id;
-        route.type = API_ROUTE_TYPE;
-        const routeId = SpinalGraphService.createNode(route, undefined);
+        delete routeInfo.id;
+        routeInfo.type = API_ROUTE_TYPE;
+        routeInfo.name = routeInfo.route;
+        const routeId = SpinalGraphService.createNode(routeInfo, undefined);
         const node = SpinalGraphService.getRealNode(routeId);
         return this.context.addChildInContext(node, CONTEXT_TO_API_ROUTE_RELATION_NAME, PTR_LST_TYPE, this.context);
     }

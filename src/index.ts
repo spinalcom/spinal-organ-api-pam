@@ -22,24 +22,26 @@
  * <http://resources.spinalcom.com/licenses.pdf>.
  */
 
+const path = require("path");
 
-require("dotenv").config();
+require("dotenv").config(path.resolve(__dirname, "../.env"));
 import { spinalCore } from 'spinal-core-connectorjs_type';
 import { configServiceInstance } from './services/configFile.service';
 // const { spinalConnector: { user, password, host, port }, config: { directory_path, fileName } } = require("../config");
 
 import initExpress from './initExpress';
-import initSwagger from "./swagger";
+// import initSwagger from "./swagger";
 
-import routes from "./routes";
+// import routes from "./old_routes";
+import { RegisterRoutes } from './routes'
 
 const conn = spinalCore.connect(`http://${process.env.USER_ID}:${process.env.USER_MDP}@${process.env.HUB_HOST}:${process.env.HUB_PORT}/`);
 
 
-configServiceInstance.init(conn).then((result) => {
+configServiceInstance.init(conn).then(() => {
   const { app } = initExpress();
-  initSwagger(app);
-  routes(app);
+  // initSwagger(app);
+  RegisterRoutes(app);
 }).catch((err: Error) => {
   console.error(err);
 });

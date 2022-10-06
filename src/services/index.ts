@@ -32,4 +32,6 @@ export * from "./organList.service";
 export * from "./role.service";
 export * from "./digitalTwin.service";
 export * from "./authentification.service";
+export * from "./portofolio.service";
+export * from "./users.services";
 // export * from "./graph.service";

@@ -1,21 +1,18 @@
-import { IAdmin, IAdminCredential, IBosCredential, IPamInfo, IUserCredential, IAppCredential } from "../interfaces";
-import { HTTP_CODES } from "../constant";
+import { IAdmin, IAdminCredential, IPamCredential, IPamInfo, IUserCredential, IAppCredential, IApplicationToken, IUserToken } from "../interfaces";
 export declare class AuthentificationService {
     private static instance;
     private constructor();
     static getInstance(): AuthentificationService;
     authenticate(info: IUserCredential | IAppCredential): Promise<{
-        code: HTTP_CODES;
-        data: any;
-    } | {
-        code: HTTP_CODES;
-        data: string;
+        code: number;
+        data: string | IApplicationToken | IUserToken;
     }>;
-    tokenIsValid(token: string): boolean;
-    getTokenData(token: string): boolean;
-    registerToAdmin(pamInfo: IPamInfo, adminInfo: IAdmin): Promise<IBosCredential>;
-    getBosToAdminCredential(): Promise<IBosCredential>;
-    editBosCredential(bosCredential: any): Promise<IBosCredential>;
+    tokenIsValid(token: string): Promise<boolean>;
+    registerToAdmin(pamInfo: IPamInfo, adminInfo: IAdmin): Promise<IPamCredential>;
+    getPamToAdminCredential(): Promise<IPamCredential>;
+    deleteCredentials(): Promise<{
+        removed: boolean;
+    }>;
     createAdminCredential(): Promise<IAdminCredential>;
     editAdminCredential(admin: IAdminCredential): Promise<IAdminCredential>;
     getAdminCredential(): Promise<IAdminCredential>;
@@ -23,12 +20,13 @@ export declare class AuthentificationService {
     private _getOrCreateAdminCredential;
     private getJsonData;
     private _getRequestBody;
+    private _editPamCredential;
     private _sendLoginRequest;
     private _getProfileInfo;
     private _getUserInfo;
     private _formatUserProfiles;
     private _formatAppProfiles;
-    private _formatAppList;
-    private _formatOrganList;
     private _getOrCreateContext;
+    private _saveUserToken;
+    _getTokenData(token: string): Promise<IApplicationToken | IUserToken>;
 }

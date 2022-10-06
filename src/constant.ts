@@ -26,8 +26,19 @@ import { SPINAL_RELATION_LST_PTR_TYPE, SPINAL_RELATION_PTR_LST_TYPE } from "spin
 import { HTTP_METHODS } from './interfaces';
 
 export const CONFIG_FILE_MODEl_TYPE = "SpinalPAM";
-export const CONFIG_GRAPH_NAME = "pam";
+export const CONFIG_DEFAULT_NAME = "PAMConfig";
+export const CONFIG_DEFAULT_DIRECTORY_PATH = "/__users__/admin/";
 
+
+export const ADMIN_USERNAME = "admin";
+export const ADMIN_USER_TYPE = "admin";
+export const CONTEXT_TO_ADMIN_USER_RELATION = "hasAdminUser";
+export const USER_TYPES = Object.freeze({
+    ADMIN: "1",
+    USER: "2",
+    1: "ADMIN",
+    2: "USER"
+})
 
 //Contexts names
 export const USER_PROFILE_CONTEXT_NAME = 'UserProfileList';
@@ -39,12 +50,16 @@ export const BUILDING_CONTEXT_NAME = 'Buildings';
 export const DIGITALTWIN_CONTEXT_NAME = 'DigitalTwins';
 export const API_ROUTES_CONTEXT_NAME = 'ApiListContext';
 export const ORGAN_LIST_CONTEXT_NAME = 'OrganListContext';
-export const AUTHORIZED_APP_CONTEXT_NAME = "Authorized Apps";
+export const AUTHORIZED_PORTOFOLIO_CONTEXT_NAME = "Authorized Portofolio";
 export const AUTHORIZED_API_CONTEXT_NAME = "Authorized Apis Routes";
 export const AUTHORIZED_BOS_CONTEXT_NAME = "Authorized BOS";
-export const BOS_CREDENTIAL_CONTEXT_NAME = "BosCredential";
+export const PAM_CREDENTIAL_CONTEXT_NAME = "PAMToAuthCredential";
 export const ADMIN_CREDENTIAL_CONTEXT_NAME = "AdminCredential";
+export const PORTOFOLIO_CONTEXT_NAME = "Portofolio description Context";
 
+export const ADMIN_APPS_GROUP_NAME = "Admin apps";
+export const PORTOFOLIO_APPS_GROUP_NAME = "Portofolio apps";
+export const BUILDING_APPS_GROUP_NAME = "Building apps";
 
 //Contexts types
 export const USER_PROFILE_CONTEXT_TYPE = 'UserProfileList';
@@ -56,13 +71,12 @@ export const BUILDING_CONTEXT_TYPE = 'BuildingContextList';
 export const DIGITALTWIN_CONTEXT_TYPE = 'DigitalTwinContext';
 export const API_ROUTES_CONTEXT_TYPE = 'ApiListContext';
 export const ORGAN_LIST_CONTEXT_TYPE = 'OrganListContext';
-export const AUTHORIZED_APPS_CONTEXT_TYPE = "AuthorizedAppContext";
+export const AUTHORIZED_PORTOFOLIO_CONTEXT_TYPE = "AuthorizedPortofolioContext";
 export const AUTHORIZED_API_CONTEXT_TYPE = "AuthorizedApisContext";
 export const AUTHORIZED_BOS_CONTEXT_TYPE = "AuthorizedBosContext";
-export const BOS_CREDENTIAL_CONTEXT_TYPE = "BosCredential";
+export const PAM_CREDENTIAL_CONTEXT_TYPE = "PamCredential";
 export const ADMIN_CREDENTIAL_CONTEXT_TYPE = "AdminCredential";
-
-
+export const PORTOFOLIO_CONTEXT_TYPE = "PortofolioContext";
 
 
 // types
@@ -73,25 +87,41 @@ export const APP_CATEGORY_TYPE = "AdminAppCategory";
 export const APP_GROUP_TYPE = "AdminAppGroup";
 export const APP_TYPE = 'AdminApp';
 export const BUILDING_TYPE = 'Building';
-export const DIGITALTWIN_TYPE = 'PAMDigitalTwin';
+export const DIGITALTWIN_TYPE = 'Digital twin';
 export const API_ROUTE_TYPE = 'ApiRoute';
+export const PORTOFOLIO_TYPE = 'Portofolio';
+
+export const ADMIN_APPS_GROUP_TYPE = "AdminAppsGroup";
+export const PORTOFOLIO_APPS_GROUP_TYPE = "PortofolioAppsGroup";
+export const BUILDING_APPS_GROUP_TYPE = "BuildingAppsGroup";
+
+export const ADMIN_APP_TYPE = "AdminApp";
+export const PORTOFOLIO_APP_TYPE = "PortofolioApp";
+export const BUILDING_APP_TYPE = "BuildingApp";
 
 
 // RelationName
-export const CONTEXT_TO_APP_CATEGORY_RELATION_NAME = "hasAppCategory";
-export const CATEGORY_TO_APP_GROUP_RELATION_NAME = 'hasAppGroup';
-export const APP_GROUP_TO_APP_RELATION_NAME = 'groupHasApp';
-export const CONTEXT_TO_APP_RELATION_NAME = 'hasApps';
+// export const CONTEXT_TO_APP_CATEGORY_RELATION_NAME = "hasAppCategory";
+// export const CATEGORY_TO_APP_GROUP_RELATION_NAME = 'hasAppGroup';
+// export const APP_GROUP_TO_APP_RELATION_NAME = 'groupHasApp';
+// export const CONTEXT_TO_APP_RELATION_NAME = 'hasApps';
+export const CONTEXT_TO_APPS_GROUP = "hasAppsGroups";
 export const CONTEXT_TO_USER_PROFILE_RELATION_NAME = 'hasUserProfile';
 export const CONTEXT_TO_APP_PROFILE_RELATION_NAME = 'hasAppProfile';
 export const CONTEXT_TO_ROLE_RELATION_NAME = 'hasRole';
 export const CONTEXT_TO_USER_RELATION_NAME = 'hasUser';
-export const CONTEXT_TO_BUILDING_RELATION_NAME = 'hasBuilding';
 export const CONTEXT_TO_DIGITALTWIN_RELATION_NAME = 'hasDigitalTwin';
 export const CONTEXT_TO_API_ROUTE_RELATION_NAME = 'hasApiRoute';
-export const CONTEXT_TO_AUTHORIZED_APPS_RELATION_NAME = "profileHasApps";
+export const CONTEXT_TO_PORTOFOLIO_RELATION_NAME = "hasPortofolio";
+// export const CONTEXT_TO_AUTHORIZED_APPS_RELATION_NAME = "profileHasApps";
 export const CONTEXT_TO_AUTHORIZED_APIS_RELATION_NAME = "profileHasApis";
-export const CONTEXT_TO_AUTHORIZED_BOS_RELATION_NAME = "profileHasBos";
+// export const CONTEXT_TO_AUTHORIZED_BOS_RELATION_NAME = "profileHasBos";
+
+export const APP_RELATION_NAME = "hasApps";
+export const BUILDING_RELATION_NAME = 'hasBuilding';
+
+export const PROFILE_TO_AUTHORIZED_PORTOFOLIO_RELATION = "hasAccessToPortofolio";
+export const PROFILE_TO_AUTHORIZED_BOS_RELATION = "hasAccessToBos";
 
 // Relation Type
 export const PTR_LST_TYPE = SPINAL_RELATION_PTR_LST_TYPE;

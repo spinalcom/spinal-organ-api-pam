@@ -7,7 +7,7 @@ export declare class APIService {
     private constructor();
     static getInstance(): APIService;
     init(): Promise<SpinalContext>;
-    createApiRoute(route: IApiRoute): Promise<SpinalNode>;
+    createApiRoute(routeInfo: IApiRoute): Promise<SpinalNode>;
     updateApiRoute(routeId: string, newValue: IApiRoute): Promise<SpinalNode<any>>;
     getApiRouteById(routeId: string): Promise<void | SpinalNode>;
     getApiRouteByRoute(apiRoute: IApiRoute): Promise<void | SpinalNode>;
