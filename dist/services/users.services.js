@@ -38,6 +38,9 @@ const constant_1 = require("../constant");
 const configFile_service_1 = require("./configFile.service");
 const spinal_core_connectorjs_type_1 = require("spinal-core-connectorjs_type");
 const bcrypt = require("bcrypt");
+const fileLog = require("log-to-file");
+const path = require("path");
+const token_service_1 = require("./token.service");
 class UserService {
     constructor() { }
     static getInstance() {
@@ -51,7 +54,7 @@ class UserService {
             if (this.context)
                 return this.context;
             this.context = yield configFile_service_1.configServiceInstance.addContext(constant_1.USER_LIST_CONTEXT_NAME, constant_1.USER_LIST_CONTEXT_TYPE);
-            const info = { userName: "admin", password: Math.random().toString(36).slice(-8) };
+            const info = { name: "admin", userName: "admin", password: this._generateString(15) };
             yield this.createAdminUser(info);
             return this.context;
         });
@@ -62,12 +65,13 @@ class UserService {
             const userExist = yield this.getAdminUser(userName);
             if (userExist)
                 return;
-            const password = (userInfo && userInfo.password) || Math.random().toString(36).slice(-8);
+            const password = (userInfo && userInfo.password) || this._generateString(10);
+            fileLog(JSON.stringify({ userName, password }), path.resolve(__dirname, "../../.admin.log"));
             if (userInfo.password)
                 delete userInfo.password;
-            userInfo.name = userName;
             userInfo.userName = userName;
             userInfo.type = constant_1.USER_TYPES.ADMIN;
+            userInfo.userType = constant_1.USER_TYPES.ADMIN;
             const nodeId = spinal_env_viewer_graph_service_1.SpinalGraphService.createNode(userInfo, new spinal_core_connectorjs_type_1.Model({
                 userName,
                 password: yield this._hashPassword(password)
@@ -79,19 +83,21 @@ class UserService {
     getAdminUser(userName) {
         return __awaiter(this, void 0, void 0, function* () {
             const children = yield this.context.getChildren(constant_1.CONTEXT_TO_ADMIN_USER_RELATION);
-            return children.find(el => el.info.userName().get() === userName);
+            return children.find(el => el.info.userName.get() === userName);
         });
     }
     loginAdmin(user) {
         return __awaiter(this, void 0, void 0, function* () {
             const node = yield this.getAdminUser(user.userName);
             if (!node)
-                throw { code: constant_1.HTTP_CODES.UNAUTHORIZED, message: "bad username and/or password" };
+                return { code: constant_1.HTTP_CODES.UNAUTHORIZED, message: "bad username and/or password" };
             const element = yield node.getElement(true);
             const success = yield this._comparePassword(user.password, element.password.get());
             if (!success)
-                throw { code: constant_1.HTTP_CODES.UNAUTHORIZED, message: "bad username and/or password" };
-            // Ajouter un token;
+                return { code: constant_1.HTTP_CODES.UNAUTHORIZED, message: "bad username and/or password" };
+            yield this._deleteUserToken(node);
+            const res = yield token_service_1.TokenService.getInstance().addUserToken(node);
+            return { code: constant_1.HTTP_CODES.OK, message: res };
         });
     }
     //////////////////////////////////////////////////
@@ -103,7 +109,22 @@ class UserService {
     _comparePassword(password, hash) {
         return bcrypt.compare(password, hash);
     }
-    linkUserT() {
+    _linkUserToken() {
+    }
+    _generateString(length = 10) {
+        const charset = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789*/-_@#&";
+        let text = "";
+        for (var i = 0, n = charset.length; i < length; ++i) {
+            text += charset.charAt(Math.floor(Math.random() * n));
+        }
+        return text;
+    }
+    _deleteUserToken(userNode) {
+        return __awaiter(this, void 0, void 0, function* () {
+            const tokens = yield userNode.getChildren(constant_1.TOKEN_RELATION_NAME);
+            const promises = tokens.map(token => token_service_1.TokenService.getInstance().deleteToken(token));
+            return Promise.all(promises);
+        });
     }
 }
 exports.UserService = UserService;

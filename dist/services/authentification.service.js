@@ -41,6 +41,8 @@ const uuid_1 = require("uuid");
 const userProfile_service_1 = require("./userProfile.service");
 const appProfile_service_1 = require("./appProfile.service");
 const globalCache = require("global-cache");
+const users_services_1 = require("./users.services");
+const token_service_1 = require("./token.service");
 const tokenKey = '9b1deb4d-3b7d-4bad-9bdd-2b0d7b3dcb6d';
 class AuthentificationService {
     constructor() { }
@@ -57,6 +59,14 @@ class AuthentificationService {
             const isUser = "userName" in info && "password" in info ? true : false;
             const url = `${adminCredential.urlAdmin}/${isUser ? 'users' : 'applications'}/login`;
             return this._sendLoginRequest(url, info, adminCredential, isUser);
+        });
+    }
+    authenticateAdmin(info) {
+        return __awaiter(this, void 0, void 0, function* () {
+            const data = yield users_services_1.UserService.getInstance().loginAdmin(info);
+            if (data.code === constant_1.HTTP_CODES.OK)
+                this._saveUserToken(data.message, false);
+            return data;
         });
     }
     tokenIsValid(token) {
@@ -267,9 +277,11 @@ class AuthentificationService {
             return context;
         });
     }
-    _saveUserToken(data) {
+    _saveUserToken(data, addToGraph = true) {
         return __awaiter(this, void 0, void 0, function* () {
             globalCache.set(data.token, data);
+            if (addToGraph)
+                yield token_service_1.TokenService.getInstance().addTokenToContext(data.token, data);
         });
     }
     _getTokenData(token) {
@@ -277,7 +289,8 @@ class AuthentificationService {
             const data = globalCache.get(token);
             if (data)
                 return data;
-            // Edit here
+            const found = yield token_service_1.TokenService.getInstance().getTokenData(token);
+            return found;
         });
     }
 }

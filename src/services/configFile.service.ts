@@ -31,7 +31,8 @@ import {
     APIService, AppProfileService,
     AppService, BuildingService,
     OrganListService, RoleService,
-    UserProfileService, PortofolioService, DigitalTwinService
+    UserProfileService, PortofolioService,
+    DigitalTwinService, TokenService, UserService
 } from ".";
 
 // const { config: { directory_path, fileName } } = require("../../config");
@@ -100,8 +101,10 @@ export default class ConfigFileService {
             OrganListService,
             RoleService,
             UserProfileService,
+            UserService,
             // DigitalTwinService,
-            PortofolioService
+            PortofolioService,
+            TokenService
         ];
 
         const promises = services.map(service => {

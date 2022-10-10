@@ -5,6 +5,9 @@ export declare class AuthController extends Controller {
     authenticate(credential: IUserCredential | IAppCredential): Promise<string | IApplicationToken | IUserToken | {
         message: string;
     }>;
+    authenticateAdmin(credential: IUserCredential): Promise<string | IApplicationToken | IUserToken | {
+        message: string;
+    }>;
     registerToAdmin(data: {
         pamInfo: IPamInfo;
         adminInfo: IAdmin;

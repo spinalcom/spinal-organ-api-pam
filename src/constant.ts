@@ -56,10 +56,10 @@ export const AUTHORIZED_BOS_CONTEXT_NAME = "Authorized BOS";
 export const PAM_CREDENTIAL_CONTEXT_NAME = "PAMToAuthCredential";
 export const ADMIN_CREDENTIAL_CONTEXT_NAME = "AdminCredential";
 export const PORTOFOLIO_CONTEXT_NAME = "Portofolio description Context";
-
 export const ADMIN_APPS_GROUP_NAME = "Admin apps";
 export const PORTOFOLIO_APPS_GROUP_NAME = "Portofolio apps";
 export const BUILDING_APPS_GROUP_NAME = "Building apps";
+export const TOKEN_LIST_CONTEXT_NAME = "Tokens"
 
 //Contexts types
 export const USER_PROFILE_CONTEXT_TYPE = 'UserProfileList';
@@ -77,6 +77,7 @@ export const AUTHORIZED_BOS_CONTEXT_TYPE = "AuthorizedBosContext";
 export const PAM_CREDENTIAL_CONTEXT_TYPE = "PamCredential";
 export const ADMIN_CREDENTIAL_CONTEXT_TYPE = "AdminCredential";
 export const PORTOFOLIO_CONTEXT_TYPE = "PortofolioContext";
+export const TOKEN_LIST_CONTEXT_TYPE = "TokenList";
 
 
 // types
@@ -98,7 +99,7 @@ export const BUILDING_APPS_GROUP_TYPE = "BuildingAppsGroup";
 export const ADMIN_APP_TYPE = "AdminApp";
 export const PORTOFOLIO_APP_TYPE = "PortofolioApp";
 export const BUILDING_APP_TYPE = "BuildingApp";
-
+export const TOKEN_TYPE = "token";
 
 // RelationName
 // export const CONTEXT_TO_APP_CATEGORY_RELATION_NAME = "hasAppCategory";
@@ -116,6 +117,7 @@ export const CONTEXT_TO_PORTOFOLIO_RELATION_NAME = "hasPortofolio";
 // export const CONTEXT_TO_AUTHORIZED_APPS_RELATION_NAME = "profileHasApps";
 export const CONTEXT_TO_AUTHORIZED_APIS_RELATION_NAME = "profileHasApis";
 // export const CONTEXT_TO_AUTHORIZED_BOS_RELATION_NAME = "profileHasBos";
+export const TOKEN_RELATION_NAME = "hasToken"
 
 export const APP_RELATION_NAME = "hasApps";
 export const BUILDING_RELATION_NAME = 'hasBuilding';

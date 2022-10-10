@@ -7,6 +7,10 @@ export declare class AuthentificationService {
         code: number;
         data: string | IApplicationToken | IUserToken;
     }>;
+    authenticateAdmin(info: IUserCredential): Promise<{
+        code: number;
+        message: any;
+    }>;
     tokenIsValid(token: string): Promise<boolean>;
     registerToAdmin(pamInfo: IPamInfo, adminInfo: IAdmin): Promise<IPamCredential>;
     getPamToAdminCredential(): Promise<IPamCredential>;

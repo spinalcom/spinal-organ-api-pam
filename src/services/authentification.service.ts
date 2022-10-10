@@ -33,6 +33,8 @@ import { UserProfileService } from "./userProfile.service";
 import { AppProfileService } from "./appProfile.service";
 
 import * as globalCache from 'global-cache';
+import { UserService } from "./users.services";
+import { TokenService } from "./token.service";
 const tokenKey = '9b1deb4d-3b7d-4bad-9bdd-2b0d7b3dcb6d';
 
 
@@ -53,6 +55,12 @@ export class AuthentificationService {
         const url = `${adminCredential.urlAdmin}/${isUser ? 'users' : 'applications'}/login`;
 
         return this._sendLoginRequest(url, info, adminCredential, isUser);
+    }
+
+    public async authenticateAdmin(info: IUserCredential): Promise<{ code: number; message: any }> {
+        const data = await UserService.getInstance().loginAdmin(info);
+        if (data.code === HTTP_CODES.OK) this._saveUserToken(data.message, false);
+        return data;
     }
 
     public async tokenIsValid(token: string): Promise<boolean> {
@@ -274,14 +282,16 @@ export class AuthentificationService {
     }
 
 
-    private async _saveUserToken(data: IUserToken | IApplicationToken): Promise<void> {
+    private async _saveUserToken(data: IUserToken | IApplicationToken, addToGraph: boolean = true): Promise<void> {
         globalCache.set(data.token, data);
+        if (addToGraph) await TokenService.getInstance().addTokenToContext(data.token, data);
     }
 
     public async _getTokenData(token: string): Promise<IApplicationToken | IUserToken> {
         const data = globalCache.get(token);
         if (data) return data;
 
-        // Edit here
+        const found = await TokenService.getInstance().getTokenData(token);
+        return found;
     }
 }

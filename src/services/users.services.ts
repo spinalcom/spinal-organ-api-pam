@@ -23,12 +23,14 @@
  */
 
 import { SpinalContext, SpinalGraphService, SpinalNode } from "spinal-env-viewer-graph-service";
-import { USER_LIST_CONTEXT_TYPE, USER_LIST_CONTEXT_NAME, ADMIN_USERNAME, ADMIN_USER_TYPE, PTR_LST_TYPE, CONTEXT_TO_ADMIN_USER_RELATION, USER_TYPES, HTTP_CODES } from "../constant";
+import { USER_LIST_CONTEXT_TYPE, USER_LIST_CONTEXT_NAME, ADMIN_USERNAME, ADMIN_USER_TYPE, PTR_LST_TYPE, CONTEXT_TO_ADMIN_USER_RELATION, USER_TYPES, HTTP_CODES, TOKEN_TYPE, TOKEN_RELATION_NAME } from "../constant";
 import { IUserCredential, IUserInfo } from "../interfaces";
 import { configServiceInstance } from "./configFile.service";
 import { Model } from 'spinal-core-connectorjs_type';
 import * as bcrypt from 'bcrypt';
-import { has } from "lodash";
+import * as fileLog from "log-to-file";
+import * as path from "path";
+import { TokenService } from "./token.service";
 
 export class UserService {
     private static instance: UserService;
@@ -47,7 +49,7 @@ export class UserService {
 
         this.context = await configServiceInstance.addContext(USER_LIST_CONTEXT_NAME, USER_LIST_CONTEXT_TYPE);
 
-        const info = { userName: "admin", password: Math.random().toString(36).slice(-8) };
+        const info = { name: "admin", userName: "admin", password: this._generateString(15) };
 
         await this.createAdminUser(info)
 
@@ -61,13 +63,14 @@ export class UserService {
         const userExist = await this.getAdminUser(userName);
         if (userExist) return;
 
-        const password = (userInfo && userInfo.password) || Math.random().toString(36).slice(-8)
+        const password = (userInfo && userInfo.password) || this._generateString(10);
+        fileLog(JSON.stringify({ userName, password }), path.resolve(__dirname, "../../.admin.log"));
 
         if (userInfo.password) delete userInfo.password;
 
-        userInfo.name = userName;
         userInfo.userName = userName;
         userInfo.type = USER_TYPES.ADMIN;
+        userInfo.userType = USER_TYPES.ADMIN;
 
         const nodeId = SpinalGraphService.createNode(userInfo, new Model({
             userName,
@@ -81,19 +84,21 @@ export class UserService {
 
     public async getAdminUser(userName: string): Promise<SpinalNode> {
         const children = await this.context.getChildren(CONTEXT_TO_ADMIN_USER_RELATION);
-        return children.find(el => el.info.userName().get() === userName);
+        return children.find(el => el.info.userName.get() === userName);
     }
 
-
-    public async loginAdmin(user: IUserCredential) {
+    public async loginAdmin(user: IUserCredential): Promise<{ code: number; message: any | string }> {
         const node = await this.getAdminUser(user.userName);
-        if (!node) throw { code: HTTP_CODES.UNAUTHORIZED, message: "bad username and/or password" };
+        if (!node) return { code: HTTP_CODES.UNAUTHORIZED, message: "bad username and/or password" };
 
         const element = await node.getElement(true);
         const success = await this._comparePassword(user.password, element.password.get());
-        if (!success) throw { code: HTTP_CODES.UNAUTHORIZED, message: "bad username and/or password" };
+        if (!success) return { code: HTTP_CODES.UNAUTHORIZED, message: "bad username and/or password" };
 
-        // Ajouter un token;
+        await this._deleteUserToken(node);
+        const res = await TokenService.getInstance().addUserToken(node);
+
+        return { code: HTTP_CODES.OK, message: res };
     }
 
 
@@ -111,7 +116,23 @@ export class UserService {
         return bcrypt.compare(password, hash);
     }
 
-    private linkUserT() {
+    private _linkUserToken() {
 
     }
+
+    private _generateString(length = 10): string {
+        const charset = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789*/-_@#&";
+        let text = "";
+        for (var i = 0, n = charset.length; i < length; ++i) {
+            text += charset.charAt(Math.floor(Math.random() * n));
+        }
+        return text;
+    }
+
+    private async _deleteUserToken(userNode: SpinalNode) {
+        const tokens = await userNode.getChildren(TOKEN_RELATION_NAME)
+        const promises = tokens.map(token => TokenService.getInstance().deleteToken(token))
+        return Promise.all(promises);
+    }
+
 }

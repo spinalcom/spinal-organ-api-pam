@@ -25,8 +25,9 @@
 import { IUserCredential } from "./IAdmin";
 
 export interface IUserInfo extends IUserCredential {
-    firstName?: string;
-    lastName?: string;
+    name: string;
+    telephone?: string;
     email?: string;
+    userType?: string;
     [key: string]: string;
 }

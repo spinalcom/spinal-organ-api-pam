@@ -2369,6 +2369,59 @@
                 }
             }
         },
+        "/api/v1/pam/auth/admin": {
+            "post": {
+                "operationId": "AuthenticateAdmin",
+                "responses": {
+                    "200": {
+                        "description": "Ok",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "anyOf": [
+                                        {
+                                            "type": "string"
+                                        },
+                                        {
+                                            "$ref": "#/components/schemas/IApplicationToken"
+                                        },
+                                        {
+                                            "$ref": "#/components/schemas/IUserToken"
+                                        },
+                                        {
+                                            "properties": {
+                                                "message": {
+                                                    "type": "string"
+                                                }
+                                            },
+                                            "required": [
+                                                "message"
+                                            ],
+                                            "type": "object"
+                                        }
+                                    ]
+                                }
+                            }
+                        }
+                    }
+                },
+                "tags": [
+                    "Auth"
+                ],
+                "security": [],
+                "parameters": [],
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/IUserCredential"
+                            }
+                        }
+                    }
+                }
+            }
+        },
         "/api/v1/pam/register_admin": {
             "post": {
                 "operationId": "RegisterToAdmin",

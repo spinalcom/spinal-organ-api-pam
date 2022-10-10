@@ -8,8 +8,13 @@ export declare class UserService {
     init(): Promise<SpinalContext>;
     createAdminUser(userInfo?: IUserInfo): Promise<SpinalNode>;
     getAdminUser(userName: string): Promise<SpinalNode>;
-    loginAdmin(user: IUserCredential): Promise<void>;
+    loginAdmin(user: IUserCredential): Promise<{
+        code: number;
+        message: any | string;
+    }>;
     private _hashPassword;
     private _comparePassword;
-    private linkUserT;
+    private _linkUserToken;
+    private _generateString;
+    private _deleteUserToken;
 }

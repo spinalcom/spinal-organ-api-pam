@@ -66,6 +66,19 @@ let AuthController = class AuthController extends tsoa_1.Controller {
             }
         });
     }
+    authenticateAdmin(credential) {
+        return __awaiter(this, void 0, void 0, function* () {
+            try {
+                const { code, message } = yield serviceInstance.authenticateAdmin(credential);
+                this.setStatus(code);
+                return message;
+            }
+            catch (error) {
+                this.setStatus(constant_1.HTTP_CODES.INTERNAL_ERROR);
+                return { message: error.message };
+            }
+        });
+    }
     registerToAdmin(data) {
         return __awaiter(this, void 0, void 0, function* () {
             try {
@@ -161,6 +174,13 @@ __decorate([
     __metadata("design:paramtypes", [Object]),
     __metadata("design:returntype", Promise)
 ], AuthController.prototype, "authenticate", null);
+__decorate([
+    (0, tsoa_1.Post)("/auth/admin"),
+    __param(0, (0, tsoa_1.Body)()),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [Object]),
+    __metadata("design:returntype", Promise)
+], AuthController.prototype, "authenticateAdmin", null);
 __decorate([
     (0, tsoa_1.Post)("/register_admin"),
     __param(0, (0, tsoa_1.Body)()),

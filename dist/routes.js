@@ -895,6 +895,23 @@ function RegisterRoutes(app) {
         }
     });
     // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
+    app.post('/api/v1/pam/auth/admin', ...((0, runtime_1.fetchMiddlewares)(auth_controller_1.AuthController)), ...((0, runtime_1.fetchMiddlewares)(auth_controller_1.AuthController.prototype.authenticateAdmin)), function AuthController_authenticateAdmin(request, response, next) {
+        const args = {
+            credential: { "in": "body", "name": "credential", "required": true, "ref": "IUserCredential" },
+        };
+        // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
+        let validatedArgs = [];
+        try {
+            validatedArgs = getValidatedArgs(args, request, response);
+            const controller = new auth_controller_1.AuthController();
+            const promise = controller.authenticateAdmin.apply(controller, validatedArgs);
+            promiseHandler(controller, promise, response, undefined, next);
+        }
+        catch (err) {
+            return next(err);
+        }
+    });
+    // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
     app.post('/api/v1/pam/register_admin', ...((0, runtime_1.fetchMiddlewares)(auth_controller_1.AuthController)), ...((0, runtime_1.fetchMiddlewares)(auth_controller_1.AuthController.prototype.registerToAdmin)), function AuthController_registerToAdmin(request, response, next) {
         const args = {
             data: { "in": "body", "name": "data", "required": true, "dataType": "nestedObjectLiteral", "nestedProperties": { "adminInfo": { "ref": "IAdmin", "required": true }, "pamInfo": { "ref": "IPamInfo", "required": true } } },

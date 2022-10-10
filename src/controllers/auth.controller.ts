@@ -51,6 +51,18 @@ export class AuthController extends Controller {
         }
     }
 
+    @Post("/auth/admin")
+    public async authenticateAdmin(@Body() credential: IUserCredential): Promise<string | IApplicationToken | IUserToken | { message: string }> {
+        try {
+            const { code, message } = await serviceInstance.authenticateAdmin(credential);
+            this.setStatus(code);
+            return message;
+        } catch (error) {
+            this.setStatus(HTTP_CODES.INTERNAL_ERROR)
+            return { message: error.message };
+        }
+    }
+
     @Post("/register_admin")
     public async registerToAdmin(@Body() data: { pamInfo: IPamInfo, adminInfo: IAdmin }): Promise<IPamCredential | { message: string }> {
         try {
