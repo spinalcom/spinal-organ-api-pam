@@ -57,9 +57,9 @@ let PortofolioController = class PortofolioController extends tsoa_1.Controller 
     addPortofolio(data) {
         return __awaiter(this, void 0, void 0, function* () {
             try {
-                const { name, buildingIds, appIds } = data;
-                const { node, apps, buildings } = yield portofolioInstance.addPortofolio(name, buildingIds, appIds);
-                const details = portofolioInstance._formatDetails(node, apps, buildings);
+                const { name, buildingIds, appIds, apiIds } = data;
+                const { node, apps, buildings, apis } = yield portofolioInstance.addPortofolio(name, buildingIds, appIds, apiIds);
+                const details = portofolioInstance._formatDetails(node, apps, buildings, apis);
                 this.setStatus(constant_1.HTTP_CODES.CREATED);
                 return details;
             }
@@ -303,6 +303,87 @@ let PortofolioController = class PortofolioController extends tsoa_1.Controller 
             }
         });
     }
+    addApiToPortofolio(portofolioId, data) {
+        return __awaiter(this, void 0, void 0, function* () {
+            try {
+                const nodes = yield portofolioInstance.addApiToPortofolio(portofolioId, data.apisIds);
+                if (!nodes || nodes.length === 0) {
+                    this.setStatus(constant_1.HTTP_CODES.BAD_REQUEST);
+                    return { message: "Something wen wrong, please check your input data" };
+                }
+                this.setStatus(constant_1.HTTP_CODES.OK);
+                return nodes.map(el => el.info.get());
+            }
+            catch (error) {
+                this.setStatus(constant_1.HTTP_CODES.INTERNAL_ERROR);
+                return { message: error.message };
+            }
+        });
+    }
+    getPortofolioApis(portofolioId) {
+        return __awaiter(this, void 0, void 0, function* () {
+            try {
+                const node = yield portofolioInstance.getPortofolioApis(portofolioId);
+                if (!node) {
+                    this.setStatus(constant_1.HTTP_CODES.BAD_REQUEST);
+                    return { message: "Something wen wrong, please check your input data" };
+                }
+                this.setStatus(constant_1.HTTP_CODES.OK);
+                return node.map(el => el.info.get());
+            }
+            catch (error) {
+                this.setStatus(constant_1.HTTP_CODES.INTERNAL_ERROR);
+                return { message: error.message };
+            }
+        });
+    }
+    getApiFromPortofolio(portofolioId, apiId) {
+        return __awaiter(this, void 0, void 0, function* () {
+            try {
+                const node = yield portofolioInstance.getApiFromPortofolio(portofolioId, apiId);
+                if (!node) {
+                    this.setStatus(constant_1.HTTP_CODES.BAD_REQUEST);
+                    return { message: "Something wen wrong, please check your input data" };
+                }
+                this.setStatus(constant_1.HTTP_CODES.OK);
+                return node.info.get();
+            }
+            catch (error) {
+                this.setStatus(constant_1.HTTP_CODES.INTERNAL_ERROR);
+                return { message: error.message };
+            }
+        });
+    }
+    removeApiFromPortofolio(portofolioId, data) {
+        return __awaiter(this, void 0, void 0, function* () {
+            try {
+                const ids = yield portofolioInstance.removeApiFromPortofolio(portofolioId, data.apisIds);
+                if (!ids || ids.length === 0) {
+                    this.setStatus(constant_1.HTTP_CODES.BAD_REQUEST);
+                    return { message: "Something went wrong, please check your input data" };
+                }
+                this.setStatus(constant_1.HTTP_CODES.OK);
+                return { message: "route removed from portofolio !", ids };
+            }
+            catch (error) {
+                this.setStatus(constant_1.HTTP_CODES.INTERNAL_ERROR);
+                return { message: error.message };
+            }
+        });
+    }
+    portofolioHasApi(portofolioId, apiId) {
+        return __awaiter(this, void 0, void 0, function* () {
+            try {
+                const exist = yield portofolioInstance.portofolioHasApi(portofolioId, apiId);
+                this.setStatus(constant_1.HTTP_CODES.OK);
+                return exist ? true : false;
+            }
+            catch (error) {
+                this.setStatus(constant_1.HTTP_CODES.INTERNAL_ERROR);
+                return { message: error.message };
+            }
+        });
+    }
 };
 __decorate([
     (0, tsoa_1.Post)("/add_portofolio"),
@@ -422,6 +503,45 @@ __decorate([
     __metadata("design:paramtypes", [String, String]),
     __metadata("design:returntype", Promise)
 ], PortofolioController.prototype, "portofolioHasApp", null);
+__decorate([
+    (0, tsoa_1.Post)("/add_apiRoute_to_portofolio/{portofolioId}"),
+    __param(0, (0, tsoa_1.Path)()),
+    __param(1, (0, tsoa_1.Body)()),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [String, Object]),
+    __metadata("design:returntype", Promise)
+], PortofolioController.prototype, "addApiToPortofolio", null);
+__decorate([
+    (0, tsoa_1.Get)("/get_apisRoute_from_portofolio/{portofolioId}"),
+    __param(0, (0, tsoa_1.Path)()),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [String]),
+    __metadata("design:returntype", Promise)
+], PortofolioController.prototype, "getPortofolioApis", null);
+__decorate([
+    (0, tsoa_1.Get)("/get_apiRoute_from_portofolio/{portofolioId}/{apiId}"),
+    __param(0, (0, tsoa_1.Path)()),
+    __param(1, (0, tsoa_1.Path)()),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [String, String]),
+    __metadata("design:returntype", Promise)
+], PortofolioController.prototype, "getApiFromPortofolio", null);
+__decorate([
+    (0, tsoa_1.Delete)("/remove_apiRoute_from_portofolio/{portofolioId}"),
+    __param(0, (0, tsoa_1.Path)()),
+    __param(1, (0, tsoa_1.Body)()),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [String, Object]),
+    __metadata("design:returntype", Promise)
+], PortofolioController.prototype, "removeApiFromPortofolio", null);
+__decorate([
+    (0, tsoa_1.Get)("/portofolio_has_apiRoute/{portofolioId}/{apiId}"),
+    __param(0, (0, tsoa_1.Path)()),
+    __param(1, (0, tsoa_1.Path)()),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [String, String]),
+    __metadata("design:returntype", Promise)
+], PortofolioController.prototype, "portofolioHasApi", null);
 PortofolioController = __decorate([
     (0, tsoa_1.Route)("/api/v1/pam"),
     (0, tsoa_1.Tags)("Portofolio"),

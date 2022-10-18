@@ -1,8 +1,8 @@
-import { IApp, IBuilding, IPortofolioInfo } from "../interfaces";
+import { IApiRoute, IApp, IBuilding, IPortofolioData, IPortofolioInfo } from "../interfaces";
 import { Controller } from "tsoa";
 export declare class PortofolioController extends Controller {
     constructor();
-    addPortofolio(data: IPortofolioInfo): Promise<any | {
+    addPortofolio(data: IPortofolioInfo): Promise<IPortofolioData | {
         message: string;
     }>;
     renamePortofolio(id: string, data: {
@@ -16,7 +16,7 @@ export declare class PortofolioController extends Controller {
     getPortofolio(id: string): Promise<any | {
         message: string;
     }>;
-    getPortofolioDetails(id: string): Promise<any | {
+    getPortofolioDetails(id: string): Promise<IPortofolioData | {
         message: string;
     }>;
     getAllPortofoliosDetails(): Promise<any[] | {
@@ -60,6 +60,26 @@ export declare class PortofolioController extends Controller {
         ids?: string[];
     }>;
     portofolioHasApp(portofolioId: string, applicationId: string): Promise<boolean | {
+        message: string;
+    }>;
+    addApiToPortofolio(portofolioId: string, data: {
+        apisIds: string[];
+    }): Promise<IApiRoute[] | {
+        message: string;
+    }>;
+    getPortofolioApis(portofolioId: string): Promise<IApiRoute[] | {
+        message: string;
+    }>;
+    getApiFromPortofolio(portofolioId: string, apiId: string): Promise<IApiRoute | {
+        message: string;
+    }>;
+    removeApiFromPortofolio(portofolioId: string, data: {
+        apisIds: string[];
+    }): Promise<{
+        message: string;
+        ids?: string[];
+    }>;
+    portofolioHasApi(portofolioId: string, apiId: string): Promise<boolean | {
         message: string;
     }>;
 }

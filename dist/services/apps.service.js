@@ -32,12 +32,18 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
     });
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.AppService = void 0;
+exports.AppService = exports.AppsType = void 0;
 const spinal_env_viewer_graph_service_1 = require("spinal-env-viewer-graph-service");
 const constant_1 = require("../constant");
 const building_service_1 = require("./building.service");
 const configFile_service_1 = require("./configFile.service");
 const portofolio_service_1 = require("./portofolio.service");
+const spinal_env_viewer_plugin_excel_manager_service_1 = require("spinal-env-viewer-plugin-excel-manager-service");
+exports.AppsType = Object.freeze({
+    admin: "admin",
+    building: "building",
+    portofolio: "portofolio"
+});
 class AppService {
     constructor() { }
     static getInstance() {
@@ -62,6 +68,10 @@ class AppService {
             const groupNode = yield this._getApplicationGroupNode(constant_1.ADMIN_APPS_GROUP_NAME, constant_1.ADMIN_APPS_GROUP_TYPE, true);
             if (!groupNode)
                 return;
+            const children = yield groupNode.getChildren([constant_1.APP_RELATION_NAME]);
+            const appExist = children.find(el => el.getName().get() === appInfo.name);
+            if (appExist)
+                return appExist;
             appInfo.type = constant_1.ADMIN_APP_TYPE;
             const appId = spinal_env_viewer_graph_service_1.SpinalGraphService.createNode(appInfo, undefined);
             const node = spinal_env_viewer_graph_service_1.SpinalGraphService.getRealNode(appId);
@@ -73,6 +83,10 @@ class AppService {
             const groupNode = yield this._getApplicationGroupNode(constant_1.PORTOFOLIO_APPS_GROUP_NAME, constant_1.PORTOFOLIO_APPS_GROUP_TYPE, true);
             if (!groupNode)
                 return;
+            const children = yield groupNode.getChildren([constant_1.APP_RELATION_NAME]);
+            const appExist = children.find(el => el.getName().get() === appInfo.name);
+            if (appExist)
+                return appExist;
             appInfo.type = constant_1.PORTOFOLIO_APP_TYPE;
             const appId = spinal_env_viewer_graph_service_1.SpinalGraphService.createNode(appInfo, undefined);
             const node = spinal_env_viewer_graph_service_1.SpinalGraphService.getRealNode(appId);
@@ -84,6 +98,10 @@ class AppService {
             const groupNode = yield this._getApplicationGroupNode(constant_1.BUILDING_APPS_GROUP_NAME, constant_1.BUILDING_APPS_GROUP_TYPE, true);
             if (!groupNode)
                 return;
+            const children = yield groupNode.getChildren([constant_1.APP_RELATION_NAME]);
+            const appExist = children.find(el => el.getName().get() === appInfo.name);
+            if (appExist)
+                return appExist;
             appInfo.type = constant_1.BUILDING_APP_TYPE;
             const appId = spinal_env_viewer_graph_service_1.SpinalGraphService.createNode(appInfo, undefined);
             const node = spinal_env_viewer_graph_service_1.SpinalGraphService.getRealNode(appId);
@@ -249,6 +267,31 @@ class AppService {
     //////////////////////////////////
     //         EXCEl / JSON         //
     //////////////////////////////////
+    uploadApps(appType, fileData, isExcel = false) {
+        return __awaiter(this, void 0, void 0, function* () {
+            let data;
+            if (!isExcel)
+                data = JSON.parse(JSON.stringify(fileData.toString()));
+            else
+                data = yield this._convertExcelToJson(fileData);
+            const formattedApps = this._formatAppsJson(data);
+            return formattedApps.reduce((prom, item) => __awaiter(this, void 0, void 0, function* () {
+                const liste = yield prom;
+                try {
+                    let app;
+                    if (appType === exports.AppsType.admin)
+                        app = yield this.createAdminApp(item);
+                    else if (appType === exports.AppsType.portofolio)
+                        app = yield this.createPortofolioApp(item);
+                    else if (appType === exports.AppsType.building)
+                        app = yield this.createBuildingApp(item);
+                    liste.push(app);
+                }
+                catch (error) { }
+                return liste;
+            }), Promise.resolve([]));
+        });
+    }
     //////////////////////////////////
     //              PRIVATES        //
     //////////////////////////////////
@@ -261,6 +304,26 @@ class AppService {
             const node = new spinal_env_viewer_graph_service_1.SpinalNode(name, type);
             return this.context.addChildInContext(node, constant_1.CONTEXT_TO_APPS_GROUP, constant_1.PTR_LST_TYPE, this.context);
         });
+    }
+    _convertExcelToJson(excelData) {
+        return __awaiter(this, void 0, void 0, function* () {
+            const data = yield spinal_env_viewer_plugin_excel_manager_service_1.SpinalExcelManager.convertExcelToJson(excelData);
+            return Object.values(data).flat();
+        });
+    }
+    _formatAppsJson(jsonData) {
+        return jsonData.reduce((liste, app) => {
+            const requiredAttrs = ["name", "icon", "tags", "categoryName", "groupName"];
+            const notValid = requiredAttrs.find(el => !app[el]);
+            if (!notValid) {
+                app.hasViewer = app.hasViewer || false;
+                app.packageName = app.packageName || app.name;
+                if (typeof app.tags === "string")
+                    app.tags = app.tags.split(",");
+                liste.push(app);
+            }
+            return liste;
+        }, []);
     }
 }
 exports.AppService = AppService;

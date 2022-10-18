@@ -1,4 +1,4 @@
-import { IApp, IBuilding, IEditBuilding } from "../interfaces";
+import { IApiRoute, IApp, IBuilding, IEditBuilding } from "../interfaces";
 import { Controller } from "tsoa";
 export declare class BuildingController extends Controller {
     constructor();
@@ -40,6 +40,26 @@ export declare class BuildingController extends Controller {
         ids?: string[];
     }>;
     buildingHasApp(buildingId: string, appId: string): Promise<boolean | {
+        message: string;
+    }>;
+    addApiToBuilding(buildingId: string, data: {
+        apisIds: string[];
+    }): Promise<IApiRoute[] | {
+        message: string;
+    }>;
+    getApisFromBuilding(buildingId: string): Promise<IApiRoute[] | {
+        message: string;
+    }>;
+    getApiFromBuilding(buildingId: string, apiId: string): Promise<IApiRoute | {
+        message: string;
+    }>;
+    removeApisFromBuilding(buildingId: string, data: {
+        apisIds: string[];
+    }): Promise<{
+        message: string;
+        ids?: string[];
+    }>;
+    buildingHasApi(buildingId: string, apiId: string): Promise<boolean | {
         message: string;
     }>;
 }

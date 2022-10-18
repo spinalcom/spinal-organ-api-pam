@@ -53,14 +53,14 @@ let APIController = class APIController extends tsoa_1.Controller {
     constructor() {
         super();
     }
-    /**
-     * Adds a route to the list of available routes
-     */
-    createApiRoute(data) {
+    //////////////////////////////////////////
+    //              PORTOFOLIO              //
+    //////////////////////////////////////////
+    createPortofolioApiRoute(data) {
         return __awaiter(this, void 0, void 0, function* () {
             try {
                 // const data = req.body;
-                const node = yield apiService.createApiRoute(data);
+                const node = yield apiService.createApiRoute(data, constant_1.PORTOFOLIO_API_GROUP_TYPE);
                 this.setStatus(constant_1.HTTP_CODES.CREATED);
                 return node.info.get();
             }
@@ -70,10 +70,10 @@ let APIController = class APIController extends tsoa_1.Controller {
             }
         });
     }
-    updateApiRoute(data, id) {
+    updatePortofolioApiRoute(data, id) {
         return __awaiter(this, void 0, void 0, function* () {
             try {
-                const node = yield apiService.updateApiRoute(id, data);
+                const node = yield apiService.updateApiRoute(id, data, constant_1.PORTOFOLIO_API_GROUP_TYPE);
                 this.setStatus(constant_1.HTTP_CODES.ACCEPTED);
                 return node.info.get();
             }
@@ -83,10 +83,10 @@ let APIController = class APIController extends tsoa_1.Controller {
             }
         });
     }
-    getApiRouteById(id) {
+    getPortofolioApiRouteById(id) {
         return __awaiter(this, void 0, void 0, function* () {
             try {
-                const node = yield apiService.getApiRouteById(id);
+                const node = yield apiService.getApiRouteById(id, constant_1.PORTOFOLIO_API_GROUP_TYPE);
                 if (node) {
                     this.setStatus(constant_1.HTTP_CODES.OK);
                     return node.info.get();
@@ -100,10 +100,10 @@ let APIController = class APIController extends tsoa_1.Controller {
             }
         });
     }
-    getAllApiRoute() {
+    getAllPortofolioApiRoute() {
         return __awaiter(this, void 0, void 0, function* () {
             try {
-                const routes = yield apiService.getAllApiRoute();
+                const routes = yield apiService.getAllApiRoute(constant_1.PORTOFOLIO_API_GROUP_TYPE);
                 this.setStatus(constant_1.HTTP_CODES.OK);
                 return routes.map(el => el.info.get());
             }
@@ -113,10 +113,10 @@ let APIController = class APIController extends tsoa_1.Controller {
             }
         });
     }
-    deleteApiRoute(id) {
+    deletePortofolioApiRoute(id) {
         return __awaiter(this, void 0, void 0, function* () {
             try {
-                yield apiService.deleteApiRoute(id);
+                yield apiService.deleteApiRoute(id, constant_1.PORTOFOLIO_API_GROUP_TYPE);
                 this.setStatus(constant_1.HTTP_CODES.OK);
                 return { message: `${id} api route has been deleted` };
             }
@@ -126,7 +126,7 @@ let APIController = class APIController extends tsoa_1.Controller {
             }
         });
     }
-    uploadSwaggerFile(file) {
+    uploadPortofolioSwaggerFile(file) {
         return __awaiter(this, void 0, void 0, function* () {
             try {
                 if (!file) {
@@ -140,7 +140,107 @@ let APIController = class APIController extends tsoa_1.Controller {
                         this.setStatus(constant_1.HTTP_CODES.BAD_REQUEST);
                         return { message: "The selected file must be a json file" };
                     }
-                    const apis = yield apiService.uploadSwaggerFile(file.buffer);
+                    const apis = yield services_1.PortofolioService.getInstance().uploadSwaggerFile(file.buffer);
+                    this.setStatus(constant_1.HTTP_CODES.OK);
+                    return apis.map(el => el.info.get());
+                }
+                this.setStatus(constant_1.HTTP_CODES.BAD_REQUEST);
+                return { message: "No file uploaded" };
+            }
+            catch (error) {
+                this.setStatus(constant_1.HTTP_CODES.INTERNAL_ERROR);
+                return { message: error.message };
+            }
+        });
+    }
+    //////////////////////////////////////////
+    //              BUILDING                //
+    //////////////////////////////////////////
+    createBosApiRoute(data) {
+        return __awaiter(this, void 0, void 0, function* () {
+            try {
+                // const data = req.body;
+                const node = yield apiService.createApiRoute(data, constant_1.BUILDING_API_GROUP_TYPE);
+                this.setStatus(constant_1.HTTP_CODES.CREATED);
+                return node.info.get();
+            }
+            catch (error) {
+                this.setStatus(constant_1.HTTP_CODES.INTERNAL_ERROR);
+                return { message: error.message };
+            }
+        });
+    }
+    updateBosApiRoute(data, id) {
+        return __awaiter(this, void 0, void 0, function* () {
+            try {
+                const node = yield apiService.updateApiRoute(id, data, constant_1.BUILDING_API_GROUP_TYPE);
+                this.setStatus(constant_1.HTTP_CODES.ACCEPTED);
+                return node.info.get();
+            }
+            catch (error) {
+                this.setStatus(constant_1.HTTP_CODES.INTERNAL_ERROR);
+                return { message: error.message };
+            }
+        });
+    }
+    getBosApiRouteById(id) {
+        return __awaiter(this, void 0, void 0, function* () {
+            try {
+                const node = yield apiService.getApiRouteById(id, constant_1.BUILDING_API_GROUP_TYPE);
+                if (node) {
+                    this.setStatus(constant_1.HTTP_CODES.OK);
+                    return node.info.get();
+                }
+                this.setStatus(constant_1.HTTP_CODES.NOT_FOUND);
+                return { message: `No api route found for ${id}` };
+            }
+            catch (error) {
+                this.setStatus(constant_1.HTTP_CODES.INTERNAL_ERROR);
+                return { message: error.message };
+            }
+        });
+    }
+    getAllBosApiRoute() {
+        return __awaiter(this, void 0, void 0, function* () {
+            try {
+                const routes = yield apiService.getAllApiRoute(constant_1.BUILDING_API_GROUP_TYPE);
+                this.setStatus(constant_1.HTTP_CODES.OK);
+                return routes.map(el => el.info.get());
+            }
+            catch (error) {
+                this.setStatus(constant_1.HTTP_CODES.INTERNAL_ERROR);
+                return { message: error.message };
+            }
+        });
+    }
+    deleteBosApiRoute(id) {
+        return __awaiter(this, void 0, void 0, function* () {
+            try {
+                yield apiService.deleteApiRoute(id, constant_1.BUILDING_API_GROUP_TYPE);
+                this.setStatus(constant_1.HTTP_CODES.OK);
+                return { message: `${id} api route has been deleted` };
+            }
+            catch (error) {
+                this.setStatus(constant_1.HTTP_CODES.INTERNAL_ERROR);
+                return { message: error.message };
+            }
+        });
+    }
+    uploadBosSwaggerFile(file) {
+        return __awaiter(this, void 0, void 0, function* () {
+            try {
+                if (!file) {
+                    this.setStatus(constant_1.HTTP_CODES.BAD_REQUEST);
+                    return { message: "No file uploaded" };
+                }
+                // const firstFile = Object.keys(files)[0];
+                if (file) {
+                    // const file = files[firstFile];
+                    if (!/.*\.json$/.test(file.originalname)) {
+                        this.setStatus(constant_1.HTTP_CODES.BAD_REQUEST);
+                        return { message: "The selected file must be a json file" };
+                    }
+                    const apis = yield services_1.BuildingService.getInstance().uploadSwaggerFile(file.buffer);
                     this.setStatus(constant_1.HTTP_CODES.OK);
                     return apis.map(el => el.info.get());
                 }
@@ -155,47 +255,89 @@ let APIController = class APIController extends tsoa_1.Controller {
     }
 };
 __decorate([
-    (0, tsoa_1.Post)("/create_api_route"),
+    (0, tsoa_1.Post)("/create_portofolio_api_route"),
     __param(0, (0, tsoa_1.Body)()),
     __metadata("design:type", Function),
     __metadata("design:paramtypes", [Object]),
     __metadata("design:returntype", Promise)
-], APIController.prototype, "createApiRoute", null);
+], APIController.prototype, "createPortofolioApiRoute", null);
 __decorate([
-    (0, tsoa_1.Put)("/update_api_route/{id}"),
+    (0, tsoa_1.Put)("/update_portofolio_api_route/{id}"),
     __param(0, (0, tsoa_1.Body)()),
     __param(1, (0, tsoa_1.Path)()),
     __metadata("design:type", Function),
     __metadata("design:paramtypes", [Object, String]),
     __metadata("design:returntype", Promise)
-], APIController.prototype, "updateApiRoute", null);
+], APIController.prototype, "updatePortofolioApiRoute", null);
 __decorate([
-    (0, tsoa_1.Get)("/get_api_route/{id}"),
+    (0, tsoa_1.Get)("/get_portofolio_api_route/{id}"),
     __param(0, (0, tsoa_1.Path)()),
     __metadata("design:type", Function),
     __metadata("design:paramtypes", [String]),
     __metadata("design:returntype", Promise)
-], APIController.prototype, "getApiRouteById", null);
+], APIController.prototype, "getPortofolioApiRouteById", null);
 __decorate([
-    (0, tsoa_1.Get)("/get_all_api_route"),
+    (0, tsoa_1.Get)("/get_all_portofolio_api_route"),
     __metadata("design:type", Function),
     __metadata("design:paramtypes", []),
     __metadata("design:returntype", Promise)
-], APIController.prototype, "getAllApiRoute", null);
+], APIController.prototype, "getAllPortofolioApiRoute", null);
 __decorate([
-    (0, tsoa_1.Delete)("/delete_api_route/{id}"),
+    (0, tsoa_1.Delete)("/delete_portofolio_api_route/{id}"),
     __param(0, (0, tsoa_1.Path)()),
     __metadata("design:type", Function),
     __metadata("design:paramtypes", [Object]),
     __metadata("design:returntype", Promise)
-], APIController.prototype, "deleteApiRoute", null);
+], APIController.prototype, "deletePortofolioApiRoute", null);
 __decorate([
-    (0, tsoa_1.Post)("/upload_apis_routes"),
+    (0, tsoa_1.Post)("/upload_portofolio_apis_routes"),
     __param(0, (0, tsoa_1.UploadedFile)()),
     __metadata("design:type", Function),
     __metadata("design:paramtypes", [Object]),
     __metadata("design:returntype", Promise)
-], APIController.prototype, "uploadSwaggerFile", null);
+], APIController.prototype, "uploadPortofolioSwaggerFile", null);
+__decorate([
+    (0, tsoa_1.Post)("/create_bos_api_route"),
+    __param(0, (0, tsoa_1.Body)()),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [Object]),
+    __metadata("design:returntype", Promise)
+], APIController.prototype, "createBosApiRoute", null);
+__decorate([
+    (0, tsoa_1.Put)("/update_bos_api_route/{id}"),
+    __param(0, (0, tsoa_1.Body)()),
+    __param(1, (0, tsoa_1.Path)()),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [Object, String]),
+    __metadata("design:returntype", Promise)
+], APIController.prototype, "updateBosApiRoute", null);
+__decorate([
+    (0, tsoa_1.Get)("/get_bos_api_route/{id}"),
+    __param(0, (0, tsoa_1.Path)()),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [String]),
+    __metadata("design:returntype", Promise)
+], APIController.prototype, "getBosApiRouteById", null);
+__decorate([
+    (0, tsoa_1.Get)("/get_all_bos_api_route"),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", []),
+    __metadata("design:returntype", Promise)
+], APIController.prototype, "getAllBosApiRoute", null);
+__decorate([
+    (0, tsoa_1.Delete)("/delete_bos_api_route/{id}"),
+    __param(0, (0, tsoa_1.Path)()),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [Object]),
+    __metadata("design:returntype", Promise)
+], APIController.prototype, "deleteBosApiRoute", null);
+__decorate([
+    (0, tsoa_1.Post)("/upload_bos_apis_routes"),
+    __param(0, (0, tsoa_1.UploadedFile)()),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [Object]),
+    __metadata("design:returntype", Promise)
+], APIController.prototype, "uploadBosSwaggerFile", null);
 APIController = __decorate([
     (0, tsoa_1.Route)("/api/v1/pam/"),
     (0, tsoa_1.Tags)("Apis"),

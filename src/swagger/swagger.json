@@ -36,18 +36,6 @@
 					"type": "string"
 				}
 			},
-			"IAppTags": {
-				"properties": {
-					"name": {
-						"type": "string"
-					}
-				},
-				"required": [
-					"name"
-				],
-				"type": "object",
-				"additionalProperties": false
-			},
 			"IApp": {
 				"properties": {
 					"name": {
@@ -61,7 +49,7 @@
 					},
 					"tags": {
 						"items": {
-							"$ref": "#/components/schemas/IAppTags"
+							"type": "string"
 						},
 						"type": "array"
 					},
@@ -69,6 +57,12 @@
 						"type": "string"
 					},
 					"groupName": {
+						"type": "string"
+					},
+					"hasViewer": {
+						"type": "boolean"
+					},
+					"packageName": {
 						"type": "string"
 					}
 				},
@@ -83,21 +77,6 @@
 				"type": "object",
 				"additionalProperties": {}
 			},
-			"IPortofolioData": {
-				"properties": {
-					"apps": {
-						"items": {
-							"$ref": "#/components/schemas/IApp"
-						},
-						"type": "array"
-					}
-				},
-				"required": [
-					"apps"
-				],
-				"type": "object",
-				"additionalProperties": {}
-			},
 			"IBosData": {
 				"properties": {
 					"apps": {
@@ -105,67 +84,52 @@
 							"$ref": "#/components/schemas/IApp"
 						},
 						"type": "array"
+					},
+					"apis": {
+						"items": {
+							"$ref": "#/components/schemas/IApiRoute"
+						},
+						"type": "array"
 					}
 				},
-				"required": [
-					"apps"
-				],
 				"type": "object",
 				"additionalProperties": {}
 			},
-			"IProfileData": {
+			"IPortofolioData": {
 				"properties": {
-					"authorizedPortofolio": {
+					"apps": {
 						"items": {
-							"$ref": "#/components/schemas/IPortofolioData"
+							"$ref": "#/components/schemas/IApp"
 						},
 						"type": "array"
 					},
-					"authorizedRoutes": {
+					"apis": {
 						"items": {
 							"$ref": "#/components/schemas/IApiRoute"
 						},
 						"type": "array"
 					},
-					"authorizedBos": {
+					"building": {
 						"items": {
 							"$ref": "#/components/schemas/IBosData"
 						},
 						"type": "array"
 					}
 				},
-				"required": [
-					"authorizedPortofolio",
-					"authorizedRoutes",
-					"authorizedBos"
-				],
 				"type": "object",
 				"additionalProperties": {}
 			},
-			"IPortofolioAuth": {
+			"IProfileData": {
 				"properties": {
-					"portofolioId": {
-						"type": "string"
-					},
-					"appsIds": {
-						"anyOf": [
-							{
-								"type": "string"
-							},
-							{
-								"items": {
-									"type": "string"
-								},
-								"type": "array"
-							}
-						]
+					"authorized": {
+						"items": {
+							"$ref": "#/components/schemas/IPortofolioData"
+						},
+						"type": "array"
 					}
 				},
-				"required": [
-					"portofolioId"
-				],
 				"type": "object",
-				"additionalProperties": false
+				"additionalProperties": {}
 			},
 			"IBosAuth": {
 				"properties": {
@@ -173,21 +137,50 @@
 						"type": "string"
 					},
 					"appsIds": {
-						"anyOf": [
-							{
-								"type": "string"
-							},
-							{
-								"items": {
-									"type": "string"
-								},
-								"type": "array"
-							}
-						]
+						"items": {
+							"type": "string"
+						},
+						"type": "array"
+					},
+					"apisIds": {
+						"items": {
+							"type": "string"
+						},
+						"type": "array"
 					}
 				},
 				"required": [
 					"buildingId"
+				],
+				"type": "object",
+				"additionalProperties": false
+			},
+			"IPortofolioAuth": {
+				"properties": {
+					"portofolioId": {
+						"type": "string"
+					},
+					"appsIds": {
+						"items": {
+							"type": "string"
+						},
+						"type": "array"
+					},
+					"apisIds": {
+						"items": {
+							"type": "string"
+						},
+						"type": "array"
+					},
+					"building": {
+						"items": {
+							"$ref": "#/components/schemas/IBosAuth"
+						},
+						"type": "array"
+					}
+				},
+				"required": [
+					"portofolioId"
 				],
 				"type": "object",
 				"additionalProperties": false
@@ -197,43 +190,17 @@
 					"name": {
 						"type": "string"
 					},
-					"authorizePortofolio": {
+					"authorize": {
 						"items": {
 							"$ref": "#/components/schemas/IPortofolioAuth"
-						},
-						"type": "array"
-					},
-					"unauthorizePortofolio": {
-						"items": {
-							"$ref": "#/components/schemas/IPortofolioAuth"
-						},
-						"type": "array"
-					},
-					"authorizeApis": {
-						"items": {
-							"type": "string"
-						},
-						"type": "array"
-					},
-					"unauthorizeApis": {
-						"items": {
-							"type": "string"
-						},
-						"type": "array"
-					},
-					"authorizeBos": {
-						"items": {
-							"$ref": "#/components/schemas/IBosAuth"
-						},
-						"type": "array"
-					},
-					"unauthorizeBos": {
-						"items": {
-							"$ref": "#/components/schemas/IBosAuth"
 						},
 						"type": "array"
 					}
 				},
+				"required": [
+					"name",
+					"authorize"
+				],
 				"type": "object",
 				"additionalProperties": false
 			},
@@ -250,7 +217,7 @@
 					},
 					"tags": {
 						"items": {
-							"$ref": "#/components/schemas/IAppTags"
+							"type": "string"
 						},
 						"type": "array"
 					},
@@ -262,7 +229,7 @@
 					}
 				},
 				"type": "object",
-				"additionalProperties": false
+				"additionalProperties": {}
 			},
 			"IApplicationToken": {
 				"properties": {
@@ -583,6 +550,12 @@
 							"type": "string"
 						},
 						"type": "array"
+					},
+					"apiIds": {
+						"items": {
+							"type": "string"
+						},
+						"type": "array"
 					}
 				},
 				"required": [
@@ -604,9 +577,9 @@
 	},
 	"openapi": "3.0.0",
 	"paths": {
-		"/api/v1/pam/create_api_route": {
+		"/api/v1/pam/create_portofolio_api_route": {
 			"post": {
-				"operationId": "CreateApiRoute",
+				"operationId": "CreatePortofolioApiRoute",
 				"responses": {
 					"200": {
 						"description": "Ok",
@@ -634,7 +607,6 @@
 						}
 					}
 				},
-				"description": "Adds a route to the list of available routes",
 				"tags": [
 					"Apis"
 				],
@@ -652,9 +624,9 @@
 				}
 			}
 		},
-		"/api/v1/pam/update_api_route/{id}": {
+		"/api/v1/pam/update_portofolio_api_route/{id}": {
 			"put": {
-				"operationId": "UpdateApiRoute",
+				"operationId": "UpdatePortofolioApiRoute",
 				"responses": {
 					"200": {
 						"description": "Ok",
@@ -708,9 +680,9 @@
 				}
 			}
 		},
-		"/api/v1/pam/get_api_route/{id}": {
+		"/api/v1/pam/get_portofolio_api_route/{id}": {
 			"get": {
-				"operationId": "GetApiRouteById",
+				"operationId": "GetPortofolioApiRouteById",
 				"responses": {
 					"200": {
 						"description": "Ok",
@@ -754,9 +726,9 @@
 				]
 			}
 		},
-		"/api/v1/pam/get_all_api_route": {
+		"/api/v1/pam/get_all_portofolio_api_route": {
 			"get": {
-				"operationId": "GetAllApiRoute",
+				"operationId": "GetAllPortofolioApiRoute",
 				"responses": {
 					"200": {
 						"description": "Ok",
@@ -794,9 +766,9 @@
 				"parameters": []
 			}
 		},
-		"/api/v1/pam/delete_api_route/{id}": {
+		"/api/v1/pam/delete_portofolio_api_route/{id}": {
 			"delete": {
-				"operationId": "DeleteApiRoute",
+				"operationId": "DeletePortofolioApiRoute",
 				"responses": {
 					"200": {
 						"description": "Ok",
@@ -833,9 +805,296 @@
 				]
 			}
 		},
-		"/api/v1/pam/upload_apis_routes": {
+		"/api/v1/pam/upload_portofolio_apis_routes": {
 			"post": {
-				"operationId": "UploadSwaggerFile",
+				"operationId": "UploadPortofolioSwaggerFile",
+				"responses": {
+					"200": {
+						"description": "Ok",
+						"content": {
+							"application/json": {
+								"schema": {
+									"anyOf": [
+										{
+											"items": {
+												"$ref": "#/components/schemas/IApiRoute"
+											},
+											"type": "array"
+										},
+										{
+											"properties": {
+												"message": {
+													"type": "string"
+												}
+											},
+											"required": [
+												"message"
+											],
+											"type": "object"
+										}
+									]
+								}
+							}
+						}
+					}
+				},
+				"tags": [
+					"Apis"
+				],
+				"security": [],
+				"parameters": [],
+				"requestBody": {
+					"required": true,
+					"content": {
+						"multipart/form-data": {
+							"schema": {
+								"type": "object",
+								"properties": {
+									"file": {
+										"type": "string",
+										"format": "binary"
+									}
+								},
+								"required": [
+									"file"
+								]
+							}
+						}
+					}
+				}
+			}
+		},
+		"/api/v1/pam/create_bos_api_route": {
+			"post": {
+				"operationId": "CreateBosApiRoute",
+				"responses": {
+					"200": {
+						"description": "Ok",
+						"content": {
+							"application/json": {
+								"schema": {
+									"anyOf": [
+										{
+											"$ref": "#/components/schemas/IApiRoute"
+										},
+										{
+											"properties": {
+												"message": {
+													"type": "string"
+												}
+											},
+											"required": [
+												"message"
+											],
+											"type": "object"
+										}
+									]
+								}
+							}
+						}
+					}
+				},
+				"tags": [
+					"Apis"
+				],
+				"security": [],
+				"parameters": [],
+				"requestBody": {
+					"required": true,
+					"content": {
+						"application/json": {
+							"schema": {
+								"$ref": "#/components/schemas/IApiRoute"
+							}
+						}
+					}
+				}
+			}
+		},
+		"/api/v1/pam/update_bos_api_route/{id}": {
+			"put": {
+				"operationId": "UpdateBosApiRoute",
+				"responses": {
+					"200": {
+						"description": "Ok",
+						"content": {
+							"application/json": {
+								"schema": {
+									"anyOf": [
+										{
+											"$ref": "#/components/schemas/IApiRoute"
+										},
+										{
+											"properties": {
+												"message": {
+													"type": "string"
+												}
+											},
+											"required": [
+												"message"
+											],
+											"type": "object"
+										}
+									]
+								}
+							}
+						}
+					}
+				},
+				"tags": [
+					"Apis"
+				],
+				"security": [],
+				"parameters": [
+					{
+						"in": "path",
+						"name": "id",
+						"required": true,
+						"schema": {
+							"type": "string"
+						}
+					}
+				],
+				"requestBody": {
+					"required": true,
+					"content": {
+						"application/json": {
+							"schema": {
+								"$ref": "#/components/schemas/IApiRoute"
+							}
+						}
+					}
+				}
+			}
+		},
+		"/api/v1/pam/get_bos_api_route/{id}": {
+			"get": {
+				"operationId": "GetBosApiRouteById",
+				"responses": {
+					"200": {
+						"description": "Ok",
+						"content": {
+							"application/json": {
+								"schema": {
+									"anyOf": [
+										{
+											"$ref": "#/components/schemas/IApiRoute"
+										},
+										{
+											"properties": {
+												"message": {
+													"type": "string"
+												}
+											},
+											"required": [
+												"message"
+											],
+											"type": "object"
+										}
+									]
+								}
+							}
+						}
+					}
+				},
+				"tags": [
+					"Apis"
+				],
+				"security": [],
+				"parameters": [
+					{
+						"in": "path",
+						"name": "id",
+						"required": true,
+						"schema": {
+							"type": "string"
+						}
+					}
+				]
+			}
+		},
+		"/api/v1/pam/get_all_bos_api_route": {
+			"get": {
+				"operationId": "GetAllBosApiRoute",
+				"responses": {
+					"200": {
+						"description": "Ok",
+						"content": {
+							"application/json": {
+								"schema": {
+									"anyOf": [
+										{
+											"items": {
+												"$ref": "#/components/schemas/IApiRoute"
+											},
+											"type": "array"
+										},
+										{
+											"properties": {
+												"message": {
+													"type": "string"
+												}
+											},
+											"required": [
+												"message"
+											],
+											"type": "object"
+										}
+									]
+								}
+							}
+						}
+					}
+				},
+				"tags": [
+					"Apis"
+				],
+				"security": [],
+				"parameters": []
+			}
+		},
+		"/api/v1/pam/delete_bos_api_route/{id}": {
+			"delete": {
+				"operationId": "DeleteBosApiRoute",
+				"responses": {
+					"200": {
+						"description": "Ok",
+						"content": {
+							"application/json": {
+								"schema": {
+									"properties": {
+										"message": {
+											"type": "string"
+										}
+									},
+									"required": [
+										"message"
+									],
+									"type": "object"
+								}
+							}
+						}
+					}
+				},
+				"tags": [
+					"Apis"
+				],
+				"security": [],
+				"parameters": [
+					{
+						"in": "path",
+						"name": "id",
+						"required": true,
+						"schema": {
+							"type": "string"
+						}
+					}
+				]
+			}
+		},
+		"/api/v1/pam/upload_bos_apis_routes": {
+			"post": {
+				"operationId": "UploadBosSwaggerFile",
 				"responses": {
 					"200": {
 						"description": "Ok",
@@ -1120,128 +1379,9 @@
 				]
 			}
 		},
-		"/api/v1/pam/app_profile/authorize_portofolio_apps/{profileId}": {
-			"post": {
-				"operationId": "AuthorizeToAccessPortofolioApps",
-				"responses": {
-					"200": {
-						"description": "Ok",
-						"content": {
-							"application/json": {
-								"schema": {
-									"anyOf": [
-										{
-											"items": {
-												"$ref": "#/components/schemas/IPortofolioData"
-											},
-											"type": "array"
-										},
-										{
-											"properties": {
-												"message": {
-													"type": "string"
-												}
-											},
-											"required": [
-												"message"
-											],
-											"type": "object"
-										}
-									]
-								}
-							}
-						}
-					}
-				},
-				"tags": [
-					"App Profiles"
-				],
-				"security": [],
-				"parameters": [
-					{
-						"in": "path",
-						"name": "profileId",
-						"required": true,
-						"schema": {
-							"type": "string"
-						}
-					}
-				],
-				"requestBody": {
-					"required": true,
-					"content": {
-						"application/json": {
-							"schema": {
-								"items": {
-									"$ref": "#/components/schemas/IPortofolioAuth"
-								},
-								"type": "array"
-							}
-						}
-					}
-				}
-			}
-		},
-		"/api/v1/pam/app_profile/unauthorize_portofolio_apps/{profileId}": {
-			"post": {
-				"operationId": "UnauthorizeToAccessPortofolioApps",
-				"responses": {
-					"200": {
-						"description": "Ok",
-						"content": {
-							"application/json": {
-								"schema": {
-									"anyOf": [
-										{},
-										{
-											"properties": {
-												"message": {
-													"type": "string"
-												}
-											},
-											"required": [
-												"message"
-											],
-											"type": "object"
-										}
-									]
-								}
-							}
-						}
-					}
-				},
-				"tags": [
-					"App Profiles"
-				],
-				"security": [],
-				"parameters": [
-					{
-						"in": "path",
-						"name": "profileId",
-						"required": true,
-						"schema": {
-							"type": "string"
-						}
-					}
-				],
-				"requestBody": {
-					"required": true,
-					"content": {
-						"application/json": {
-							"schema": {
-								"items": {
-									"$ref": "#/components/schemas/IPortofolioAuth"
-								},
-								"type": "array"
-							}
-						}
-					}
-				}
-			}
-		},
 		"/api/v1/pam/app_profile/get_authorized_portofolio/{profileId}": {
 			"get": {
-				"operationId": "GetAuthorizedPortofolioApps",
+				"operationId": "GetAuthorizedPortofolio",
 				"responses": {
 					"200": {
 						"description": "Ok",
@@ -1288,183 +1428,9 @@
 				]
 			}
 		},
-		"/api/v1/pam/app_profile/authorize_apis/{profileId}": {
+		"/api/v1/pam/app_profile/authorize_portofolio_apis/{profileId}": {
 			"post": {
-				"operationId": "AuthorizeToAccessApis",
-				"responses": {
-					"200": {
-						"description": "Ok",
-						"content": {
-							"application/json": {
-								"schema": {
-									"anyOf": [
-										{},
-										{
-											"properties": {
-												"message": {
-													"type": "string"
-												}
-											},
-											"required": [
-												"message"
-											],
-											"type": "object"
-										}
-									]
-								}
-							}
-						}
-					}
-				},
-				"tags": [
-					"App Profiles"
-				],
-				"security": [],
-				"parameters": [
-					{
-						"in": "path",
-						"name": "profileId",
-						"required": true,
-						"schema": {
-							"type": "string"
-						}
-					}
-				],
-				"requestBody": {
-					"required": true,
-					"content": {
-						"application/json": {
-							"schema": {
-								"properties": {
-									"authorizeApis": {
-										"items": {
-											"type": "string"
-										},
-										"type": "array"
-									}
-								},
-								"required": [
-									"authorizeApis"
-								],
-								"type": "object"
-							}
-						}
-					}
-				}
-			}
-		},
-		"/api/v1/pam/app_profile/unauthorize_apis/{profileId}": {
-			"post": {
-				"operationId": "UnauthorizeToAccessApis",
-				"responses": {
-					"200": {
-						"description": "Ok",
-						"content": {
-							"application/json": {
-								"schema": {
-									"anyOf": [
-										{},
-										{
-											"properties": {
-												"message": {
-													"type": "string"
-												}
-											},
-											"required": [
-												"message"
-											],
-											"type": "object"
-										}
-									]
-								}
-							}
-						}
-					}
-				},
-				"tags": [
-					"App Profiles"
-				],
-				"security": [],
-				"parameters": [
-					{
-						"in": "path",
-						"name": "profileId",
-						"required": true,
-						"schema": {
-							"type": "string"
-						}
-					}
-				],
-				"requestBody": {
-					"required": true,
-					"content": {
-						"application/json": {
-							"schema": {
-								"properties": {
-									"unauthorizeApis": {
-										"items": {
-											"type": "string"
-										},
-										"type": "array"
-									}
-								},
-								"required": [
-									"unauthorizeApis"
-								],
-								"type": "object"
-							}
-						}
-					}
-				}
-			}
-		},
-		"/api/v1/pam/app_profile/get_authorized_apis/{profileId}": {
-			"get": {
-				"operationId": "GetAuthorizedApis",
-				"responses": {
-					"200": {
-						"description": "Ok",
-						"content": {
-							"application/json": {
-								"schema": {
-									"anyOf": [
-										{},
-										{
-											"properties": {
-												"message": {
-													"type": "string"
-												}
-											},
-											"required": [
-												"message"
-											],
-											"type": "object"
-										}
-									]
-								}
-							}
-						}
-					}
-				},
-				"tags": [
-					"App Profiles"
-				],
-				"security": [],
-				"parameters": [
-					{
-						"in": "path",
-						"name": "profileId",
-						"required": true,
-						"schema": {
-							"type": "string"
-						}
-					}
-				]
-			}
-		},
-		"/api/v1/pam/app_profile/authorize_bos_apps/{profileId}": {
-			"post": {
-				"operationId": "AuthorizeProfileToAccessBos",
+				"operationId": "AuthorizeToAccessPortofolioApis",
 				"responses": {
 					"200": {
 						"description": "Ok",
@@ -1474,7 +1440,123 @@
 									"anyOf": [
 										{
 											"items": {
-												"$ref": "#/components/schemas/IBosData"
+												"$ref": "#/components/schemas/IApiRoute"
+											},
+											"type": "array"
+										},
+										{
+											"properties": {
+												"message": {
+													"type": "string"
+												}
+											},
+											"required": [
+												"message"
+											],
+											"type": "object"
+										}
+									]
+								}
+							}
+						}
+					}
+				},
+				"tags": [
+					"App Profiles"
+				],
+				"security": [],
+				"parameters": [
+					{
+						"in": "path",
+						"name": "profileId",
+						"required": true,
+						"schema": {
+							"type": "string"
+						}
+					}
+				],
+				"requestBody": {
+					"required": true,
+					"content": {
+						"application/json": {
+							"schema": {
+								"$ref": "#/components/schemas/IPortofolioAuth"
+							}
+						}
+					}
+				}
+			}
+		},
+		"/api/v1/pam/app_profile/get_authorized_portofolio_apis/{profileId}/{portofolioId}": {
+			"get": {
+				"operationId": "GetAuthorizedPortofolioApis",
+				"responses": {
+					"200": {
+						"description": "Ok",
+						"content": {
+							"application/json": {
+								"schema": {
+									"anyOf": [
+										{
+											"items": {
+												"$ref": "#/components/schemas/IApiRoute"
+											},
+											"type": "array"
+										},
+										{
+											"properties": {
+												"message": {
+													"type": "string"
+												}
+											},
+											"required": [
+												"message"
+											],
+											"type": "object"
+										}
+									]
+								}
+							}
+						}
+					}
+				},
+				"tags": [
+					"App Profiles"
+				],
+				"security": [],
+				"parameters": [
+					{
+						"in": "path",
+						"name": "profileId",
+						"required": true,
+						"schema": {
+							"type": "string"
+						}
+					},
+					{
+						"in": "path",
+						"name": "portofolioId",
+						"required": true,
+						"schema": {
+							"type": "string"
+						}
+					}
+				]
+			}
+		},
+		"/api/v1/pam/app_profile/unauthorize_portofolio_apis/{profileId}": {
+			"post": {
+				"operationId": "UnauthorizeToAccessPortofolioApis",
+				"responses": {
+					"200": {
+						"description": "Ok",
+						"content": {
+							"application/json": {
+								"schema": {
+									"anyOf": [
+										{
+											"items": {
+												"type": "string"
 											},
 											"type": "array"
 										},
@@ -1515,64 +1597,22 @@
 						"application/json": {
 							"schema": {
 								"items": {
-									"$ref": "#/components/schemas/IBosAuth"
-								},
-								"type": "array"
-							}
-						}
-					}
-				}
-			}
-		},
-		"/api/v1/pam/app_profile/unauthorize_bos_apps/{profileId}": {
-			"post": {
-				"operationId": "UnauthorizeProfileToAccessBos",
-				"responses": {
-					"200": {
-						"description": "Ok",
-						"content": {
-							"application/json": {
-								"schema": {
-									"anyOf": [
-										{},
-										{
-											"properties": {
-												"message": {
-													"type": "string"
-												}
+									"properties": {
+										"portofolioId": {
+											"type": "string"
+										},
+										"apisIds": {
+											"items": {
+												"type": "string"
 											},
-											"required": [
-												"message"
-											],
-											"type": "object"
+											"type": "array"
 										}
-									]
-								}
-							}
-						}
-					}
-				},
-				"tags": [
-					"App Profiles"
-				],
-				"security": [],
-				"parameters": [
-					{
-						"in": "path",
-						"name": "profileId",
-						"required": true,
-						"schema": {
-							"type": "string"
-						}
-					}
-				],
-				"requestBody": {
-					"required": true,
-					"content": {
-						"application/json": {
-							"schema": {
-								"items": {
-									"$ref": "#/components/schemas/IBosAuth"
+									},
+									"required": [
+										"portofolioId",
+										"apisIds"
+									],
+									"type": "object"
 								},
 								"type": "array"
 							}
@@ -1581,7 +1621,7 @@
 				}
 			}
 		},
-		"/api/v1/pam/app_profile/get_authorized_bos/{profileId}": {
+		"/api/v1/pam/app_profile/get_authorized_bos/{profileId}/{portofolioId}": {
 			"get": {
 				"operationId": "GetAuthorizedBos",
 				"responses": {
@@ -1591,7 +1631,9 @@
 							"application/json": {
 								"schema": {
 									"anyOf": [
-										{},
+										{
+											"$ref": "#/components/schemas/IBosData"
+										},
 										{
 											"properties": {
 												"message": {
@@ -1621,8 +1663,233 @@
 						"schema": {
 							"type": "string"
 						}
+					},
+					{
+						"in": "path",
+						"name": "portofolioId",
+						"required": true,
+						"schema": {
+							"type": "string"
+						}
 					}
 				]
+			}
+		},
+		"/api/v1/pam/app_profile/authorize_bos_apis/{profileId}/{portofolioId}": {
+			"post": {
+				"operationId": "AuthorizeToAccessBosApis",
+				"responses": {
+					"200": {
+						"description": "Ok",
+						"content": {
+							"application/json": {
+								"schema": {
+									"anyOf": [
+										{
+											"items": {
+												"$ref": "#/components/schemas/IApiRoute"
+											},
+											"type": "array"
+										},
+										{
+											"properties": {
+												"message": {
+													"type": "string"
+												}
+											},
+											"required": [
+												"message"
+											],
+											"type": "object"
+										}
+									]
+								}
+							}
+						}
+					}
+				},
+				"tags": [
+					"App Profiles"
+				],
+				"security": [],
+				"parameters": [
+					{
+						"in": "path",
+						"name": "profileId",
+						"required": true,
+						"schema": {
+							"type": "string"
+						}
+					},
+					{
+						"in": "path",
+						"name": "portofolioId",
+						"required": true,
+						"schema": {
+							"type": "string"
+						}
+					}
+				],
+				"requestBody": {
+					"required": true,
+					"content": {
+						"application/json": {
+							"schema": {
+								"$ref": "#/components/schemas/IBosAuth"
+							}
+						}
+					}
+				}
+			}
+		},
+		"/api/v1/pam/app_profile/get_authorized_bos_apis/{profileId}/{portofolioId}/{bosId}": {
+			"get": {
+				"operationId": "GetAuthorizedBosApis",
+				"responses": {
+					"200": {
+						"description": "Ok",
+						"content": {
+							"application/json": {
+								"schema": {
+									"anyOf": [
+										{
+											"items": {
+												"$ref": "#/components/schemas/IApiRoute"
+											},
+											"type": "array"
+										},
+										{
+											"properties": {
+												"message": {
+													"type": "string"
+												}
+											},
+											"required": [
+												"message"
+											],
+											"type": "object"
+										}
+									]
+								}
+							}
+						}
+					}
+				},
+				"tags": [
+					"App Profiles"
+				],
+				"security": [],
+				"parameters": [
+					{
+						"in": "path",
+						"name": "profileId",
+						"required": true,
+						"schema": {
+							"type": "string"
+						}
+					},
+					{
+						"in": "path",
+						"name": "portofolioId",
+						"required": true,
+						"schema": {
+							"type": "string"
+						}
+					},
+					{
+						"in": "path",
+						"name": "bosId",
+						"required": true,
+						"schema": {
+							"type": "string"
+						}
+					}
+				]
+			}
+		},
+		"/api/v1/pam/app_profile/unauthorize_bos_apis/{profileId}/{portofolioId}": {
+			"post": {
+				"operationId": "UnauthorizeToAccessBosApis",
+				"responses": {
+					"200": {
+						"description": "Ok",
+						"content": {
+							"application/json": {
+								"schema": {
+									"anyOf": [
+										{
+											"items": {
+												"type": "string"
+											},
+											"type": "array"
+										},
+										{
+											"properties": {
+												"message": {
+													"type": "string"
+												}
+											},
+											"required": [
+												"message"
+											],
+											"type": "object"
+										}
+									]
+								}
+							}
+						}
+					}
+				},
+				"tags": [
+					"App Profiles"
+				],
+				"security": [],
+				"parameters": [
+					{
+						"in": "path",
+						"name": "profileId",
+						"required": true,
+						"schema": {
+							"type": "string"
+						}
+					},
+					{
+						"in": "path",
+						"name": "portofolioId",
+						"required": true,
+						"schema": {
+							"type": "string"
+						}
+					}
+				],
+				"requestBody": {
+					"required": true,
+					"content": {
+						"application/json": {
+							"schema": {
+								"items": {
+									"properties": {
+										"buildingId": {
+											"type": "string"
+										},
+										"apisIds": {
+											"items": {
+												"type": "string"
+											},
+											"type": "array"
+										}
+									},
+									"required": [
+										"buildingId",
+										"apisIds"
+									],
+									"type": "object"
+								},
+								"type": "array"
+							}
+						}
+					}
+				}
 			}
 		},
 		"/api/v1/pam/create_admin_app": {
@@ -2307,6 +2574,183 @@
 						}
 					}
 				]
+			}
+		},
+		"/api/v1/pam/upload_admin_apps": {
+			"post": {
+				"operationId": "UploadAdminApp",
+				"responses": {
+					"200": {
+						"description": "Ok",
+						"content": {
+							"application/json": {
+								"schema": {
+									"anyOf": [
+										{
+											"items": {
+												"$ref": "#/components/schemas/IApp"
+											},
+											"type": "array"
+										},
+										{
+											"properties": {
+												"message": {
+													"type": "string"
+												}
+											},
+											"required": [
+												"message"
+											],
+											"type": "object"
+										}
+									]
+								}
+							}
+						}
+					}
+				},
+				"tags": [
+					"Applications"
+				],
+				"security": [],
+				"parameters": [],
+				"requestBody": {
+					"required": true,
+					"content": {
+						"multipart/form-data": {
+							"schema": {
+								"type": "object",
+								"properties": {
+									"file": {
+										"type": "string",
+										"format": "binary"
+									}
+								},
+								"required": [
+									"file"
+								]
+							}
+						}
+					}
+				}
+			}
+		},
+		"/api/v1/pam/upload_portofolio_apps": {
+			"post": {
+				"operationId": "UploadPortofolioApp",
+				"responses": {
+					"200": {
+						"description": "Ok",
+						"content": {
+							"application/json": {
+								"schema": {
+									"anyOf": [
+										{
+											"items": {
+												"$ref": "#/components/schemas/IApp"
+											},
+											"type": "array"
+										},
+										{
+											"properties": {
+												"message": {
+													"type": "string"
+												}
+											},
+											"required": [
+												"message"
+											],
+											"type": "object"
+										}
+									]
+								}
+							}
+						}
+					}
+				},
+				"tags": [
+					"Applications"
+				],
+				"security": [],
+				"parameters": [],
+				"requestBody": {
+					"required": true,
+					"content": {
+						"multipart/form-data": {
+							"schema": {
+								"type": "object",
+								"properties": {
+									"file": {
+										"type": "string",
+										"format": "binary"
+									}
+								},
+								"required": [
+									"file"
+								]
+							}
+						}
+					}
+				}
+			}
+		},
+		"/api/v1/pam/upload_building_apps": {
+			"post": {
+				"operationId": "UploadBuildingApp",
+				"responses": {
+					"200": {
+						"description": "Ok",
+						"content": {
+							"application/json": {
+								"schema": {
+									"anyOf": [
+										{
+											"items": {
+												"$ref": "#/components/schemas/IApp"
+											},
+											"type": "array"
+										},
+										{
+											"properties": {
+												"message": {
+													"type": "string"
+												}
+											},
+											"required": [
+												"message"
+											],
+											"type": "object"
+										}
+									]
+								}
+							}
+						}
+					}
+				},
+				"tags": [
+					"Applications"
+				],
+				"security": [],
+				"parameters": [],
+				"requestBody": {
+					"required": true,
+					"content": {
+						"multipart/form-data": {
+							"schema": {
+								"type": "object",
+								"properties": {
+									"file": {
+										"type": "string",
+										"format": "binary"
+									}
+								},
+								"required": [
+									"file"
+								]
+							}
+						}
+					}
+				}
 			}
 		},
 		"/api/v1/pam/auth": {
@@ -3196,6 +3640,299 @@
 				]
 			}
 		},
+		"/api/v1/pam/add_apiRoute_to_building/{buildingId}": {
+			"post": {
+				"operationId": "AddApiToBuilding",
+				"responses": {
+					"200": {
+						"description": "Ok",
+						"content": {
+							"application/json": {
+								"schema": {
+									"anyOf": [
+										{
+											"items": {
+												"$ref": "#/components/schemas/IApiRoute"
+											},
+											"type": "array"
+										},
+										{
+											"properties": {
+												"message": {
+													"type": "string"
+												}
+											},
+											"required": [
+												"message"
+											],
+											"type": "object"
+										}
+									]
+								}
+							}
+						}
+					}
+				},
+				"tags": [
+					"Building"
+				],
+				"security": [],
+				"parameters": [
+					{
+						"in": "path",
+						"name": "buildingId",
+						"required": true,
+						"schema": {
+							"type": "string"
+						}
+					}
+				],
+				"requestBody": {
+					"required": true,
+					"content": {
+						"application/json": {
+							"schema": {
+								"properties": {
+									"apisIds": {
+										"items": {
+											"type": "string"
+										},
+										"type": "array"
+									}
+								},
+								"required": [
+									"apisIds"
+								],
+								"type": "object"
+							}
+						}
+					}
+				}
+			}
+		},
+		"/api/v1/pam/get_apisRoute_from_building/{buildingId}": {
+			"get": {
+				"operationId": "GetApisFromBuilding",
+				"responses": {
+					"200": {
+						"description": "Ok",
+						"content": {
+							"application/json": {
+								"schema": {
+									"anyOf": [
+										{
+											"items": {
+												"$ref": "#/components/schemas/IApiRoute"
+											},
+											"type": "array"
+										},
+										{
+											"properties": {
+												"message": {
+													"type": "string"
+												}
+											},
+											"required": [
+												"message"
+											],
+											"type": "object"
+										}
+									]
+								}
+							}
+						}
+					}
+				},
+				"tags": [
+					"Building"
+				],
+				"security": [],
+				"parameters": [
+					{
+						"in": "path",
+						"name": "buildingId",
+						"required": true,
+						"schema": {
+							"type": "string"
+						}
+					}
+				]
+			}
+		},
+		"/api/v1/pam/get_apiRoute_from_building/{buildingId}/{apiId}": {
+			"get": {
+				"operationId": "GetApiFromBuilding",
+				"responses": {
+					"200": {
+						"description": "Ok",
+						"content": {
+							"application/json": {
+								"schema": {
+									"anyOf": [
+										{
+											"$ref": "#/components/schemas/IApiRoute"
+										},
+										{
+											"properties": {
+												"message": {
+													"type": "string"
+												}
+											},
+											"required": [
+												"message"
+											],
+											"type": "object"
+										}
+									]
+								}
+							}
+						}
+					}
+				},
+				"tags": [
+					"Building"
+				],
+				"security": [],
+				"parameters": [
+					{
+						"in": "path",
+						"name": "buildingId",
+						"required": true,
+						"schema": {
+							"type": "string"
+						}
+					},
+					{
+						"in": "path",
+						"name": "apiId",
+						"required": true,
+						"schema": {
+							"type": "string"
+						}
+					}
+				]
+			}
+		},
+		"/api/v1/pam/remove_apiRoute_from_building/{buildingId}": {
+			"delete": {
+				"operationId": "RemoveApisFromBuilding",
+				"responses": {
+					"200": {
+						"description": "Ok",
+						"content": {
+							"application/json": {
+								"schema": {
+									"properties": {
+										"ids": {
+											"items": {
+												"type": "string"
+											},
+											"type": "array"
+										},
+										"message": {
+											"type": "string"
+										}
+									},
+									"required": [
+										"message"
+									],
+									"type": "object"
+								}
+							}
+						}
+					}
+				},
+				"tags": [
+					"Building"
+				],
+				"security": [],
+				"parameters": [
+					{
+						"in": "path",
+						"name": "buildingId",
+						"required": true,
+						"schema": {
+							"type": "string"
+						}
+					}
+				],
+				"requestBody": {
+					"required": true,
+					"content": {
+						"application/json": {
+							"schema": {
+								"properties": {
+									"apisIds": {
+										"items": {
+											"type": "string"
+										},
+										"type": "array"
+									}
+								},
+								"required": [
+									"apisIds"
+								],
+								"type": "object"
+							}
+						}
+					}
+				}
+			}
+		},
+		"/api/v1/pam/building_has_apiRoute/{buildingId}/{apiId}": {
+			"get": {
+				"operationId": "BuildingHasApi",
+				"responses": {
+					"200": {
+						"description": "Ok",
+						"content": {
+							"application/json": {
+								"schema": {
+									"anyOf": [
+										{
+											"type": "boolean"
+										},
+										{
+											"properties": {
+												"message": {
+													"type": "string"
+												}
+											},
+											"required": [
+												"message"
+											],
+											"type": "object"
+										}
+									]
+								}
+							}
+						}
+					}
+				},
+				"tags": [
+					"Building"
+				],
+				"security": [],
+				"parameters": [
+					{
+						"in": "path",
+						"name": "buildingId",
+						"required": true,
+						"schema": {
+							"type": "string"
+						}
+					},
+					{
+						"in": "path",
+						"name": "apiId",
+						"required": true,
+						"schema": {
+							"type": "string"
+						}
+					}
+				]
+			}
+		},
 		"/api/v1/pam/create_digitaltwin": {
 			"post": {
 				"operationId": "CreateDigitalTwin",
@@ -3263,7 +4000,9 @@
 							"application/json": {
 								"schema": {
 									"anyOf": [
-										{},
+										{
+											"$ref": "#/components/schemas/IPortofolioData"
+										},
 										{
 											"properties": {
 												"message": {
@@ -3444,7 +4183,9 @@
 							"application/json": {
 								"schema": {
 									"anyOf": [
-										{},
+										{
+											"$ref": "#/components/schemas/IPortofolioData"
+										},
 										{
 											"properties": {
 												"message": {
@@ -4087,6 +4828,299 @@
 				]
 			}
 		},
+		"/api/v1/pam/add_apiRoute_to_portofolio/{portofolioId}": {
+			"post": {
+				"operationId": "AddApiToPortofolio",
+				"responses": {
+					"200": {
+						"description": "Ok",
+						"content": {
+							"application/json": {
+								"schema": {
+									"anyOf": [
+										{
+											"items": {
+												"$ref": "#/components/schemas/IApiRoute"
+											},
+											"type": "array"
+										},
+										{
+											"properties": {
+												"message": {
+													"type": "string"
+												}
+											},
+											"required": [
+												"message"
+											],
+											"type": "object"
+										}
+									]
+								}
+							}
+						}
+					}
+				},
+				"tags": [
+					"Portofolio"
+				],
+				"security": [],
+				"parameters": [
+					{
+						"in": "path",
+						"name": "portofolioId",
+						"required": true,
+						"schema": {
+							"type": "string"
+						}
+					}
+				],
+				"requestBody": {
+					"required": true,
+					"content": {
+						"application/json": {
+							"schema": {
+								"properties": {
+									"apisIds": {
+										"items": {
+											"type": "string"
+										},
+										"type": "array"
+									}
+								},
+								"required": [
+									"apisIds"
+								],
+								"type": "object"
+							}
+						}
+					}
+				}
+			}
+		},
+		"/api/v1/pam/get_apisRoute_from_portofolio/{portofolioId}": {
+			"get": {
+				"operationId": "GetPortofolioApis",
+				"responses": {
+					"200": {
+						"description": "Ok",
+						"content": {
+							"application/json": {
+								"schema": {
+									"anyOf": [
+										{
+											"items": {
+												"$ref": "#/components/schemas/IApiRoute"
+											},
+											"type": "array"
+										},
+										{
+											"properties": {
+												"message": {
+													"type": "string"
+												}
+											},
+											"required": [
+												"message"
+											],
+											"type": "object"
+										}
+									]
+								}
+							}
+						}
+					}
+				},
+				"tags": [
+					"Portofolio"
+				],
+				"security": [],
+				"parameters": [
+					{
+						"in": "path",
+						"name": "portofolioId",
+						"required": true,
+						"schema": {
+							"type": "string"
+						}
+					}
+				]
+			}
+		},
+		"/api/v1/pam/get_apiRoute_from_portofolio/{portofolioId}/{apiId}": {
+			"get": {
+				"operationId": "GetApiFromPortofolio",
+				"responses": {
+					"200": {
+						"description": "Ok",
+						"content": {
+							"application/json": {
+								"schema": {
+									"anyOf": [
+										{
+											"$ref": "#/components/schemas/IApiRoute"
+										},
+										{
+											"properties": {
+												"message": {
+													"type": "string"
+												}
+											},
+											"required": [
+												"message"
+											],
+											"type": "object"
+										}
+									]
+								}
+							}
+						}
+					}
+				},
+				"tags": [
+					"Portofolio"
+				],
+				"security": [],
+				"parameters": [
+					{
+						"in": "path",
+						"name": "portofolioId",
+						"required": true,
+						"schema": {
+							"type": "string"
+						}
+					},
+					{
+						"in": "path",
+						"name": "apiId",
+						"required": true,
+						"schema": {
+							"type": "string"
+						}
+					}
+				]
+			}
+		},
+		"/api/v1/pam/remove_apiRoute_from_portofolio/{portofolioId}": {
+			"delete": {
+				"operationId": "RemoveApiFromPortofolio",
+				"responses": {
+					"200": {
+						"description": "Ok",
+						"content": {
+							"application/json": {
+								"schema": {
+									"properties": {
+										"ids": {
+											"items": {
+												"type": "string"
+											},
+											"type": "array"
+										},
+										"message": {
+											"type": "string"
+										}
+									},
+									"required": [
+										"message"
+									],
+									"type": "object"
+								}
+							}
+						}
+					}
+				},
+				"tags": [
+					"Portofolio"
+				],
+				"security": [],
+				"parameters": [
+					{
+						"in": "path",
+						"name": "portofolioId",
+						"required": true,
+						"schema": {
+							"type": "string"
+						}
+					}
+				],
+				"requestBody": {
+					"required": true,
+					"content": {
+						"application/json": {
+							"schema": {
+								"properties": {
+									"apisIds": {
+										"items": {
+											"type": "string"
+										},
+										"type": "array"
+									}
+								},
+								"required": [
+									"apisIds"
+								],
+								"type": "object"
+							}
+						}
+					}
+				}
+			}
+		},
+		"/api/v1/pam/portofolio_has_apiRoute/{portofolioId}/{apiId}": {
+			"get": {
+				"operationId": "PortofolioHasApi",
+				"responses": {
+					"200": {
+						"description": "Ok",
+						"content": {
+							"application/json": {
+								"schema": {
+									"anyOf": [
+										{
+											"type": "boolean"
+										},
+										{
+											"properties": {
+												"message": {
+													"type": "string"
+												}
+											},
+											"required": [
+												"message"
+											],
+											"type": "object"
+										}
+									]
+								}
+							}
+						}
+					}
+				},
+				"tags": [
+					"Portofolio"
+				],
+				"security": [],
+				"parameters": [
+					{
+						"in": "path",
+						"name": "portofolioId",
+						"required": true,
+						"schema": {
+							"type": "string"
+						}
+					},
+					{
+						"in": "path",
+						"name": "apiId",
+						"required": true,
+						"schema": {
+							"type": "string"
+						}
+					}
+				]
+			}
+		},
 		"/api/v1/pam/user_profile/create_profile": {
 			"post": {
 				"operationId": "CreateUserProfile",
@@ -4315,6 +5349,55 @@
 				]
 			}
 		},
+		"/api/v1/pam/user_profile/get_authorized_portofolio/{profileId}": {
+			"get": {
+				"operationId": "GetAuthorizedPortofolioApps",
+				"responses": {
+					"200": {
+						"description": "Ok",
+						"content": {
+							"application/json": {
+								"schema": {
+									"anyOf": [
+										{
+											"items": {
+												"$ref": "#/components/schemas/IPortofolioData"
+											},
+											"type": "array"
+										},
+										{
+											"properties": {
+												"message": {
+													"type": "string"
+												}
+											},
+											"required": [
+												"message"
+											],
+											"type": "object"
+										}
+									]
+								}
+							}
+						}
+					}
+				},
+				"tags": [
+					"user Profiles"
+				],
+				"security": [],
+				"parameters": [
+					{
+						"in": "path",
+						"name": "profileId",
+						"required": true,
+						"schema": {
+							"type": "string"
+						}
+					}
+				]
+			}
+		},
 		"/api/v1/pam/user_profile/authorize_portofolio_apps/{profileId}": {
 			"post": {
 				"operationId": "AuthorizeToAccessPortofolioApps",
@@ -4368,13 +5451,80 @@
 						"application/json": {
 							"schema": {
 								"items": {
-									"$ref": "#/components/schemas/IPortofolioAuth"
+									"properties": {
+										"portofolioId": {
+											"type": "string"
+										},
+										"appsIds": {
+											"items": {
+												"type": "string"
+											},
+											"type": "array"
+										}
+									},
+									"required": [
+										"portofolioId",
+										"appsIds"
+									],
+									"type": "object"
 								},
 								"type": "array"
 							}
 						}
 					}
 				}
+			}
+		},
+		"/api/v1/pam/user_profile/get_authorized_portofolio_apps/{profileId}/{portofolioId}": {
+			"get": {
+				"operationId": "GetAuthorizedPortofolioApis",
+				"responses": {
+					"200": {
+						"description": "Ok",
+						"content": {
+							"application/json": {
+								"schema": {
+									"anyOf": [
+										{},
+										{
+											"properties": {
+												"message": {
+													"type": "string"
+												}
+											},
+											"required": [
+												"message"
+											],
+											"type": "object"
+										}
+									]
+								}
+							}
+						}
+					}
+				},
+				"tags": [
+					"user Profiles"
+				],
+				"security": [],
+				"parameters": [
+					{
+						"in": "path",
+						"name": "profileId",
+						"required": true,
+						"schema": {
+							"type": "string"
+						}
+					},
+					{
+						"in": "path",
+						"name": "portofolioId",
+						"required": true,
+						"schema": {
+							"type": "string"
+						}
+					}
+				]
 			}
 		},
 		"/api/v1/pam/user_profile/unauthorize_portofolio_apps/{profileId}": {
@@ -4425,7 +5575,22 @@
 						"application/json": {
 							"schema": {
 								"items": {
-									"$ref": "#/components/schemas/IPortofolioAuth"
+									"properties": {
+										"portofolioId": {
+											"type": "string"
+										},
+										"appsIds": {
+											"items": {
+												"type": "string"
+											},
+											"type": "array"
+										}
+									},
+									"required": [
+										"portofolioId",
+										"appsIds"
+									],
+									"type": "object"
 								},
 								"type": "array"
 							}
@@ -4434,9 +5599,9 @@
 				}
 			}
 		},
-		"/api/v1/pam/user_profile/get_authorized_portofolio/{profileId}": {
+		"/api/v1/pam/user_profile/get_authorized_bos/{profileId}/{portofolioId}": {
 			"get": {
-				"operationId": "GetAuthorizedPortofolioApps",
+				"operationId": "GetAuthorizedBos",
 				"responses": {
 					"200": {
 						"description": "Ok",
@@ -4444,12 +5609,7 @@
 							"application/json": {
 								"schema": {
 									"anyOf": [
-										{
-											"items": {
-												"$ref": "#/components/schemas/IPortofolioData"
-											},
-											"type": "array"
-										},
+										{},
 										{
 											"properties": {
 												"message": {
@@ -4475,6 +5635,14 @@
 					{
 						"in": "path",
 						"name": "profileId",
+						"required": true,
+						"schema": {
+							"type": "string"
+						}
+					},
+					{
+						"in": "path",
+						"name": "portofolioId",
 						"required": true,
 						"schema": {
 							"type": "string"
@@ -4483,183 +5651,9 @@
 				]
 			}
 		},
-		"/api/v1/pam/user_profile/authorize_apis/{profileId}": {
+		"/api/v1/pam/user_profile/authorize_bos_apps/{profileId}/{portofolioId}": {
 			"post": {
-				"operationId": "AuthorizeToAccessApis",
-				"responses": {
-					"200": {
-						"description": "Ok",
-						"content": {
-							"application/json": {
-								"schema": {
-									"anyOf": [
-										{},
-										{
-											"properties": {
-												"message": {
-													"type": "string"
-												}
-											},
-											"required": [
-												"message"
-											],
-											"type": "object"
-										}
-									]
-								}
-							}
-						}
-					}
-				},
-				"tags": [
-					"user Profiles"
-				],
-				"security": [],
-				"parameters": [
-					{
-						"in": "path",
-						"name": "profileId",
-						"required": true,
-						"schema": {
-							"type": "string"
-						}
-					}
-				],
-				"requestBody": {
-					"required": true,
-					"content": {
-						"application/json": {
-							"schema": {
-								"properties": {
-									"authorizeApis": {
-										"items": {
-											"type": "string"
-										},
-										"type": "array"
-									}
-								},
-								"required": [
-									"authorizeApis"
-								],
-								"type": "object"
-							}
-						}
-					}
-				}
-			}
-		},
-		"/api/v1/pam/user_profile/unauthorize_apis/{profileId}": {
-			"post": {
-				"operationId": "UnauthorizeToAccessApis",
-				"responses": {
-					"200": {
-						"description": "Ok",
-						"content": {
-							"application/json": {
-								"schema": {
-									"anyOf": [
-										{},
-										{
-											"properties": {
-												"message": {
-													"type": "string"
-												}
-											},
-											"required": [
-												"message"
-											],
-											"type": "object"
-										}
-									]
-								}
-							}
-						}
-					}
-				},
-				"tags": [
-					"user Profiles"
-				],
-				"security": [],
-				"parameters": [
-					{
-						"in": "path",
-						"name": "profileId",
-						"required": true,
-						"schema": {
-							"type": "string"
-						}
-					}
-				],
-				"requestBody": {
-					"required": true,
-					"content": {
-						"application/json": {
-							"schema": {
-								"properties": {
-									"unauthorizeApis": {
-										"items": {
-											"type": "string"
-										},
-										"type": "array"
-									}
-								},
-								"required": [
-									"unauthorizeApis"
-								],
-								"type": "object"
-							}
-						}
-					}
-				}
-			}
-		},
-		"/api/v1/pam/user_profile/get_authorized_apis/{profileId}": {
-			"get": {
-				"operationId": "GetAuthorizedApis",
-				"responses": {
-					"200": {
-						"description": "Ok",
-						"content": {
-							"application/json": {
-								"schema": {
-									"anyOf": [
-										{},
-										{
-											"properties": {
-												"message": {
-													"type": "string"
-												}
-											},
-											"required": [
-												"message"
-											],
-											"type": "object"
-										}
-									]
-								}
-							}
-						}
-					}
-				},
-				"tags": [
-					"user Profiles"
-				],
-				"security": [],
-				"parameters": [
-					{
-						"in": "path",
-						"name": "profileId",
-						"required": true,
-						"schema": {
-							"type": "string"
-						}
-					}
-				]
-			}
-		},
-		"/api/v1/pam/user_profile/authorize_bos_apps/{profileId}": {
-			"post": {
-				"operationId": "AuthorizeProfileToAccessBos",
+				"operationId": "AuthorizeToAccessBosApps",
 				"responses": {
 					"200": {
 						"description": "Ok",
@@ -4702,6 +5696,14 @@
 						"schema": {
 							"type": "string"
 						}
+					},
+					{
+						"in": "path",
+						"name": "portofolioId",
+						"required": true,
+						"schema": {
+							"type": "string"
+						}
 					}
 				],
 				"requestBody": {
@@ -4719,9 +5721,9 @@
 				}
 			}
 		},
-		"/api/v1/pam/user_profile/unauthorize_bos_apps/{profileId}": {
-			"post": {
-				"operationId": "UnauthorizeProfileToAccessBos",
+		"/api/v1/pam/user_profile/get_authorized_bos_apps/{profileId}/{portofolioId}/{bosId}": {
+			"get": {
+				"operationId": "GetAuthorizedBosApis",
 				"responses": {
 					"200": {
 						"description": "Ok",
@@ -4759,65 +5761,104 @@
 						"schema": {
 							"type": "string"
 						}
-					}
-				],
-				"requestBody": {
-					"required": true,
-					"content": {
-						"application/json": {
-							"schema": {
-								"items": {
-									"$ref": "#/components/schemas/IBosAuth"
-								},
-								"type": "array"
-							}
-						}
-					}
-				}
-			}
-		},
-		"/api/v1/pam/user_profile/get_authorized_bos/{profileId}": {
-			"get": {
-				"operationId": "GetAuthorizedBos",
-				"responses": {
-					"200": {
-						"description": "Ok",
-						"content": {
-							"application/json": {
-								"schema": {
-									"anyOf": [
-										{},
-										{
-											"properties": {
-												"message": {
-													"type": "string"
-												}
-											},
-											"required": [
-												"message"
-											],
-											"type": "object"
-										}
-									]
-								}
-							}
-						}
-					}
-				},
-				"tags": [
-					"user Profiles"
-				],
-				"security": [],
-				"parameters": [
+					},
 					{
 						"in": "path",
-						"name": "profileId",
+						"name": "portofolioId",
+						"required": true,
+						"schema": {
+							"type": "string"
+						}
+					},
+					{
+						"in": "path",
+						"name": "bosId",
 						"required": true,
 						"schema": {
 							"type": "string"
 						}
 					}
 				]
+			}
+		},
+		"/api/v1/pam/user_profile/unauthorize_bos_apps/{profileId}/{portofolioId}": {
+			"post": {
+				"operationId": "UnauthorizeToAccessBosApp",
+				"responses": {
+					"200": {
+						"description": "Ok",
+						"content": {
+							"application/json": {
+								"schema": {
+									"anyOf": [
+										{},
+										{
+											"properties": {
+												"message": {
+													"type": "string"
+												}
+											},
+											"required": [
+												"message"
+											],
+											"type": "object"
+										}
+									]
+								}
+							}
+						}
+					}
+				},
+				"tags": [
+					"user Profiles"
+				],
+				"security": [],
+				"parameters": [
+					{
+						"in": "path",
+						"name": "profileId",
+						"required": true,
+						"schema": {
+							"type": "string"
+						}
+					},
+					{
+						"in": "path",
+						"name": "portofolioId",
+						"required": true,
+						"schema": {
+							"type": "string"
+						}
+					}
+				],
+				"requestBody": {
+					"required": true,
+					"content": {
+						"application/json": {
+							"schema": {
+								"items": {
+									"properties": {
+										"buildingId": {
+											"type": "string"
+										},
+										"appsIds": {
+											"items": {
+												"type": "string"
+											},
+											"type": "array"
+										}
+									},
+									"required": [
+										"buildingId",
+										"appsIds"
+									],
+									"type": "object"
+								},
+								"type": "array"
+							}
+						}
+					}
+				}
 			}
 		}
 	},

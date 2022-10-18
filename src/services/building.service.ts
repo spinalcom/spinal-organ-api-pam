@@ -23,7 +23,7 @@
  */
 
 import {
-    BOS_BASE_URI, BUILDING_CONTEXT_NAME, BUILDING_CONTEXT_TYPE, BUILDING_TYPE, BUILDING_RELATION_NAME, PTR_LST_TYPE, APP_RELATION_NAME
+    BOS_BASE_URI_V2, BUILDING_CONTEXT_NAME, BUILDING_CONTEXT_TYPE, BUILDING_TYPE, BUILDING_RELATION_NAME, PTR_LST_TYPE, APP_RELATION_NAME, BUILDING_API_GROUP_TYPE, API_RELATION_NAME
 } from "../constant";
 import { SpinalContext, SpinalGraphService, SpinalNode } from "spinal-env-viewer-graph-service";
 import { IBuilding, IEditBuilding, ILocation } from "../interfaces";
@@ -32,7 +32,7 @@ import * as openGeocoder from "node-open-geocoder";
 
 import axios from "axios";
 import { PortofolioService } from "./portofolio.service";
-import { AppService, configServiceInstance } from ".";
+import { APIService, AppService, configServiceInstance } from ".";
 const axiosInstance = axios.create({ baseURL: `http://localhost:${process.env.HUB_PORT}` });
 // import * as NodeGeocoder from "node-geocoder";
 
@@ -104,7 +104,7 @@ export class BuildingService {
     }
 
     public async getBuildingFromPortofolio(portofolioId: string, buildingId: string): Promise<void | SpinalNode> {
-        return PortofolioService.getInstance().portofolioHasBuilding(portofolioId, buildingId);
+        return PortofolioService.getInstance().getBuildingFromPortofolio(portofolioId, buildingId);
     }
 
     public async getAllBuildingsFromPortofolio(portfolioId: string): Promise<SpinalNode[]> {
@@ -253,7 +253,74 @@ export class BuildingService {
         return app ? true : false;
     }
 
+    //////////////////////////////////////////////////////
+    //                      APIS                        //
+    //////////////////////////////////////////////////////
 
+    public async addApiToBuilding(building: string | SpinalNode, apisIds: string | string[]): Promise<SpinalNode[]> {
+        if (typeof building === "string") building = await this.getBuildingById(building);
+        if (!(building instanceof SpinalNode)) throw new Error(`No building found for ${building}`);
+
+        if (!Array.isArray(apisIds)) apisIds = [apisIds];
+
+        return apisIds.reduce(async (prom, appId: string) => {
+            const liste = await prom;
+            const apiNode = await APIService.getInstance().getApiRouteById(appId, BUILDING_API_GROUP_TYPE);
+            if (!(apiNode instanceof SpinalNode)) return liste;
+
+            const childrenIds = (<SpinalNode>building).getChildrenIds();
+            const isChild = childrenIds.find(el => el === appId);
+
+            if (!isChild) await (<SpinalNode>building).addChildInContext(apiNode, API_RELATION_NAME, PTR_LST_TYPE, this.context);
+            liste.push(apiNode);
+            return liste;
+        }, Promise.resolve([]));
+
+    }
+
+    public async getApisFromBuilding(building: string | SpinalNode): Promise<SpinalNode[]> {
+        if (typeof building === "string") building = await this.getBuildingById(building);
+        if (!(building instanceof SpinalNode)) return [];
+
+        return building.getChildren([API_RELATION_NAME]);
+    }
+
+    public async getApiFromBuilding(building: string | SpinalNode, apiId: string): Promise<SpinalNode> {
+        const children = await this.getApisFromBuilding(building);
+        return children.find(el => el.getId().get() === apiId);
+    }
+
+    public async removeApisFromBuilding(building: string | SpinalNode, apisIds: string | string[]): Promise<string[]> {
+        if (typeof building === "string") building = await this.getBuildingById(building);
+        if (!(building instanceof SpinalNode)) return [];
+        if (!Array.isArray(apisIds)) apisIds = [apisIds];
+
+        return apisIds.reduce(async (prom, apiId: string) => {
+
+            const liste = await prom;
+            const apiNode = await this.getApiFromBuilding(building, apiId);
+            if (!(apiNode instanceof SpinalNode)) return liste;
+
+            try {
+                await (<SpinalNode>building).removeChild(apiNode, API_RELATION_NAME, PTR_LST_TYPE);
+                liste.push(apiId);
+            } catch (error) { }
+
+            return liste;
+
+
+        }, Promise.resolve([]))
+
+    }
+
+    public async buildingHasApi(building: string | SpinalNode, apiId: string): Promise<boolean> {
+        const app = await this.getApiFromBuilding(building, apiId);
+        return app ? true : false;
+    }
+
+    public async uploadSwaggerFile(buffer: Buffer): Promise<any[]> {
+        return APIService.getInstance().uploadSwaggerFile(buffer, BUILDING_API_GROUP_TYPE);
+    }
 
     /////////////////////////////////////////////////////
     //                  PRIVATES                       //
@@ -272,7 +339,7 @@ export class BuildingService {
     }
 
     private _getBuildingTypeCount(buildingId: string): Promise<{ [key: string]: number }> {
-        return axiosInstance.get(`${BOS_BASE_URI}/${buildingId}/api/v1/geographicContext/tree`)
+        return axiosInstance.get(`${BOS_BASE_URI_V2}/${buildingId}/api/v1/geographicContext/tree`)
             .then(res => {
                 return this._countTypeHelper(res.data);
             })
@@ -284,7 +351,7 @@ export class BuildingService {
 
     private _getBuildingArea(buildingId: string): Promise<number> {
         return axiosInstance
-            .get(`${BOS_BASE_URI}/${buildingId}/api/v1/building/read`)
+            .get(`${BOS_BASE_URI_V2}/${buildingId}/api/v1/building/read`)
             .then((response) => {
                 return response.data.area;
             })

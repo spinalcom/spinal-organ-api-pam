@@ -30,8 +30,8 @@ import * as express from 'express';
 import * as morgan from "morgan";
 import * as path from "path";
 import { HTTP_CODES, routesToProxy } from "./constant";
+import configureBosProxy from "./proxyToBos";
 import { AuthentificationService } from './services';
-import AuthorizationService from './services/authorization.service';
 var proxy = require('express-http-proxy');
 import * as swaggerUi from "swagger-ui-express";
 
@@ -107,6 +107,9 @@ export default function initExpress() {
 
   var app = express();
   app.use(morgan('dev'));
+
+  configureBosProxy(app);
+  configureBosProxy(app, true);
 
   useHubProxy(app);
   useApiMiddleWare(app);

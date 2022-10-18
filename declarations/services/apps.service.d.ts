@@ -1,5 +1,11 @@
+/// <reference types="node" />
 import { SpinalContext, SpinalNode } from "spinal-env-viewer-graph-service";
 import { IApp, IEditApp } from "../interfaces";
+export declare const AppsType: Readonly<{
+    admin: "admin";
+    building: "building";
+    portofolio: "portofolio";
+}>;
 export declare class AppService {
     private static instance;
     context: SpinalContext;
@@ -23,5 +29,8 @@ export declare class AppService {
     deleteBuildingApp(appId: string): Promise<boolean>;
     linkAppToPortofolio(portfolioId: string, appId: string): Promise<boolean>;
     linkAppToBuilding(buildingId: string, appId: string): Promise<boolean>;
+    uploadApps(appType: string, fileData: Buffer, isExcel?: boolean): Promise<SpinalNode[]>;
     private _getApplicationGroupNode;
+    private _convertExcelToJson;
+    private _formatAppsJson;
 }

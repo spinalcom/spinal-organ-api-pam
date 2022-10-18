@@ -48,11 +48,12 @@
 
 import { SpinalContext, SpinalGraphService, SpinalNode } from "spinal-env-viewer-graph-service";
 import { configServiceInstance } from "./configFile.service";
-import { PORTOFOLIO_CONTEXT_NAME, PORTOFOLIO_CONTEXT_TYPE, PORTOFOLIO_TYPE, CONTEXT_TO_PORTOFOLIO_RELATION_NAME, APP_RELATION_NAME, PTR_LST_TYPE, BUILDING_RELATION_NAME } from '../constant'
+import { PORTOFOLIO_CONTEXT_NAME, PORTOFOLIO_CONTEXT_TYPE, PORTOFOLIO_TYPE, CONTEXT_TO_PORTOFOLIO_RELATION_NAME, APP_RELATION_NAME, PTR_LST_TYPE, BUILDING_RELATION_NAME, PORTOFOLIO_API_GROUP_TYPE, API_RELATION_NAME } from '../constant'
 import { AppService } from './apps.service'
-import { IPortofolioDetails } from "../interfaces";
+import { IPortofolioData, IPortofolioDetails } from "../interfaces";
 import { async } from "q";
 import { BuildingService } from "./building.service";
+import { APIService } from "./apis.service";
 
 export class PortofolioService {
     private static instance: PortofolioService;
@@ -71,17 +72,19 @@ export class PortofolioService {
         return this.context;
     }
 
-    public async addPortofolio(portofolioName: string, buildingsIds: string[] = [], appsIds: string[] = []): Promise<IPortofolioDetails> {
+    public async addPortofolio(portofolioName: string, buildingsIds: string[] = [], appsIds: string[] = [], apisIds = []): Promise<IPortofolioDetails> {
         const node = new SpinalNode(portofolioName, PORTOFOLIO_TYPE);
         await this.context.addChildInContext(node, CONTEXT_TO_PORTOFOLIO_RELATION_NAME, PTR_LST_TYPE, this.context);
 
-        const apps = await this.addAppToPortofolio(node, appsIds)
+        const apps = await this.addAppToPortofolio(node, appsIds);
+        const apis = await this.addApiToPortofolio(node, apisIds);
         const buildings = await this.addBuildingToPortofolio(node, buildingsIds);
 
         return {
             node,
             apps,
-            buildings
+            buildings,
+            apis
         }
     }
 
@@ -107,9 +110,9 @@ export class PortofolioService {
 
         if (!node) throw new Error(`No portofolio found for {portofolio}`);
 
-        const [apps, buildings] = await Promise.all([this.getPortofolioApps(node), this.getPortofolioBuildings(node)])
+        const [apps, buildings, apis] = await Promise.all([this.getPortofolioApps(node), this.getPortofolioBuildings(node), this.getPortofolioApis(node)])
 
-        return { node, apps, buildings };
+        return { node, apps, buildings, apis };
     }
 
     public async getAllPortofoliosDetails(): Promise<IPortofolioDetails[]> {
@@ -201,6 +204,78 @@ export class PortofolioService {
     }
 
     //////////////////////////////////////////////////////
+    //                      APIS                        //
+    //////////////////////////////////////////////////////
+
+    public async addApiToPortofolio(portofolio: string | SpinalNode, apisIds: string | string[]): Promise<SpinalNode[]> {
+        if (typeof portofolio === "string") portofolio = await this.getPortofolio(portofolio);
+        if (!(portofolio instanceof SpinalNode)) throw new Error(`No portofolio found for ${portofolio}`);
+
+        if (!Array.isArray(apisIds)) apisIds = [apisIds];
+
+        return apisIds.reduce(async (prom, apiId: string) => {
+            const liste = await prom;
+            const apiNode = await APIService.getInstance().getApiRouteById(apiId, PORTOFOLIO_API_GROUP_TYPE);
+            if (!(apiNode instanceof SpinalNode)) return liste;
+
+            const childrenIds = (<SpinalNode>portofolio).getChildrenIds();
+            const isChild = childrenIds.find(el => el === apiId);
+
+            if (!isChild) (<SpinalNode>portofolio).addChildInContext(apiNode, API_RELATION_NAME, PTR_LST_TYPE, this.context);
+            liste.push(apiNode);
+            return liste;
+
+        }, Promise.resolve([]))
+    }
+
+    public async getPortofolioApis(portofolio: string | SpinalNode): Promise<SpinalNode[]> {
+        if (typeof portofolio === "string") portofolio = await this.getPortofolio(portofolio);
+        if (!(portofolio instanceof SpinalNode)) return [];
+
+        return portofolio.getChildren([API_RELATION_NAME]);
+    }
+
+    public async getApiFromPortofolio(portofolio: string | SpinalNode, apiId: string): Promise<SpinalNode> {
+        if (typeof portofolio === "string") portofolio = await this.getPortofolio(portofolio);
+        if (!(portofolio instanceof SpinalNode)) return;
+
+        const children = await this.getPortofolioApis(portofolio);
+        return children.find(el => el.getId().get() === apiId);
+    }
+
+    public async removeApiFromPortofolio(portofolio: string | SpinalNode, apisIds: string | string[]): Promise<string[]> {
+        if (typeof portofolio === "string") portofolio = await this.getPortofolio(portofolio);
+        if (!(portofolio instanceof SpinalNode)) throw new Error(`No portofolio found for ${portofolio}`);
+
+        if (!Array.isArray(apisIds)) apisIds = [apisIds];
+
+        return apisIds.reduce(async (prom, apiId: string) => {
+            const liste = await prom;
+            const appNode = await this.getApiFromPortofolio(portofolio, apiId);
+            if (!(appNode instanceof SpinalNode)) return liste
+
+            try {
+                await (<SpinalNode>portofolio).removeChild(appNode, API_RELATION_NAME, PTR_LST_TYPE);
+                liste.push(apiId);
+            } catch (error) { }
+
+            return liste;
+
+        }, Promise.resolve([]))
+
+    }
+
+    public async portofolioHasApi(portofolio: string | SpinalNode, apiId: string): Promise<SpinalNode | void> {
+        const apps = await this.getPortofolioApis(portofolio);
+        return apps.find(el => el.getId().get() === apiId);
+    }
+
+
+    public async uploadSwaggerFile(buffer: Buffer): Promise<any[]> {
+        return APIService.getInstance().uploadSwaggerFile(buffer, PORTOFOLIO_API_GROUP_TYPE);
+    }
+
+    //////////////////////////////////////////////////////
     //                      BUILDINGS                   //
     //////////////////////////////////////////////////////
 
@@ -243,7 +318,7 @@ export class PortofolioService {
 
         return buildingId.reduce(async (prom, id: string) => {
             const liste = await prom;
-            const buildingNode = await BuildingService.getInstance().getBuildingById(id);
+            const buildingNode = await this.getBuildingFromPortofolio(portofolio, id);
             if (!(buildingNode instanceof SpinalNode)) return liste;
 
             try {
@@ -260,19 +335,17 @@ export class PortofolioService {
 
     }
 
-    public async portofolioHasBuilding(portofolio: string | SpinalNode, buildingId: string): Promise<SpinalNode | void> {
+    public async getBuildingFromPortofolio(portofolio: string | SpinalNode, buildingId: string): Promise<SpinalNode | void> {
         const buildings = await this.getPortofolioBuildings(portofolio);
         return buildings.find(el => el.getId().get() === buildingId);
     }
 
-
-
-
-    _formatDetails(node: SpinalNode, apps: SpinalNode[], buildings: SpinalNode[]) {
+    public _formatDetails(node: SpinalNode, apps: SpinalNode[], buildings: SpinalNode[], apis: SpinalNode[] = []): IPortofolioData {
         return {
             ...node.info.get(),
             buildings: buildings.map(el => el.info.get()),
-            apps: apps.map(el => el.info.get())
+            apps: apps.map(el => el.info.get()),
+            apis: apis.map(el => el.info.get())
         }
     }
 }

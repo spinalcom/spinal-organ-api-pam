@@ -47,6 +47,15 @@ export declare class AppsController extends Controller {
     deleteBuildingApp(appId: string): Promise<{
         message: string;
     }>;
+    uploadAdminApp(file: any): Promise<IApp[] | {
+        message: string;
+    }>;
+    uploadPortofolioApp(file: any): Promise<IApp[] | {
+        message: string;
+    }>;
+    uploadBuildingApp(file: any): Promise<IApp[] | {
+        message: string;
+    }>;
 }
 declare const _default: AppsController;
 export default _default;

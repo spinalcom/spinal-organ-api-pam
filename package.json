@@ -16,6 +16,7 @@
     "swagger": "tsoa spec && tsoa routes"
   },
   "dependencies": {
+    "async-iterator-to-array": "0.0.1",
     "axios": "^0.27.2",
     "bcrypt": "^5.0.1",
     "body-parser": "^1.19.0",
@@ -36,6 +37,7 @@
     "node-open-geocoder": "^4.0.1",
     "q": "^1.5.1",
     "spinal-env-viewer-graph-service": "git+https://github.com/spinalcom/Spinal-Graph-Service.git",
+    "spinal-env-viewer-plugin-excel-manager-service": "git+https://github.com/spinalcom/spinal-env-viewer-plugin-excel-manager-service.git",
     "swagger-ui-express": "^4.5.0",
     "tsoa": "^4.1.2",
     "typescript": "^4.4.3",

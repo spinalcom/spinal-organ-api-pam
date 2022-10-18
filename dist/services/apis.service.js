@@ -51,24 +51,26 @@ class APIService {
             return this.context;
         });
     }
-    createApiRoute(routeInfo) {
+    // 
+    createApiRoute(routeInfo, parentType) {
         return __awaiter(this, void 0, void 0, function* () {
-            const apiExist = yield this.getApiRouteByRoute(routeInfo);
+            const apiExist = yield this.getApiRouteByRoute(routeInfo, parentType);
             if (apiExist)
                 return apiExist;
             delete routeInfo.id;
             routeInfo.type = constant_1.API_ROUTE_TYPE;
             routeInfo.name = routeInfo.route;
+            const parent = yield this._getOrGetRoutesGroup(parentType);
             const routeId = spinal_env_viewer_graph_service_1.SpinalGraphService.createNode(routeInfo, undefined);
             const node = spinal_env_viewer_graph_service_1.SpinalGraphService.getRealNode(routeId);
-            return this.context.addChildInContext(node, constant_1.CONTEXT_TO_API_ROUTE_RELATION_NAME, constant_1.PTR_LST_TYPE, this.context);
+            return parent.addChildInContext(node, constant_1.API_RELATION_NAME, constant_1.PTR_LST_TYPE, this.context);
         });
     }
-    updateApiRoute(routeId, newValue) {
+    updateApiRoute(routeId, newValue, parentType) {
         return __awaiter(this, void 0, void 0, function* () {
             delete newValue.id;
             delete newValue.type;
-            const route = yield this.getApiRouteById(routeId);
+            const route = yield this.getApiRouteById(routeId, parentType);
             if (!route)
                 throw new Error(`no api route Found for ${routeId}`);
             for (const key in newValue) {
@@ -80,18 +82,19 @@ class APIService {
             return route;
         });
     }
-    getApiRouteById(routeId) {
+    getApiRouteById(routeId, parentType) {
         return __awaiter(this, void 0, void 0, function* () {
-            const node = spinal_env_viewer_graph_service_1.SpinalGraphService.getRealNode(routeId);
-            if (node)
-                return node;
-            const children = yield this.context.getChildrenInContext(this.context);
+            // const node = SpinalGraphService.getRealNode(routeId);
+            // if (node) return node;
+            const parent = yield this._getOrGetRoutesGroup(parentType);
+            const children = yield parent.getChildrenInContext(this.context);
             return children.find(el => el.getId().get() === routeId);
         });
     }
-    getApiRouteByRoute(apiRoute) {
+    getApiRouteByRoute(apiRoute, parentType) {
         return __awaiter(this, void 0, void 0, function* () {
-            const children = yield this.context.getChildrenInContext(this.context);
+            const parent = yield this._getOrGetRoutesGroup(parentType);
+            const children = yield parent.getChildrenInContext(this.context);
             return children.find(el => {
                 const { route, method } = el.info.get();
                 if (route && method)
@@ -100,29 +103,48 @@ class APIService {
             });
         });
     }
-    getAllApiRoute() {
-        return this.context.getChildrenInContext(this.context);
-    }
-    deleteApiRoute(routeId) {
+    getAllApiRoute(parentType) {
         return __awaiter(this, void 0, void 0, function* () {
-            const route = yield this.getApiRouteById(routeId);
+            const parent = yield this._getOrGetRoutesGroup(parentType);
+            return parent.getChildrenInContext(this.context);
+        });
+    }
+    deleteApiRoute(routeId, parentType) {
+        return __awaiter(this, void 0, void 0, function* () {
+            const route = yield this.getApiRouteById(routeId, parentType);
             if (!route)
                 throw new Error(`no api route Found for ${routeId}`);
             yield route.removeFromGraph();
             return routeId;
         });
     }
-    uploadSwaggerFile(buffer) {
+    uploadSwaggerFile(buffer, parentType) {
         return __awaiter(this, void 0, void 0, function* () {
             const swaggerData = yield this._readBuffer(buffer);
             const routes = yield this._formatSwaggerFile(swaggerData);
-            const promises = routes.map(route => {
+            return routes.reduce((prom, route) => __awaiter(this, void 0, void 0, function* () {
+                const list = yield prom;
                 try {
-                    return this.createApiRoute(route);
+                    const r = yield this.createApiRoute(route, parentType);
+                    list.push(r);
                 }
                 catch (error) { }
-            });
-            return Promise.all(promises);
+                return list;
+            }), Promise.resolve([]));
+        });
+    }
+    //////////////////////////////////////////////
+    //                  PRIVATE                 //
+    //////////////////////////////////////////////
+    _getOrGetRoutesGroup(type) {
+        return __awaiter(this, void 0, void 0, function* () {
+            const children = yield this.context.getChildren([constant_1.CONTEXT_TO_API_ROUTE_GROUP_RELATION_NAME]);
+            let found = children.find(el => el.getType().get() === type);
+            if (found)
+                return found;
+            const name = type === constant_1.BUILDING_API_GROUP_TYPE ? constant_1.BUILDING_API_GROUP_NAME : constant_1.PORTOFOLIO_API_GROUP_NAME;
+            let node = new spinal_env_viewer_graph_service_1.SpinalNode(name, type);
+            return this.context.addChildInContext(node, constant_1.CONTEXT_TO_API_ROUTE_GROUP_RELATION_NAME, constant_1.PTR_LST_TYPE, this.context);
         });
     }
     _formatSwaggerFile(swaggerFile) {

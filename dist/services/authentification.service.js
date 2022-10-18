@@ -81,6 +81,9 @@ class AuthentificationService {
     }
     // PAM Credential
     registerToAdmin(pamInfo, adminInfo) {
+        if (adminInfo.urlAdmin[adminInfo.urlAdmin.length - 1] === "/") {
+            adminInfo.urlAdmin = adminInfo.urlAdmin.substring(0, adminInfo.urlAdmin.lastIndexOf('/'));
+        }
         return axios_1.default.post(`${adminInfo.urlAdmin}/register`, {
             platformCreationParms: pamInfo,
             registerKey: adminInfo.registerKey
@@ -254,7 +257,7 @@ class AuthentificationService {
         });
     }
     _formatUserProfiles() {
-        return userProfile_service_1.UserProfileService.getInstance().getAllUserProfilesNodes().then((nodes) => {
+        return userProfile_service_1.UserProfileService.getInstance().getAllUserProfileNodes().then((nodes) => {
             return nodes.map(el => ({
                 userProfileId: el.info.id.get(),
                 label: el.info.name.get()

@@ -40,6 +40,7 @@ const express = require("express");
 const morgan = require("morgan");
 const path = require("path");
 const constant_1 = require("./constant");
+const proxyToBos_1 = require("./proxyToBos");
 const services_1 = require("./services");
 var proxy = require('express-http-proxy');
 const swaggerUi = require("swagger-ui-express");
@@ -94,6 +95,8 @@ function initExpress() {
     // const root = path.join(__dirname, ...absPath);
     var app = express();
     app.use(morgan('dev'));
+    (0, proxyToBos_1.default)(app);
+    (0, proxyToBos_1.default)(app, true);
     useHubProxy(app);
     useApiMiddleWare(app);
     useClientMiddleWare(app);

@@ -1,15 +1,16 @@
 import { IApiRoute, IApp } from ".";
 export interface IPortofolioData {
     [key: string]: any;
-    apps: IApp[];
+    apps?: IApp[];
+    apis?: IApiRoute[];
+    building?: IBosData[];
 }
 export interface IBosData {
     [key: string]: any;
-    apps: IApp[];
+    apps?: IApp[];
+    apis?: IApiRoute[];
 }
 export interface IProfileData {
     [key: string]: any;
-    authorizedPortofolio: IPortofolioData[];
-    authorizedRoutes: IApiRoute[];
-    authorizedBos: IBosData[];
+    authorized?: IPortofolioData[];
 }

@@ -35,9 +35,10 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.AuthorizationService = exports.authorizationInstance = void 0;
 const constant_1 = require("../constant");
 const spinal_env_viewer_graph_service_1 = require("spinal-env-viewer-graph-service");
-const apis_service_1 = require("./apis.service");
+const spinal_core_connectorjs_type_1 = require("spinal-core-connectorjs_type");
 const building_service_1 = require("./building.service");
 const portofolio_service_1 = require("./portofolio.service");
+const toArray = require("async-iterator-to-array");
 class AuthorizationService {
     constructor() { }
     static getInstance() {
@@ -53,85 +54,95 @@ class AuthorizationService {
             return node.belongsToContext(context);
         });
     }
-    removePortofolioReferences(profile, portofolioId) {
-        return __awaiter(this, void 0, void 0, function* () {
-            const promises = [this._getAuthorizedBosContext(profile, false), this._getAuthorizedPortofolioContext(profile, false)];
-            return Promise.all(promises).then(([bosContext, PortofolioContext]) => __awaiter(this, void 0, void 0, function* () {
-                if (PortofolioContext)
-                    yield this.unauthorizeProfileToAccessPortofolio(profile, portofolioId);
-            })).catch((err) => {
-            });
-        });
-    }
+    // public async removePortofolioReferences(profile: SpinalNode, portofolioId: string): Promise<void> {
+    //     const promises = [this._getAuthorizedBosContext(profile, false), this._getAuthorizedPortofolioContext(profile, false)]
+    //     return Promise.all(promises).then(async ([bosContext, PortofolioContext]) => {
+    //         if (PortofolioContext) await this.unauthorizeProfileToAccessPortofolio(profile, portofolioId);
+    //     }).catch((err) => {
+    //     });
+    // }
     /////////////////////////////////////////////////////////
     //                  PORTOFOLIO AUTH                    //
     /////////////////////////////////////////////////////////
+    //Authorize
     authorizeProfileToAccessPortofolio(profile, portofolioId) {
         return __awaiter(this, void 0, void 0, function* () {
             const context = yield this._getAuthorizedPortofolioContext(profile, true);
             let reference = yield this._getReference(context, portofolioId);
-            if (reference)
-                return reference;
+            if (reference) {
+                return this._getRealNode(reference);
+            }
             const portofolio = yield portofolio_service_1.PortofolioService.getInstance().getPortofolio(portofolioId);
             if (!portofolio)
                 return;
             reference = yield this._createNodeReference(portofolio);
-            return context.addChildInContext(reference, constant_1.PROFILE_TO_AUTHORIZED_PORTOFOLIO_RELATION, constant_1.PTR_LST_TYPE, context);
+            yield context.addChildInContext(reference, constant_1.PROFILE_TO_AUTHORIZED_PORTOFOLIO_RELATION, constant_1.PTR_LST_TYPE, context);
+            return portofolio;
         });
     }
-    unauthorizeProfileToAccessPortofolio(profile, portofolioId) {
-        return __awaiter(this, void 0, void 0, function* () {
-            const context = yield this._getAuthorizedPortofolioContext(profile, false);
-            if (!context)
-                return;
-            let reference = yield this._getReference(context, portofolioId);
-            if (!reference)
-                return;
-            return context.removeChild(reference, constant_1.PROFILE_TO_AUTHORIZED_PORTOFOLIO_RELATION, constant_1.PTR_LST_TYPE);
-        });
-    }
-    authorizeProfileToAccessPortofolioApp(profile, portofolioId, appIds, portofolioRef) {
+    authorizeProfileToAccessPortofolioApp(profile, portofolioId, appIds) {
         return __awaiter(this, void 0, void 0, function* () {
             if (!Array.isArray(appIds))
                 appIds = [appIds];
-            const reference = portofolioRef || (yield this.authorizeProfileToAccessPortofolio(profile, portofolioId));
-            const context = yield this._getAuthorizedPortofolioContext(profile, true);
+            yield this.authorizeProfileToAccessPortofolio(profile, portofolioId);
+            const context = yield this._getAuthorizedPortofolioContext(profile, false);
+            const reference = yield this._getReference(context, portofolioId);
             return appIds.reduce((prom, id) => __awaiter(this, void 0, void 0, function* () {
                 let liste = yield prom;
                 const app = yield portofolio_service_1.PortofolioService.getInstance().getAppFromPortofolio(portofolioId, id);
                 if (app) {
-                    const appExist = reference.getChildrenIds().find(id => id === app.getId().get());
-                    if (!appExist)
-                        yield reference.addChildInContext(app, constant_1.APP_RELATION_NAME, constant_1.PTR_LST_TYPE, context);
+                    let appExist = yield this._getReference(reference, app.getId().get(), [constant_1.APP_RELATION_NAME]);
+                    if (!appExist) {
+                        appExist = yield this._createNodeReference(app);
+                        yield reference.addChildInContext(appExist, constant_1.APP_RELATION_NAME, constant_1.PTR_LST_TYPE, context);
+                    }
+                    ;
                     liste.push(app);
                 }
                 return liste;
             }), Promise.resolve([]));
+        });
+    }
+    // unauthorize
+    unauthorizeProfileToAccessPortofolio(profile, portofolioId) {
+        return __awaiter(this, void 0, void 0, function* () {
+            const { context, portofolioRef } = yield this._getRefTree(profile, portofolioId);
+            if (context && portofolioRef) {
+                try {
+                    yield context.removeChild(portofolioRef, constant_1.PROFILE_TO_AUTHORIZED_PORTOFOLIO_RELATION, constant_1.PTR_LST_TYPE);
+                }
+                catch (error) {
+                    return false;
+                }
+            }
+            return false;
         });
     }
     unauthorizeProfileToAccessPortofolioApp(profile, portofolioId, appIds) {
         return __awaiter(this, void 0, void 0, function* () {
             if (!Array.isArray(appIds))
                 appIds = [appIds];
-            const context = yield this._getAuthorizedPortofolioContext(profile, false);
-            if (!context)
-                return;
-            const reference = yield this._getReference(context, portofolioId);
-            if (!reference)
-                return;
+            const { portofolioRef } = yield this._getRefTree(profile, portofolioId);
+            if (!portofolioRef)
+                return [];
             const data = yield appIds.reduce((prom, id) => __awaiter(this, void 0, void 0, function* () {
                 let liste = yield prom;
                 const app = yield portofolio_service_1.PortofolioService.getInstance().getAppFromPortofolio(portofolioId, id);
                 if (app) {
-                    yield reference.removeChild(app, constant_1.APP_RELATION_NAME, constant_1.PTR_LST_TYPE);
-                    liste.push(app);
+                    const appExist = yield this._getReference(portofolioRef, app.getId().get(), [constant_1.APP_RELATION_NAME]);
+                    try {
+                        yield portofolioRef.removeChild(appExist, constant_1.APP_RELATION_NAME, constant_1.PTR_LST_TYPE);
+                        liste.push(app);
+                    }
+                    catch (error) { }
                 }
                 return liste;
             }), Promise.resolve([]));
-            yield this._checkPortofolioValidity(profile, portofolioId, reference);
+            yield this._checkPortofolioValidity(profile, portofolioId, portofolioRef);
             return data;
         });
     }
+    // get
     getAuthorizedPortofolioFromProfile(profile) {
         return __awaiter(this, void 0, void 0, function* () {
             const context = yield this._getAuthorizedPortofolioContext(profile, false);
@@ -141,7 +152,7 @@ class AuthorizationService {
             return children.reduce((prom, item) => __awaiter(this, void 0, void 0, function* () {
                 const liste = yield prom;
                 if (item) {
-                    const element = yield item.getElement();
+                    const element = this._getRealNode(item);
                     liste.push(element);
                 }
                 return liste;
@@ -150,149 +161,275 @@ class AuthorizationService {
     }
     getAuthorizedPortofolioAppFromProfile(profile, portofolioId) {
         return __awaiter(this, void 0, void 0, function* () {
-            const context = yield this._getAuthorizedPortofolioContext(profile, false);
-            if (!context)
-                return [];
-            const reference = yield this._getReference(context, portofolioId);
-            if (!reference)
-                return [];
-            return reference.getChildren(constant_1.APP_RELATION_NAME);
-        });
-    }
-    //////////////////////////////////////////////////////////
-    //            API's ROUTES AUTHORIZATION                //
-    //////////////////////////////////////////////////////////
-    authorizeProfileToAccessApisRoutes(profile, apiRoutesIds) {
-        return __awaiter(this, void 0, void 0, function* () {
-            if (!Array.isArray(apiRoutesIds))
-                apiRoutesIds = [apiRoutesIds];
-            const authApicontext = yield this._getAuthorizedApisRoutesContext(profile, true);
-            if (!authApicontext)
-                return;
-            const promises = apiRoutesIds.map(id => this._addApiToContext(authApicontext, id));
-            return Promise.all(promises).then((result) => {
-                return authApicontext.getChildren(constant_1.CONTEXT_TO_AUTHORIZED_APIS_RELATION_NAME);
-            });
-        });
-    }
-    unauthorizeProfileToAccessApisRoutes(profile, apiRoutesIds) {
-        return __awaiter(this, void 0, void 0, function* () {
-            if (!Array.isArray(apiRoutesIds))
-                apiRoutesIds = [apiRoutesIds];
-            const authcontext = yield this._getAuthorizedApisRoutesContext(profile);
-            if (!authcontext)
-                return;
-            const promises = apiRoutesIds.map(el => this._removeApiFromContext(authcontext, el));
-            return Promise.all(promises);
-        });
-    }
-    getAuthorizedApisRoutesFromProfile(profile) {
-        return __awaiter(this, void 0, void 0, function* () {
-            const authAppcontext = yield this._getAuthorizedApisRoutesContext(profile);
-            if (!authAppcontext)
-                return [];
-            return authAppcontext.getChildren(constant_1.CONTEXT_TO_AUTHORIZED_APIS_RELATION_NAME);
+            const { context, portofolioRef } = yield this._getRefTree(profile, portofolioId);
+            if (context && portofolioRef) {
+                const children = yield portofolioRef.getChildren(constant_1.APP_RELATION_NAME);
+                return children.reduce((prom, item) => __awaiter(this, void 0, void 0, function* () {
+                    const liste = yield prom;
+                    if (item) {
+                        const element = this._getRealNode(item);
+                        liste.push(element);
+                    }
+                    return liste;
+                }), Promise.resolve([]));
+            }
+            return [];
         });
     }
     // //////////////////////////////////////////////////////////
     // //                  BOS AUTHORIZATION                   //
     // //////////////////////////////////////////////////////////
-    authorizeProfileToAccessBos(profile, BosId) {
+    // authorize
+    authorizeProfileToAccessBos(profile, portofolioId, BosId) {
         return __awaiter(this, void 0, void 0, function* () {
-            const context = yield this._getAuthorizedBosContext(profile, true);
-            let reference = yield this._getReference(context, BosId);
-            if (reference)
-                return reference;
-            const bos = yield building_service_1.BuildingService.getInstance().getBuildingById(BosId);
+            yield this.authorizeProfileToAccessPortofolio(profile, portofolioId);
+            const { context, portofolioRef } = yield this._getRefTree(profile, portofolioId);
+            const bos = yield portofolio_service_1.PortofolioService.getInstance().getBuildingFromPortofolio(portofolioId, BosId);
             if (!bos)
                 return;
-            reference = yield this._createNodeReference(bos);
-            return context.addChildInContext(reference, constant_1.PROFILE_TO_AUTHORIZED_BOS_RELATION, constant_1.PTR_LST_TYPE, context);
+            const bosExist = yield this._getReference(portofolioRef, BosId, [constant_1.PROFILE_TO_AUTHORIZED_BOS_RELATION]);
+            if (!bosExist) {
+                const reference = yield this._createNodeReference(bos);
+                yield portofolioRef.addChildInContext(reference, constant_1.PROFILE_TO_AUTHORIZED_BOS_RELATION, constant_1.PTR_LST_TYPE, context);
+            }
+            return bos;
         });
     }
-    unauthorizeProfileToAccessBos(profile, BosId) {
-        return __awaiter(this, void 0, void 0, function* () {
-            const context = yield this._getAuthorizedBosContext(profile, false);
-            if (!context)
-                return;
-            let reference = yield this._getReference(context, BosId);
-            if (!reference)
-                return;
-            return context.removeChild(reference, constant_1.PROFILE_TO_AUTHORIZED_BOS_RELATION, constant_1.PTR_LST_TYPE);
-        });
-    }
-    authorizeProfileToAccessBosApp(profile, BosId, appIds, BosRef) {
+    authorizeProfileToAccessBosApp(profile, portofolioId, BosId, appIds) {
         return __awaiter(this, void 0, void 0, function* () {
             if (!Array.isArray(appIds))
                 appIds = [appIds];
-            const reference = BosRef || (yield this.authorizeProfileToAccessBos(profile, BosId));
-            const context = yield this._getAuthorizedBosContext(profile, true);
+            yield this.authorizeProfileToAccessBos(profile, portofolioId, BosId);
+            const { context, bosRef } = yield this._getRefTree(profile, portofolioId, BosId);
             return appIds.reduce((prom, id) => __awaiter(this, void 0, void 0, function* () {
                 let liste = yield prom;
                 const app = yield building_service_1.BuildingService.getInstance().getAppFromBuilding(BosId, id);
                 if (app) {
-                    const appExist = reference.getChildrenIds().find(id => id === app.getId().get());
-                    if (!appExist)
-                        yield reference.addChildInContext(app, constant_1.APP_RELATION_NAME, constant_1.PTR_LST_TYPE, context);
+                    let appExist = yield this._getReference(bosRef, app.getId().get(), [constant_1.APP_RELATION_NAME]);
+                    if (!appExist) {
+                        appExist = yield this._createNodeReference(app);
+                        yield bosRef.addChildInContext(appExist, constant_1.APP_RELATION_NAME, constant_1.PTR_LST_TYPE, context);
+                    }
+                    ;
                     liste.push(app);
                 }
                 return liste;
             }), Promise.resolve([]));
         });
     }
-    unauthorizeProfileToAccessBosApp(profile, BosId, appIds) {
+    // unauthorize
+    unauthorizeProfileToAccessBos(profile, portofolioId, BosId) {
+        return __awaiter(this, void 0, void 0, function* () {
+            const { portofolioRef, bosRef } = yield this._getRefTree(profile, portofolioId, BosId);
+            if (portofolioRef && bosRef) {
+                try {
+                    yield portofolioRef.removeChild(bosRef, constant_1.PROFILE_TO_AUTHORIZED_BOS_RELATION, constant_1.PTR_LST_TYPE);
+                    return true;
+                }
+                catch (error) { }
+            }
+            return false;
+        });
+    }
+    unauthorizeProfileToAccessBosApp(profile, portofolioId, BosId, appIds) {
         return __awaiter(this, void 0, void 0, function* () {
             if (!Array.isArray(appIds))
                 appIds = [appIds];
-            const context = yield this._getAuthorizedBosContext(profile, false);
-            if (!context)
-                return;
-            let reference = yield this._getReference(context, BosId);
-            if (!reference)
+            const { bosRef } = yield this._getRefTree(profile, portofolioId, BosId);
+            if (!bosRef)
                 return;
             const data = yield appIds.reduce((prom, id) => __awaiter(this, void 0, void 0, function* () {
                 let liste = yield prom;
                 const app = yield building_service_1.BuildingService.getInstance().getAppFromBuilding(BosId, id);
                 if (app) {
-                    yield reference.removeChild(app, constant_1.APP_RELATION_NAME, constant_1.PTR_LST_TYPE);
-                    liste.push(app);
+                    const appRef = yield this._getReference(bosRef, app.getId().get(), [constant_1.APP_RELATION_NAME]);
+                    if (appRef) {
+                        yield bosRef.removeChild(appRef, constant_1.APP_RELATION_NAME, constant_1.PTR_LST_TYPE);
+                        liste.push(app);
+                    }
                 }
                 return liste;
             }), Promise.resolve([]));
-            yield this._checkBosValidity(profile, BosId, reference);
+            yield this._checkBosValidity(profile, portofolioId, BosId, bosRef);
             return data;
         });
     }
-    getAuthorizedBosFromProfile(profile) {
+    // get
+    getAuthorizedBosFromProfile(profile, portofolioId) {
         return __awaiter(this, void 0, void 0, function* () {
-            const context = yield this._getAuthorizedBosContext(profile, false);
-            if (!context)
-                return [];
-            const children = yield context.getChildren([constant_1.PROFILE_TO_AUTHORIZED_BOS_RELATION]);
+            const { portofolioRef } = yield this._getRefTree(profile, portofolioId);
+            const children = yield portofolioRef.getChildren(constant_1.PROFILE_TO_AUTHORIZED_BOS_RELATION);
             return children.reduce((prom, item) => __awaiter(this, void 0, void 0, function* () {
                 const liste = yield prom;
                 if (item) {
-                    const element = yield item.getElement();
+                    const element = this._getRealNode(item);
                     liste.push(element);
                 }
                 return liste;
             }), Promise.resolve([]));
         });
     }
-    getAuthorizedBosAppFromProfile(profile, bosId) {
+    getAuthorizedBosAppFromProfile(profile, portofolioId, BosId) {
         return __awaiter(this, void 0, void 0, function* () {
-            const context = yield this._getAuthorizedBosContext(profile, false);
-            if (!context)
+            const { bosRef } = yield this._getRefTree(profile, portofolioId, BosId);
+            if (!bosRef)
                 return [];
-            const reference = yield this._getReference(context, bosId);
-            if (!reference)
+            const children = yield bosRef.getChildren(constant_1.APP_RELATION_NAME);
+            return children.reduce((prom, item) => __awaiter(this, void 0, void 0, function* () {
+                const liste = yield prom;
+                if (item) {
+                    const element = this._getRealNode(item);
+                    liste.push(element);
+                }
+                return liste;
+            }), Promise.resolve([]));
+        });
+    }
+    //////////////////////////////////////////////////////////
+    //            API's ROUTES AUTHORIZATION                //
+    //////////////////////////////////////////////////////////
+    //authorize
+    authorizeProfileToAccessPortofolioApisRoutes(profile, portofolioId, apiRoutesIds) {
+        return __awaiter(this, void 0, void 0, function* () {
+            if (!Array.isArray(apiRoutesIds))
+                apiRoutesIds = [apiRoutesIds];
+            // const authApicontext = await this._getAuthorizedApisRoutesContext(profile, true);
+            // if (!authApicontext) return;
+            yield this.authorizeProfileToAccessPortofolio(profile, portofolioId);
+            const { context, portofolioRef } = yield this._getRefTree(profile, portofolioId);
+            return apiRoutesIds.reduce((prom, id) => __awaiter(this, void 0, void 0, function* () {
+                const liste = yield prom;
+                const node = yield portofolio_service_1.PortofolioService.getInstance().getApiFromPortofolio(portofolioId, id);
+                if (node) {
+                    let apiExist = yield this._getReference(portofolioRef, id, [constant_1.API_RELATION_NAME]);
+                    if (!apiExist) {
+                        const _temp = yield this._createNodeReference(node);
+                        apiExist = yield portofolioRef.addChildInContext(_temp, constant_1.API_RELATION_NAME, constant_1.PTR_LST_TYPE, context);
+                    }
+                    liste.push(node);
+                }
+                return liste;
+            }), Promise.resolve([]));
+        });
+    }
+    authorizeProfileToAccessBosApisRoutes(profile, portofolioId, bosId, apiRoutesIds) {
+        return __awaiter(this, void 0, void 0, function* () {
+            if (!Array.isArray(apiRoutesIds))
+                apiRoutesIds = [apiRoutesIds];
+            yield this.authorizeProfileToAccessBos(profile, portofolioId, bosId);
+            const { context, bosRef } = yield this._getRefTree(profile, portofolioId, bosId);
+            if (!bosRef)
+                return;
+            return apiRoutesIds.reduce((prom, id) => __awaiter(this, void 0, void 0, function* () {
+                const liste = yield prom;
+                const node = yield building_service_1.BuildingService.getInstance().getApiFromBuilding(bosId, id);
+                if (node) {
+                    let apiExist = yield this._getReference(bosRef, id, [constant_1.API_RELATION_NAME]);
+                    if (!apiExist) {
+                        const _temp = yield this._createNodeReference(node);
+                        apiExist = yield bosRef.addChildInContext(_temp, constant_1.API_RELATION_NAME, constant_1.PTR_LST_TYPE, context);
+                    }
+                    liste.push(node);
+                }
+                return liste;
+            }), Promise.resolve([]));
+        });
+    }
+    // unauthorize
+    unauthorizeProfileToAccessPortofolioApisRoutes(profile, portofolioId, apiRoutesIds) {
+        return __awaiter(this, void 0, void 0, function* () {
+            if (!Array.isArray(apiRoutesIds))
+                apiRoutesIds = [apiRoutesIds];
+            const { portofolioRef } = yield this._getRefTree(profile, portofolioId);
+            if (!portofolioRef)
+                return;
+            return apiRoutesIds.reduce((prom, id) => __awaiter(this, void 0, void 0, function* () {
+                const liste = yield prom;
+                const route = yield portofolio_service_1.PortofolioService.getInstance().getApiFromPortofolio(portofolioId, id);
+                if (route) {
+                    const routeRef = yield this._getReference(portofolioRef, id, [constant_1.API_RELATION_NAME]);
+                    try {
+                        yield portofolioRef.removeChild(routeRef, constant_1.API_RELATION_NAME, constant_1.PTR_LST_TYPE);
+                        liste.push(route);
+                    }
+                    catch (error) { }
+                }
+                return liste;
+                // this._removeApiFromContext(authcontext, el)
+            }), Promise.resolve([]));
+        });
+    }
+    unauthorizeProfileToAccessBosApisRoutes(profile, portofolioId, bosId, apiRoutesIds) {
+        return __awaiter(this, void 0, void 0, function* () {
+            if (!Array.isArray(apiRoutesIds))
+                apiRoutesIds = [apiRoutesIds];
+            const { bosRef } = yield this._getRefTree(profile, portofolioId, bosId);
+            if (!bosRef)
+                return;
+            return apiRoutesIds.reduce((prom, id) => __awaiter(this, void 0, void 0, function* () {
+                const liste = yield prom;
+                const route = yield building_service_1.BuildingService.getInstance().getApiFromBuilding(bosId, id);
+                if (route) {
+                    const routeRef = yield this._getReference(bosRef, id, [constant_1.API_RELATION_NAME]);
+                    try {
+                        yield bosRef.removeChild(routeRef, constant_1.API_RELATION_NAME, constant_1.PTR_LST_TYPE);
+                        liste.push(route);
+                    }
+                    catch (error) { }
+                }
+                return liste;
+                // this._removeApiFromContext(authcontext, el)
+            }), Promise.resolve([]));
+        });
+    }
+    // get
+    getAuthorizedApisRoutesFromProfile(profile, portofolioId) {
+        return __awaiter(this, void 0, void 0, function* () {
+            const { portofolioRef } = yield this._getRefTree(profile, portofolioId);
+            if (!portofolioRef)
                 return [];
-            return reference.getChildren(constant_1.APP_RELATION_NAME);
+            const children = yield portofolioRef.getChildren(constant_1.API_RELATION_NAME);
+            return children.reduce((prom, item) => __awaiter(this, void 0, void 0, function* () {
+                const liste = yield prom;
+                if (item) {
+                    const element = this._getRealNode(item);
+                    liste.push(element);
+                }
+                return liste;
+            }), Promise.resolve([]));
+        });
+    }
+    getAuthorizedBosApisRoutesFromProfile(profile, portofolioId, BosId) {
+        return __awaiter(this, void 0, void 0, function* () {
+            const { bosRef } = yield this._getRefTree(profile, portofolioId, BosId);
+            if (!bosRef)
+                return [];
+            const children = yield bosRef.getChildren(constant_1.API_RELATION_NAME);
+            return children.reduce((prom, item) => __awaiter(this, void 0, void 0, function* () {
+                const liste = yield prom;
+                if (item) {
+                    const element = this._getRealNode(item);
+                    liste.push(element);
+                }
+                return liste;
+            }), Promise.resolve([]));
         });
     }
     //////////////////////////////////////////////////////////
     //                     PRIVATES                         //
     //////////////////////////////////////////////////////////
+    _getRefTree(profile, portofolioId, BosId) {
+        return __awaiter(this, void 0, void 0, function* () {
+            const context = yield this._getAuthorizedPortofolioContext(profile, false);
+            if (!context || !portofolioId)
+                return { context };
+            const portofolioRef = yield this._getReference(context, portofolioId);
+            if (!portofolioRef || !BosId)
+                return { context, portofolioRef };
+            const bosRef = yield this._getReference(portofolioRef, BosId, [constant_1.PROFILE_TO_AUTHORIZED_BOS_RELATION]);
+            return { context, portofolioRef, bosRef };
+        });
+    }
     _getAuthorizedPortofolioContext(profile, createIfNotExist = false) {
         return __awaiter(this, void 0, void 0, function* () {
             return this._getOrCreateContext(profile, constant_1.AUTHORIZED_PORTOFOLIO_CONTEXT_NAME, createIfNotExist, constant_1.AUTHORIZED_PORTOFOLIO_CONTEXT_TYPE);
@@ -308,32 +445,25 @@ class AuthorizationService {
             return this._getOrCreateContext(profile, constant_1.AUTHORIZED_BOS_CONTEXT_NAME, createIfNotExist, constant_1.AUTHORIZED_BOS_CONTEXT_TYPE);
         });
     }
-    _addApiToContext(context, id) {
-        return __awaiter(this, void 0, void 0, function* () {
-            try {
-                const node = yield apis_service_1.APIService.getInstance().getApiRouteById(id);
-                if (node) {
-                    const apiExist = context.getChildrenIds().find(id => id === node.getId().get());
-                    if (!apiExist)
-                        return context.addChildInContext(node, constant_1.CONTEXT_TO_AUTHORIZED_APIS_RELATION_NAME, constant_1.PTR_LST_TYPE, context);
-                    return node;
-                }
-            }
-            catch (error) { }
-        });
-    }
-    _removeApiFromContext(context, id) {
-        return __awaiter(this, void 0, void 0, function* () {
-            try {
-                const node = yield apis_service_1.APIService.getInstance().getApiRouteById(id);
-                if (node) {
-                    yield context.removeChild(node, constant_1.CONTEXT_TO_AUTHORIZED_APIS_RELATION_NAME, constant_1.PTR_LST_TYPE);
-                    return node.getId().get();
-                }
-            }
-            catch (error) { }
-        });
-    }
+    // private async _addApiToContext(context: SpinalContext, id: string): Promise<SpinalNode> {
+    //     try {
+    //         const node = await APIService.getInstance().getApiRouteById(id);
+    //         if (node) {
+    //             const apiExist = context.getChildrenIds().find(id => id === node.getId().get());
+    //             if (!apiExist) return context.addChildInContext(node, CONTEXT_TO_AUTHORIZED_APIS_RELATION_NAME, PTR_LST_TYPE, context);
+    //             return node;
+    //         }
+    //     } catch (error) { }
+    // }
+    // private async _removeApiFromContext(context: SpinalContext, id: string): Promise<string> {
+    //     try {
+    //         const node = await APIService.getInstance().getApiRouteById(id);
+    //         if (node) {
+    //             await context.removeChild(node, CONTEXT_TO_AUTHORIZED_APIS_RELATION_NAME, PTR_LST_TYPE);
+    //             return node.getId().get();
+    //         }
+    //     } catch (error) { }
+    // }
     _getOrCreateContext(profile, contextName, createIfNotExist, contextType) {
         return __awaiter(this, void 0, void 0, function* () {
             const graph = yield this._getProfileGraph(profile);
@@ -354,22 +484,47 @@ class AuthorizationService {
                 return profile.getElement();
         });
     }
-    _getReference(context, referenceId) {
+    _getReference(startNode, referenceId, relationName = []) {
         return __awaiter(this, void 0, void 0, function* () {
-            const children = yield context.getChildren();
-            for (const child of children) {
-                const element = yield child.getElement(true);
-                if (element && element.getId().get() === referenceId)
-                    return child;
+            let queue = [startNode];
+            while (queue.length > 0) {
+                const child = queue.shift();
+                if (child instanceof spinal_env_viewer_graph_service_1.SpinalNode) {
+                    const element = yield child.getElement(true);
+                    if (element && element.getId().get() === referenceId)
+                        return child;
+                    const children = yield child.visitChildren(relationName);
+                    queue.push(...toArray(children));
+                }
             }
         });
+    }
+    _getRealNode(refNode) {
+        return refNode.getElement(false);
     }
     _createNodeReference(node) {
         return __awaiter(this, void 0, void 0, function* () {
             const refNode = new spinal_env_viewer_graph_service_1.SpinalNode(node.getName().get(), node.getType().get(), node);
             refNode.info.name.set(node.info.name);
+            this._addRefToNode(node, refNode);
             return refNode;
         });
+    }
+    _addRefToNode(node, ref) {
+        if (node.info.references) {
+            return new Promise((resolve, reject) => {
+                node.info.references.load((lst) => {
+                    lst.push(ref);
+                    resolve(ref);
+                });
+            });
+        }
+        else {
+            node.info.add_attr({
+                references: new spinal_core_connectorjs_type_1.Ptr(new spinal_core_connectorjs_type_1.Lst([ref]))
+            });
+            return Promise.resolve(ref);
+        }
     }
     _getContextByType(profile, elementType) {
         switch (elementType) {
@@ -385,18 +540,18 @@ class AuthorizationService {
     }
     _checkPortofolioValidity(profile, portofolioId, reference) {
         return __awaiter(this, void 0, void 0, function* () {
-            const children = yield reference.getChildren(constant_1.APP_RELATION_NAME);
+            const children = yield reference.getChildren();
             if (children.length > 0)
                 return;
             return this.unauthorizeProfileToAccessPortofolio(profile, portofolioId);
         });
     }
-    _checkBosValidity(profile, bosId, reference) {
+    _checkBosValidity(profile, portofolioId, bosId, reference) {
         return __awaiter(this, void 0, void 0, function* () {
-            const children = yield reference.getChildren(constant_1.APP_RELATION_NAME);
+            const children = yield reference.getChildren();
             if (children.length > 0)
                 return;
-            return this.unauthorizeProfileToAccessBos(profile, bosId);
+            return this.unauthorizeProfileToAccessBos(profile, portofolioId, bosId);
         });
     }
 }

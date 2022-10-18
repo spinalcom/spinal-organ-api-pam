@@ -1,0 +1,13 @@
+export declare const BASE_URI: string;
+export declare const API_URI: string;
+export declare const CONFIG_PATH: string;
+export declare const PORT: string | number | boolean;
+export declare const DEV_PORT: string | number | boolean;
+export declare const DEV_IP = "192.168.1.4";
+export declare const PROD_IP = "94.23.9.157";
+export declare const NOREPLY_MAIL = "noreply@spinalcom.com";
+export declare const TEMPLATE_PATH: string;
+export declare const DATABASE_ERR = "Database error";
+export declare const BAD_REQUEST_ERR = "Bad Request";
+export declare const NOT_ALLOWED_ERR = "Unauthorized";
+export declare const INTERNAL_ERR = "Internal Server Error";

@@ -22,12 +22,35 @@
  * <http://resources.spinalcom.com/licenses.pdf>.
  */
 
+/*
+ * Copyright 2022 SpinalCom - www.spinalcom.com
+ * 
+ * This file is part of SpinalCore.
+ * 
+ * Please read all of the following terms and conditions
+ * of the Free Software license Agreement ("Agreement")
+ * carefully.
+ * 
+ * This Agreement is a legally binding contract between
+ * the Licensee (as defined below) and SpinalCom that
+ * sets forth the terms and conditions that govern your
+ * use of the Program. By installing and/or using the
+ * Program, you agree to abide by all the terms and
+ * conditions stated or referenced herein.
+ * 
+ * If you do not agree to abide by these terms and
+ * conditions, do not demonstrate your acceptance and do
+ * not install or use the Program.
+ * You should have received a copy of the license along
+ * with this file. If not, see
+ * <http://resources.spinalcom.com/licenses.pdf>.
+ */
+
 import { BuildingService } from "../services";
 
-import { IApp, IBuilding, IEditBuilding } from "../interfaces";
-import { Body, Controller, Path, Post, Route, Tags, Put, Get, Delete } from "tsoa";
+import { IApiRoute, IApp, IBuilding, IEditBuilding } from "../interfaces";
+import { Body, Controller, Path, Post, Route, Tags, Put, Get, Delete, UploadedFile } from "tsoa";
 import { HTTP_CODES } from "../constant";
-import { async } from "q";
 
 const serviceInstance = BuildingService.getInstance();
 
@@ -122,7 +145,6 @@ export class BuildingController extends Controller {
             return { message: error.message };
         }
     }
-
 
 
     @Delete("/delete_building/{id}")
@@ -237,6 +259,92 @@ export class BuildingController extends Controller {
             return { message: error.message };
         }
     }
+
+
+
+
+
+
+    @Post("/add_apiRoute_to_building/{buildingId}")
+    public async addApiToBuilding(@Path() buildingId: string, @Body() data: { apisIds: string[] }): Promise<IApiRoute[] | { message: string }> {
+        try {
+            const apis = await serviceInstance.addApiToBuilding(buildingId, data.apisIds);
+            if (!apis || apis.length === 0) {
+                this.setStatus(HTTP_CODES.BAD_REQUEST);
+                return { message: "Something went wrong, please check your input data" };
+            }
+            this.setStatus(HTTP_CODES.OK)
+            return apis.map(el => el.info.get());
+        } catch (error) {
+            this.setStatus(HTTP_CODES.INTERNAL_ERROR);
+            return { message: error.message };
+        }
+    }
+
+    @Get("/get_apisRoute_from_building/{buildingId}")
+    public async getApisFromBuilding(@Path() buildingId: string): Promise<IApiRoute[] | { message: string }> {
+        try {
+            const apis = await serviceInstance.getApisFromBuilding(buildingId);
+            if (!apis) {
+                this.setStatus(HTTP_CODES.BAD_REQUEST);
+                return { message: "Something went wrong, please check your input data" };
+            }
+            this.setStatus(HTTP_CODES.OK);
+            return apis.map(el => el.info.get());
+        } catch (error) {
+            this.setStatus(HTTP_CODES.INTERNAL_ERROR);
+            return { message: error.message };
+        }
+    }
+
+    @Get("/get_apiRoute_from_building/{buildingId}/{apiId}")
+    public async getApiFromBuilding(@Path() buildingId: string, @Path() apiId: string): Promise<IApiRoute | { message: string }> {
+        try {
+            const api = await serviceInstance.getApiFromBuilding(buildingId, apiId);
+            if (!api) {
+                this.setStatus(HTTP_CODES.BAD_REQUEST);
+                return { message: "Something went wrong, please check your input data" };
+            }
+            this.setStatus(HTTP_CODES.OK);
+            return api.info.get();
+        } catch (error) {
+            this.setStatus(HTTP_CODES.INTERNAL_ERROR);
+            return { message: error.message };
+        }
+    }
+
+    @Delete("/remove_apiRoute_from_building/{buildingId}")
+    public async removeApisFromBuilding(@Path() buildingId: string, @Body() data: { apisIds: string[] }): Promise<{ message: string; ids?: string[] }> {
+        try {
+            const idsDeleted = await serviceInstance.removeApisFromBuilding(buildingId, data.apisIds);
+
+            if (!idsDeleted || idsDeleted.length === 0) {
+                this.setStatus(HTTP_CODES.BAD_REQUEST);
+                return { message: "Something went wrong, please check your input data" };
+            }
+
+            this.setStatus(HTTP_CODES.OK);
+            return { message: "application removed with success !", ids: idsDeleted };
+        } catch (error) {
+            this.setStatus(HTTP_CODES.INTERNAL_ERROR);
+            return { message: error.message };
+        }
+    }
+
+    @Get("/building_has_apiRoute/{buildingId}/{apiId}")
+    public async buildingHasApi(@Path() buildingId: string, @Path() apiId: string): Promise<boolean | { message: string }> {
+        try {
+            const success = await serviceInstance.buildingHasApi(buildingId, apiId);
+
+            this.setStatus(HTTP_CODES.OK);
+            return success;
+        } catch (error) {
+            this.setStatus(HTTP_CODES.INTERNAL_ERROR);
+            return { message: error.message };
+        }
+    }
+
+
 
 
 }

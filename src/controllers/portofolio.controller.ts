@@ -24,8 +24,8 @@
 
 import { BuildingService, PortofolioService } from "../services";
 
-import { IApp, IBuilding, IPortofolioInfo } from "../interfaces";
-import { Body, Controller, Path, Post, Route, Tags, Put, Get, Delete } from "tsoa";
+import { IApiRoute, IApp, IBuilding, IPortofolioData, IPortofolioInfo } from "../interfaces";
+import { Body, Controller, Path, Post, Route, Tags, Put, Get, Delete, UploadedFile } from "tsoa";
 import { HTTP_CODES } from "../constant";
 
 
@@ -43,12 +43,13 @@ export class PortofolioController extends Controller {
     }
 
     @Post("/add_portofolio")
-    public async addPortofolio(@Body() data: IPortofolioInfo): Promise<any | { message: string }> {
+    public async addPortofolio(@Body() data: IPortofolioInfo): Promise<IPortofolioData | { message: string }> {
         try {
-            const { name, buildingIds, appIds } = data;
+            const { name, buildingIds, appIds, apiIds } = data;
 
-            const { node, apps, buildings } = await portofolioInstance.addPortofolio(name, buildingIds, appIds);
-            const details = portofolioInstance._formatDetails(node, apps, buildings);
+            const { node, apps, buildings, apis } = await portofolioInstance.addPortofolio(name, buildingIds, appIds, apiIds);
+            const details = portofolioInstance._formatDetails(node, apps, buildings, apis);
+
             this.setStatus(HTTP_CODES.CREATED);
             return details;
         } catch (error) {
@@ -98,7 +99,7 @@ export class PortofolioController extends Controller {
     }
 
     @Get("/get_portofolio_details/{id}")
-    public async getPortofolioDetails(@Path() id: string): Promise<any | { message: string }> {
+    public async getPortofolioDetails(@Path() id: string): Promise<IPortofolioData | { message: string }> {
         try {
             const { node, apps, buildings } = await portofolioInstance.getPortofolioDetails(id);
             const details = portofolioInstance._formatDetails(node, apps, buildings);
@@ -293,6 +294,95 @@ export class PortofolioController extends Controller {
             return { message: error.message };
         }
     }
+
+
+
+
+
+    @Post("/add_apiRoute_to_portofolio/{portofolioId}")
+    public async addApiToPortofolio(@Path() portofolioId: string, @Body() data: { apisIds: string[] }): Promise<IApiRoute[] | { message: string }> {
+        try {
+            const nodes = await portofolioInstance.addApiToPortofolio(portofolioId, data.apisIds);
+            if (!nodes || nodes.length === 0) {
+                this.setStatus(HTTP_CODES.BAD_REQUEST);
+                return { message: "Something wen wrong, please check your input data" };
+            }
+
+            this.setStatus(HTTP_CODES.OK);
+            return nodes.map(el => el.info.get())
+        } catch (error) {
+            this.setStatus(HTTP_CODES.INTERNAL_ERROR);
+            return { message: error.message };
+        }
+    }
+
+
+    @Get("/get_apisRoute_from_portofolio/{portofolioId}")
+    public async getPortofolioApis(@Path() portofolioId: string): Promise<IApiRoute[] | { message: string }> {
+        try {
+            const node = await portofolioInstance.getPortofolioApis(portofolioId);
+            if (!node) {
+                this.setStatus(HTTP_CODES.BAD_REQUEST);
+                return { message: "Something wen wrong, please check your input data" };
+            }
+
+            this.setStatus(HTTP_CODES.OK);
+            return node.map(el => el.info.get())
+        } catch (error) {
+            this.setStatus(HTTP_CODES.INTERNAL_ERROR);
+            return { message: error.message };
+        }
+    }
+
+
+    @Get("/get_apiRoute_from_portofolio/{portofolioId}/{apiId}")
+    public async getApiFromPortofolio(@Path() portofolioId: string, @Path() apiId: string): Promise<IApiRoute | { message: string }> {
+        try {
+            const node = await portofolioInstance.getApiFromPortofolio(portofolioId, apiId);
+            if (!node) {
+                this.setStatus(HTTP_CODES.BAD_REQUEST);
+                return { message: "Something wen wrong, please check your input data" };
+            }
+
+            this.setStatus(HTTP_CODES.OK);
+            return node.info.get();
+        } catch (error) {
+            this.setStatus(HTTP_CODES.INTERNAL_ERROR);
+            return { message: error.message };
+        }
+    }
+
+
+    @Delete("/remove_apiRoute_from_portofolio/{portofolioId}")
+    public async removeApiFromPortofolio(@Path() portofolioId: string, @Body() data: { apisIds: string[] }): Promise<{ message: string, ids?: string[] }> {
+        try {
+            const ids = await portofolioInstance.removeApiFromPortofolio(portofolioId, data.apisIds);
+            if (!ids || ids.length === 0) {
+                this.setStatus(HTTP_CODES.BAD_REQUEST);
+                return { message: "Something went wrong, please check your input data" };
+            }
+            this.setStatus(HTTP_CODES.OK);
+            return { message: "route removed from portofolio !", ids }
+        } catch (error) {
+            this.setStatus(HTTP_CODES.INTERNAL_ERROR);
+            return { message: error.message };
+        }
+    }
+
+
+    @Get("/portofolio_has_apiRoute/{portofolioId}/{apiId}")
+    public async portofolioHasApi(@Path() portofolioId: string, @Path() apiId: string): Promise<boolean | { message: string }> {
+        try {
+            const exist = await portofolioInstance.portofolioHasApi(portofolioId, apiId);
+            this.setStatus(HTTP_CODES.OK);
+            return exist ? true : false;
+        } catch (error) {
+            this.setStatus(HTTP_CODES.INTERNAL_ERROR);
+            return { message: error.message };
+        }
+    }
+
+
 
 
 }

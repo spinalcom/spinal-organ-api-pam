@@ -28,10 +28,19 @@ import { IApp, IEditApp, IGroup } from "../interfaces";
 import { BuildingService } from "./building.service";
 import { configServiceInstance } from "./configFile.service";
 import { PortofolioService } from "./portofolio.service";
+import { SpinalExcelManager } from "spinal-env-viewer-plugin-excel-manager-service";
+
+export const AppsType = Object.freeze({
+  admin: "admin",
+  building: "building",
+  portofolio: "portofolio"
+})
 
 export class AppService {
   private static instance: AppService;
   public context: SpinalContext;
+
+
 
   private constructor() { }
 
@@ -56,6 +65,10 @@ export class AppService {
     const groupNode = await this._getApplicationGroupNode(ADMIN_APPS_GROUP_NAME, ADMIN_APPS_GROUP_TYPE, true);
     if (!groupNode) return;
 
+    const children = await groupNode.getChildren([APP_RELATION_NAME]);
+    const appExist = children.find(el => el.getName().get() === appInfo.name);
+    if (appExist) return appExist;
+
     appInfo.type = ADMIN_APP_TYPE;
     const appId = SpinalGraphService.createNode(appInfo, undefined);
     const node = SpinalGraphService.getRealNode(appId);
@@ -66,6 +79,10 @@ export class AppService {
     const groupNode = await this._getApplicationGroupNode(PORTOFOLIO_APPS_GROUP_NAME, PORTOFOLIO_APPS_GROUP_TYPE, true);
     if (!groupNode) return;
 
+    const children = await groupNode.getChildren([APP_RELATION_NAME]);
+    const appExist = children.find(el => el.getName().get() === appInfo.name);
+    if (appExist) return appExist;
+
     appInfo.type = PORTOFOLIO_APP_TYPE;
     const appId = SpinalGraphService.createNode(appInfo, undefined);
     const node = SpinalGraphService.getRealNode(appId);
@@ -75,6 +92,10 @@ export class AppService {
   public async createBuildingApp(appInfo: IApp): Promise<SpinalNode> {
     const groupNode = await this._getApplicationGroupNode(BUILDING_APPS_GROUP_NAME, BUILDING_APPS_GROUP_TYPE, true);
     if (!groupNode) return;
+
+    const children = await groupNode.getChildren([APP_RELATION_NAME]);
+    const appExist = children.find(el => el.getName().get() === appInfo.name);
+    if (appExist) return appExist;
 
     appInfo.type = BUILDING_APP_TYPE;
     const appId = SpinalGraphService.createNode(appInfo, undefined);
@@ -237,6 +258,32 @@ export class AppService {
   //////////////////////////////////
 
 
+  public async uploadApps(appType: string, fileData: Buffer, isExcel: boolean = false): Promise<SpinalNode[]> {
+    let data;
+    if (!isExcel) data = JSON.parse(JSON.stringify(fileData.toString()));
+    else data = await this._convertExcelToJson(fileData);
+
+    const formattedApps = this._formatAppsJson(data);
+
+    return formattedApps.reduce(async (prom, item) => {
+      const liste = await prom;
+
+      try {
+        let app;
+
+        if (appType === AppsType.admin) app = await this.createAdminApp(item);
+        else if (appType === AppsType.portofolio) app = await this.createPortofolioApp(item);
+        else if (appType === AppsType.building) app = await this.createBuildingApp(item);
+
+        liste.push(app)
+      } catch (error) { }
+
+      return liste;
+    }, Promise.resolve([]))
+
+  }
+
+
   //////////////////////////////////
   //              PRIVATES        //
   //////////////////////////////////
@@ -251,166 +298,28 @@ export class AppService {
     return this.context.addChildInContext(node, CONTEXT_TO_APPS_GROUP, PTR_LST_TYPE, this.context);
   }
 
-  // public async createAppCategory(categoryName: string): Promise<SpinalNode> {
 
-  //   const found = await this.getAppCategory(categoryName);
+  private async _convertExcelToJson(excelData: Buffer) {
+    const data = await SpinalExcelManager.convertExcelToJson(excelData);
+    return Object.values(data).flat();
+  }
 
-  //   if (found) throw new Error(`${categoryName} already exist`);
+  private _formatAppsJson(jsonData: IApp[]): IApp[] {
+    return jsonData.reduce((liste, app) => {
+      const requiredAttrs = ["name", "icon", "tags", "categoryName", "groupName"];
 
+      const notValid = requiredAttrs.find(el => !app[el]);
+      if (!notValid) {
+        app.hasViewer = app.hasViewer || false;
+        app.packageName = app.packageName || app.name;
+        if (typeof app.tags === "string") app.tags = (<any>app.tags).split(",")
 
-  //   const nodeId = SpinalGraphService.createNode({ name: categoryName, type: APP_CATEGORY_TYPE }, undefined);
-  //   const node = SpinalGraphService.getRealNode(nodeId);
+        liste.push(app);
+      }
 
-  //   return this.context.addChildInContext(node, CONTEXT_TO_APP_CATEGORY_RELATION_NAME, PTR_LST_TYPE, this.context);
-  // }
+      return liste;
+    }, [])
 
-  // public async getAppCategory(categoryIdOrName: string): Promise<SpinalNode> {
-  //   const node = SpinalGraphService.getRealNode(categoryIdOrName);
-  //   if (node) return node;
-
-  //   return this._findChildInContext(this.context, categoryIdOrName);
-  // }
-
-  // public getAllCategories(): Promise<SpinalNode[]> {
-  //   return this.context.getChildrenInContext();
-  // }
-
-  // public async updateAppCategory(categoryId: string, newName: string): Promise<SpinalNode> {
-  //   const category = await this.getAppCategory(categoryId);
-  //   if (!category) throw new Error(`no category found for ${categoryId}`);
-
-  //   category.info.name.set(newName);
-  //   return category;
-  // }
-
-  // public async deleteAppCategory(categoryId: string): Promise<string> {
-  //   const category = await this.getAppCategory(categoryId);
-  //   if (!category) throw new Error(`no category found for ${categoryId}`);
-
-  //   await category.removeFromGraph();
-  //   return categoryId;
-  // }
-
-  // public async createAppGroup(categoryId: string, groupName: string): Promise<SpinalNode> {
-  //   const found = await this.getAppGroup(categoryId, groupName);
-
-  //   if (found) throw new Error(`${groupName} already exist in ${categoryId}`);
-
-  //   const category = await this.getAppCategory(categoryId);
-  //   const nodeId = SpinalGraphService.createNode({ name: groupName, type: APP_GROUP_TYPE }, undefined);
-  //   const node = SpinalGraphService.getRealNode(nodeId);
-
-  //   return category.addChildInContext(node, CATEGORY_TO_APP_GROUP_RELATION_NAME, PTR_LST_TYPE, this.context);
-  // }
-
-  // public async getAllGroupsInCategory(categoryId: string): Promise<SpinalNode[]> {
-  //   const category = await this.getAppCategory(categoryId)
-  //   return category.getChildrenInContext(this.context);
-  // }
-
-  // public async getAppGroup(categoryIdOrName: string, groupIdOrName: string): Promise<SpinalNode> {
-  //   const node = SpinalGraphService.getRealNode(groupIdOrName);
-  //   if (node) return node;
-
-  //   const category = await this.getAppCategory(categoryIdOrName);
-  //   if (!category) return;
-
-  //   return this._findChildInContext(category, groupIdOrName);
-  // }
-
-  // public async updateAppGroup(categoryId: string, groupId: string, groupNewName: string): Promise<SpinalNode | void> {
-  //   const group = await this.getAppGroup(categoryId, groupId);
-  //   if (group) {
-  //     group.info.name.set(groupNewName);
-  //     return group;
-  //   }
-  // }
-
-  // public async deleteAppGroup(categoryId: string, groupId: string): Promise<void> {
-  //   const group = await this.getAppGroup(categoryId, groupId);
-  //   if (group) group.removeFromGraph();
-  // }
-
-  // public async createApp(categoryId: string, groupId: string, appInfo: IApp): Promise<SpinalNode> {
-  //   const category = await this.getAppCategory(categoryId);
-  //   const group = await this.getAppGroup(categoryId, groupId);
-  //   if (category && group) {
-  //     appInfo.categoryId = categoryId;
-  //     appInfo.categoryName = category.getName();
-  //     appInfo.groupId = groupId;
-  //     appInfo.groupName = group.getName();
-  //     appInfo.type = APP_TYPE;
-
-  //     const appId = SpinalGraphService.createNode(appInfo, undefined);
-  //     const node = SpinalGraphService.getRealNode(appId);
-  //     await this.context.addChild(node, CONTEXT_TO_APP_RELATION_NAME, PTR_LST_TYPE);
-  //     return group.addChildInContext(node, APP_GROUP_TO_APP_RELATION_NAME, PTR_LST_TYPE, this.context);
-  //   }
-
-  //   throw new Error("No group found for " + groupId);
-  // }
-
-
-  // public getAllApps(): Promise<SpinalNode[]> {
-  //   return this.context.getChildren(CONTEXT_TO_APP_RELATION_NAME);
-  // }
-
-  // public async getAllAppsInGroup(categoryId: string, groupId: string): Promise<SpinalNode[]> {
-  //   const group = await this.getAppGroup(categoryId, groupId);
-  //   if (group) {
-  //     return group.getChildrenInContext(this.context);
-  //   }
-
-  //   return []
-  // }
-
-  // public async getAppById(appId: string): Promise<void | SpinalNode> {
-  //   const node = SpinalGraphService.getRealNode(appId);
-  //   if (node) return node;
-
-  //   const children = await this.context.getChildren(CONTEXT_TO_APP_RELATION_NAME);
-  //   return children.find(el => el.getId().get() === appId);
-  // }
-
-  // public async getApp(categoryId: string, groupId: string, appId: string): Promise<SpinalNode> {
-  //   const node = SpinalGraphService.getRealNode(appId);
-  //   if (node) return node;
-
-  //   const group = await this.getAppGroup(categoryId, groupId);
-  //   if (!group) return;
-
-  //   return this._findChildInContext(group, appId);
-  // }
-
-  // public async updateApp(categoryId: string, groupId: string, appId: string, newInfo: IApp): Promise<SpinalNode> {
-  //   const appNode = await this.getApp(categoryId, groupId, appId);
-  //   if (appNode) {
-  //     for (const key in newInfo) {
-  //       if (Object.prototype.hasOwnProperty.call(newInfo, key) && appNode.info[key]) {
-  //         const element = newInfo[key];
-  //         appNode.info[key].set(element);
-  //       }
-  //     }
-
-  //   }
-  //   return appNode;
-  // }
-
-  // public async deleteApp(categoryId: string, groupId: string, appId: string): Promise<void> {
-  //   const appNode = await this.getApp(categoryId, groupId, appId);
-  //   if (appNode) appNode.removeFromGraph();
-  // }
-
-  // private async _findChildInContext(startNode: SpinalNode, nodeIdOrName: string): Promise<SpinalNode> {
-  //   const children = await startNode.getChildrenInContext(this.context);
-  //   return children.find(el => {
-  //     if (el.getId().get() === nodeIdOrName || el.getName().get() === nodeIdOrName) {
-  //       //@ts-ignore
-  //       SpinalGraphService._addNode(el);
-  //       return true;
-  //     }
-  //     return false;
-  //   })
-  // }
+  }
 
 }

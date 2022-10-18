@@ -1,3 +1,4 @@
+/// <reference types="node" />
 import { SpinalContext, SpinalNode } from "spinal-env-viewer-graph-service";
 import { IBuilding, IEditBuilding, ILocation } from "../interfaces";
 export declare class BuildingService {
@@ -33,6 +34,12 @@ export declare class BuildingService {
     getAppFromBuilding(building: string | SpinalNode, appId: string): Promise<SpinalNode>;
     removeAppFromBuilding(building: string | SpinalNode, applicationId: string | string[]): Promise<string[]>;
     buildingHasApp(building: string | SpinalNode, appId: string): Promise<boolean>;
+    addApiToBuilding(building: string | SpinalNode, apisIds: string | string[]): Promise<SpinalNode[]>;
+    getApisFromBuilding(building: string | SpinalNode): Promise<SpinalNode[]>;
+    getApiFromBuilding(building: string | SpinalNode, apiId: string): Promise<SpinalNode>;
+    removeApisFromBuilding(building: string | SpinalNode, apisIds: string | string[]): Promise<string[]>;
+    buildingHasApi(building: string | SpinalNode, apiId: string): Promise<boolean>;
+    uploadSwaggerFile(buffer: Buffer): Promise<any[]>;
     private _findChildInContext;
     private _getBuildingTypeCount;
     private _getBuildingArea;

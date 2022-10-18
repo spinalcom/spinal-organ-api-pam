@@ -74,6 +74,10 @@ export class AuthentificationService {
 
     // PAM Credential
     public registerToAdmin(pamInfo: IPamInfo, adminInfo: IAdmin): Promise<IPamCredential> {
+        if (adminInfo.urlAdmin[adminInfo.urlAdmin.length - 1] === "/") {
+            adminInfo.urlAdmin = adminInfo.urlAdmin.substring(0, adminInfo.urlAdmin.lastIndexOf('/'))
+        }
+
         return axios.post(`${adminInfo.urlAdmin}/register`, {
             platformCreationParms: pamInfo,
             registerKey: adminInfo.registerKey
@@ -257,7 +261,7 @@ export class AuthentificationService {
     }
 
     private _formatUserProfiles(): Promise<IAdminUserProfile[]> {
-        return UserProfileService.getInstance().getAllUserProfilesNodes().then((nodes) => {
+        return UserProfileService.getInstance().getAllUserProfileNodes().then((nodes) => {
             return nodes.map(el => ({
                 userProfileId: el.info.id.get(),
                 label: el.info.name.get()

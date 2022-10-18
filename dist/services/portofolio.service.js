@@ -61,6 +61,7 @@ const configFile_service_1 = require("./configFile.service");
 const constant_1 = require("../constant");
 const apps_service_1 = require("./apps.service");
 const building_service_1 = require("./building.service");
+const apis_service_1 = require("./apis.service");
 class PortofolioService {
     constructor() { }
     static getInstance() {
@@ -76,16 +77,18 @@ class PortofolioService {
             return this.context;
         });
     }
-    addPortofolio(portofolioName, buildingsIds = [], appsIds = []) {
+    addPortofolio(portofolioName, buildingsIds = [], appsIds = [], apisIds = []) {
         return __awaiter(this, void 0, void 0, function* () {
             const node = new spinal_env_viewer_graph_service_1.SpinalNode(portofolioName, constant_1.PORTOFOLIO_TYPE);
             yield this.context.addChildInContext(node, constant_1.CONTEXT_TO_PORTOFOLIO_RELATION_NAME, constant_1.PTR_LST_TYPE, this.context);
             const apps = yield this.addAppToPortofolio(node, appsIds);
+            const apis = yield this.addApiToPortofolio(node, apisIds);
             const buildings = yield this.addBuildingToPortofolio(node, buildingsIds);
             return {
                 node,
                 apps,
-                buildings
+                buildings,
+                apis
             };
         });
     }
@@ -112,8 +115,8 @@ class PortofolioService {
             const node = portofolio instanceof spinal_env_viewer_graph_service_1.SpinalNode ? portofolio : yield this.getPortofolio(portofolio);
             if (!node)
                 throw new Error(`No portofolio found for {portofolio}`);
-            const [apps, buildings] = yield Promise.all([this.getPortofolioApps(node), this.getPortofolioBuildings(node)]);
-            return { node, apps, buildings };
+            const [apps, buildings, apis] = yield Promise.all([this.getPortofolioApps(node), this.getPortofolioBuildings(node), this.getPortofolioApis(node)]);
+            return { node, apps, buildings, apis };
         });
     }
     getAllPortofoliosDetails() {
@@ -213,6 +216,83 @@ class PortofolioService {
         });
     }
     //////////////////////////////////////////////////////
+    //                      APIS                        //
+    //////////////////////////////////////////////////////
+    addApiToPortofolio(portofolio, apisIds) {
+        return __awaiter(this, void 0, void 0, function* () {
+            if (typeof portofolio === "string")
+                portofolio = yield this.getPortofolio(portofolio);
+            if (!(portofolio instanceof spinal_env_viewer_graph_service_1.SpinalNode))
+                throw new Error(`No portofolio found for ${portofolio}`);
+            if (!Array.isArray(apisIds))
+                apisIds = [apisIds];
+            return apisIds.reduce((prom, apiId) => __awaiter(this, void 0, void 0, function* () {
+                const liste = yield prom;
+                const apiNode = yield apis_service_1.APIService.getInstance().getApiRouteById(apiId, constant_1.PORTOFOLIO_API_GROUP_TYPE);
+                if (!(apiNode instanceof spinal_env_viewer_graph_service_1.SpinalNode))
+                    return liste;
+                const childrenIds = portofolio.getChildrenIds();
+                const isChild = childrenIds.find(el => el === apiId);
+                if (!isChild)
+                    portofolio.addChildInContext(apiNode, constant_1.API_RELATION_NAME, constant_1.PTR_LST_TYPE, this.context);
+                liste.push(apiNode);
+                return liste;
+            }), Promise.resolve([]));
+        });
+    }
+    getPortofolioApis(portofolio) {
+        return __awaiter(this, void 0, void 0, function* () {
+            if (typeof portofolio === "string")
+                portofolio = yield this.getPortofolio(portofolio);
+            if (!(portofolio instanceof spinal_env_viewer_graph_service_1.SpinalNode))
+                return [];
+            return portofolio.getChildren([constant_1.API_RELATION_NAME]);
+        });
+    }
+    getApiFromPortofolio(portofolio, apiId) {
+        return __awaiter(this, void 0, void 0, function* () {
+            if (typeof portofolio === "string")
+                portofolio = yield this.getPortofolio(portofolio);
+            if (!(portofolio instanceof spinal_env_viewer_graph_service_1.SpinalNode))
+                return;
+            const children = yield this.getPortofolioApis(portofolio);
+            return children.find(el => el.getId().get() === apiId);
+        });
+    }
+    removeApiFromPortofolio(portofolio, apisIds) {
+        return __awaiter(this, void 0, void 0, function* () {
+            if (typeof portofolio === "string")
+                portofolio = yield this.getPortofolio(portofolio);
+            if (!(portofolio instanceof spinal_env_viewer_graph_service_1.SpinalNode))
+                throw new Error(`No portofolio found for ${portofolio}`);
+            if (!Array.isArray(apisIds))
+                apisIds = [apisIds];
+            return apisIds.reduce((prom, apiId) => __awaiter(this, void 0, void 0, function* () {
+                const liste = yield prom;
+                const appNode = yield this.getApiFromPortofolio(portofolio, apiId);
+                if (!(appNode instanceof spinal_env_viewer_graph_service_1.SpinalNode))
+                    return liste;
+                try {
+                    yield portofolio.removeChild(appNode, constant_1.API_RELATION_NAME, constant_1.PTR_LST_TYPE);
+                    liste.push(apiId);
+                }
+                catch (error) { }
+                return liste;
+            }), Promise.resolve([]));
+        });
+    }
+    portofolioHasApi(portofolio, apiId) {
+        return __awaiter(this, void 0, void 0, function* () {
+            const apps = yield this.getPortofolioApis(portofolio);
+            return apps.find(el => el.getId().get() === apiId);
+        });
+    }
+    uploadSwaggerFile(buffer) {
+        return __awaiter(this, void 0, void 0, function* () {
+            return apis_service_1.APIService.getInstance().uploadSwaggerFile(buffer, constant_1.PORTOFOLIO_API_GROUP_TYPE);
+        });
+    }
+    //////////////////////////////////////////////////////
     //                      BUILDINGS                   //
     //////////////////////////////////////////////////////
     addBuildingToPortofolio(portofolio, buildingId) {
@@ -258,7 +338,7 @@ class PortofolioService {
                 buildingId = [buildingId];
             return buildingId.reduce((prom, id) => __awaiter(this, void 0, void 0, function* () {
                 const liste = yield prom;
-                const buildingNode = yield building_service_1.BuildingService.getInstance().getBuildingById(id);
+                const buildingNode = yield this.getBuildingFromPortofolio(portofolio, id);
                 if (!(buildingNode instanceof spinal_env_viewer_graph_service_1.SpinalNode))
                     return liste;
                 try {
@@ -272,14 +352,14 @@ class PortofolioService {
             }), Promise.resolve([]));
         });
     }
-    portofolioHasBuilding(portofolio, buildingId) {
+    getBuildingFromPortofolio(portofolio, buildingId) {
         return __awaiter(this, void 0, void 0, function* () {
             const buildings = yield this.getPortofolioBuildings(portofolio);
             return buildings.find(el => el.getId().get() === buildingId);
         });
     }
-    _formatDetails(node, apps, buildings) {
-        return Object.assign(Object.assign({}, node.info.get()), { buildings: buildings.map(el => el.info.get()), apps: apps.map(el => el.info.get()) });
+    _formatDetails(node, apps, buildings, apis = []) {
+        return Object.assign(Object.assign({}, node.info.get()), { buildings: buildings.map(el => el.info.get()), apps: apps.map(el => el.info.get()), apis: apis.map(el => el.info.get()) });
     }
 }
 exports.PortofolioService = PortofolioService;

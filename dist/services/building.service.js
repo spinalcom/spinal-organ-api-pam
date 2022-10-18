@@ -111,7 +111,7 @@ class BuildingService {
     }
     getBuildingFromPortofolio(portofolioId, buildingId) {
         return __awaiter(this, void 0, void 0, function* () {
-            return portofolio_service_1.PortofolioService.getInstance().portofolioHasBuilding(portofolioId, buildingId);
+            return portofolio_service_1.PortofolioService.getInstance().getBuildingFromPortofolio(portofolioId, buildingId);
         });
     }
     getAllBuildingsFromPortofolio(portfolioId) {
@@ -260,6 +260,79 @@ class BuildingService {
             return app ? true : false;
         });
     }
+    //////////////////////////////////////////////////////
+    //                      APIS                        //
+    //////////////////////////////////////////////////////
+    addApiToBuilding(building, apisIds) {
+        return __awaiter(this, void 0, void 0, function* () {
+            if (typeof building === "string")
+                building = yield this.getBuildingById(building);
+            if (!(building instanceof spinal_env_viewer_graph_service_1.SpinalNode))
+                throw new Error(`No building found for ${building}`);
+            if (!Array.isArray(apisIds))
+                apisIds = [apisIds];
+            return apisIds.reduce((prom, appId) => __awaiter(this, void 0, void 0, function* () {
+                const liste = yield prom;
+                const apiNode = yield _1.APIService.getInstance().getApiRouteById(appId, constant_1.BUILDING_API_GROUP_TYPE);
+                if (!(apiNode instanceof spinal_env_viewer_graph_service_1.SpinalNode))
+                    return liste;
+                const childrenIds = building.getChildrenIds();
+                const isChild = childrenIds.find(el => el === appId);
+                if (!isChild)
+                    yield building.addChildInContext(apiNode, constant_1.API_RELATION_NAME, constant_1.PTR_LST_TYPE, this.context);
+                liste.push(apiNode);
+                return liste;
+            }), Promise.resolve([]));
+        });
+    }
+    getApisFromBuilding(building) {
+        return __awaiter(this, void 0, void 0, function* () {
+            if (typeof building === "string")
+                building = yield this.getBuildingById(building);
+            if (!(building instanceof spinal_env_viewer_graph_service_1.SpinalNode))
+                return [];
+            return building.getChildren([constant_1.API_RELATION_NAME]);
+        });
+    }
+    getApiFromBuilding(building, apiId) {
+        return __awaiter(this, void 0, void 0, function* () {
+            const children = yield this.getApisFromBuilding(building);
+            return children.find(el => el.getId().get() === apiId);
+        });
+    }
+    removeApisFromBuilding(building, apisIds) {
+        return __awaiter(this, void 0, void 0, function* () {
+            if (typeof building === "string")
+                building = yield this.getBuildingById(building);
+            if (!(building instanceof spinal_env_viewer_graph_service_1.SpinalNode))
+                return [];
+            if (!Array.isArray(apisIds))
+                apisIds = [apisIds];
+            return apisIds.reduce((prom, apiId) => __awaiter(this, void 0, void 0, function* () {
+                const liste = yield prom;
+                const apiNode = yield this.getApiFromBuilding(building, apiId);
+                if (!(apiNode instanceof spinal_env_viewer_graph_service_1.SpinalNode))
+                    return liste;
+                try {
+                    yield building.removeChild(apiNode, constant_1.API_RELATION_NAME, constant_1.PTR_LST_TYPE);
+                    liste.push(apiId);
+                }
+                catch (error) { }
+                return liste;
+            }), Promise.resolve([]));
+        });
+    }
+    buildingHasApi(building, apiId) {
+        return __awaiter(this, void 0, void 0, function* () {
+            const app = yield this.getApiFromBuilding(building, apiId);
+            return app ? true : false;
+        });
+    }
+    uploadSwaggerFile(buffer) {
+        return __awaiter(this, void 0, void 0, function* () {
+            return _1.APIService.getInstance().uploadSwaggerFile(buffer, constant_1.BUILDING_API_GROUP_TYPE);
+        });
+    }
     /////////////////////////////////////////////////////
     //                  PRIVATES                       //
     /////////////////////////////////////////////////////
@@ -277,7 +350,7 @@ class BuildingService {
         });
     }
     _getBuildingTypeCount(buildingId) {
-        return axiosInstance.get(`${constant_1.BOS_BASE_URI}/${buildingId}/api/v1/geographicContext/tree`)
+        return axiosInstance.get(`${constant_1.BOS_BASE_URI_V2}/${buildingId}/api/v1/geographicContext/tree`)
             .then(res => {
             return this._countTypeHelper(res.data);
         })
@@ -288,7 +361,7 @@ class BuildingService {
     }
     _getBuildingArea(buildingId) {
         return axiosInstance
-            .get(`${constant_1.BOS_BASE_URI}/${buildingId}/api/v1/building/read`)
+            .get(`${constant_1.BOS_BASE_URI_V2}/${buildingId}/api/v1/building/read`)
             .then((response) => {
             return response.data.area;
         })

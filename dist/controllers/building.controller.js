@@ -45,6 +45,29 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.BuildingController = void 0;
+/*
+ * Copyright 2022 SpinalCom - www.spinalcom.com
+ *
+ * This file is part of SpinalCore.
+ *
+ * Please read all of the following terms and conditions
+ * of the Free Software license Agreement ("Agreement")
+ * carefully.
+ *
+ * This Agreement is a legally binding contract between
+ * the Licensee (as defined below) and SpinalCom that
+ * sets forth the terms and conditions that govern your
+ * use of the Program. By installing and/or using the
+ * Program, you agree to abide by all the terms and
+ * conditions stated or referenced herein.
+ *
+ * If you do not agree to abide by these terms and
+ * conditions, do not demonstrate your acceptance and do
+ * not install or use the Program.
+ * You should have received a copy of the license along
+ * with this file. If not, see
+ * <http://resources.spinalcom.com/licenses.pdf>.
+ */
 const services_1 = require("../services");
 const tsoa_1 = require("tsoa");
 const constant_1 = require("../constant");
@@ -239,6 +262,87 @@ let BuildingController = class BuildingController extends tsoa_1.Controller {
             }
         });
     }
+    addApiToBuilding(buildingId, data) {
+        return __awaiter(this, void 0, void 0, function* () {
+            try {
+                const apis = yield serviceInstance.addApiToBuilding(buildingId, data.apisIds);
+                if (!apis || apis.length === 0) {
+                    this.setStatus(constant_1.HTTP_CODES.BAD_REQUEST);
+                    return { message: "Something went wrong, please check your input data" };
+                }
+                this.setStatus(constant_1.HTTP_CODES.OK);
+                return apis.map(el => el.info.get());
+            }
+            catch (error) {
+                this.setStatus(constant_1.HTTP_CODES.INTERNAL_ERROR);
+                return { message: error.message };
+            }
+        });
+    }
+    getApisFromBuilding(buildingId) {
+        return __awaiter(this, void 0, void 0, function* () {
+            try {
+                const apis = yield serviceInstance.getApisFromBuilding(buildingId);
+                if (!apis) {
+                    this.setStatus(constant_1.HTTP_CODES.BAD_REQUEST);
+                    return { message: "Something went wrong, please check your input data" };
+                }
+                this.setStatus(constant_1.HTTP_CODES.OK);
+                return apis.map(el => el.info.get());
+            }
+            catch (error) {
+                this.setStatus(constant_1.HTTP_CODES.INTERNAL_ERROR);
+                return { message: error.message };
+            }
+        });
+    }
+    getApiFromBuilding(buildingId, apiId) {
+        return __awaiter(this, void 0, void 0, function* () {
+            try {
+                const api = yield serviceInstance.getApiFromBuilding(buildingId, apiId);
+                if (!api) {
+                    this.setStatus(constant_1.HTTP_CODES.BAD_REQUEST);
+                    return { message: "Something went wrong, please check your input data" };
+                }
+                this.setStatus(constant_1.HTTP_CODES.OK);
+                return api.info.get();
+            }
+            catch (error) {
+                this.setStatus(constant_1.HTTP_CODES.INTERNAL_ERROR);
+                return { message: error.message };
+            }
+        });
+    }
+    removeApisFromBuilding(buildingId, data) {
+        return __awaiter(this, void 0, void 0, function* () {
+            try {
+                const idsDeleted = yield serviceInstance.removeApisFromBuilding(buildingId, data.apisIds);
+                if (!idsDeleted || idsDeleted.length === 0) {
+                    this.setStatus(constant_1.HTTP_CODES.BAD_REQUEST);
+                    return { message: "Something went wrong, please check your input data" };
+                }
+                this.setStatus(constant_1.HTTP_CODES.OK);
+                return { message: "application removed with success !", ids: idsDeleted };
+            }
+            catch (error) {
+                this.setStatus(constant_1.HTTP_CODES.INTERNAL_ERROR);
+                return { message: error.message };
+            }
+        });
+    }
+    buildingHasApi(buildingId, apiId) {
+        return __awaiter(this, void 0, void 0, function* () {
+            try {
+                const success = yield serviceInstance.buildingHasApi(buildingId, apiId);
+                this.setStatus(constant_1.HTTP_CODES.OK);
+                return success;
+            }
+            catch (error) {
+                this.setStatus(constant_1.HTTP_CODES.INTERNAL_ERROR);
+                return { message: error.message };
+            }
+        });
+    }
 };
 __decorate([
     (0, tsoa_1.Post)("/create_building"),
@@ -320,6 +424,45 @@ __decorate([
     __metadata("design:paramtypes", [String, String]),
     __metadata("design:returntype", Promise)
 ], BuildingController.prototype, "buildingHasApp", null);
+__decorate([
+    (0, tsoa_1.Post)("/add_apiRoute_to_building/{buildingId}"),
+    __param(0, (0, tsoa_1.Path)()),
+    __param(1, (0, tsoa_1.Body)()),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [String, Object]),
+    __metadata("design:returntype", Promise)
+], BuildingController.prototype, "addApiToBuilding", null);
+__decorate([
+    (0, tsoa_1.Get)("/get_apisRoute_from_building/{buildingId}"),
+    __param(0, (0, tsoa_1.Path)()),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [String]),
+    __metadata("design:returntype", Promise)
+], BuildingController.prototype, "getApisFromBuilding", null);
+__decorate([
+    (0, tsoa_1.Get)("/get_apiRoute_from_building/{buildingId}/{apiId}"),
+    __param(0, (0, tsoa_1.Path)()),
+    __param(1, (0, tsoa_1.Path)()),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [String, String]),
+    __metadata("design:returntype", Promise)
+], BuildingController.prototype, "getApiFromBuilding", null);
+__decorate([
+    (0, tsoa_1.Delete)("/remove_apiRoute_from_building/{buildingId}"),
+    __param(0, (0, tsoa_1.Path)()),
+    __param(1, (0, tsoa_1.Body)()),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [String, Object]),
+    __metadata("design:returntype", Promise)
+], BuildingController.prototype, "removeApisFromBuilding", null);
+__decorate([
+    (0, tsoa_1.Get)("/building_has_apiRoute/{buildingId}/{apiId}"),
+    __param(0, (0, tsoa_1.Path)()),
+    __param(1, (0, tsoa_1.Path)()),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [String, String]),
+    __metadata("design:returntype", Promise)
+], BuildingController.prototype, "buildingHasApi", null);
 BuildingController = __decorate([
     (0, tsoa_1.Route)("/api/v1/pam"),
     (0, tsoa_1.Tags)("Building"),

@@ -22,15 +22,13 @@
  * <http://resources.spinalcom.com/licenses.pdf>.
  */
 
-import { IAuthRes, IBosAuth, IPortofolioAuth, IProfile, IProfileRes, IPortofolioAuthRes, IBosAuthRes, IPortofolioData, IBosData } from "../interfaces";
+import { IBosAuth, IPortofolioAuth, IProfile, IProfileRes, IPortofolioAuthRes, IBosAuthRes, IPortofolioData, IBosData, IProfileData } from "../interfaces";
 import { SpinalNode } from 'spinal-env-viewer-graph-service'
 
-export function _formatProfile(data: IProfileRes) {
+export function _formatProfile(data: IProfileRes): IProfileData {
     return {
         ...data.node.info.get(),
-        authorizedportofolio: data.authorizedPortofolio.map(el => _formatPortofolioAuthRes(el)),
-        authorizedRoutes: _getNodeListInfo(data.authorizedRoutes),
-        authorizedBos: data.authorizedBos.map(el => _formatBosAuthRes(el))
+        authorized: data.authorized.map(el => _formatPortofolioAuthRes(el))
     }
 }
 
@@ -38,14 +36,17 @@ export function _formatProfile(data: IProfileRes) {
 export function _formatPortofolioAuthRes(data: IPortofolioAuthRes): IPortofolioData {
     return {
         ...data.portofolio.info.get(),
-        apps: _getNodeListInfo(data.apps)
+        apps: _getNodeListInfo(data.apps),
+        apis: _getNodeListInfo(data.apis),
+        buildings: data.buildings.map(el => _formatBosAuthRes(el))
     }
 }
 
 export function _formatBosAuthRes(data: IBosAuthRes): IBosData {
     return {
         ...data.building.info.get(),
-        apps: _getNodeListInfo(data.apps)
+        apps: _getNodeListInfo(data.apps),
+        apis: _getNodeListInfo(data.apis)
     }
 }
 
@@ -66,34 +67,35 @@ export function _formatProfileKeys(profile: IProfile): IProfile {
     return res;
 }
 
-export function _formatAuthorizationData(profileData: IProfile) {
-    return {
-        authorizePortofolio: _unifyData(profileData.authorizePortofolio),
-        unauthorizePortofolio: _unifyData(profileData.unauthorizePortofolio),
-        authorizeApis: profileData.authorizeApis || [],
-        unauthorizeApis: profileData.unauthorizeApis || [],
-        authorizeBos: _unifyData(profileData.authorizeBos),
-        unauthorizeBos: _unifyData(profileData.unauthorizeBos)
-    }
-}
-
-function _unifyData(auths: (IPortofolioAuth | IBosAuth)[]): (IPortofolioAuth | IBosAuth)[] {
-    if (!auths) return [];
-
-    return auths.reduce((liste, item) => {
-        let key = "portofolioId" in item ? "portofolioId" : "buildingId";
-        let appIds = item.appsIds ? Array.isArray(item.appsIds) ? item.appsIds : [item.appsIds] : [];
-
-        const found = liste.find(el => el[key] === item[key]);
-        if (found) found.appIds.push(...appIds);
-        else {
-            item.appsIds = appIds;
-            liste.push(item);
+export function _formatAuthorizationData(profileData: IProfile): IPortofolioAuth[] {
+    const obj = {}
+    return profileData.authorize.reduce((liste, item: IPortofolioAuth) => {
+        const index = obj[item.portofolioId];
+        if (typeof index !== "undefined") {
+            const copy = _unifyData(liste[index - 1], item);
+            liste[index - 1] = copy
+        } else {
+            obj[item.portofolioId] = liste.push(item);
         }
 
         return liste;
     }, [])
 }
+
+
+
+function _unifyData(profile1: IPortofolioAuth, profile2: IPortofolioAuth): IPortofolioAuth {
+    if (!profile1.appsIds) profile1.appsIds = [];
+    if (!profile1.apisIds) profile1.apisIds = [];
+    if (!profile1.building) profile1.building = [];
+
+    profile1.appsIds = [...profile1.appsIds, ...(profile2.appsIds || [])];
+    profile1.apisIds = [...profile1.apisIds, ...(profile2.apisIds || [])];
+    profile1.building = [...profile1.building, ...(profile2.building || [])];
+
+    return profile1;
+}
+
 export function _filterApisList(authorizedIds: string[] = [], unauthorizedIds: string[] = []): string[] {
 
     if (!unauthorizedIds.length) return authorizedIds;

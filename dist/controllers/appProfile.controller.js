@@ -45,6 +45,52 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.AppProfileController = void 0;
+/*
+ * Copyright 2022 SpinalCom - www.spinalcom.com
+ *
+ * This file is part of SpinalCore.
+ *
+ * Please read all of the following terms and conditions
+ * of the Free Software license Agreement ("Agreement")
+ * carefully.
+ *
+ * This Agreement is a legally binding contract between
+ * the Licensee (as defined below) and SpinalCom that
+ * sets forth the terms and conditions that govern your
+ * use of the Program. By installing and/or using the
+ * Program, you agree to abide by all the terms and
+ * conditions stated or referenced herein.
+ *
+ * If you do not agree to abide by these terms and
+ * conditions, do not demonstrate your acceptance and do
+ * not install or use the Program.
+ * You should have received a copy of the license along
+ * with this file. If not, see
+ * <http://resources.spinalcom.com/licenses.pdf>.
+ */
+/*
+ * Copyright 2022 SpinalCom - www.spinalcom.com
+ *
+ * This file is part of SpinalCore.
+ *
+ * Please read all of the following terms and conditions
+ * of the Free Software license Agreement ("Agreement")
+ * carefully.
+ *
+ * This Agreement is a legally binding contract between
+ * the Licensee (as defined below) and SpinalCom that
+ * sets forth the terms and conditions that govern your
+ * use of the Program. By installing and/or using the
+ * Program, you agree to abide by all the terms and
+ * conditions stated or referenced herein.
+ *
+ * If you do not agree to abide by these terms and
+ * conditions, do not demonstrate your acceptance and do
+ * not install or use the Program.
+ * You should have received a copy of the license along
+ * with this file. If not, see
+ * <http://resources.spinalcom.com/licenses.pdf>.
+ */
 const constant_1 = require("../constant");
 const services_1 = require("../services");
 const tsoa_1 = require("tsoa");
@@ -131,48 +177,10 @@ let AppProfileController = class AppProfileController extends tsoa_1.Controller 
             }
         });
     }
-    authorizeToAccessPortofolioApps(profileId, data) {
-        return __awaiter(this, void 0, void 0, function* () {
-            try {
-                const nodes = yield serviceInstance.authorizeToAccessPortofolioApp(profileId, data);
-                if (nodes) {
-                    this.setStatus(constant_1.HTTP_CODES.OK);
-                    return nodes.map(value => (0, profileUtils_1._formatPortofolioAuthRes)(value));
-                }
-                this.setStatus(constant_1.HTTP_CODES.NOT_FOUND);
-                return { message: `no profile found for ${profileId}` };
-            }
-            catch (error) {
-                this.setStatus(constant_1.HTTP_CODES.INTERNAL_ERROR);
-                return { message: error.message };
-            }
-        });
-    }
-    unauthorizeToAccessPortofolioApps(profileId, data) {
-        return __awaiter(this, void 0, void 0, function* () {
-            try {
-                const nodes = yield serviceInstance.unauthorizeToAccessPortofolioApp(profileId, data);
-                if (nodes) {
-                    this.setStatus(constant_1.HTTP_CODES.OK);
-                    return nodes.reduce((liste, items) => {
-                        if (items) {
-                            let format = items.map(el => el.info.get());
-                            liste.push(format);
-                        }
-                        ;
-                        return liste;
-                    }, []);
-                }
-                this.setStatus(constant_1.HTTP_CODES.NOT_FOUND);
-                return { message: `no profile found for ${profileId}` };
-            }
-            catch (error) {
-                this.setStatus(constant_1.HTTP_CODES.INTERNAL_ERROR);
-                return { message: error.message };
-            }
-        });
-    }
-    getAuthorizedPortofolioApps(profileId) {
+    ///////////////////
+    //   PORTOFOLIO  //
+    ///////////////////
+    getAuthorizedPortofolio(profileId) {
         return __awaiter(this, void 0, void 0, function* () {
             try {
                 const nodes = yield serviceInstance.getPortofolioAuthStructure(profileId);
@@ -189,10 +197,33 @@ let AppProfileController = class AppProfileController extends tsoa_1.Controller 
             }
         });
     }
-    authorizeToAccessApis(profileId, data) {
+    authorizeToAccessPortofolioApis(profileId, data) {
         return __awaiter(this, void 0, void 0, function* () {
             try {
-                const nodes = yield serviceInstance.authorizeToAccessApis(profileId, data.authorizeApis);
+                const nodes = yield serviceInstance.authorizeToAccessPortofolioApisRoute(profileId, data);
+                if (nodes) {
+                    this.setStatus(constant_1.HTTP_CODES.OK);
+                    return nodes.reduce((liste, { apis }) => {
+                        apis.forEach((node) => {
+                            if (node)
+                                liste.push(...(0, profileUtils_1._getNodeListInfo)([node]));
+                        });
+                        return liste;
+                    }, []);
+                }
+                this.setStatus(constant_1.HTTP_CODES.NOT_FOUND);
+                return { message: `no profile found for ${profileId}` };
+            }
+            catch (error) {
+                this.setStatus(constant_1.HTTP_CODES.INTERNAL_ERROR);
+                return { message: error.message };
+            }
+        });
+    }
+    getAuthorizedPortofolioApis(profileId, portofolioId) {
+        return __awaiter(this, void 0, void 0, function* () {
+            try {
+                const nodes = yield serviceInstance.getAuthorizedPortofolioApis(profileId, portofolioId);
                 if (nodes) {
                     this.setStatus(constant_1.HTTP_CODES.OK);
                     return (0, profileUtils_1._getNodeListInfo)(nodes);
@@ -206,10 +237,10 @@ let AppProfileController = class AppProfileController extends tsoa_1.Controller 
             }
         });
     }
-    unauthorizeToAccessApis(profileId, data) {
+    unauthorizeToAccessPortofolioApis(profileId, data) {
         return __awaiter(this, void 0, void 0, function* () {
             try {
-                const nodes = yield serviceInstance.unauthorizeToAccessApis(profileId, data.unauthorizeApis);
+                const nodes = yield serviceInstance.unauthorizeToAccessPortofolioApisRoute(profileId, data);
                 if (nodes) {
                     this.setStatus(constant_1.HTTP_CODES.OK);
                     return nodes.filter(el => el);
@@ -223,10 +254,53 @@ let AppProfileController = class AppProfileController extends tsoa_1.Controller 
             }
         });
     }
-    getAuthorizedApis(profileId) {
+    ////////////
+    //   BOS  //
+    ////////////
+    getAuthorizedBos(profileId, portofolioId) {
         return __awaiter(this, void 0, void 0, function* () {
             try {
-                const nodes = yield serviceInstance.getAuthorizedApis(profileId);
+                const nodes = yield serviceInstance.getBosAuthStructure(profileId, portofolioId);
+                if (nodes) {
+                    this.setStatus(constant_1.HTTP_CODES.OK);
+                    return nodes.map(node => (0, profileUtils_1._formatBosAuthRes)(node));
+                }
+                this.setStatus(constant_1.HTTP_CODES.NOT_FOUND);
+                return { message: `no profile found for ${profileId}` };
+            }
+            catch (error) {
+                this.setStatus(constant_1.HTTP_CODES.INTERNAL_ERROR);
+                return { message: error.message };
+            }
+        });
+    }
+    authorizeToAccessBosApis(profileId, portofolioId, data) {
+        return __awaiter(this, void 0, void 0, function* () {
+            try {
+                const nodes = yield serviceInstance.authorizeToAccessBosApiRoute(profileId, portofolioId, data);
+                if (nodes) {
+                    this.setStatus(constant_1.HTTP_CODES.OK);
+                    return nodes.reduce((liste, { apis }) => {
+                        apis.forEach((node) => {
+                            if (node)
+                                liste.push(...(0, profileUtils_1._getNodeListInfo)([node]));
+                        });
+                        return liste;
+                    }, []);
+                }
+                this.setStatus(constant_1.HTTP_CODES.NOT_FOUND);
+                return { message: `no profile found for ${profileId}` };
+            }
+            catch (error) {
+                this.setStatus(constant_1.HTTP_CODES.INTERNAL_ERROR);
+                return { message: error.message };
+            }
+        });
+    }
+    getAuthorizedBosApis(profileId, portofolioId, bosId) {
+        return __awaiter(this, void 0, void 0, function* () {
+            try {
+                const nodes = yield serviceInstance.getAuthorizedBosApis(profileId, portofolioId, bosId);
                 if (nodes) {
                     this.setStatus(constant_1.HTTP_CODES.OK);
                     return (0, profileUtils_1._getNodeListInfo)(nodes);
@@ -240,54 +314,13 @@ let AppProfileController = class AppProfileController extends tsoa_1.Controller 
             }
         });
     }
-    authorizeProfileToAccessBos(profileId, data) {
+    unauthorizeToAccessBosApis(profileId, portofolioId, data) {
         return __awaiter(this, void 0, void 0, function* () {
             try {
-                const nodes = yield serviceInstance.authorizeToAccessBosApp(profileId, data);
+                const nodes = yield serviceInstance.unauthorizeToAccessBosApiRoute(profileId, portofolioId, data);
                 if (nodes) {
                     this.setStatus(constant_1.HTTP_CODES.OK);
-                    return nodes.map(node => (0, profileUtils_1._formatBosAuthRes)(node));
-                }
-                this.setStatus(constant_1.HTTP_CODES.NOT_FOUND);
-                return { message: `no profile found for ${profileId}` };
-            }
-            catch (error) {
-                this.setStatus(constant_1.HTTP_CODES.INTERNAL_ERROR);
-                return { message: error.message };
-            }
-        });
-    }
-    unauthorizeProfileToAccessBos(profileId, data) {
-        return __awaiter(this, void 0, void 0, function* () {
-            try {
-                const nodes = yield serviceInstance.unauthorizeToAccessBosApp(profileId, data);
-                if (nodes) {
-                    this.setStatus(constant_1.HTTP_CODES.OK);
-                    return nodes.reduce((liste, items) => {
-                        if (items) {
-                            let format = items.map(el => el.info.get());
-                            liste.push(format);
-                        }
-                        ;
-                        return liste;
-                    }, []);
-                }
-                this.setStatus(constant_1.HTTP_CODES.NOT_FOUND);
-                return { message: `no profile found for ${profileId}` };
-            }
-            catch (error) {
-                this.setStatus(constant_1.HTTP_CODES.INTERNAL_ERROR);
-                return { message: error.message };
-            }
-        });
-    }
-    getAuthorizedBos(profileId) {
-        return __awaiter(this, void 0, void 0, function* () {
-            try {
-                const nodes = yield serviceInstance.getBosAuthStructure(profileId);
-                if (nodes) {
-                    this.setStatus(constant_1.HTTP_CODES.OK);
-                    return nodes.map(node => (0, profileUtils_1._formatBosAuthRes)(node));
+                    return nodes.filter(el => el);
                 }
                 this.setStatus(constant_1.HTTP_CODES.NOT_FOUND);
                 return { message: `no profile found for ${profileId}` };
@@ -335,74 +368,71 @@ __decorate([
     __metadata("design:returntype", Promise)
 ], AppProfileController.prototype, "deleteAppProfile", null);
 __decorate([
-    (0, tsoa_1.Post)("/authorize_portofolio_apps/{profileId}"),
-    __param(0, (0, tsoa_1.Path)()),
-    __param(1, (0, tsoa_1.Body)()),
-    __metadata("design:type", Function),
-    __metadata("design:paramtypes", [String, Array]),
-    __metadata("design:returntype", Promise)
-], AppProfileController.prototype, "authorizeToAccessPortofolioApps", null);
-__decorate([
-    (0, tsoa_1.Post)("/unauthorize_portofolio_apps/{profileId}"),
-    __param(0, (0, tsoa_1.Path)()),
-    __param(1, (0, tsoa_1.Body)()),
-    __metadata("design:type", Function),
-    __metadata("design:paramtypes", [String, Array]),
-    __metadata("design:returntype", Promise)
-], AppProfileController.prototype, "unauthorizeToAccessPortofolioApps", null);
-__decorate([
     (0, tsoa_1.Get)("/get_authorized_portofolio/{profileId}"),
     __param(0, (0, tsoa_1.Path)()),
     __metadata("design:type", Function),
     __metadata("design:paramtypes", [String]),
     __metadata("design:returntype", Promise)
-], AppProfileController.prototype, "getAuthorizedPortofolioApps", null);
+], AppProfileController.prototype, "getAuthorizedPortofolio", null);
 __decorate([
-    (0, tsoa_1.Post)("/authorize_apis/{profileId}"),
+    (0, tsoa_1.Post)("/authorize_portofolio_apis/{profileId}"),
     __param(0, (0, tsoa_1.Path)()),
     __param(1, (0, tsoa_1.Body)()),
     __metadata("design:type", Function),
     __metadata("design:paramtypes", [String, Object]),
     __metadata("design:returntype", Promise)
-], AppProfileController.prototype, "authorizeToAccessApis", null);
+], AppProfileController.prototype, "authorizeToAccessPortofolioApis", null);
 __decorate([
-    (0, tsoa_1.Post)("/unauthorize_apis/{profileId}"),
+    (0, tsoa_1.Get)("/get_authorized_portofolio_apis/{profileId}/{portofolioId}"),
     __param(0, (0, tsoa_1.Path)()),
-    __param(1, (0, tsoa_1.Body)()),
+    __param(1, (0, tsoa_1.Path)()),
     __metadata("design:type", Function),
-    __metadata("design:paramtypes", [String, Object]),
+    __metadata("design:paramtypes", [String, String]),
     __metadata("design:returntype", Promise)
-], AppProfileController.prototype, "unauthorizeToAccessApis", null);
+], AppProfileController.prototype, "getAuthorizedPortofolioApis", null);
 __decorate([
-    (0, tsoa_1.Get)("/get_authorized_apis/{profileId}"),
-    __param(0, (0, tsoa_1.Path)()),
-    __metadata("design:type", Function),
-    __metadata("design:paramtypes", [String]),
-    __metadata("design:returntype", Promise)
-], AppProfileController.prototype, "getAuthorizedApis", null);
-__decorate([
-    (0, tsoa_1.Post)("/authorize_bos_apps/{profileId}"),
+    (0, tsoa_1.Post)("/unauthorize_portofolio_apis/{profileId}"),
     __param(0, (0, tsoa_1.Path)()),
     __param(1, (0, tsoa_1.Body)()),
     __metadata("design:type", Function),
     __metadata("design:paramtypes", [String, Array]),
     __metadata("design:returntype", Promise)
-], AppProfileController.prototype, "authorizeProfileToAccessBos", null);
+], AppProfileController.prototype, "unauthorizeToAccessPortofolioApis", null);
 __decorate([
-    (0, tsoa_1.Post)("/unauthorize_bos_apps/{profileId}"),
+    (0, tsoa_1.Get)("/get_authorized_bos/{profileId}/{portofolioId}"),
     __param(0, (0, tsoa_1.Path)()),
-    __param(1, (0, tsoa_1.Body)()),
+    __param(1, (0, tsoa_1.Path)()),
     __metadata("design:type", Function),
-    __metadata("design:paramtypes", [String, Array]),
-    __metadata("design:returntype", Promise)
-], AppProfileController.prototype, "unauthorizeProfileToAccessBos", null);
-__decorate([
-    (0, tsoa_1.Get)("/get_authorized_bos/{profileId}"),
-    __param(0, (0, tsoa_1.Path)()),
-    __metadata("design:type", Function),
-    __metadata("design:paramtypes", [String]),
+    __metadata("design:paramtypes", [String, String]),
     __metadata("design:returntype", Promise)
 ], AppProfileController.prototype, "getAuthorizedBos", null);
+__decorate([
+    (0, tsoa_1.Post)("/authorize_bos_apis/{profileId}/{portofolioId}"),
+    __param(0, (0, tsoa_1.Path)()),
+    __param(1, (0, tsoa_1.Path)()),
+    __param(2, (0, tsoa_1.Body)()),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [String, String, Object]),
+    __metadata("design:returntype", Promise)
+], AppProfileController.prototype, "authorizeToAccessBosApis", null);
+__decorate([
+    (0, tsoa_1.Get)("/get_authorized_bos_apis/{profileId}/{portofolioId}/{bosId}"),
+    __param(0, (0, tsoa_1.Path)()),
+    __param(1, (0, tsoa_1.Path)()),
+    __param(2, (0, tsoa_1.Path)()),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [String, String, String]),
+    __metadata("design:returntype", Promise)
+], AppProfileController.prototype, "getAuthorizedBosApis", null);
+__decorate([
+    (0, tsoa_1.Post)("/unauthorize_bos_apis/{profileId}/{portofolioId}"),
+    __param(0, (0, tsoa_1.Path)()),
+    __param(1, (0, tsoa_1.Path)()),
+    __param(2, (0, tsoa_1.Body)()),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [String, String, Array]),
+    __metadata("design:returntype", Promise)
+], AppProfileController.prototype, "unauthorizeToAccessBosApis", null);
 AppProfileController = __decorate([
     (0, tsoa_1.Route)("/api/v1/pam/app_profile"),
     (0, tsoa_1.Tags)("App Profiles"),

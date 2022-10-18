@@ -2,25 +2,40 @@ import { Controller } from "tsoa";
 import { IApiRoute } from "../interfaces";
 export declare class APIController extends Controller {
     constructor();
-    /**
-     * Adds a route to the list of available routes
-     */
-    createApiRoute(data: IApiRoute): Promise<IApiRoute | {
+    createPortofolioApiRoute(data: IApiRoute): Promise<IApiRoute | {
         message: string;
     }>;
-    updateApiRoute(data: IApiRoute, id: string): Promise<IApiRoute | {
+    updatePortofolioApiRoute(data: IApiRoute, id: string): Promise<IApiRoute | {
         message: string;
     }>;
-    getApiRouteById(id: string): Promise<IApiRoute | {
+    getPortofolioApiRouteById(id: string): Promise<IApiRoute | {
         message: string;
     }>;
-    getAllApiRoute(): Promise<IApiRoute[] | {
+    getAllPortofolioApiRoute(): Promise<IApiRoute[] | {
         message: string;
     }>;
-    deleteApiRoute(id: any): Promise<{
+    deletePortofolioApiRoute(id: any): Promise<{
         message: string;
     }>;
-    uploadSwaggerFile(file: any): Promise<IApiRoute[] | {
+    uploadPortofolioSwaggerFile(file: any): Promise<IApiRoute[] | {
+        message: string;
+    }>;
+    createBosApiRoute(data: IApiRoute): Promise<IApiRoute | {
+        message: string;
+    }>;
+    updateBosApiRoute(data: IApiRoute, id: string): Promise<IApiRoute | {
+        message: string;
+    }>;
+    getBosApiRouteById(id: string): Promise<IApiRoute | {
+        message: string;
+    }>;
+    getAllBosApiRoute(): Promise<IApiRoute[] | {
+        message: string;
+    }>;
+    deleteBosApiRoute(id: any): Promise<{
+        message: string;
+    }>;
+    uploadBosSwaggerFile(file: any): Promise<IApiRoute[] | {
         message: string;
     }>;
 }

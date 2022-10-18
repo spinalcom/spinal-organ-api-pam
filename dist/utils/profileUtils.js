@@ -25,15 +25,15 @@
 Object.defineProperty(exports, "__esModule", { value: true });
 exports._filterBosList = exports._filterPortofolioList = exports._filterApisList = exports._formatAuthorizationData = exports._formatProfileKeys = exports._getNodeListInfo = exports._formatBosAuthRes = exports._formatPortofolioAuthRes = exports._formatProfile = void 0;
 function _formatProfile(data) {
-    return Object.assign(Object.assign({}, data.node.info.get()), { authorizedportofolio: data.authorizedPortofolio.map(el => _formatPortofolioAuthRes(el)), authorizedRoutes: _getNodeListInfo(data.authorizedRoutes), authorizedBos: data.authorizedBos.map(el => _formatBosAuthRes(el)) });
+    return Object.assign(Object.assign({}, data.node.info.get()), { authorized: data.authorized.map(el => _formatPortofolioAuthRes(el)) });
 }
 exports._formatProfile = _formatProfile;
 function _formatPortofolioAuthRes(data) {
-    return Object.assign(Object.assign({}, data.portofolio.info.get()), { apps: _getNodeListInfo(data.apps) });
+    return Object.assign(Object.assign({}, data.portofolio.info.get()), { apps: _getNodeListInfo(data.apps), apis: _getNodeListInfo(data.apis), buildings: data.buildings.map(el => _formatBosAuthRes(el)) });
 }
 exports._formatPortofolioAuthRes = _formatPortofolioAuthRes;
 function _formatBosAuthRes(data) {
-    return Object.assign(Object.assign({}, data.building.info.get()), { apps: _getNodeListInfo(data.apps) });
+    return Object.assign(Object.assign({}, data.building.info.get()), { apps: _getNodeListInfo(data.apps), apis: _getNodeListInfo(data.apis) });
 }
 exports._formatBosAuthRes = _formatBosAuthRes;
 function _getNodeListInfo(nodes) {
@@ -52,31 +52,31 @@ function _formatProfileKeys(profile) {
 }
 exports._formatProfileKeys = _formatProfileKeys;
 function _formatAuthorizationData(profileData) {
-    return {
-        authorizePortofolio: _unifyData(profileData.authorizePortofolio),
-        unauthorizePortofolio: _unifyData(profileData.unauthorizePortofolio),
-        authorizeApis: profileData.authorizeApis || [],
-        unauthorizeApis: profileData.unauthorizeApis || [],
-        authorizeBos: _unifyData(profileData.authorizeBos),
-        unauthorizeBos: _unifyData(profileData.unauthorizeBos)
-    };
-}
-exports._formatAuthorizationData = _formatAuthorizationData;
-function _unifyData(auths) {
-    if (!auths)
-        return [];
-    return auths.reduce((liste, item) => {
-        let key = "portofolioId" in item ? "portofolioId" : "buildingId";
-        let appIds = item.appsIds ? Array.isArray(item.appsIds) ? item.appsIds : [item.appsIds] : [];
-        const found = liste.find(el => el[key] === item[key]);
-        if (found)
-            found.appIds.push(...appIds);
+    const obj = {};
+    return profileData.authorize.reduce((liste, item) => {
+        const index = obj[item.portofolioId];
+        if (typeof index !== "undefined") {
+            const copy = _unifyData(liste[index - 1], item);
+            liste[index - 1] = copy;
+        }
         else {
-            item.appsIds = appIds;
-            liste.push(item);
+            obj[item.portofolioId] = liste.push(item);
         }
         return liste;
     }, []);
+}
+exports._formatAuthorizationData = _formatAuthorizationData;
+function _unifyData(profile1, profile2) {
+    if (!profile1.appsIds)
+        profile1.appsIds = [];
+    if (!profile1.apisIds)
+        profile1.apisIds = [];
+    if (!profile1.building)
+        profile1.building = [];
+    profile1.appsIds = [...profile1.appsIds, ...(profile2.appsIds || [])];
+    profile1.apisIds = [...profile1.apisIds, ...(profile2.apisIds || [])];
+    profile1.building = [...profile1.building, ...(profile2.building || [])];
+    return profile1;
 }
 function _filterApisList(authorizedIds = [], unauthorizedIds = []) {
     if (!unauthorizedIds.length)

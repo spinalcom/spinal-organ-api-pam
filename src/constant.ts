@@ -60,6 +60,8 @@ export const ADMIN_APPS_GROUP_NAME = "Admin apps";
 export const PORTOFOLIO_APPS_GROUP_NAME = "Portofolio apps";
 export const BUILDING_APPS_GROUP_NAME = "Building apps";
 export const TOKEN_LIST_CONTEXT_NAME = "Tokens"
+export const BUILDING_API_GROUP_NAME = "Building Apis Routes";
+export const PORTOFOLIO_API_GROUP_NAME = "Portofolio Apis Routes";
 
 //Contexts types
 export const USER_PROFILE_CONTEXT_TYPE = 'UserProfileList';
@@ -90,6 +92,7 @@ export const APP_TYPE = 'AdminApp';
 export const BUILDING_TYPE = 'Building';
 export const DIGITALTWIN_TYPE = 'Digital twin';
 export const API_ROUTE_TYPE = 'ApiRoute';
+export const API_ROUTE_GROUP_TYPE = 'ApiRoute';
 export const PORTOFOLIO_TYPE = 'Portofolio';
 
 export const ADMIN_APPS_GROUP_TYPE = "AdminAppsGroup";
@@ -100,6 +103,9 @@ export const ADMIN_APP_TYPE = "AdminApp";
 export const PORTOFOLIO_APP_TYPE = "PortofolioApp";
 export const BUILDING_APP_TYPE = "BuildingApp";
 export const TOKEN_TYPE = "token";
+
+export const BUILDING_API_GROUP_TYPE = "BuildingApis";
+export const PORTOFOLIO_API_GROUP_TYPE = "PortofolioApis";
 
 // RelationName
 // export const CONTEXT_TO_APP_CATEGORY_RELATION_NAME = "hasAppCategory";
@@ -112,7 +118,8 @@ export const CONTEXT_TO_APP_PROFILE_RELATION_NAME = 'hasAppProfile';
 export const CONTEXT_TO_ROLE_RELATION_NAME = 'hasRole';
 export const CONTEXT_TO_USER_RELATION_NAME = 'hasUser';
 export const CONTEXT_TO_DIGITALTWIN_RELATION_NAME = 'hasDigitalTwin';
-export const CONTEXT_TO_API_ROUTE_RELATION_NAME = 'hasApiRoute';
+export const CONTEXT_TO_API_ROUTE_GROUP_RELATION_NAME = 'hasApiRouteGroup';
+export const API_RELATION_NAME = 'hasApiRoute';
 export const CONTEXT_TO_PORTOFOLIO_RELATION_NAME = "hasPortofolio";
 // export const CONTEXT_TO_AUTHORIZED_APPS_RELATION_NAME = "profileHasApps";
 export const CONTEXT_TO_AUTHORIZED_APIS_RELATION_NAME = "profileHasApis";
@@ -161,7 +168,12 @@ export const routesToProxy = [
 ];
 
 export const PAM_BASE_URI = "/api/v1/pam";
-export const BOS_BASE_URI = "/api/v1/building"
+
+export const BOS_BASE_URI_V1 = "/api/v1/building";
+export const BOS_BASE_URI_V1_2 = "/v1/building";
+
+export const BOS_BASE_URI_V2 = "/api/v2/building";
+
 
 
 export enum HTTP_CODES {

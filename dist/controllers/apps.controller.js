@@ -45,6 +45,29 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.AppsController = void 0;
+/*
+ * Copyright 2022 SpinalCom - www.spinalcom.com
+ *
+ * This file is part of SpinalCore.
+ *
+ * Please read all of the following terms and conditions
+ * of the Free Software license Agreement ("Agreement")
+ * carefully.
+ *
+ * This Agreement is a legally binding contract between
+ * the Licensee (as defined below) and SpinalCom that
+ * sets forth the terms and conditions that govern your
+ * use of the Program. By installing and/or using the
+ * Program, you agree to abide by all the terms and
+ * conditions stated or referenced herein.
+ *
+ * If you do not agree to abide by these terms and
+ * conditions, do not demonstrate your acceptance and do
+ * not install or use the Program.
+ * You should have received a copy of the license along
+ * with this file. If not, see
+ * <http://resources.spinalcom.com/licenses.pdf>.
+ */
 const services_1 = require("../services");
 const tsoa_1 = require("tsoa");
 const constant_1 = require("../constant");
@@ -290,6 +313,85 @@ let AppsController = class AppsController extends tsoa_1.Controller {
             }
         });
     }
+    uploadAdminApp(file) {
+        return __awaiter(this, void 0, void 0, function* () {
+            try {
+                if (!file) {
+                    this.setStatus(constant_1.HTTP_CODES.BAD_REQUEST);
+                    return { message: "No file uploaded" };
+                }
+                // if (file && !(/.*\.json$/.test(file.originalname) || /.*\.xlsx$/.test(file.originalname))) {
+                if (file && !(/.*\.xlsx$/.test(file.originalname))) {
+                    this.setStatus(constant_1.HTTP_CODES.BAD_REQUEST);
+                    return { message: "The selected file must be a json or excel file" };
+                }
+                const isExcel = /.*\.xlsx$/.test(file.originalname);
+                const apps = yield appServiceInstance.uploadApps(services_1.AppsType.admin, file.buffer, isExcel);
+                if (apps && apps.length > 0) {
+                    this.setStatus(constant_1.HTTP_CODES.CREATED);
+                    return apps.map(node => node.info.get());
+                }
+                this.setStatus(constant_1.HTTP_CODES.BAD_REQUEST);
+                return { message: "oops, something went wrong, please check your input data" };
+            }
+            catch (error) {
+                this.setStatus(constant_1.HTTP_CODES.INTERNAL_ERROR);
+                return { message: error.message };
+            }
+        });
+    }
+    uploadPortofolioApp(file) {
+        return __awaiter(this, void 0, void 0, function* () {
+            try {
+                if (!file) {
+                    this.setStatus(constant_1.HTTP_CODES.BAD_REQUEST);
+                    return { message: "No file uploaded" };
+                }
+                if (file && !(/.*\.json$/.test(file.originalname) || /.*\.xlsx$/.test(file.originalname))) {
+                    this.setStatus(constant_1.HTTP_CODES.BAD_REQUEST);
+                    return { message: "The selected file must be a json or excel file" };
+                }
+                const isExcel = /.*\.xlsx$/.test(file.originalname);
+                const apps = yield appServiceInstance.uploadApps(services_1.AppsType.portofolio, file.buffer, isExcel);
+                if (apps && apps.length > 0) {
+                    this.setStatus(constant_1.HTTP_CODES.CREATED);
+                    return apps.map(node => node.info.get());
+                }
+                this.setStatus(constant_1.HTTP_CODES.BAD_REQUEST);
+                return { message: "oops, something went wrong, please check your input data" };
+            }
+            catch (error) {
+                this.setStatus(constant_1.HTTP_CODES.INTERNAL_ERROR);
+                return { message: error.message };
+            }
+        });
+    }
+    uploadBuildingApp(file) {
+        return __awaiter(this, void 0, void 0, function* () {
+            try {
+                if (!file) {
+                    this.setStatus(constant_1.HTTP_CODES.BAD_REQUEST);
+                    return { message: "No file uploaded" };
+                }
+                if (file && !(/.*\.json$/.test(file.originalname) || /.*\.xlsx$/.test(file.originalname))) {
+                    this.setStatus(constant_1.HTTP_CODES.BAD_REQUEST);
+                    return { message: "The selected file must be a json or excel file" };
+                }
+                const isExcel = /.*\.xlsx$/.test(file.originalname);
+                const apps = yield appServiceInstance.uploadApps(services_1.AppsType.building, file.buffer, isExcel);
+                if (apps && apps.length > 0) {
+                    this.setStatus(constant_1.HTTP_CODES.CREATED);
+                    return apps.map(node => node.info.get());
+                }
+                this.setStatus(constant_1.HTTP_CODES.BAD_REQUEST);
+                return { message: "oops, something went wrong, please check your input data" };
+            }
+            catch (error) {
+                this.setStatus(constant_1.HTTP_CODES.INTERNAL_ERROR);
+                return { message: error.message };
+            }
+        });
+    }
 };
 __decorate([
     (0, tsoa_1.Post)("/create_admin_app"),
@@ -396,6 +498,27 @@ __decorate([
     __metadata("design:paramtypes", [String]),
     __metadata("design:returntype", Promise)
 ], AppsController.prototype, "deleteBuildingApp", null);
+__decorate([
+    (0, tsoa_1.Post)("/upload_admin_apps"),
+    __param(0, (0, tsoa_1.UploadedFile)()),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [Object]),
+    __metadata("design:returntype", Promise)
+], AppsController.prototype, "uploadAdminApp", null);
+__decorate([
+    (0, tsoa_1.Post)("/upload_portofolio_apps"),
+    __param(0, (0, tsoa_1.UploadedFile)()),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [Object]),
+    __metadata("design:returntype", Promise)
+], AppsController.prototype, "uploadPortofolioApp", null);
+__decorate([
+    (0, tsoa_1.Post)("/upload_building_apps"),
+    __param(0, (0, tsoa_1.UploadedFile)()),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [Object]),
+    __metadata("design:returntype", Promise)
+], AppsController.prototype, "uploadBuildingApp", null);
 AppsController = __decorate([
     (0, tsoa_1.Route)("/api/v1/pam"),
     (0, tsoa_1.Tags)("Applications"),

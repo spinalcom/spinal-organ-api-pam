@@ -1,5 +1,53 @@
 /*
  * Copyright 2022 SpinalCom - www.spinalcom.com
+ *
+ * This file is part of SpinalCore.
+ *
+ * Please read all of the following terms and conditions
+ * of the Free Software license Agreement ("Agreement")
+ * carefully.
+ *
+ * This Agreement is a legally binding contract between
+ * the Licensee (as defined below) and SpinalCom that
+ * sets forth the terms and conditions that govern your
+ * use of the Program. By installing and/or using the
+ * Program, you agree to abide by all the terms and
+ * conditions stated or referenced herein.
+ *
+ * If you do not agree to abide by these terms and
+ * conditions, do not demonstrate your acceptance and do
+ * not install or use the Program.
+ * You should have received a copy of the license along
+ * with this file. If not, see
+ * <http://resources.spinalcom.com/licenses.pdf>.
+ */
+
+/*
+ * Copyright 2022 SpinalCom - www.spinalcom.com
+ *
+ * This file is part of SpinalCore.
+ *
+ * Please read all of the following terms and conditions
+ * of the Free Software license Agreement ("Agreement")
+ * carefully.
+ *
+ * This Agreement is a legally binding contract between
+ * the Licensee (as defined below) and SpinalCom that
+ * sets forth the terms and conditions that govern your
+ * use of the Program. By installing and/or using the
+ * Program, you agree to abide by all the terms and
+ * conditions stated or referenced herein.
+ *
+ * If you do not agree to abide by these terms and
+ * conditions, do not demonstrate your acceptance and do
+ * not install or use the Program.
+ * You should have received a copy of the license along
+ * with this file. If not, see
+ * <http://resources.spinalcom.com/licenses.pdf>.
+ */
+
+/*
+ * Copyright 2022 SpinalCom - www.spinalcom.com
  * 
  * This file is part of SpinalCore.
  * 
@@ -33,262 +81,305 @@ const serviceInstance = UserProfileService.getInstance();
 @Tags("user Profiles")
 export class UserProfileController extends Controller {
 
-  public constructor() {
-    super();
-  }
-
-  @Post("/create_profile")
-  public async createUserProfile(@Body() data: IProfile): Promise<IProfileData | { message: string }> {
-    try {
-
-      if (!data.name) {
-        this.setStatus(HTTP_CODES.BAD_REQUEST)
-        return { message: "The profile name is required" };
-      }
-
-      const profile = await serviceInstance.createUserProfile(data);
-      this.setStatus(HTTP_CODES.CREATED)
-      return _formatProfile(profile);
-
-    } catch (error) {
-      this.setStatus(HTTP_CODES.INTERNAL_ERROR);
-      return { message: error.message };
+    public constructor() {
+        super();
     }
-  }
 
-  @Get("/get_profile/{id}")
-  public async getUserProfile(@Path() id: string): Promise<IProfileData | { message: string }> {
-    try {
-      const data = await serviceInstance.getUserProfile(id);
-      if (data) {
-        this.setStatus(HTTP_CODES.OK)
-        return _formatProfile(data);
-      }
+    @Post("/create_profile")
+    public async createUserProfile(@Body() data: IProfile): Promise<IProfileData | { message: string }> {
+        try {
 
-      this.setStatus(HTTP_CODES.NOT_FOUND)
-      return { message: `no profile found for ${id}` };
-    } catch (error) {
-      this.setStatus(HTTP_CODES.INTERNAL_ERROR);
-      return { message: error.message };
+            if (!data.name) {
+                this.setStatus(HTTP_CODES.BAD_REQUEST)
+                return { message: "The profile name is required" };
+            }
+
+            const profile = await serviceInstance.createUserProfile(data);
+            this.setStatus(HTTP_CODES.CREATED)
+            return _formatProfile(profile);
+
+        } catch (error) {
+            this.setStatus(HTTP_CODES.INTERNAL_ERROR);
+            return { message: error.message };
+        }
     }
-  }
 
-  @Get("/get_all_profile")
-  public async getAllUserProfile(): Promise<IProfileData[] | { message: string }> {
-    try {
-      const nodes = await serviceInstance.getAllUserProfile() || [];
-      this.setStatus(HTTP_CODES.OK);
-      return nodes.map(el => _formatProfile(el));
-    } catch (error) {
-      this.setStatus(HTTP_CODES.INTERNAL_ERROR);
-      return { message: error.message };
+    @Get("/get_profile/{id}")
+    public async getUserProfile(@Path() id: string): Promise<IProfileData | { message: string }> {
+        try {
+            const data = await serviceInstance.getUserProfile(id);
+            if (data) {
+                this.setStatus(HTTP_CODES.OK)
+                return _formatProfile(data);
+            }
+
+            this.setStatus(HTTP_CODES.NOT_FOUND)
+            return { message: `no profile found for ${id}` };
+        } catch (error) {
+            this.setStatus(HTTP_CODES.INTERNAL_ERROR);
+            return { message: error.message };
+        }
     }
-  }
 
-  @Put("/edit_profile/{id}")
-  public async updateUserProfile(@Path() id: string, @Body() data: IProfile): Promise<IProfileData | { message: string }> {
-    try {
-      const node = await serviceInstance.updateUserProfile(id, data);
-      if (node) {
-        this.setStatus(HTTP_CODES.OK);
-        return _formatProfile(node);
-      }
-
-      this.setStatus(HTTP_CODES.NOT_FOUND);
-      return { message: `no profile found for ${id}` };
-
-    } catch (error) {
-      this.setStatus(HTTP_CODES.INTERNAL_ERROR);
-      return { message: error.message };
+    @Get("/get_all_profile")
+    public async getAllUserProfile(): Promise<IProfileData[] | { message: string }> {
+        try {
+            const nodes = await serviceInstance.getAllUserProfile() || [];
+            this.setStatus(HTTP_CODES.OK);
+            return nodes.map(el => _formatProfile(el));
+        } catch (error) {
+            this.setStatus(HTTP_CODES.INTERNAL_ERROR);
+            return { message: error.message };
+        }
     }
-  }
 
-  @Delete("/delete_profile/{id}")
-  public async deleteUserProfile(@Path() id: string): Promise<{ message: string }> {
-    try {
+    @Put("/edit_profile/{id}")
+    public async updateUserProfile(@Path() id: string, @Body() data: IProfile): Promise<IProfileData | { message: string }> {
+        try {
+            const node = await serviceInstance.updateUserProfile(id, data);
+            if (node) {
+                this.setStatus(HTTP_CODES.OK);
+                return _formatProfile(node);
+            }
 
-      await serviceInstance.deleteUserProfile(id);
-      this.setStatus(HTTP_CODES.OK);
-      return { message: "user profile deleted" };
+            this.setStatus(HTTP_CODES.NOT_FOUND);
+            return { message: `no profile found for ${id}` };
 
-    } catch (error) {
-      this.setStatus(HTTP_CODES.INTERNAL_ERROR);
-      return { message: error.message };
+        } catch (error) {
+            this.setStatus(HTTP_CODES.INTERNAL_ERROR);
+            return { message: error.message };
+        }
     }
-  }
 
-  @Post("/authorize_portofolio_apps/{profileId}")
-  public async authorizeToAccessPortofolioApps(@Path() profileId: string, @Body() data: IPortofolioAuth[]): Promise<IPortofolioData[] | { message: string }> {
-    try {
+    @Delete("/delete_profile/{id}")
+    public async deleteUserProfile(@Path() id: string): Promise<{ message: string }> {
+        try {
 
-      const nodes = await serviceInstance.authorizeToAccessPortofolioApp(profileId, data);
-      if (nodes) {
-        this.setStatus(HTTP_CODES.OK)
-        return nodes.map(value => _formatPortofolioAuthRes(value));
-      }
+            await serviceInstance.deleteUserProfile(id);
+            this.setStatus(HTTP_CODES.OK);
+            return { message: "user profile deleted" };
 
-      this.setStatus(HTTP_CODES.NOT_FOUND)
-      return { message: `no profile found for ${profileId}` };
-
-    } catch (error) {
-      this.setStatus(HTTP_CODES.INTERNAL_ERROR);
-      return { message: error.message };
+        } catch (error) {
+            this.setStatus(HTTP_CODES.INTERNAL_ERROR);
+            return { message: error.message };
+        }
     }
-  }
 
-  @Post("/unauthorize_portofolio_apps/{profileId}")
-  public async unauthorizeToAccessPortofolioApps(@Path() profileId: string, @Body() data: IPortofolioAuth[]): Promise<any | { message: string }> {
-    try {
+    ///////////////////
+    //   PORTOFOLIO  //
+    ///////////////////
 
-      const nodes = await serviceInstance.unauthorizeToAccessPortofolioApp(profileId, data);
-      if (nodes) {
-        this.setStatus(HTTP_CODES.OK);
-        return nodes.reduce((liste: any[], items) => {
-          if (items) {
-            let format = items.map(el => el.info.get());
-            liste.push(format);
-          };
-          return liste;
-        }, []);
-      }
+    @Get("/get_authorized_portofolio/{profileId}")
+    public async getAuthorizedPortofolioApps(@Path() profileId: string): Promise<IPortofolioData[] | { message: string }> {
+        try {
+            const nodes = await serviceInstance.getPortofolioAuthStructure(profileId);
+            if (nodes) {
+                this.setStatus(HTTP_CODES.OK)
+                return nodes.map(value => _formatPortofolioAuthRes(value));
+            }
 
-      this.setStatus(HTTP_CODES.NOT_FOUND);
-      return { message: `no profile found for ${profileId}` };
-    } catch (error) {
-      this.setStatus(HTTP_CODES.INTERNAL_ERROR);
-      return { message: error.message };
+            this.setStatus(HTTP_CODES.NOT_FOUND);
+            return { message: `no profile found for ${profileId}` };
+        } catch (error) {
+            this.setStatus(HTTP_CODES.INTERNAL_ERROR);
+            return { message: error.message };
+        }
     }
-  }
 
-  @Get("/get_authorized_portofolio/{profileId}")
-  public async getAuthorizedPortofolioApps(@Path() profileId: string): Promise<IPortofolioData[] | { message: string }> {
-    try {
-      const nodes = await serviceInstance.getPortofolioAuthStructure(profileId);
-      if (nodes) {
-        this.setStatus(HTTP_CODES.OK)
-        return nodes.map(value => _formatPortofolioAuthRes(value));
-      }
+    @Post("/authorize_portofolio_apps/{profileId}")
+    public async authorizeToAccessPortofolioApps(@Path() profileId: string, @Body() data: { appsIds: string[], portofolioId: string }[]): Promise<IPortofolioData[] | { message: string }> {
+        try {
 
-      this.setStatus(HTTP_CODES.NOT_FOUND);
-      return { message: `no profile found for ${profileId}` };
-    } catch (error) {
-      this.setStatus(HTTP_CODES.INTERNAL_ERROR);
-      return { message: error.message };
+            const nodes = await serviceInstance.authorizeToAccessPortofolioApp(profileId, data);
+            if (nodes) {
+                this.setStatus(HTTP_CODES.OK)
+                return nodes.map(value => _formatPortofolioAuthRes(value));
+            }
+
+            this.setStatus(HTTP_CODES.NOT_FOUND)
+            return { message: `no profile found for ${profileId}` };
+
+        } catch (error) {
+            this.setStatus(HTTP_CODES.INTERNAL_ERROR);
+            return { message: error.message };
+        }
     }
-  }
 
-  @Post("/authorize_apis/{profileId}")
-  public async authorizeToAccessApis(@Path() profileId: string, @Body() data: { authorizeApis: string[] }): Promise<any | { message: string }> {
-    try {
-      const nodes = await serviceInstance.authorizeToAccessApis(profileId, data.authorizeApis);
-      if (nodes) {
+    @Get("/get_authorized_portofolio_apps/{profileId}/{portofolioId}")
+    public async getAuthorizedPortofolioApis(@Path() profileId: string, @Path() portofolioId: string): Promise<any | { message: string }> {
+        try {
+            const nodes = await serviceInstance.getAuthorizedPortofolioApp(profileId, portofolioId);
+            if (nodes) {
+                this.setStatus(HTTP_CODES.OK)
+                return _getNodeListInfo(nodes);
+            }
 
-        this.setStatus(HTTP_CODES.OK)
-        return _getNodeListInfo(nodes);
-      }
-
-      this.setStatus(HTTP_CODES.NOT_FOUND)
-      return { message: `no profile found for ${profileId}` };
-    } catch (error) {
-      this.setStatus(HTTP_CODES.INTERNAL_ERROR);
-      return { message: error.message };
+            this.setStatus(HTTP_CODES.NOT_FOUND)
+            return { message: `no profile found for ${profileId}` };
+        } catch (error) {
+            this.setStatus(HTTP_CODES.INTERNAL_ERROR);
+            return { message: error.message };
+        }
     }
-  }
 
-  @Post("/unauthorize_apis/{profileId}")
-  public async unauthorizeToAccessApis(@Path() profileId: string, @Body() data: { unauthorizeApis: string[] }): Promise<any | { message: string }> {
-    try {
-      const nodes = await serviceInstance.unauthorizeToAccessApis(profileId, data.unauthorizeApis);
-      if (nodes) {
-        this.setStatus(HTTP_CODES.OK)
-        return nodes.filter(el => el);
-      }
+    @Post("/unauthorize_portofolio_apps/{profileId}")
+    public async unauthorizeToAccessPortofolioApps(@Path() profileId: string, @Body() data: { appsIds: string[], portofolioId: string }[]): Promise<any | { message: string }> {
+        try {
 
+            const nodes = await serviceInstance.unauthorizeToAccessPortofolioApp(profileId, data);
+            if (nodes) {
+                this.setStatus(HTTP_CODES.OK);
+                return nodes.reduce((liste: any[], item) => {
+                    if (item) liste.push(item.info.get());
 
-      this.setStatus(HTTP_CODES.NOT_FOUND)
-      return { message: `no profile found for ${profileId}` };
+                    return liste;
+                }, []);
+            }
 
-    } catch (error) {
-      this.setStatus(HTTP_CODES.INTERNAL_ERROR);
-      return { message: error.message };
+            this.setStatus(HTTP_CODES.NOT_FOUND);
+            return { message: `no profile found for ${profileId}` };
+        } catch (error) {
+            this.setStatus(HTTP_CODES.INTERNAL_ERROR);
+            return { message: error.message };
+        }
     }
-  }
 
-  @Get("/get_authorized_apis/{profileId}")
-  public async getAuthorizedApis(@Path() profileId: string): Promise<any | { message: string }> {
-    try {
-      const nodes = await serviceInstance.getAuthorizedApis(profileId);
-      if (nodes) {
-        this.setStatus(HTTP_CODES.OK)
-        return _getNodeListInfo(nodes);
-      }
 
-      this.setStatus(HTTP_CODES.NOT_FOUND)
-      return { message: `no profile found for ${profileId}` };
-    } catch (error) {
-      this.setStatus(HTTP_CODES.INTERNAL_ERROR);
-      return { message: error.message };
+    ////////////
+    //   BOS  //
+    ////////////
+
+
+    @Get("/get_authorized_bos/{profileId}/{portofolioId}")
+    public async getAuthorizedBos(@Path() profileId: string, @Path() portofolioId: string): Promise<any | { message: string }> {
+        try {
+            const nodes = await serviceInstance.getBosAuthStructure(profileId, portofolioId);
+            if (nodes) {
+                this.setStatus(HTTP_CODES.OK)
+                return nodes.map(node => _formatBosAuthRes(node));
+            }
+
+            this.setStatus(HTTP_CODES.NOT_FOUND)
+            return { message: `no profile found for ${profileId}` };
+        } catch (error) {
+            this.setStatus(HTTP_CODES.INTERNAL_ERROR);
+            return { message: error.message };
+        }
     }
-  }
 
-  @Post("/authorize_bos_apps/{profileId}")
-  public async authorizeProfileToAccessBos(@Path() profileId: string, @Body() data: IBosAuth[]): Promise<IBosData[] | { message: string }> {
-    try {
-      const nodes = await serviceInstance.authorizeToAccessBosApp(profileId, data);
-      if (nodes) {
-        this.setStatus(HTTP_CODES.OK)
-        return nodes.map(node => _formatBosAuthRes(node));
-      }
+    @Post("/authorize_bos_apps/{profileId}/{portofolioId}")
+    public async authorizeToAccessBosApps(@Path() profileId: string, @Path() portofolioId: string, @Body() data: IBosAuth[]): Promise<IBosData[] | { message: string }> {
+        try {
+            const nodes = await serviceInstance.authorizeToAccessBosApp(profileId, portofolioId, data);
+            if (nodes) {
+                this.setStatus(HTTP_CODES.OK)
+                return nodes.map(node => _formatBosAuthRes(node));
+            }
 
-      this.setStatus(HTTP_CODES.NOT_FOUND)
-      return { message: `no profile found for ${profileId}` };
-    } catch (error) {
-      this.setStatus(HTTP_CODES.INTERNAL_ERROR);
-      return { message: error.message };
+            this.setStatus(HTTP_CODES.NOT_FOUND)
+            return { message: `no profile found for ${profileId}` };
+        } catch (error) {
+            this.setStatus(HTTP_CODES.INTERNAL_ERROR);
+            return { message: error.message };
+        }
     }
-  }
 
-  @Post("/unauthorize_bos_apps/{profileId}")
-  public async unauthorizeProfileToAccessBos(@Path() profileId: string, @Body() data: IBosAuth[]): Promise<any | { message: string }> {
-    try {
-      const nodes = await serviceInstance.unauthorizeToAccessBosApp(profileId, data);
-      if (nodes) {
-        this.setStatus(HTTP_CODES.OK)
-        return nodes.reduce((liste: any[], items) => {
-          if (items) {
-            let format = items.map(el => el.info.get());
-            liste.push(format);
-          };
-          return liste;
-        }, []);
-      }
 
-      this.setStatus(HTTP_CODES.NOT_FOUND)
-      return { message: `no profile found for ${profileId}` };
-    } catch (error) {
-      this.setStatus(HTTP_CODES.INTERNAL_ERROR);
-      return { message: error.message };
+    @Get("/get_authorized_bos_apps/{profileId}/{portofolioId}/{bosId}")
+    public async getAuthorizedBosApis(@Path() profileId: string, @Path() portofolioId: string, @Path() bosId: string): Promise<any | { message: string }> {
+        try {
+            const nodes = await serviceInstance.getAuthorizedBosApp(profileId, portofolioId, bosId);
+
+            if (nodes) {
+                this.setStatus(HTTP_CODES.OK)
+                return _getNodeListInfo(nodes);
+            }
+
+            this.setStatus(HTTP_CODES.NOT_FOUND)
+            return { message: `no profile found for ${profileId}` };
+        } catch (error) {
+            this.setStatus(HTTP_CODES.INTERNAL_ERROR);
+            return { message: error.message };
+        }
     }
-  }
 
-  @Get("/get_authorized_bos/{profileId}")
-  public async getAuthorizedBos(@Path() profileId: string): Promise<any | { message: string }> {
-    try {
-      const nodes = await serviceInstance.getBosAuthStructure(profileId);
-      if (nodes) {
-        this.setStatus(HTTP_CODES.OK)
-        return nodes.map(node => _formatBosAuthRes(node));
-      }
+    @Post("/unauthorize_bos_apps/{profileId}/{portofolioId}")
+    public async unauthorizeToAccessBosApp(@Path() profileId: string, @Path() portofolioId: string, @Body() data: { appsIds: string[], buildingId: string }[]): Promise<any | { message: string }> {
+        try {
+            const nodes = await serviceInstance.unauthorizeToAccessBosApp(profileId, portofolioId, data);
+            if (nodes) {
+                this.setStatus(HTTP_CODES.OK)
+                return nodes.reduce((liste: any[], item) => {
+                    if (item) liste.push(item.info.get());
+                    return liste;
+                }, []);
+            }
 
-      this.setStatus(HTTP_CODES.NOT_FOUND)
-      return { message: `no profile found for ${profileId}` };
-    } catch (error) {
-      this.setStatus(HTTP_CODES.INTERNAL_ERROR);
-      return { message: error.message };
+            this.setStatus(HTTP_CODES.NOT_FOUND)
+            return { message: `no profile found for ${profileId}` };
+        } catch (error) {
+            this.setStatus(HTTP_CODES.INTERNAL_ERROR);
+            return { message: error.message };
+        }
     }
-  }
 
 
+
+
+
+    // @Post("/authorize_apis/{profileId}")
+    // public async authorizeToAccessApis(@Path() profileId: string, @Body() data: { authorizeApis: string[] }): Promise<any | { message: string }> {
+    //   try {
+    //     const nodes = await serviceInstance.authorizeToAccessApis(profileId, data.authorizeApis);
+    //     if (nodes) {
+
+    //       this.setStatus(HTTP_CODES.OK)
+    //       return _getNodeListInfo(nodes);
+    //     }
+
+    //     this.setStatus(HTTP_CODES.NOT_FOUND)
+    //     return { message: `no profile found for ${profileId}` };
+    //   } catch (error) {
+    //     this.setStatus(HTTP_CODES.INTERNAL_ERROR);
+    //     return { message: error.message };
+    //   }
+    // }
+
+    // @Post("/unauthorize_apis/{profileId}")
+    // public async unauthorizeToAccessApis(@Path() profileId: string, @Body() data: { unauthorizeApis: string[] }): Promise<any | { message: string }> {
+    //   try {
+    //     const nodes = await serviceInstance.unauthorizeToAccessApis(profileId, data.unauthorizeApis);
+    //     if (nodes) {
+    //       this.setStatus(HTTP_CODES.OK)
+    //       return nodes.filter(el => el);
+    //     }
+
+
+    //     this.setStatus(HTTP_CODES.NOT_FOUND)
+    //     return { message: `no profile found for ${profileId}` };
+
+    //   } catch (error) {
+    //     this.setStatus(HTTP_CODES.INTERNAL_ERROR);
+    //     return { message: error.message };
+    //   }
+    // }
+
+    // @Get("/get_authorized_apis/{profileId}")
+    // public async getAuthorizedApis(@Path() profileId: string): Promise<any | { message: string }> {
+    //   try {
+    //     const nodes = await serviceInstance.getAuthorizedApis(profileId);
+    //     if (nodes) {
+    //       this.setStatus(HTTP_CODES.OK)
+    //       return _getNodeListInfo(nodes);
+    //     }
+
+    //     this.setStatus(HTTP_CODES.NOT_FOUND)
+    //     return { message: `no profile found for ${profileId}` };
+    //   } catch (error) {
+    //     this.setStatus(HTTP_CODES.INTERNAL_ERROR);
+    //     return { message: error.message };
+    //   }
+    // }
 }
 
 
