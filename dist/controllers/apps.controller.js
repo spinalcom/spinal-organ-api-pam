@@ -394,6 +394,7 @@ let AppsController = class AppsController extends tsoa_1.Controller {
     }
 };
 __decorate([
+    (0, tsoa_1.Security)(constant_1.SECURITY_NAME.admin),
     (0, tsoa_1.Post)("/create_admin_app"),
     __param(0, (0, tsoa_1.Body)()),
     __metadata("design:type", Function),
@@ -401,6 +402,7 @@ __decorate([
     __metadata("design:returntype", Promise)
 ], AppsController.prototype, "createAdminApp", null);
 __decorate([
+    (0, tsoa_1.Security)(constant_1.SECURITY_NAME.admin),
     (0, tsoa_1.Post)("/create_portofolio_app"),
     __param(0, (0, tsoa_1.Body)()),
     __metadata("design:type", Function),
@@ -408,6 +410,7 @@ __decorate([
     __metadata("design:returntype", Promise)
 ], AppsController.prototype, "createPortofolioApp", null);
 __decorate([
+    (0, tsoa_1.Security)(constant_1.SECURITY_NAME.admin),
     (0, tsoa_1.Post)("/create_building_app"),
     __param(0, (0, tsoa_1.Body)()),
     __metadata("design:type", Function),
@@ -415,24 +418,28 @@ __decorate([
     __metadata("design:returntype", Promise)
 ], AppsController.prototype, "createBuildingApp", null);
 __decorate([
+    (0, tsoa_1.Security)(constant_1.SECURITY_NAME.admin),
     (0, tsoa_1.Get)("/get_all_admin_apps"),
     __metadata("design:type", Function),
     __metadata("design:paramtypes", []),
     __metadata("design:returntype", Promise)
 ], AppsController.prototype, "getAllAdminApps", null);
 __decorate([
+    (0, tsoa_1.Security)(constant_1.SECURITY_NAME.admin),
     (0, tsoa_1.Get)("/get_all_portofolio_apps"),
     __metadata("design:type", Function),
     __metadata("design:paramtypes", []),
     __metadata("design:returntype", Promise)
 ], AppsController.prototype, "getAllPortofolioApps", null);
 __decorate([
+    (0, tsoa_1.Security)(constant_1.SECURITY_NAME.admin),
     (0, tsoa_1.Get)("/get_all_building_apps"),
     __metadata("design:type", Function),
     __metadata("design:paramtypes", []),
     __metadata("design:returntype", Promise)
 ], AppsController.prototype, "getAllBuildingApps", null);
 __decorate([
+    (0, tsoa_1.Security)(constant_1.SECURITY_NAME.admin),
     (0, tsoa_1.Get)("/get_admin_app/{appId}"),
     __param(0, (0, tsoa_1.Path)()),
     __metadata("design:type", Function),
@@ -440,6 +447,7 @@ __decorate([
     __metadata("design:returntype", Promise)
 ], AppsController.prototype, "getAdminApp", null);
 __decorate([
+    (0, tsoa_1.Security)(constant_1.SECURITY_NAME.admin),
     (0, tsoa_1.Get)("/get_portofolio_app/{appId}"),
     __param(0, (0, tsoa_1.Path)()),
     __metadata("design:type", Function),
@@ -447,6 +455,7 @@ __decorate([
     __metadata("design:returntype", Promise)
 ], AppsController.prototype, "getPortofolioApp", null);
 __decorate([
+    (0, tsoa_1.Security)(constant_1.SECURITY_NAME.admin),
     (0, tsoa_1.Get)("/get_building_app/{appId}"),
     __param(0, (0, tsoa_1.Path)()),
     __metadata("design:type", Function),
@@ -454,6 +463,7 @@ __decorate([
     __metadata("design:returntype", Promise)
 ], AppsController.prototype, "getBuildingApp", null);
 __decorate([
+    (0, tsoa_1.Security)(constant_1.SECURITY_NAME.admin),
     (0, tsoa_1.Put)("/update_admin_app/{appId}"),
     __param(0, (0, tsoa_1.Path)()),
     __param(1, (0, tsoa_1.Body)()),
@@ -462,6 +472,7 @@ __decorate([
     __metadata("design:returntype", Promise)
 ], AppsController.prototype, "updateAdminApp", null);
 __decorate([
+    (0, tsoa_1.Security)(constant_1.SECURITY_NAME.admin),
     (0, tsoa_1.Put)("/update_portofolio_app/{appId}"),
     __param(0, (0, tsoa_1.Path)()),
     __param(1, (0, tsoa_1.Body)()),
@@ -470,6 +481,7 @@ __decorate([
     __metadata("design:returntype", Promise)
 ], AppsController.prototype, "updatePortofolioApp", null);
 __decorate([
+    (0, tsoa_1.Security)(constant_1.SECURITY_NAME.admin),
     (0, tsoa_1.Put)("/update_building_app/{appId}"),
     __param(0, (0, tsoa_1.Path)()),
     __param(1, (0, tsoa_1.Body)()),
@@ -478,6 +490,7 @@ __decorate([
     __metadata("design:returntype", Promise)
 ], AppsController.prototype, "updateBuildingApp", null);
 __decorate([
+    (0, tsoa_1.Security)(constant_1.SECURITY_NAME.admin),
     (0, tsoa_1.Delete)("/delete_admin_app/{appId}"),
     __param(0, (0, tsoa_1.Path)()),
     __metadata("design:type", Function),
@@ -485,6 +498,7 @@ __decorate([
     __metadata("design:returntype", Promise)
 ], AppsController.prototype, "deleteAdminApp", null);
 __decorate([
+    (0, tsoa_1.Security)(constant_1.SECURITY_NAME.admin),
     (0, tsoa_1.Delete)("/delete_portofolio_app/{appId}"),
     __param(0, (0, tsoa_1.Path)()),
     __metadata("design:type", Function),
@@ -492,6 +506,7 @@ __decorate([
     __metadata("design:returntype", Promise)
 ], AppsController.prototype, "deletePortofolioApp", null);
 __decorate([
+    (0, tsoa_1.Security)(constant_1.SECURITY_NAME.admin),
     (0, tsoa_1.Delete)("/delete_building_app/{appId}"),
     __param(0, (0, tsoa_1.Path)()),
     __metadata("design:type", Function),
@@ -499,6 +514,7 @@ __decorate([
     __metadata("design:returntype", Promise)
 ], AppsController.prototype, "deleteBuildingApp", null);
 __decorate([
+    (0, tsoa_1.Security)(constant_1.SECURITY_NAME.admin),
     (0, tsoa_1.Post)("/upload_admin_apps"),
     __param(0, (0, tsoa_1.UploadedFile)()),
     __metadata("design:type", Function),
@@ -506,6 +522,7 @@ __decorate([
     __metadata("design:returntype", Promise)
 ], AppsController.prototype, "uploadAdminApp", null);
 __decorate([
+    (0, tsoa_1.Security)(constant_1.SECURITY_NAME.admin),
     (0, tsoa_1.Post)("/upload_portofolio_apps"),
     __param(0, (0, tsoa_1.UploadedFile)()),
     __metadata("design:type", Function),
@@ -513,6 +530,7 @@ __decorate([
     __metadata("design:returntype", Promise)
 ], AppsController.prototype, "uploadPortofolioApp", null);
 __decorate([
+    (0, tsoa_1.Security)(constant_1.SECURITY_NAME.admin),
     (0, tsoa_1.Post)("/upload_building_apps"),
     __param(0, (0, tsoa_1.UploadedFile)()),
     __metadata("design:type", Function),

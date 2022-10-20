@@ -386,6 +386,7 @@ let PortofolioController = class PortofolioController extends tsoa_1.Controller 
     }
 };
 __decorate([
+    (0, tsoa_1.Security)(constant_1.SECURITY_NAME.admin),
     (0, tsoa_1.Post)("/add_portofolio"),
     __param(0, (0, tsoa_1.Body)()),
     __metadata("design:type", Function),
@@ -393,6 +394,7 @@ __decorate([
     __metadata("design:returntype", Promise)
 ], PortofolioController.prototype, "addPortofolio", null);
 __decorate([
+    (0, tsoa_1.Security)(constant_1.SECURITY_NAME.admin),
     (0, tsoa_1.Put)("/rename_portofolio/{id}"),
     __param(0, (0, tsoa_1.Path)()),
     __param(1, (0, tsoa_1.Body)()),
@@ -401,12 +403,14 @@ __decorate([
     __metadata("design:returntype", Promise)
 ], PortofolioController.prototype, "renamePortofolio", null);
 __decorate([
+    (0, tsoa_1.Security)(constant_1.SECURITY_NAME.admin),
     (0, tsoa_1.Get)("/get_all_portofolio"),
     __metadata("design:type", Function),
     __metadata("design:paramtypes", []),
     __metadata("design:returntype", Promise)
 ], PortofolioController.prototype, "getAllPortofolio", null);
 __decorate([
+    (0, tsoa_1.Security)(constant_1.SECURITY_NAME.admin),
     (0, tsoa_1.Get)("/get_portofolio/{id}"),
     __param(0, (0, tsoa_1.Path)()),
     __metadata("design:type", Function),
@@ -414,6 +418,7 @@ __decorate([
     __metadata("design:returntype", Promise)
 ], PortofolioController.prototype, "getPortofolio", null);
 __decorate([
+    (0, tsoa_1.Security)(constant_1.SECURITY_NAME.admin),
     (0, tsoa_1.Get)("/get_portofolio_details/{id}"),
     __param(0, (0, tsoa_1.Path)()),
     __metadata("design:type", Function),
@@ -421,12 +426,14 @@ __decorate([
     __metadata("design:returntype", Promise)
 ], PortofolioController.prototype, "getPortofolioDetails", null);
 __decorate([
+    (0, tsoa_1.Security)(constant_1.SECURITY_NAME.admin),
     (0, tsoa_1.Get)("/get_all_portofolios_details"),
     __metadata("design:type", Function),
     __metadata("design:paramtypes", []),
     __metadata("design:returntype", Promise)
 ], PortofolioController.prototype, "getAllPortofoliosDetails", null);
 __decorate([
+    (0, tsoa_1.Security)(constant_1.SECURITY_NAME.admin),
     (0, tsoa_1.Delete)("/remove_portofolio/{id}"),
     __param(0, (0, tsoa_1.Path)()),
     __metadata("design:type", Function),
@@ -434,6 +441,7 @@ __decorate([
     __metadata("design:returntype", Promise)
 ], PortofolioController.prototype, "removePortofolio", null);
 __decorate([
+    (0, tsoa_1.Security)(constant_1.SECURITY_NAME.admin),
     (0, tsoa_1.Post)("/add_building_to_portofolio/{portofolioId}"),
     __param(0, (0, tsoa_1.Path)()),
     __param(1, (0, tsoa_1.Body)()),
@@ -442,6 +450,7 @@ __decorate([
     __metadata("design:returntype", Promise)
 ], PortofolioController.prototype, "addBuilding", null);
 __decorate([
+    (0, tsoa_1.Security)(constant_1.SECURITY_NAME.admin),
     (0, tsoa_1.Get)("/get_building_from_portofolio/{portofolioId}/{appId}"),
     __param(0, (0, tsoa_1.Path)()),
     __param(1, (0, tsoa_1.Path)()),
@@ -450,6 +459,7 @@ __decorate([
     __metadata("design:returntype", Promise)
 ], PortofolioController.prototype, "getBuilding", null);
 __decorate([
+    (0, tsoa_1.Security)(constant_1.SECURITY_NAME.admin),
     (0, tsoa_1.Get)("/get_all_buildings_from_portofolio/{portofolioId}"),
     __param(0, (0, tsoa_1.Path)()),
     __metadata("design:type", Function),
@@ -457,6 +467,7 @@ __decorate([
     __metadata("design:returntype", Promise)
 ], PortofolioController.prototype, "getAllBuilding", null);
 __decorate([
+    (0, tsoa_1.Security)(constant_1.SECURITY_NAME.admin),
     (0, tsoa_1.Delete)("/remove_building_from_portofolio/{portofolioId}"),
     __param(0, (0, tsoa_1.Path)()),
     __param(1, (0, tsoa_1.Body)()),
@@ -465,6 +476,7 @@ __decorate([
     __metadata("design:returntype", Promise)
 ], PortofolioController.prototype, "deleteBuildingFromPortofolio", null);
 __decorate([
+    (0, tsoa_1.Security)(constant_1.SECURITY_NAME.admin),
     (0, tsoa_1.Post)("/add_app_to_portofolio/{portofolioId}"),
     __param(0, (0, tsoa_1.Path)()),
     __param(1, (0, tsoa_1.Body)()),
@@ -473,6 +485,7 @@ __decorate([
     __metadata("design:returntype", Promise)
 ], PortofolioController.prototype, "addAppToPortofolio", null);
 __decorate([
+    (0, tsoa_1.Security)(constant_1.SECURITY_NAME.admin),
     (0, tsoa_1.Get)("/get_apps_from_portofolio/{portofolioId}"),
     __param(0, (0, tsoa_1.Path)()),
     __metadata("design:type", Function),
@@ -480,6 +493,7 @@ __decorate([
     __metadata("design:returntype", Promise)
 ], PortofolioController.prototype, "getPortofolioApps", null);
 __decorate([
+    (0, tsoa_1.Security)(constant_1.SECURITY_NAME.admin),
     (0, tsoa_1.Get)("/get_app_from_portofolio/{portofolioId}/{applicationId}"),
     __param(0, (0, tsoa_1.Path)()),
     __param(1, (0, tsoa_1.Path)()),
@@ -488,6 +502,7 @@ __decorate([
     __metadata("design:returntype", Promise)
 ], PortofolioController.prototype, "getAppFromPortofolio", null);
 __decorate([
+    (0, tsoa_1.Security)(constant_1.SECURITY_NAME.admin),
     (0, tsoa_1.Delete)("/remove_app_from_portofolio/{portofolioId}"),
     __param(0, (0, tsoa_1.Path)()),
     __param(1, (0, tsoa_1.Body)()),
@@ -496,6 +511,7 @@ __decorate([
     __metadata("design:returntype", Promise)
 ], PortofolioController.prototype, "removeAppFromPortofolio", null);
 __decorate([
+    (0, tsoa_1.Security)(constant_1.SECURITY_NAME.admin),
     (0, tsoa_1.Get)("/portofolio_has_app/{portofolioId}//{applicationId}"),
     __param(0, (0, tsoa_1.Path)()),
     __param(1, (0, tsoa_1.Path)()),
@@ -504,6 +520,7 @@ __decorate([
     __metadata("design:returntype", Promise)
 ], PortofolioController.prototype, "portofolioHasApp", null);
 __decorate([
+    (0, tsoa_1.Security)(constant_1.SECURITY_NAME.admin),
     (0, tsoa_1.Post)("/add_apiRoute_to_portofolio/{portofolioId}"),
     __param(0, (0, tsoa_1.Path)()),
     __param(1, (0, tsoa_1.Body)()),
@@ -512,6 +529,7 @@ __decorate([
     __metadata("design:returntype", Promise)
 ], PortofolioController.prototype, "addApiToPortofolio", null);
 __decorate([
+    (0, tsoa_1.Security)(constant_1.SECURITY_NAME.admin),
     (0, tsoa_1.Get)("/get_apisRoute_from_portofolio/{portofolioId}"),
     __param(0, (0, tsoa_1.Path)()),
     __metadata("design:type", Function),
@@ -519,6 +537,7 @@ __decorate([
     __metadata("design:returntype", Promise)
 ], PortofolioController.prototype, "getPortofolioApis", null);
 __decorate([
+    (0, tsoa_1.Security)(constant_1.SECURITY_NAME.admin),
     (0, tsoa_1.Get)("/get_apiRoute_from_portofolio/{portofolioId}/{apiId}"),
     __param(0, (0, tsoa_1.Path)()),
     __param(1, (0, tsoa_1.Path)()),
@@ -527,6 +546,7 @@ __decorate([
     __metadata("design:returntype", Promise)
 ], PortofolioController.prototype, "getApiFromPortofolio", null);
 __decorate([
+    (0, tsoa_1.Security)(constant_1.SECURITY_NAME.admin),
     (0, tsoa_1.Delete)("/remove_apiRoute_from_portofolio/{portofolioId}"),
     __param(0, (0, tsoa_1.Path)()),
     __param(1, (0, tsoa_1.Body)()),
@@ -535,6 +555,7 @@ __decorate([
     __metadata("design:returntype", Promise)
 ], PortofolioController.prototype, "removeApiFromPortofolio", null);
 __decorate([
+    (0, tsoa_1.Security)(constant_1.SECURITY_NAME.admin),
     (0, tsoa_1.Get)("/portofolio_has_apiRoute/{portofolioId}/{apiId}"),
     __param(0, (0, tsoa_1.Path)()),
     __param(1, (0, tsoa_1.Path)()),

@@ -45,52 +45,6 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.UserProfileController = void 0;
-/*
- * Copyright 2022 SpinalCom - www.spinalcom.com
- *
- * This file is part of SpinalCore.
- *
- * Please read all of the following terms and conditions
- * of the Free Software license Agreement ("Agreement")
- * carefully.
- *
- * This Agreement is a legally binding contract between
- * the Licensee (as defined below) and SpinalCom that
- * sets forth the terms and conditions that govern your
- * use of the Program. By installing and/or using the
- * Program, you agree to abide by all the terms and
- * conditions stated or referenced herein.
- *
- * If you do not agree to abide by these terms and
- * conditions, do not demonstrate your acceptance and do
- * not install or use the Program.
- * You should have received a copy of the license along
- * with this file. If not, see
- * <http://resources.spinalcom.com/licenses.pdf>.
- */
-/*
- * Copyright 2022 SpinalCom - www.spinalcom.com
- *
- * This file is part of SpinalCore.
- *
- * Please read all of the following terms and conditions
- * of the Free Software license Agreement ("Agreement")
- * carefully.
- *
- * This Agreement is a legally binding contract between
- * the Licensee (as defined below) and SpinalCom that
- * sets forth the terms and conditions that govern your
- * use of the Program. By installing and/or using the
- * Program, you agree to abide by all the terms and
- * conditions stated or referenced herein.
- *
- * If you do not agree to abide by these terms and
- * conditions, do not demonstrate your acceptance and do
- * not install or use the Program.
- * You should have received a copy of the license along
- * with this file. If not, see
- * <http://resources.spinalcom.com/licenses.pdf>.
- */
 const constant_1 = require("../constant");
 const services_1 = require("../services");
 const tsoa_1 = require("tsoa");
@@ -329,6 +283,7 @@ let UserProfileController = class UserProfileController extends tsoa_1.Controlle
     }
 };
 __decorate([
+    (0, tsoa_1.Security)(constant_1.SECURITY_NAME.admin),
     (0, tsoa_1.Post)("/create_profile"),
     __param(0, (0, tsoa_1.Body)()),
     __metadata("design:type", Function),
@@ -336,6 +291,7 @@ __decorate([
     __metadata("design:returntype", Promise)
 ], UserProfileController.prototype, "createUserProfile", null);
 __decorate([
+    (0, tsoa_1.Security)(constant_1.SECURITY_NAME.admin),
     (0, tsoa_1.Get)("/get_profile/{id}"),
     __param(0, (0, tsoa_1.Path)()),
     __metadata("design:type", Function),
@@ -343,12 +299,14 @@ __decorate([
     __metadata("design:returntype", Promise)
 ], UserProfileController.prototype, "getUserProfile", null);
 __decorate([
+    (0, tsoa_1.Security)(constant_1.SECURITY_NAME.admin),
     (0, tsoa_1.Get)("/get_all_profile"),
     __metadata("design:type", Function),
     __metadata("design:paramtypes", []),
     __metadata("design:returntype", Promise)
 ], UserProfileController.prototype, "getAllUserProfile", null);
 __decorate([
+    (0, tsoa_1.Security)(constant_1.SECURITY_NAME.admin),
     (0, tsoa_1.Put)("/edit_profile/{id}"),
     __param(0, (0, tsoa_1.Path)()),
     __param(1, (0, tsoa_1.Body)()),
@@ -357,6 +315,7 @@ __decorate([
     __metadata("design:returntype", Promise)
 ], UserProfileController.prototype, "updateUserProfile", null);
 __decorate([
+    (0, tsoa_1.Security)(constant_1.SECURITY_NAME.admin),
     (0, tsoa_1.Delete)("/delete_profile/{id}"),
     __param(0, (0, tsoa_1.Path)()),
     __metadata("design:type", Function),
@@ -364,6 +323,7 @@ __decorate([
     __metadata("design:returntype", Promise)
 ], UserProfileController.prototype, "deleteUserProfile", null);
 __decorate([
+    (0, tsoa_1.Security)(constant_1.SECURITY_NAME.admin),
     (0, tsoa_1.Get)("/get_authorized_portofolio/{profileId}"),
     __param(0, (0, tsoa_1.Path)()),
     __metadata("design:type", Function),
@@ -371,6 +331,7 @@ __decorate([
     __metadata("design:returntype", Promise)
 ], UserProfileController.prototype, "getAuthorizedPortofolioApps", null);
 __decorate([
+    (0, tsoa_1.Security)(constant_1.SECURITY_NAME.admin),
     (0, tsoa_1.Post)("/authorize_portofolio_apps/{profileId}"),
     __param(0, (0, tsoa_1.Path)()),
     __param(1, (0, tsoa_1.Body)()),
@@ -379,6 +340,7 @@ __decorate([
     __metadata("design:returntype", Promise)
 ], UserProfileController.prototype, "authorizeToAccessPortofolioApps", null);
 __decorate([
+    (0, tsoa_1.Security)(constant_1.SECURITY_NAME.admin),
     (0, tsoa_1.Get)("/get_authorized_portofolio_apps/{profileId}/{portofolioId}"),
     __param(0, (0, tsoa_1.Path)()),
     __param(1, (0, tsoa_1.Path)()),
@@ -387,6 +349,7 @@ __decorate([
     __metadata("design:returntype", Promise)
 ], UserProfileController.prototype, "getAuthorizedPortofolioApis", null);
 __decorate([
+    (0, tsoa_1.Security)(constant_1.SECURITY_NAME.admin),
     (0, tsoa_1.Post)("/unauthorize_portofolio_apps/{profileId}"),
     __param(0, (0, tsoa_1.Path)()),
     __param(1, (0, tsoa_1.Body)()),
@@ -395,6 +358,7 @@ __decorate([
     __metadata("design:returntype", Promise)
 ], UserProfileController.prototype, "unauthorizeToAccessPortofolioApps", null);
 __decorate([
+    (0, tsoa_1.Security)(constant_1.SECURITY_NAME.admin),
     (0, tsoa_1.Get)("/get_authorized_bos/{profileId}/{portofolioId}"),
     __param(0, (0, tsoa_1.Path)()),
     __param(1, (0, tsoa_1.Path)()),
@@ -403,6 +367,7 @@ __decorate([
     __metadata("design:returntype", Promise)
 ], UserProfileController.prototype, "getAuthorizedBos", null);
 __decorate([
+    (0, tsoa_1.Security)(constant_1.SECURITY_NAME.admin),
     (0, tsoa_1.Post)("/authorize_bos_apps/{profileId}/{portofolioId}"),
     __param(0, (0, tsoa_1.Path)()),
     __param(1, (0, tsoa_1.Path)()),
@@ -412,6 +377,7 @@ __decorate([
     __metadata("design:returntype", Promise)
 ], UserProfileController.prototype, "authorizeToAccessBosApps", null);
 __decorate([
+    (0, tsoa_1.Security)(constant_1.SECURITY_NAME.admin),
     (0, tsoa_1.Get)("/get_authorized_bos_apps/{profileId}/{portofolioId}/{bosId}"),
     __param(0, (0, tsoa_1.Path)()),
     __param(1, (0, tsoa_1.Path)()),
@@ -421,6 +387,7 @@ __decorate([
     __metadata("design:returntype", Promise)
 ], UserProfileController.prototype, "getAuthorizedBosApis", null);
 __decorate([
+    (0, tsoa_1.Security)(constant_1.SECURITY_NAME.admin),
     (0, tsoa_1.Post)("/unauthorize_bos_apps/{profileId}/{portofolioId}"),
     __param(0, (0, tsoa_1.Path)()),
     __param(1, (0, tsoa_1.Path)()),

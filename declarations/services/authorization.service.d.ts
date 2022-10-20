@@ -3,7 +3,7 @@ export default class AuthorizationService {
     private static instance;
     private constructor();
     static getInstance(): AuthorizationService;
-    profileHasAccess(profile: SpinalNode, node: SpinalNode, elementType: string): Promise<boolean>;
+    profileHasAccess(profile: SpinalNode, node: SpinalNode): Promise<boolean>;
     authorizeProfileToAccessPortofolio(profile: SpinalNode, portofolioId: string): Promise<SpinalNode>;
     authorizeProfileToAccessPortofolioApp(profile: SpinalNode, portofolioId: string, appIds: string | string[]): Promise<SpinalNode[]>;
     unauthorizeProfileToAccessPortofolio(profile: SpinalNode, portofolioId: string): Promise<boolean>;

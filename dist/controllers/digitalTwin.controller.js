@@ -72,6 +72,7 @@ let DigitaltwinController = class DigitaltwinController extends tsoa_1.Controlle
     }
 };
 __decorate([
+    (0, tsoa_1.Security)(constant_1.SECURITY_NAME.admin),
     (0, tsoa_1.Post)("/create_digitaltwin"),
     __param(0, (0, tsoa_1.Body)()),
     __metadata("design:type", Function),

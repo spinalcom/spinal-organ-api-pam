@@ -333,6 +333,7 @@ let AppProfileController = class AppProfileController extends tsoa_1.Controller 
     }
 };
 __decorate([
+    (0, tsoa_1.Security)(constant_1.SECURITY_NAME.admin),
     (0, tsoa_1.Post)("/create_profile"),
     __param(0, (0, tsoa_1.Body)()),
     __metadata("design:type", Function),
@@ -340,6 +341,7 @@ __decorate([
     __metadata("design:returntype", Promise)
 ], AppProfileController.prototype, "createAppProfile", null);
 __decorate([
+    (0, tsoa_1.Security)(constant_1.SECURITY_NAME.admin),
     (0, tsoa_1.Get)("/get_profile/{id}"),
     __param(0, (0, tsoa_1.Path)()),
     __metadata("design:type", Function),
@@ -347,12 +349,14 @@ __decorate([
     __metadata("design:returntype", Promise)
 ], AppProfileController.prototype, "getAppProfile", null);
 __decorate([
+    (0, tsoa_1.Security)(constant_1.SECURITY_NAME.admin),
     (0, tsoa_1.Get)("/get_all_profile"),
     __metadata("design:type", Function),
     __metadata("design:paramtypes", []),
     __metadata("design:returntype", Promise)
 ], AppProfileController.prototype, "getAllAppProfile", null);
 __decorate([
+    (0, tsoa_1.Security)(constant_1.SECURITY_NAME.admin),
     (0, tsoa_1.Put)("/edit_profile/{id}"),
     __param(0, (0, tsoa_1.Path)()),
     __param(1, (0, tsoa_1.Body)()),
@@ -361,6 +365,7 @@ __decorate([
     __metadata("design:returntype", Promise)
 ], AppProfileController.prototype, "updateAppProfile", null);
 __decorate([
+    (0, tsoa_1.Security)(constant_1.SECURITY_NAME.admin),
     (0, tsoa_1.Delete)("/delete_profile/{id}"),
     __param(0, (0, tsoa_1.Path)()),
     __metadata("design:type", Function),
@@ -368,6 +373,7 @@ __decorate([
     __metadata("design:returntype", Promise)
 ], AppProfileController.prototype, "deleteAppProfile", null);
 __decorate([
+    (0, tsoa_1.Security)(constant_1.SECURITY_NAME.admin),
     (0, tsoa_1.Get)("/get_authorized_portofolio/{profileId}"),
     __param(0, (0, tsoa_1.Path)()),
     __metadata("design:type", Function),
@@ -375,6 +381,7 @@ __decorate([
     __metadata("design:returntype", Promise)
 ], AppProfileController.prototype, "getAuthorizedPortofolio", null);
 __decorate([
+    (0, tsoa_1.Security)(constant_1.SECURITY_NAME.admin),
     (0, tsoa_1.Post)("/authorize_portofolio_apis/{profileId}"),
     __param(0, (0, tsoa_1.Path)()),
     __param(1, (0, tsoa_1.Body)()),
@@ -383,6 +390,7 @@ __decorate([
     __metadata("design:returntype", Promise)
 ], AppProfileController.prototype, "authorizeToAccessPortofolioApis", null);
 __decorate([
+    (0, tsoa_1.Security)(constant_1.SECURITY_NAME.admin),
     (0, tsoa_1.Get)("/get_authorized_portofolio_apis/{profileId}/{portofolioId}"),
     __param(0, (0, tsoa_1.Path)()),
     __param(1, (0, tsoa_1.Path)()),
@@ -391,6 +399,7 @@ __decorate([
     __metadata("design:returntype", Promise)
 ], AppProfileController.prototype, "getAuthorizedPortofolioApis", null);
 __decorate([
+    (0, tsoa_1.Security)(constant_1.SECURITY_NAME.admin),
     (0, tsoa_1.Post)("/unauthorize_portofolio_apis/{profileId}"),
     __param(0, (0, tsoa_1.Path)()),
     __param(1, (0, tsoa_1.Body)()),
@@ -399,6 +408,7 @@ __decorate([
     __metadata("design:returntype", Promise)
 ], AppProfileController.prototype, "unauthorizeToAccessPortofolioApis", null);
 __decorate([
+    (0, tsoa_1.Security)(constant_1.SECURITY_NAME.admin),
     (0, tsoa_1.Get)("/get_authorized_bos/{profileId}/{portofolioId}"),
     __param(0, (0, tsoa_1.Path)()),
     __param(1, (0, tsoa_1.Path)()),
@@ -407,6 +417,7 @@ __decorate([
     __metadata("design:returntype", Promise)
 ], AppProfileController.prototype, "getAuthorizedBos", null);
 __decorate([
+    (0, tsoa_1.Security)(constant_1.SECURITY_NAME.admin),
     (0, tsoa_1.Post)("/authorize_bos_apis/{profileId}/{portofolioId}"),
     __param(0, (0, tsoa_1.Path)()),
     __param(1, (0, tsoa_1.Path)()),
@@ -416,6 +427,7 @@ __decorate([
     __metadata("design:returntype", Promise)
 ], AppProfileController.prototype, "authorizeToAccessBosApis", null);
 __decorate([
+    (0, tsoa_1.Security)(constant_1.SECURITY_NAME.admin),
     (0, tsoa_1.Get)("/get_authorized_bos_apis/{profileId}/{portofolioId}/{bosId}"),
     __param(0, (0, tsoa_1.Path)()),
     __param(1, (0, tsoa_1.Path)()),
@@ -425,6 +437,7 @@ __decorate([
     __metadata("design:returntype", Promise)
 ], AppProfileController.prototype, "getAuthorizedBosApis", null);
 __decorate([
+    (0, tsoa_1.Security)(constant_1.SECURITY_NAME.admin),
     (0, tsoa_1.Post)("/unauthorize_bos_apis/{profileId}/{portofolioId}"),
     __param(0, (0, tsoa_1.Path)()),
     __param(1, (0, tsoa_1.Path)()),

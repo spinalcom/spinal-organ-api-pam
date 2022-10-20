@@ -6,9 +6,17 @@
     ],
     "spec": {
         "outputDirectory": "./src/swagger",
-        "specVersion": 3
+        "specVersion": 3,
+        "securityDefinitions": {
+            "admin": {
+                "type": "http",
+                "scheme": "bearer",
+                "bearerFormat": "JWT"
+            }
+        }
     },
     "routes": {
-        "routesDir": "./src"
+        "routesDir": "./src",
+        "authenticationModule": "./src/security/authentication.ts"
     }
 }

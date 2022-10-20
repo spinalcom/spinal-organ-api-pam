@@ -75,8 +75,8 @@ class AuthentificationService {
             const expirationTime = data === null || data === void 0 ? void 0 : data.expieredToken;
             const tokenExpired = expirationTime ? Date.now() >= expirationTime * 1000 : true;
             if (!data || tokenExpired)
-                return false;
-            return true;
+                return;
+            return data;
         });
     }
     // PAM Credential
@@ -214,6 +214,7 @@ class AuthentificationService {
             data.profile = yield this._getProfileInfo(data.token, adminCredential, isUser);
             if (isUser)
                 data.userInfo = yield this._getUserInfo(data.userId, adminCredential, data.token);
+            // else data.userInfo = await this._getApplicationInfo()
             this._saveUserToken(data);
             return {
                 code: constant_1.HTTP_CODES.OK,
@@ -228,7 +229,7 @@ class AuthentificationService {
     }
     _getProfileInfo(userToken, adminCredential, isUser) {
         let urlAdmin = adminCredential.urlAdmin;
-        let endpoint = isUser ? "/tokens/getUserProfileByToken" : "";
+        let endpoint = isUser ? "/tokens/getUserProfileByToken" : "/tokens/getAppProfileByToken";
         return axios_1.default.post(urlAdmin + endpoint, {
             platformId: adminCredential.idPlateform,
             token: userToken
@@ -251,6 +252,20 @@ class AuthentificationService {
             },
         };
         return axios_1.default.get(`${adminCredential.urlAdmin}/users/${userId}`, config).then((result) => {
+            return result.data;
+        }).catch((err) => {
+            console.error(err);
+        });
+    }
+    _getApplicationInfo(applicationId, adminCredential, userToken) {
+        const config = {
+            headers: {
+                'Content-Type': 'application/json',
+                // "x-access-token": adminCredential.tokenBosAdmin
+                "x-access-token": userToken
+            },
+        };
+        return axios_1.default.get(`${adminCredential.urlAdmin}/application/${applicationId}`, config).then((result) => {
             return result.data;
         }).catch((err) => {
             console.error(err);
@@ -293,7 +308,7 @@ class AuthentificationService {
             if (data)
                 return data;
             const found = yield token_service_1.TokenService.getInstance().getTokenData(token);
-            return found;
+            return found === null || found === void 0 ? void 0 : found.get();
         });
     }
 }

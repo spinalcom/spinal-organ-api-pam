@@ -25,8 +25,8 @@
 import { BuildingService, PortofolioService } from "../services";
 
 import { IApiRoute, IApp, IBuilding, IPortofolioData, IPortofolioInfo } from "../interfaces";
-import { Body, Controller, Path, Post, Route, Tags, Put, Get, Delete, UploadedFile } from "tsoa";
-import { HTTP_CODES } from "../constant";
+import { Body, Controller, Path, Post, Route, Tags, Put, Get, Delete, UploadedFile, Security } from "tsoa";
+import { HTTP_CODES, SECURITY_NAME } from "../constant";
 
 
 const serviceInstance = BuildingService.getInstance();
@@ -42,6 +42,7 @@ export class PortofolioController extends Controller {
         super();
     }
 
+    @Security(SECURITY_NAME.admin)
     @Post("/add_portofolio")
     public async addPortofolio(@Body() data: IPortofolioInfo): Promise<IPortofolioData | { message: string }> {
         try {
@@ -58,6 +59,7 @@ export class PortofolioController extends Controller {
         }
     }
 
+    @Security(SECURITY_NAME.admin)
     @Put("/rename_portofolio/{id}")
     public async renamePortofolio(@Path() id: string, @Body() data: { name: string }): Promise<{ message?: string }> {
         try {
@@ -74,6 +76,7 @@ export class PortofolioController extends Controller {
         }
     }
 
+    @Security(SECURITY_NAME.admin)
     @Get("/get_all_portofolio")
     public async getAllPortofolio(): Promise<any[] | { message: string }> {
         try {
@@ -86,6 +89,7 @@ export class PortofolioController extends Controller {
         }
     }
 
+    @Security(SECURITY_NAME.admin)
     @Get("/get_portofolio/{id}")
     public async getPortofolio(@Path() id: string): Promise<any | { message: string }> {
         try {
@@ -98,6 +102,7 @@ export class PortofolioController extends Controller {
         }
     }
 
+    @Security(SECURITY_NAME.admin)
     @Get("/get_portofolio_details/{id}")
     public async getPortofolioDetails(@Path() id: string): Promise<IPortofolioData | { message: string }> {
         try {
@@ -111,6 +116,7 @@ export class PortofolioController extends Controller {
         }
     }
 
+    @Security(SECURITY_NAME.admin)
     @Get("/get_all_portofolios_details")
     public async getAllPortofoliosDetails(): Promise<any[] | { message: string }> {
         try {
@@ -124,6 +130,7 @@ export class PortofolioController extends Controller {
         }
     }
 
+    @Security(SECURITY_NAME.admin)
     @Delete("/remove_portofolio/{id}")
     public async removePortofolio(@Path() id: string): Promise<{ message: string }> {
         try {
@@ -138,6 +145,7 @@ export class PortofolioController extends Controller {
         }
     }
 
+    @Security(SECURITY_NAME.admin)
     @Post("/add_building_to_portofolio/{portofolioId}")
     public async addBuilding(@Path() portofolioId: string, @Body() body: { buildingId: string[] }): Promise<IBuilding[] | { message: string }> {
         try {
@@ -155,6 +163,7 @@ export class PortofolioController extends Controller {
         }
     }
 
+    @Security(SECURITY_NAME.admin)
     @Get("/get_building_from_portofolio/{portofolioId}/{appId}")
     public async getBuilding(@Path() portofolioId: string, @Path() appId: string): Promise<IBuilding | { message: string }> {
         try {
@@ -176,6 +185,7 @@ export class PortofolioController extends Controller {
         }
     }
 
+    @Security(SECURITY_NAME.admin)
     @Get("/get_all_buildings_from_portofolio/{portofolioId}")
     public async getAllBuilding(@Path() portofolioId: string): Promise<IBuilding[] | { message: string }> {
         try {
@@ -194,6 +204,7 @@ export class PortofolioController extends Controller {
     }
 
 
+    @Security(SECURITY_NAME.admin)
     @Delete("/remove_building_from_portofolio/{portofolioId}")
     public async deleteBuildingFromPortofolio(@Path() portofolioId: string, @Body() data: { buildingIds: string[] }): Promise<{ message: string, ids?: string[] }> {
         try {
@@ -212,6 +223,7 @@ export class PortofolioController extends Controller {
         }
     }
 
+    @Security(SECURITY_NAME.admin)
     @Post("/add_app_to_portofolio/{portofolioId}")
     public async addAppToPortofolio(@Path() portofolioId: string, @Body() data: { applicationsIds: string[] }): Promise<IApp[] | { message: string }> {
         try {
@@ -230,6 +242,7 @@ export class PortofolioController extends Controller {
     }
 
 
+    @Security(SECURITY_NAME.admin)
     @Get("/get_apps_from_portofolio/{portofolioId}")
     public async getPortofolioApps(@Path() portofolioId: string): Promise<IApp[] | { message: string }> {
         try {
@@ -248,6 +261,7 @@ export class PortofolioController extends Controller {
     }
 
 
+    @Security(SECURITY_NAME.admin)
     @Get("/get_app_from_portofolio/{portofolioId}/{applicationId}")
     public async getAppFromPortofolio(@Path() portofolioId: string, @Path() applicationId: string): Promise<IApp | { message: string }> {
         try {
@@ -266,6 +280,7 @@ export class PortofolioController extends Controller {
     }
 
 
+    @Security(SECURITY_NAME.admin)
     @Delete("/remove_app_from_portofolio/{portofolioId}")
     public async removeAppFromPortofolio(@Path() portofolioId: string, @Body() data: { applicationId: string[] }): Promise<{ message: string, ids?: string[] }> {
         try {
@@ -283,6 +298,7 @@ export class PortofolioController extends Controller {
     }
 
 
+    @Security(SECURITY_NAME.admin)
     @Get("/portofolio_has_app/{portofolioId}//{applicationId}")
     public async portofolioHasApp(@Path() portofolioId: string, @Path() applicationId: string): Promise<boolean | { message: string }> {
         try {
@@ -299,6 +315,7 @@ export class PortofolioController extends Controller {
 
 
 
+    @Security(SECURITY_NAME.admin)
     @Post("/add_apiRoute_to_portofolio/{portofolioId}")
     public async addApiToPortofolio(@Path() portofolioId: string, @Body() data: { apisIds: string[] }): Promise<IApiRoute[] | { message: string }> {
         try {
@@ -317,6 +334,7 @@ export class PortofolioController extends Controller {
     }
 
 
+    @Security(SECURITY_NAME.admin)
     @Get("/get_apisRoute_from_portofolio/{portofolioId}")
     public async getPortofolioApis(@Path() portofolioId: string): Promise<IApiRoute[] | { message: string }> {
         try {
@@ -335,6 +353,7 @@ export class PortofolioController extends Controller {
     }
 
 
+    @Security(SECURITY_NAME.admin)
     @Get("/get_apiRoute_from_portofolio/{portofolioId}/{apiId}")
     public async getApiFromPortofolio(@Path() portofolioId: string, @Path() apiId: string): Promise<IApiRoute | { message: string }> {
         try {
@@ -353,6 +372,7 @@ export class PortofolioController extends Controller {
     }
 
 
+    @Security(SECURITY_NAME.admin)
     @Delete("/remove_apiRoute_from_portofolio/{portofolioId}")
     public async removeApiFromPortofolio(@Path() portofolioId: string, @Body() data: { apisIds: string[] }): Promise<{ message: string, ids?: string[] }> {
         try {
@@ -370,6 +390,7 @@ export class PortofolioController extends Controller {
     }
 
 
+    @Security(SECURITY_NAME.admin)
     @Get("/portofolio_has_apiRoute/{portofolioId}/{apiId}")
     public async portofolioHasApi(@Path() portofolioId: string, @Path() apiId: string): Promise<boolean | { message: string }> {
         try {

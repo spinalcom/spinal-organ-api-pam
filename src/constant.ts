@@ -187,7 +187,18 @@ export enum HTTP_CODES {
     INTERNAL_ERROR = 500
 }
 
+
+export enum SECURITY_MESSAGES {
+    INVALID_TOKEN = "Invalid/expired token ! Please authenticate",
+    UNAUTHORIZED = "Unauthorized"
+}
+
 // export const AUTH_SERVER_URI = 'http://localhost:3054';
 
 // export const SPINALTWIN_CLIENT_ID = 'm9T3YOTHRq';
 // export const SPINALTWIN_CLIENT_SECRET = 'kRBmqiUyofHSL9j8zrNI4bUSwcM3eO';
+
+export enum SECURITY_NAME {
+    admin = "admin",
+    simple = "simple"
+} 

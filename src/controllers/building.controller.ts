@@ -49,8 +49,8 @@
 import { BuildingService } from "../services";
 
 import { IApiRoute, IApp, IBuilding, IEditBuilding } from "../interfaces";
-import { Body, Controller, Path, Post, Route, Tags, Put, Get, Delete, UploadedFile } from "tsoa";
-import { HTTP_CODES } from "../constant";
+import { Body, Controller, Path, Post, Route, Tags, Put, Get, Delete, UploadedFile, Security } from "tsoa";
+import { HTTP_CODES, SECURITY_NAME } from "../constant";
 
 const serviceInstance = BuildingService.getInstance();
 
@@ -63,6 +63,7 @@ export class BuildingController extends Controller {
         super();
     }
 
+    @Security(SECURITY_NAME.admin)
     @Post("/create_building")
     public async createBuilding(@Body() buildingInfo: IBuilding): Promise<IBuilding | { message: string }> {
         try {
@@ -85,6 +86,7 @@ export class BuildingController extends Controller {
         }
     }
 
+    @Security(SECURITY_NAME.admin)
     @Post("/get_building/{id}")
     public async getBuildingById(@Path() id: string): Promise<IBuilding | { message: string }> {
         try {
@@ -106,6 +108,7 @@ export class BuildingController extends Controller {
         }
     }
 
+    @Security(SECURITY_NAME.admin)
     @Get("/get_all_buildings")
     public async getAllBuildings(): Promise<IBuilding[] | { message: string }> {
         try {
@@ -123,6 +126,7 @@ export class BuildingController extends Controller {
         }
     }
 
+    @Security(SECURITY_NAME.admin)
     @Get("/get_all_buildings_apps")
     public async getAllBuildingsApps(): Promise<(IBuilding & { apps: IApp })[] | { message: string }> {
         try {
@@ -147,6 +151,7 @@ export class BuildingController extends Controller {
     }
 
 
+    @Security(SECURITY_NAME.admin)
     @Delete("/delete_building/{id}")
     public async deleteBuilding(@Path() id: string): Promise<any | { message: string }> {
         try {
@@ -160,6 +165,7 @@ export class BuildingController extends Controller {
     }
 
 
+    @Security(SECURITY_NAME.admin)
     @Put("/edit_building/{id}")
     public async editBuilding(@Path() id: string, @Body() data: IEditBuilding): Promise<IBuilding | { message: string }> {
         try {
@@ -181,6 +187,7 @@ export class BuildingController extends Controller {
         }
     }
 
+    @Security(SECURITY_NAME.admin)
     @Post("/add_app_to_building/{buildingId}")
     public async addAppToBuilding(@Path() buildingId: string, @Body() data: { applicationId: string[] }): Promise<IApp[] | { message: string }> {
         try {
@@ -197,6 +204,7 @@ export class BuildingController extends Controller {
         }
     }
 
+    @Security(SECURITY_NAME.admin)
     @Get("/get_apps_from_building/{buildingId}")
     public async getAppsFromBuilding(@Path() buildingId: string): Promise<IApp[] | { message: string }> {
         try {
@@ -213,6 +221,7 @@ export class BuildingController extends Controller {
         }
     }
 
+    @Security(SECURITY_NAME.admin)
     @Get("/get_app_from_building/{buildingId}/{appId}")
     public async getAppFromBuilding(@Path() buildingId: string, @Path() appId: string): Promise<IApp | { message: string }> {
         try {
@@ -229,6 +238,7 @@ export class BuildingController extends Controller {
         }
     }
 
+    @Security(SECURITY_NAME.admin)
     @Delete("/remove_app_from_building/{buildingId}")
     public async removeAppFromBuilding(@Path() buildingId: string, @Body() data: { applicationId: string[] }): Promise<{ message: string; ids?: string[] }> {
         try {
@@ -247,6 +257,7 @@ export class BuildingController extends Controller {
         }
     }
 
+    @Security(SECURITY_NAME.admin)
     @Get("/building_has_app/{buildingId}/{appId}")
     public async buildingHasApp(@Path() buildingId: string, @Path() appId: string): Promise<boolean | { message: string }> {
         try {
@@ -265,6 +276,7 @@ export class BuildingController extends Controller {
 
 
 
+    @Security(SECURITY_NAME.admin)
     @Post("/add_apiRoute_to_building/{buildingId}")
     public async addApiToBuilding(@Path() buildingId: string, @Body() data: { apisIds: string[] }): Promise<IApiRoute[] | { message: string }> {
         try {
@@ -281,6 +293,7 @@ export class BuildingController extends Controller {
         }
     }
 
+    @Security(SECURITY_NAME.admin)
     @Get("/get_apisRoute_from_building/{buildingId}")
     public async getApisFromBuilding(@Path() buildingId: string): Promise<IApiRoute[] | { message: string }> {
         try {
@@ -297,6 +310,7 @@ export class BuildingController extends Controller {
         }
     }
 
+    @Security(SECURITY_NAME.admin)
     @Get("/get_apiRoute_from_building/{buildingId}/{apiId}")
     public async getApiFromBuilding(@Path() buildingId: string, @Path() apiId: string): Promise<IApiRoute | { message: string }> {
         try {
@@ -313,6 +327,7 @@ export class BuildingController extends Controller {
         }
     }
 
+    @Security(SECURITY_NAME.admin)
     @Delete("/remove_apiRoute_from_building/{buildingId}")
     public async removeApisFromBuilding(@Path() buildingId: string, @Body() data: { apisIds: string[] }): Promise<{ message: string; ids?: string[] }> {
         try {
@@ -331,6 +346,7 @@ export class BuildingController extends Controller {
         }
     }
 
+    @Security(SECURITY_NAME.admin)
     @Get("/building_has_apiRoute/{buildingId}/{apiId}")
     public async buildingHasApi(@Path() buildingId: string, @Path() apiId: string): Promise<boolean | { message: string }> {
         try {

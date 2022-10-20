@@ -76,6 +76,8 @@ export class UserProfileService {
       return liste;
     }, Promise.resolve([]))
 
+    await this.context.addChildInContext(node, CONTEXT_TO_USER_PROFILE_RELATION_NAME, PTR_LST_TYPE, this.context)
+
     return obj;
   }
 
@@ -154,7 +156,7 @@ export class UserProfileService {
     const node = profile instanceof SpinalNode ? profile : await this._getUserProfileNode(profile);
     if (!(node instanceof SpinalNode)) return;
 
-    const promises = portofolioId.map(async id => {
+    const promises = portofolioId.map(id => {
       return authorizationInstance.authorizeProfileToAccessPortofolio(node, id)
     })
 
@@ -423,11 +425,12 @@ export class UserProfileService {
 
 
   private async _authorizeIPortofolioAuth(profile: SpinalNode, portofolioAuth: IPortofolioAuth): Promise<IPortofolioAuthRes> {
-    const [portofolio] = await this.authorizePortofolio(profile, portofolioAuth.portofolioId);
+
+    const portofolio = await this.authorizePortofolio(profile, portofolioAuth.portofolioId);
     const [appsData, apisData] = await Promise.all([this.authorizeToAccessPortofolioApp(profile, portofolioAuth), this.authorizeToAccessPortofolioApisRoute(profile, portofolioAuth)]);
     const buildingProm = portofolioAuth.building.map(bos => this._authorizeIBosAuth(profile, bos, portofolioAuth.portofolioId))
     return {
-      portofolio,
+      portofolio: portofolio[0],
       apps: appsData[0]?.apps,
       apis: apisData[0]?.apis,
       buildings: await Promise.all(buildingProm)

@@ -72,8 +72,8 @@
 
 import * as express from "express";
 import { DigitalTwinService } from "../services";
-import { HTTP_CODES } from "../constant";
-import { Body, Controller, Post, Route, Tags } from "tsoa";
+import { HTTP_CODES, SECURITY_NAME } from "../constant";
+import { Body, Controller, Post, Route, Security, Tags } from "tsoa";
 
 const serviceInstance = DigitalTwinService.getInstance();
 
@@ -85,6 +85,7 @@ export class DigitaltwinController extends Controller {
         super();
     }
 
+    @Security(SECURITY_NAME.admin)
     @Post("/create_digitaltwin")
     public async createDigitalTwin(@Body() data: { name: string; folderPath: string }) {
         try {

@@ -22,11 +22,10 @@
  * <http://resources.spinalcom.com/licenses.pdf>.
  */
 
-import { Route, Get, Post, Delete, Body, Controller, Tags, Put, Path, UploadedFile } from "tsoa";
+import { Route, Get, Post, Delete, Body, Controller, Tags, Put, Path, UploadedFile, Security } from "tsoa";
 import { APIService, BuildingService, PortofolioService } from "../services";
-import { BUILDING_API_GROUP_TYPE, HTTP_CODES, PORTOFOLIO_API_GROUP_TYPE } from "../constant";
+import { BUILDING_API_GROUP_TYPE, HTTP_CODES, PORTOFOLIO_API_GROUP_TYPE, SECURITY_NAME } from "../constant";
 import { IApiRoute } from "../interfaces";
-
 
 const apiService = APIService.getInstance();
 
@@ -43,6 +42,7 @@ export class APIController extends Controller {
     //              PORTOFOLIO              //
     //////////////////////////////////////////
 
+    @Security(SECURITY_NAME.admin)
     @Post("/create_portofolio_api_route")
     public async createPortofolioApiRoute(@Body() data: IApiRoute): Promise<IApiRoute | { message: string }> {
         try {
@@ -56,7 +56,7 @@ export class APIController extends Controller {
         }
     }
 
-
+    @Security(SECURITY_NAME.admin)
     @Put("/update_portofolio_api_route/{id}")
     public async updatePortofolioApiRoute(@Body() data: IApiRoute, @Path() id: string): Promise<IApiRoute | { message: string }> {
         try {
@@ -70,6 +70,8 @@ export class APIController extends Controller {
         }
     }
 
+
+    @Security(SECURITY_NAME.admin)
     @Get("/get_portofolio_api_route/{id}")
     public async getPortofolioApiRouteById(@Path() id: string): Promise<IApiRoute | { message: string }> {
         try {
@@ -87,6 +89,7 @@ export class APIController extends Controller {
         }
     }
 
+    @Security(SECURITY_NAME.admin)
     @Get("/get_all_portofolio_api_route")
     public async getAllPortofolioApiRoute(): Promise<IApiRoute[] | { message: string }> {
         try {
@@ -99,6 +102,7 @@ export class APIController extends Controller {
         }
     }
 
+    @Security(SECURITY_NAME.admin)
     @Delete("/delete_portofolio_api_route/{id}")
     public async deletePortofolioApiRoute(@Path() id): Promise<{ message: string }> {
         try {
@@ -112,6 +116,7 @@ export class APIController extends Controller {
         }
     }
 
+    @Security(SECURITY_NAME.admin)
     @Post("/upload_portofolio_apis_routes")
     public async uploadPortofolioSwaggerFile(@UploadedFile() file): Promise<IApiRoute[] | { message: string }> {
         try {
@@ -147,6 +152,7 @@ export class APIController extends Controller {
     //////////////////////////////////////////
 
 
+    @Security(SECURITY_NAME.admin)
     @Post("/create_bos_api_route")
     public async createBosApiRoute(@Body() data: IApiRoute): Promise<IApiRoute | { message: string }> {
         try {
@@ -160,7 +166,7 @@ export class APIController extends Controller {
         }
     }
 
-
+    @Security(SECURITY_NAME.admin)
     @Put("/update_bos_api_route/{id}")
     public async updateBosApiRoute(@Body() data: IApiRoute, @Path() id: string): Promise<IApiRoute | { message: string }> {
         try {
@@ -174,6 +180,7 @@ export class APIController extends Controller {
         }
     }
 
+    @Security(SECURITY_NAME.admin)
     @Get("/get_bos_api_route/{id}")
     public async getBosApiRouteById(@Path() id: string): Promise<IApiRoute | { message: string }> {
         try {
@@ -191,6 +198,7 @@ export class APIController extends Controller {
         }
     }
 
+    @Security(SECURITY_NAME.admin)
     @Get("/get_all_bos_api_route")
     public async getAllBosApiRoute(): Promise<IApiRoute[] | { message: string }> {
         try {
@@ -203,6 +211,7 @@ export class APIController extends Controller {
         }
     }
 
+    @Security(SECURITY_NAME.admin)
     @Delete("/delete_bos_api_route/{id}")
     public async deleteBosApiRoute(@Path() id): Promise<{ message: string }> {
         try {
@@ -216,7 +225,7 @@ export class APIController extends Controller {
         }
     }
 
-
+    @Security(SECURITY_NAME.admin)
     @Post("/upload_bos_apis_routes")
     public async uploadBosSwaggerFile(@UploadedFile() file): Promise<IApiRoute[] | { message: string }> {
         try {

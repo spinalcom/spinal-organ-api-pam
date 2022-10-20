@@ -47,8 +47,8 @@
  */
 
 import { AppService, AppsType } from "../services";
-import { Body, Controller, Delete, Get, Path, Post, Put, Route, Tags, UploadedFile } from "tsoa";
-import { HTTP_CODES } from "../constant";
+import { Body, Controller, Delete, Get, Path, Post, Put, Route, Security, Tags, UploadedFile } from "tsoa";
+import { HTTP_CODES, SECURITY_NAME } from "../constant";
 import { IApp, IEditApp } from "../interfaces";
 
 const appServiceInstance = AppService.getInstance();
@@ -63,6 +63,7 @@ export class AppsController extends Controller {
 
 
 
+    @Security(SECURITY_NAME.admin)
     @Post("/create_admin_app")
     public async createAdminApp(@Body() appInfo: IApp): Promise<IApp | { message: string }> {
         try {
@@ -79,6 +80,7 @@ export class AppsController extends Controller {
         }
     }
 
+    @Security(SECURITY_NAME.admin)
     @Post("/create_portofolio_app")
     public async createPortofolioApp(@Body() appInfo: IApp): Promise<IApp | { message: string }> {
         try {
@@ -95,6 +97,7 @@ export class AppsController extends Controller {
         }
     }
 
+    @Security(SECURITY_NAME.admin)
     @Post("/create_building_app")
     public async createBuildingApp(@Body() appInfo: IApp): Promise<IApp | { message: string }> {
         try {
@@ -112,6 +115,7 @@ export class AppsController extends Controller {
     }
 
 
+    @Security(SECURITY_NAME.admin)
     @Get("/get_all_admin_apps")
     public async getAllAdminApps(): Promise<IApp[] | { message: string }> {
         try {
@@ -124,6 +128,7 @@ export class AppsController extends Controller {
         }
     }
 
+    @Security(SECURITY_NAME.admin)
     @Get("/get_all_portofolio_apps")
     public async getAllPortofolioApps(): Promise<IApp[] | { message: string }> {
         try {
@@ -136,6 +141,7 @@ export class AppsController extends Controller {
         }
     }
 
+    @Security(SECURITY_NAME.admin)
     @Get("/get_all_building_apps")
     public async getAllBuildingApps(): Promise<IApp[] | { message: string }> {
         try {
@@ -149,6 +155,7 @@ export class AppsController extends Controller {
     }
 
 
+    @Security(SECURITY_NAME.admin)
     @Get("/get_admin_app/{appId}")
     public async getAdminApp(@Path() appId: string): Promise<IApp | { message: string }> {
         try {
@@ -167,6 +174,7 @@ export class AppsController extends Controller {
         }
     }
 
+    @Security(SECURITY_NAME.admin)
     @Get("/get_portofolio_app/{appId}")
     public async getPortofolioApp(@Path() appId: string): Promise<IApp | { message: string }> {
         try {
@@ -185,6 +193,7 @@ export class AppsController extends Controller {
         }
     }
 
+    @Security(SECURITY_NAME.admin)
     @Get("/get_building_app/{appId}")
     public async getBuildingApp(@Path() appId: string): Promise<IApp | { message: string }> {
         try {
@@ -204,6 +213,7 @@ export class AppsController extends Controller {
     }
 
 
+    @Security(SECURITY_NAME.admin)
     @Put("/update_admin_app/{appId}")
     public async updateAdminApp(@Path() appId: string, @Body() newInfo: IEditApp): Promise<IApp | { message: string }> {
         try {
@@ -222,6 +232,7 @@ export class AppsController extends Controller {
         }
     }
 
+    @Security(SECURITY_NAME.admin)
     @Put("/update_portofolio_app/{appId}")
     public async updatePortofolioApp(@Path() appId: string, @Body() newInfo: IEditApp): Promise<IApp | { message: string }> {
         try {
@@ -240,6 +251,7 @@ export class AppsController extends Controller {
         }
     }
 
+    @Security(SECURITY_NAME.admin)
     @Put("/update_building_app/{appId}")
     public async updateBuildingApp(@Path() appId: string, @Body() newInfo: IEditApp): Promise<IApp | { message: string }> {
         try {
@@ -259,6 +271,7 @@ export class AppsController extends Controller {
     }
 
 
+    @Security(SECURITY_NAME.admin)
     @Delete("/delete_admin_app/{appId}")
     public async deleteAdminApp(@Path() appId: string): Promise<{ message: string }> {
         try {
@@ -273,6 +286,7 @@ export class AppsController extends Controller {
         }
     }
 
+    @Security(SECURITY_NAME.admin)
     @Delete("/delete_portofolio_app/{appId}")
     public async deletePortofolioApp(@Path() appId: string): Promise<{ message: string }> {
         try {
@@ -287,6 +301,7 @@ export class AppsController extends Controller {
         }
     }
 
+    @Security(SECURITY_NAME.admin)
     @Delete("/delete_building_app/{appId}")
     public async deleteBuildingApp(@Path() appId: string): Promise<{ message: string }> {
         try {
@@ -302,6 +317,7 @@ export class AppsController extends Controller {
     }
 
 
+    @Security(SECURITY_NAME.admin)
     @Post("/upload_admin_apps")
     public async uploadAdminApp(@UploadedFile() file): Promise<IApp[] | { message: string }> {
         try {
@@ -332,6 +348,7 @@ export class AppsController extends Controller {
         }
     }
 
+    @Security(SECURITY_NAME.admin)
     @Post("/upload_portofolio_apps")
     public async uploadPortofolioApp(@UploadedFile() file): Promise<IApp[] | { message: string }> {
         try {
@@ -361,6 +378,7 @@ export class AppsController extends Controller {
         }
     }
 
+    @Security(SECURITY_NAME.admin)
     @Post("/upload_building_apps")
     public async uploadBuildingApp(@UploadedFile() file): Promise<IApp[] | { message: string }> {
         try {

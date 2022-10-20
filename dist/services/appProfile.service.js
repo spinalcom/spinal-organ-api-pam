@@ -69,6 +69,7 @@ class AppProfileService {
                 liste.push(portofolioAuth);
                 return liste;
             }), Promise.resolve([]));
+            yield this.context.addChildInContext(node, constant_1.CONTEXT_TO_APP_PROFILE_RELATION_NAME, constant_1.PTR_LST_TYPE, this.context);
             return obj;
         });
     }

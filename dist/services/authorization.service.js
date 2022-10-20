@@ -38,7 +38,6 @@ const spinal_env_viewer_graph_service_1 = require("spinal-env-viewer-graph-servi
 const spinal_core_connectorjs_type_1 = require("spinal-core-connectorjs_type");
 const building_service_1 = require("./building.service");
 const portofolio_service_1 = require("./portofolio.service");
-const toArray = require("async-iterator-to-array");
 class AuthorizationService {
     constructor() { }
     static getInstance() {
@@ -46,9 +45,12 @@ class AuthorizationService {
             this.instance = new AuthorizationService();
         return this.instance;
     }
-    profileHasAccess(profile, node, elementType) {
+    profileHasAccess(profile, node) {
         return __awaiter(this, void 0, void 0, function* () {
-            const context = yield this._getContextByType(profile, elementType);
+            // const context = await this._getContextByType(profile, elementType);
+            // if (!context) return false;
+            // return node.belongsToContext(context);
+            const context = yield this._getAuthorizedPortofolioContext(profile, true);
             if (!context)
                 return false;
             return node.belongsToContext(context);
@@ -152,7 +154,7 @@ class AuthorizationService {
             return children.reduce((prom, item) => __awaiter(this, void 0, void 0, function* () {
                 const liste = yield prom;
                 if (item) {
-                    const element = this._getRealNode(item);
+                    const element = yield this._getRealNode(item);
                     liste.push(element);
                 }
                 return liste;
@@ -167,7 +169,7 @@ class AuthorizationService {
                 return children.reduce((prom, item) => __awaiter(this, void 0, void 0, function* () {
                     const liste = yield prom;
                     if (item) {
-                        const element = this._getRealNode(item);
+                        const element = yield this._getRealNode(item);
                         liste.push(element);
                     }
                     return liste;
@@ -262,7 +264,7 @@ class AuthorizationService {
             return children.reduce((prom, item) => __awaiter(this, void 0, void 0, function* () {
                 const liste = yield prom;
                 if (item) {
-                    const element = this._getRealNode(item);
+                    const element = yield this._getRealNode(item);
                     liste.push(element);
                 }
                 return liste;
@@ -278,7 +280,7 @@ class AuthorizationService {
             return children.reduce((prom, item) => __awaiter(this, void 0, void 0, function* () {
                 const liste = yield prom;
                 if (item) {
-                    const element = this._getRealNode(item);
+                    const element = yield this._getRealNode(item);
                     liste.push(element);
                 }
                 return liste;
@@ -392,7 +394,7 @@ class AuthorizationService {
             return children.reduce((prom, item) => __awaiter(this, void 0, void 0, function* () {
                 const liste = yield prom;
                 if (item) {
-                    const element = this._getRealNode(item);
+                    const element = yield this._getRealNode(item);
                     liste.push(element);
                 }
                 return liste;
@@ -408,7 +410,7 @@ class AuthorizationService {
             return children.reduce((prom, item) => __awaiter(this, void 0, void 0, function* () {
                 const liste = yield prom;
                 if (item) {
-                    const element = this._getRealNode(item);
+                    const element = yield this._getRealNode(item);
                     liste.push(element);
                 }
                 return liste;
@@ -493,8 +495,8 @@ class AuthorizationService {
                     const element = yield child.getElement(true);
                     if (element && element.getId().get() === referenceId)
                         return child;
-                    const children = yield child.visitChildren(relationName);
-                    queue.push(...toArray(children));
+                    const children = yield child.getChildren(relationName);
+                    queue.push(...children);
                 }
             }
         });

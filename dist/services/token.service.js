@@ -64,8 +64,9 @@ class TokenService {
             const token = jwt.sign(playload, key, { expiresIn: durationInMin });
             const now = Date.now();
             playload.createdToken = now;
-            playload.createdToken = now + (durationInMin * 60 * 1000);
+            playload.expieredToken = now + (durationInMin * 60 * 1000);
             playload.userId = userNode.getId().get();
+            playload.token = token;
             const tokenNode = yield this.addTokenToContext(token, playload);
             yield userNode.addChild(tokenNode, constant_1.TOKEN_RELATION_NAME, constant_1.PTR_LST_TYPE);
             return playload;

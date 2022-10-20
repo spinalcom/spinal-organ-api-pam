@@ -69,6 +69,7 @@ class UserProfileService {
                 liste.push(portofolioAuth);
                 return liste;
             }), Promise.resolve([]));
+            yield this.context.addChildInContext(node, constant_1.CONTEXT_TO_USER_PROFILE_RELATION_NAME, constant_1.PTR_LST_TYPE, this.context);
             return obj;
         });
     }
@@ -140,9 +141,9 @@ class UserProfileService {
             const node = profile instanceof spinal_env_viewer_graph_service_1.SpinalNode ? profile : yield this._getUserProfileNode(profile);
             if (!(node instanceof spinal_env_viewer_graph_service_1.SpinalNode))
                 return;
-            const promises = portofolioId.map((id) => __awaiter(this, void 0, void 0, function* () {
+            const promises = portofolioId.map(id => {
                 return authorization_service_1.authorizationInstance.authorizeProfileToAccessPortofolio(node, id);
-            }));
+            });
             return Promise.all(promises);
         });
     }
@@ -400,11 +401,11 @@ class UserProfileService {
     _authorizeIPortofolioAuth(profile, portofolioAuth) {
         var _a, _b;
         return __awaiter(this, void 0, void 0, function* () {
-            const [portofolio] = yield this.authorizePortofolio(profile, portofolioAuth.portofolioId);
+            const portofolio = yield this.authorizePortofolio(profile, portofolioAuth.portofolioId);
             const [appsData, apisData] = yield Promise.all([this.authorizeToAccessPortofolioApp(profile, portofolioAuth), this.authorizeToAccessPortofolioApisRoute(profile, portofolioAuth)]);
             const buildingProm = portofolioAuth.building.map(bos => this._authorizeIBosAuth(profile, bos, portofolioAuth.portofolioId));
             return {
-                portofolio,
+                portofolio: portofolio[0],
                 apps: (_a = appsData[0]) === null || _a === void 0 ? void 0 : _a.apps,
                 apis: (_b = apisData[0]) === null || _b === void 0 ? void 0 : _b.apis,
                 buildings: yield Promise.all(buildingProm)

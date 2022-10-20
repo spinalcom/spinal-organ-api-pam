@@ -63,12 +63,12 @@ export class AuthentificationService {
         return data;
     }
 
-    public async tokenIsValid(token: string): Promise<boolean> {
+    public async tokenIsValid(token: string): Promise<IUserToken | IApplicationToken> {
         const data = await this._getTokenData(token);
         const expirationTime = data?.expieredToken;
         const tokenExpired = expirationTime ? Date.now() >= expirationTime * 1000 : true;
-        if (!data || tokenExpired) return false;
-        return true;
+        if (!data || tokenExpired) return;
+        return data;
     }
 
 
@@ -216,6 +216,7 @@ export class AuthentificationService {
             const data = result.data;
             data.profile = await this._getProfileInfo(data.token, adminCredential, isUser);
             if (isUser) data.userInfo = await this._getUserInfo(data.userId, adminCredential, data.token);
+            // else data.userInfo = await this._getApplicationInfo()
             this._saveUserToken(data);
             return {
                 code: HTTP_CODES.OK,
@@ -231,7 +232,7 @@ export class AuthentificationService {
 
     private _getProfileInfo(userToken: string, adminCredential: IPamCredential, isUser: boolean) {
         let urlAdmin = adminCredential.urlAdmin;
-        let endpoint = isUser ? "/tokens/getUserProfileByToken" : "";
+        let endpoint = isUser ? "/tokens/getUserProfileByToken" : "/tokens/getAppProfileByToken";
         return axios.post(urlAdmin + endpoint, {
             platformId: adminCredential.idPlateform,
             token: userToken
@@ -260,6 +261,21 @@ export class AuthentificationService {
         })
     }
 
+    private _getApplicationInfo(applicationId: string, adminCredential: IPamCredential, userToken: string) {
+        const config = {
+            headers: {
+                'Content-Type': 'application/json',
+                // "x-access-token": adminCredential.tokenBosAdmin
+                "x-access-token": userToken
+            },
+        }
+        return axios.get(`${adminCredential.urlAdmin}/application/${applicationId}`, config).then((result) => {
+            return result.data;
+        }).catch((err) => {
+            console.error(err);
+        })
+    }
+
     private _formatUserProfiles(): Promise<IAdminUserProfile[]> {
         return UserProfileService.getInstance().getAllUserProfileNodes().then((nodes) => {
             return nodes.map(el => ({
@@ -278,7 +294,6 @@ export class AuthentificationService {
         })
     }
 
-
     private async _getOrCreateContext(contextName: string, contextType: string): Promise<SpinalContext> {
         let context = await configServiceInstance.getContext(contextName);
         if (!context) context = await configServiceInstance.addContext(contextName, contextType);
@@ -296,6 +311,6 @@ export class AuthentificationService {
         if (data) return data;
 
         const found = await TokenService.getInstance().getTokenData(token);
-        return found;
+        return found?.get();
     }
 }

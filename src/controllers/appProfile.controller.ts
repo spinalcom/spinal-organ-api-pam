@@ -70,10 +70,10 @@
  * <http://resources.spinalcom.com/licenses.pdf>.
  */
 
-import { HTTP_CODES } from "../constant";
+import { HTTP_CODES, SECURITY_NAME } from "../constant";
 import { IApiRoute, IAppProfile, IBosAuth, IBosData, IPortofolioAuth, IPortofolioData, IProfile, IProfileData } from "../interfaces";
 import { AppProfileService } from "../services";
-import { Route, Tags, Get, Post, Put, Delete, Path, Body, Controller } from 'tsoa';
+import { Route, Tags, Get, Post, Put, Delete, Path, Body, Controller, Security } from 'tsoa';
 import { _formatBosAuthRes, _formatPortofolioAuthRes, _formatProfile, _getNodeListInfo } from "../utils/profileUtils";
 const serviceInstance = AppProfileService.getInstance();
 
@@ -85,6 +85,7 @@ export class AppProfileController extends Controller {
         super();
     }
 
+    @Security(SECURITY_NAME.admin)
     @Post("/create_profile")
     public async createAppProfile(@Body() data: IProfile): Promise<IProfileData | { message: string }> {
         try {
@@ -104,6 +105,7 @@ export class AppProfileController extends Controller {
         }
     }
 
+    @Security(SECURITY_NAME.admin)
     @Get("/get_profile/{id}")
     public async getAppProfile(@Path() id: string): Promise<IProfileData | { message: string }> {
         try {
@@ -121,6 +123,7 @@ export class AppProfileController extends Controller {
         }
     }
 
+    @Security(SECURITY_NAME.admin)
     @Get("/get_all_profile")
     public async getAllAppProfile(): Promise<IProfileData[] | { message: string }> {
         try {
@@ -133,6 +136,7 @@ export class AppProfileController extends Controller {
         }
     }
 
+    @Security(SECURITY_NAME.admin)
     @Put("/edit_profile/{id}")
     public async updateAppProfile(@Path() id: string, @Body() data: IProfile): Promise<IProfileData | { message: string }> {
         try {
@@ -151,6 +155,7 @@ export class AppProfileController extends Controller {
         }
     }
 
+    @Security(SECURITY_NAME.admin)
     @Delete("/delete_profile/{id}")
     public async deleteAppProfile(@Path() id: string): Promise<{ message: string }> {
         try {
@@ -169,6 +174,7 @@ export class AppProfileController extends Controller {
     //   PORTOFOLIO  //
     ///////////////////
 
+    @Security(SECURITY_NAME.admin)
     @Get("/get_authorized_portofolio/{profileId}")
     public async getAuthorizedPortofolio(@Path() profileId: string): Promise<IPortofolioData[] | { message: string }> {
         try {
@@ -186,6 +192,7 @@ export class AppProfileController extends Controller {
         }
     }
 
+    @Security(SECURITY_NAME.admin)
     @Post("/authorize_portofolio_apis/{profileId}")
     public async authorizeToAccessPortofolioApis(@Path() profileId: string, @Body() data: IPortofolioAuth): Promise<IApiRoute[] | { message: string }> {
         try {
@@ -210,6 +217,7 @@ export class AppProfileController extends Controller {
         }
     }
 
+    @Security(SECURITY_NAME.admin)
     @Get("/get_authorized_portofolio_apis/{profileId}/{portofolioId}")
     public async getAuthorizedPortofolioApis(@Path() profileId: string, @Path() portofolioId: string): Promise<IApiRoute[] | { message: string }> {
         try {
@@ -227,6 +235,7 @@ export class AppProfileController extends Controller {
         }
     }
 
+    @Security(SECURITY_NAME.admin)
     @Post("/unauthorize_portofolio_apis/{profileId}")
     public async unauthorizeToAccessPortofolioApis(@Path() profileId: string, @Body() data: { apisIds: string[], portofolioId: string }[]): Promise<string[] | { message: string }> {
         try {
@@ -252,6 +261,7 @@ export class AppProfileController extends Controller {
     //   BOS  //
     ////////////
 
+    @Security(SECURITY_NAME.admin)
     @Get("/get_authorized_bos/{profileId}/{portofolioId}")
     public async getAuthorizedBos(@Path() profileId: string, @Path() portofolioId: string): Promise<IBosData | { message: string }> {
         try {
@@ -269,6 +279,7 @@ export class AppProfileController extends Controller {
         }
     }
 
+    @Security(SECURITY_NAME.admin)
     @Post("/authorize_bos_apis/{profileId}/{portofolioId}")
     public async authorizeToAccessBosApis(@Path() profileId: string, @Path() portofolioId: string, @Body() data: IBosAuth): Promise<IApiRoute[] | { message: string }> {
         try {
@@ -293,6 +304,7 @@ export class AppProfileController extends Controller {
         }
     }
 
+    @Security(SECURITY_NAME.admin)
     @Get("/get_authorized_bos_apis/{profileId}/{portofolioId}/{bosId}")
     public async getAuthorizedBosApis(@Path() profileId: string, @Path() portofolioId: string, @Path() bosId: string): Promise<IApiRoute[] | { message: string }> {
         try {
@@ -312,6 +324,7 @@ export class AppProfileController extends Controller {
     }
 
 
+    @Security(SECURITY_NAME.admin)
     @Post("/unauthorize_bos_apis/{profileId}/{portofolioId}")
     public async unauthorizeToAccessBosApis(@Path() profileId: string, @Path() portofolioId: string, @Body() data: { apisIds: string[], buildingId: string }[]): Promise<string[] | { message: string }> {
         try {

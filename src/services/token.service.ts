@@ -61,8 +61,9 @@ export class TokenService {
 
         const now = Date.now();
         playload.createdToken = now;
-        playload.createdToken = now + (durationInMin * 60 * 1000);
+        playload.expieredToken = now + (durationInMin * 60 * 1000);
         playload.userId = userNode.getId().get();
+        playload.token = token;
 
         const tokenNode = await this.addTokenToContext(token, playload);
         await userNode.addChild(tokenNode, TOKEN_RELATION_NAME, PTR_LST_TYPE);

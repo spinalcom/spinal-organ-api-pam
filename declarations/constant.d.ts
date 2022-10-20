@@ -107,3 +107,11 @@ export declare enum HTTP_CODES {
     NOT_FOUND = 404,
     INTERNAL_ERROR = 500
 }
+export declare enum SECURITY_MESSAGES {
+    INVALID_TOKEN = "Invalid/expired token ! Please authenticate",
+    UNAUTHORIZED = "Unauthorized"
+}
+export declare enum SECURITY_NAME {
+    admin = "admin",
+    simple = "simple"
+}

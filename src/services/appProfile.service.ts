@@ -74,6 +74,7 @@ export class AppProfileService {
       return liste;
     }, Promise.resolve([]))
 
+    await this.context.addChildInContext(node, CONTEXT_TO_APP_PROFILE_RELATION_NAME, PTR_LST_TYPE, this.context)
     return obj;
   }
 

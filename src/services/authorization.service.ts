@@ -51,9 +51,13 @@ export default class AuthorizationService {
         return this.instance;
     }
 
-    public async profileHasAccess(profile: SpinalNode, node: SpinalNode, elementType: string): Promise<boolean> {
-        const context = await this._getContextByType(profile, elementType);
+    public async profileHasAccess(profile: SpinalNode, node: SpinalNode): Promise<boolean> {
+        // const context = await this._getContextByType(profile, elementType);
+        // if (!context) return false;
+        // return node.belongsToContext(context);
+        const context = await this._getAuthorizedPortofolioContext(profile, true);
         if (!context) return false;
+
         return node.belongsToContext(context);
     }
 
@@ -167,7 +171,7 @@ export default class AuthorizationService {
             const liste = await prom;
 
             if (item) {
-                const element = this._getRealNode(item);
+                const element = await this._getRealNode(item);
                 liste.push(element);
             }
 
@@ -184,7 +188,7 @@ export default class AuthorizationService {
                 const liste = await prom;
 
                 if (item) {
-                    const element = this._getRealNode(item);
+                    const element = await this._getRealNode(item);
                     liste.push(element);
                 }
 
@@ -294,7 +298,7 @@ export default class AuthorizationService {
             const liste = await prom;
 
             if (item) {
-                const element = this._getRealNode(item);
+                const element = await this._getRealNode(item);
                 liste.push(element);
             }
 
@@ -312,7 +316,7 @@ export default class AuthorizationService {
             const liste = await prom;
 
             if (item) {
-                const element = this._getRealNode(item);
+                const element = await this._getRealNode(item);
                 liste.push(element);
             }
 
@@ -437,7 +441,7 @@ export default class AuthorizationService {
             const liste = await prom;
 
             if (item) {
-                const element = this._getRealNode(item);
+                const element = await this._getRealNode(item);
                 liste.push(element);
             }
 
@@ -455,7 +459,7 @@ export default class AuthorizationService {
             const liste = await prom;
 
             if (item) {
-                const element = this._getRealNode(item);
+                const element = await this._getRealNode(item);
                 liste.push(element);
             }
 
@@ -540,8 +544,8 @@ export default class AuthorizationService {
             if (child instanceof SpinalNode) {
                 const element: any = await child.getElement(true);
                 if (element && element.getId().get() === referenceId) return child;
-                const children = await child.visitChildren(relationName);
-                queue.push(...toArray(children));
+                const children = await child.getChildren(relationName);
+                queue.push(...children);
             }
         }
     }

@@ -11,7 +11,7 @@ export declare class AuthentificationService {
         code: number;
         message: any;
     }>;
-    tokenIsValid(token: string): Promise<boolean>;
+    tokenIsValid(token: string): Promise<IUserToken | IApplicationToken>;
     registerToAdmin(pamInfo: IPamInfo, adminInfo: IAdmin): Promise<IPamCredential>;
     getPamToAdminCredential(): Promise<IPamCredential>;
     deleteCredentials(): Promise<{
@@ -28,6 +28,7 @@ export declare class AuthentificationService {
     private _sendLoginRequest;
     private _getProfileInfo;
     private _getUserInfo;
+    private _getApplicationInfo;
     private _formatUserProfiles;
     private _formatAppProfiles;
     private _getOrCreateContext;

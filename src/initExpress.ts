@@ -30,7 +30,7 @@ import * as express from 'express';
 import * as morgan from "morgan";
 import * as path from "path";
 import { HTTP_CODES, routesToProxy } from "./constant";
-import configureBosProxy from "./proxyToBos";
+import configureBosProxy from "./proxy";
 import { AuthentificationService } from './services';
 var proxy = require('express-http-proxy');
 import * as swaggerUi from "swagger-ui-express";
