@@ -1,14 +1,15 @@
 /// <reference types="node" />
 import { SpinalContext, SpinalNode } from "spinal-env-viewer-graph-service";
-import { IPortofolioData, IPortofolioDetails } from "../interfaces";
+import { IEditProtofolio, IPortofolioData, IPortofolioDetails, IBuildingCreation, IBuildingDetails } from "../interfaces";
 export declare class PortofolioService {
     private static instance;
     context: SpinalContext;
     constructor();
     static getInstance(): PortofolioService;
     init(): Promise<SpinalContext>;
-    addPortofolio(portofolioName: string, buildingsIds?: string[], appsIds?: string[], apisIds?: any[]): Promise<IPortofolioDetails>;
+    addPortofolio(portofolioName: string, appsIds?: string[], apisIds?: any[]): Promise<IPortofolioDetails>;
     renamePortofolio(portfolioId: string, newName: string): Promise<boolean>;
+    updateProtofolio(portofolioId: string, newData: IEditProtofolio): Promise<IPortofolioDetails>;
     getAllPortofolio(): Promise<SpinalNode[]>;
     getPortofolio(portofolioId: string): Promise<SpinalNode>;
     getPortofolioDetails(portofolio: string | SpinalNode): Promise<IPortofolioDetails>;
@@ -25,9 +26,9 @@ export declare class PortofolioService {
     removeApiFromPortofolio(portofolio: string | SpinalNode, apisIds: string | string[]): Promise<string[]>;
     portofolioHasApi(portofolio: string | SpinalNode, apiId: string): Promise<SpinalNode | void>;
     uploadSwaggerFile(buffer: Buffer): Promise<any[]>;
-    addBuildingToPortofolio(portofolio: string | SpinalNode, buildingId: string | string[]): Promise<SpinalNode[]>;
+    addBuildingToPortofolio(portofolio: string | SpinalNode, buildingInfo: IBuildingCreation): Promise<IBuildingDetails>;
     getPortofolioBuildings(portofolio: string | SpinalNode): Promise<SpinalNode[]>;
     removeBuildingFromPortofolio(portofolio: string | SpinalNode, buildingId: string | string[]): Promise<string[]>;
     getBuildingFromPortofolio(portofolio: string | SpinalNode, buildingId: string): Promise<SpinalNode | void>;
-    _formatDetails(node: SpinalNode, apps: SpinalNode[], buildings: SpinalNode[], apis?: SpinalNode[]): IPortofolioData;
+    _formatDetails(data: IPortofolioDetails): IPortofolioData;
 }

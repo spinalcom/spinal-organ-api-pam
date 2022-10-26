@@ -22,36 +22,11 @@
  * <http://resources.spinalcom.com/licenses.pdf>.
  */
 
-/*
- * Copyright 2022 SpinalCom - www.spinalcom.com
- * 
- * This file is part of SpinalCore.
- * 
- * Please read all of the following terms and conditions
- * of the Free Software license Agreement ("Agreement")
- * carefully.
- * 
- * This Agreement is a legally binding contract between
- * the Licensee (as defined below) and SpinalCom that
- * sets forth the terms and conditions that govern your
- * use of the Program. By installing and/or using the
- * Program, you agree to abide by all the terms and
- * conditions stated or referenced herein.
- * 
- * If you do not agree to abide by these terms and
- * conditions, do not demonstrate your acceptance and do
- * not install or use the Program.
- * You should have received a copy of the license along
- * with this file. If not, see
- * <http://resources.spinalcom.com/licenses.pdf>.
- */
-
-import { SpinalContext, SpinalGraphService, SpinalNode } from "spinal-env-viewer-graph-service";
+import { SpinalContext, SpinalNode } from "spinal-env-viewer-graph-service";
 import { configServiceInstance } from "./configFile.service";
 import { PORTOFOLIO_CONTEXT_NAME, PORTOFOLIO_CONTEXT_TYPE, PORTOFOLIO_TYPE, CONTEXT_TO_PORTOFOLIO_RELATION_NAME, APP_RELATION_NAME, PTR_LST_TYPE, BUILDING_RELATION_NAME, PORTOFOLIO_API_GROUP_TYPE, API_RELATION_NAME } from '../constant'
 import { AppService } from './apps.service'
-import { IPortofolioData, IPortofolioDetails } from "../interfaces";
-import { async } from "q";
+import { IEditProtofolio, IPortofolioData, IPortofolioDetails, IBuilding, IBuildingCreation, IBuildingDetails } from "../interfaces";
 import { BuildingService } from "./building.service";
 import { APIService } from "./apis.service";
 
@@ -72,18 +47,18 @@ export class PortofolioService {
         return this.context;
     }
 
-    public async addPortofolio(portofolioName: string, buildingsIds: string[] = [], appsIds: string[] = [], apisIds = []): Promise<IPortofolioDetails> {
+    public async addPortofolio(portofolioName: string, appsIds: string[] = [], apisIds = []): Promise<IPortofolioDetails> {
         const node = new SpinalNode(portofolioName, PORTOFOLIO_TYPE);
         await this.context.addChildInContext(node, CONTEXT_TO_PORTOFOLIO_RELATION_NAME, PTR_LST_TYPE, this.context);
 
         const apps = await this.addAppToPortofolio(node, appsIds);
         const apis = await this.addApiToPortofolio(node, apisIds);
-        const buildings = await this.addBuildingToPortofolio(node, buildingsIds);
+        // const buildings = await this.addBuildingToPortofolio(node, buildingsIds);
 
         return {
             node,
             apps,
-            buildings,
+            buildings: [],
             apis
         }
     }
@@ -94,6 +69,21 @@ export class PortofolioService {
 
         portofolio.info.name.set(newName.trim());
         return true;
+    }
+
+    public async updateProtofolio(portofolioId: string, newData: IEditProtofolio): Promise<IPortofolioDetails> {
+        const node = await this.getPortofolio(portofolioId);
+        if (!node) return;
+
+        if (newData.name?.trim()) node.info.name.set(newData.name.trim());
+
+        if (newData.authorizeAppIds) await this.addAppToPortofolio(node, newData.authorizeAppIds);
+        if (newData.authorizeApiIds) await this.addApiToPortofolio(node, newData.authorizeApiIds);
+
+        if (newData.unauthorizeAppIds) await this.removeAppFromPortofolio(node, newData.unauthorizeAppIds);
+        if (newData.unauthorizeApiIds) await this.removeApiFromPortofolio(node, newData.unauthorizeApiIds);
+
+        return this.getPortofolioDetails(node);
     }
 
     public getAllPortofolio(): Promise<SpinalNode[]> {
@@ -112,7 +102,12 @@ export class PortofolioService {
 
         const [apps, buildings, apis] = await Promise.all([this.getPortofolioApps(node), this.getPortofolioBuildings(node), this.getPortofolioApis(node)])
 
-        return { node, apps, buildings, apis };
+        return {
+            node,
+            apps,
+            buildings: await Promise.all(buildings.map(el => BuildingService.getInstance().getBuildingStructure(el))),
+            apis
+        };
     }
 
     public async getAllPortofoliosDetails(): Promise<IPortofolioDetails[]> {
@@ -128,6 +123,10 @@ export class PortofolioService {
     public async removePortofolio(portofolio: string | SpinalNode): Promise<boolean> {
         try {
             const node = portofolio instanceof SpinalNode ? portofolio : await this.getPortofolio(portofolio);
+            const buildings = await this.getPortofolioBuildings(node);
+
+            await Promise.all(buildings.map(el => BuildingService.getInstance().deleteBuilding(el.getId().get())))
+
             await this.context.removeChild(node, CONTEXT_TO_PORTOFOLIO_RELATION_NAME, PTR_LST_TYPE);
             return true;
         } catch (error) {
@@ -160,6 +159,7 @@ export class PortofolioService {
 
         }, Promise.resolve([]))
     }
+
 
     public async getPortofolioApps(portofolio: string | SpinalNode): Promise<SpinalNode[]> {
         if (typeof portofolio === "string") portofolio = await this.getPortofolio(portofolio);
@@ -279,28 +279,32 @@ export class PortofolioService {
     //                      BUILDINGS                   //
     //////////////////////////////////////////////////////
 
-    public async addBuildingToPortofolio(portofolio: string | SpinalNode, buildingId: string | string[]): Promise<SpinalNode[]> {
+    public async addBuildingToPortofolio(portofolio: string | SpinalNode, buildingInfo: IBuildingCreation): Promise<IBuildingDetails> {
 
         if (typeof portofolio === "string") portofolio = await this.getPortofolio(portofolio);
         if (!(portofolio instanceof SpinalNode)) throw new Error(`No portofolio found for ${portofolio}`);
 
-        if (!Array.isArray(buildingId)) buildingId = [buildingId];
+        // if (!Array.isArray(buildingId)) buildingId = [buildingId];
 
-        return buildingId.reduce(async (prom, id: string) => {
-            const liste = await prom;
-            const buildingNode = await BuildingService.getInstance().getBuildingById(id);
-            if (!(buildingNode instanceof SpinalNode)) return liste;
+        const structure = await BuildingService.getInstance().createBuilding(buildingInfo);
 
-            const childrenIds = (<SpinalNode>portofolio).getChildrenIds();
-            const isChild = childrenIds.find(el => el === id);
+        (<SpinalNode>portofolio).addChildInContext(structure.node, BUILDING_RELATION_NAME, PTR_LST_TYPE, this.context);
+        return structure;
+        // return buildingId.reduce(async (prom, id: string) => {
+        //     const liste = await prom;
+        //     const buildingNode = await BuildingService.getInstance().getBuildingById(id);
+        //     if (!(buildingNode instanceof SpinalNode)) return liste;
 
-            if (!isChild) (<SpinalNode>portofolio).addChildInContext(buildingNode, BUILDING_RELATION_NAME, PTR_LST_TYPE, this.context);
-            liste.push(buildingNode);
-            return liste;
-            //         const appNode = AppService.getInstance().getAppById(appId);
-            //         if (!(appNode instanceof SpinalNode)) throw new Error(`No application found for ${appId}`);
+        //     const childrenIds = (<SpinalNode>portofolio).getChildrenIds();
+        //     const isChild = childrenIds.find(el => el === id);
 
-        }, Promise.resolve([]))
+        //     if (!isChild) (<SpinalNode>portofolio).addChildInContext(buildingNode, BUILDING_RELATION_NAME, PTR_LST_TYPE, this.context);
+        //     liste.push(buildingNode);
+        //     return liste;
+        //     //         const appNode = AppService.getInstance().getAppById(appId);
+        //     //         if (!(appNode instanceof SpinalNode)) throw new Error(`No application found for ${appId}`);
+
+        // }, Promise.resolve([]))
     }
 
     public async getPortofolioBuildings(portofolio: string | SpinalNode): Promise<SpinalNode[]> {
@@ -340,12 +344,12 @@ export class PortofolioService {
         return buildings.find(el => el.getId().get() === buildingId);
     }
 
-    public _formatDetails(node: SpinalNode, apps: SpinalNode[], buildings: SpinalNode[], apis: SpinalNode[] = []): IPortofolioData {
+    public _formatDetails(data: IPortofolioDetails): IPortofolioData {
         return {
-            ...node.info.get(),
-            buildings: buildings.map(el => el.info.get()),
-            apps: apps.map(el => el.info.get()),
-            apis: apis.map(el => el.info.get())
+            ...(data.node.info.get()),
+            buildings: data.buildings.map(el => BuildingService.getInstance().formatBuildingStructure(el)),
+            apps: data.apps.map(el => el.info.get()),
+            apis: data.apis.map(el => el.info.get())
         }
     }
 }

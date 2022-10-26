@@ -22,9 +22,12 @@
  * <http://resources.spinalcom.com/licenses.pdf>.
  */
 
+import { SpinalNode } from "spinal-env-viewer-graph-service";
+import { IApp } from "./IApp";
+
 export interface ILocation {
-    lat: number;
-    lng: number;
+    lat?: number;
+    lng?: number;
     [key: string]: any;
 
 }
@@ -34,22 +37,28 @@ export interface IBuilding {
     aliasName: string;
     bosUrl: string;
     apiUrl: string;
-    clientId: string;
-    clientSecret: string;
+    clientId?: string;
+    clientSecret?: string;
     address: string;
     description: string;
     location?: ILocation;
     [key: string]: any;
 }
 
-export interface IEditBuilding {
-    name?: string;
-    aliasName?: string;
-    bosUrl?: string;
-    apiUrl?: string;
-    clientId?: string;
-    clientSecret?: string;
-    address?: string;
-    description?: string;
-    location?: ILocation;
+export type IBuildingCreation = IBuilding & {
+    appIds?: string[];
+    apiIds?: string[];
+};
+
+export interface IBuildingDetails {
+    node: SpinalNode;
+    apps: SpinalNode[];
+    apis: SpinalNode[];
 }
+
+export type IEditBuilding = IBuilding & {
+    authorizeAppIds?: string[];
+    authorizeApiIds?: string[];
+    unauthorizeAppIds?: string[];
+    unauthorizeApiIds?: string[];
+} 

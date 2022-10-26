@@ -22,30 +22,6 @@
  * <http://resources.spinalcom.com/licenses.pdf>.
  */
 
-/*
- * Copyright 2022 SpinalCom - www.spinalcom.com
- * 
- * This file is part of SpinalCore.
- * 
- * Please read all of the following terms and conditions
- * of the Free Software license Agreement ("Agreement")
- * carefully.
- * 
- * This Agreement is a legally binding contract between
- * the Licensee (as defined below) and SpinalCom that
- * sets forth the terms and conditions that govern your
- * use of the Program. By installing and/or using the
- * Program, you agree to abide by all the terms and
- * conditions stated or referenced herein.
- * 
- * If you do not agree to abide by these terms and
- * conditions, do not demonstrate your acceptance and do
- * not install or use the Program.
- * You should have received a copy of the license along
- * with this file. If not, see
- * <http://resources.spinalcom.com/licenses.pdf>.
- */
-
 import { BuildingService } from "../services";
 
 import { IApiRoute, IApp, IBuilding, IEditBuilding } from "../interfaces";
@@ -63,6 +39,7 @@ export class BuildingController extends Controller {
         super();
     }
 
+    /*
     @Security(SECURITY_NAME.admin)
     @Post("/create_building")
     public async createBuilding(@Body() buildingInfo: IBuilding): Promise<IBuilding | { message: string }> {
@@ -77,15 +54,15 @@ export class BuildingController extends Controller {
             await serviceInstance.setLocation(buildingInfo);
 
             const node = await serviceInstance.createBuilding(buildingInfo);
-            const data = await serviceInstance.formatBuilding(node.info.get());
+            // const data = await serviceInstance.formatBuilding(node.info.get());
             this.setStatus(HTTP_CODES.OK);
-            return data;
+            return node.getInfo().get();
         } catch (error) {
             this.setStatus(HTTP_CODES.INTERNAL_ERROR)
             return { message: error.message };
         }
     }
-
+*/
     @Security(SECURITY_NAME.admin)
     @Post("/get_building/{id}")
     public async getBuildingById(@Path() id: string): Promise<IBuilding | { message: string }> {
@@ -108,6 +85,7 @@ export class BuildingController extends Controller {
         }
     }
 
+    /*
     @Security(SECURITY_NAME.admin)
     @Get("/get_all_buildings")
     public async getAllBuildings(): Promise<IBuilding[] | { message: string }> {
@@ -124,7 +102,7 @@ export class BuildingController extends Controller {
             this.setStatus(HTTP_CODES.INTERNAL_ERROR)
             return { message: error.message };
         }
-    }
+    }*/
 
     @Security(SECURITY_NAME.admin)
     @Get("/get_all_buildings_apps")
@@ -174,7 +152,7 @@ export class BuildingController extends Controller {
 
             const node = await serviceInstance.updateBuilding(id, data);
             if (node) {
-                const data = await serviceInstance.formatBuilding(node.info.get());
+                const data = await serviceInstance.formatBuildingStructure(node);
                 this.setStatus(HTTP_CODES.OK)
                 return data;
             };

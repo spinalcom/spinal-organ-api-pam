@@ -57,10 +57,24 @@ let PortofolioController = class PortofolioController extends tsoa_1.Controller 
     addPortofolio(data) {
         return __awaiter(this, void 0, void 0, function* () {
             try {
-                const { name, buildingIds, appIds, apiIds } = data;
-                const { node, apps, buildings, apis } = yield portofolioInstance.addPortofolio(name, buildingIds, appIds, apiIds);
-                const details = portofolioInstance._formatDetails(node, apps, buildings, apis);
+                const { name, appIds, apiIds } = data;
+                const res = yield portofolioInstance.addPortofolio(name, appIds, apiIds);
+                const details = portofolioInstance._formatDetails(res);
                 this.setStatus(constant_1.HTTP_CODES.CREATED);
+                return details;
+            }
+            catch (error) {
+                this.setStatus(constant_1.HTTP_CODES.INTERNAL_ERROR);
+                return { message: error.message };
+            }
+        });
+    }
+    updatePortofolio(portofolioId, data) {
+        return __awaiter(this, void 0, void 0, function* () {
+            try {
+                const res = yield portofolioInstance.updateProtofolio(portofolioId, data);
+                const details = portofolioInstance._formatDetails(res);
+                this.setStatus(constant_1.HTTP_CODES.OK);
                 return details;
             }
             catch (error) {
@@ -113,8 +127,8 @@ let PortofolioController = class PortofolioController extends tsoa_1.Controller 
     getPortofolioDetails(id) {
         return __awaiter(this, void 0, void 0, function* () {
             try {
-                const { node, apps, buildings } = yield portofolioInstance.getPortofolioDetails(id);
-                const details = portofolioInstance._formatDetails(node, apps, buildings);
+                const res = yield portofolioInstance.getPortofolioDetails(id);
+                const details = portofolioInstance._formatDetails(res);
                 this.setStatus(constant_1.HTTP_CODES.OK);
                 return details;
             }
@@ -128,7 +142,7 @@ let PortofolioController = class PortofolioController extends tsoa_1.Controller 
         return __awaiter(this, void 0, void 0, function* () {
             try {
                 const portofolios = yield portofolioInstance.getAllPortofoliosDetails();
-                const details = portofolios.map(({ node, apps, buildings }) => portofolioInstance._formatDetails(node, apps, buildings));
+                const details = portofolios.map((res) => portofolioInstance._formatDetails(res));
                 this.setStatus(constant_1.HTTP_CODES.OK);
                 return details;
             }
@@ -156,14 +170,13 @@ let PortofolioController = class PortofolioController extends tsoa_1.Controller 
     addBuilding(portofolioId, body) {
         return __awaiter(this, void 0, void 0, function* () {
             try {
-                const nodes = yield serviceInstance.addBuildingToPortofolio(portofolioId, body.buildingId);
-                if (!nodes || nodes.length === 0) {
+                const node = yield serviceInstance.addBuildingToPortofolio(portofolioId, body);
+                if (!node) {
                     this.setStatus(constant_1.HTTP_CODES.BAD_REQUEST);
                     return { message: "Something went wrong, please check your input data" };
                 }
                 this.setStatus(constant_1.HTTP_CODES.OK);
-                const promises = nodes.map(node => serviceInstance.formatBuilding(node.info.get()));
-                return Promise.all(promises);
+                return services_1.BuildingService.getInstance().formatBuildingStructure(node);
             }
             catch (error) {
                 this.setStatus(constant_1.HTTP_CODES.INTERNAL_ERROR);
@@ -393,6 +406,15 @@ __decorate([
     __metadata("design:paramtypes", [Object]),
     __metadata("design:returntype", Promise)
 ], PortofolioController.prototype, "addPortofolio", null);
+__decorate([
+    (0, tsoa_1.Security)(constant_1.SECURITY_NAME.admin),
+    (0, tsoa_1.Put)("/update_portofolio/{portofolioId}"),
+    __param(0, (0, tsoa_1.Path)()),
+    __param(1, (0, tsoa_1.Body)()),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [String, Object]),
+    __metadata("design:returntype", Promise)
+], PortofolioController.prototype, "updatePortofolio", null);
 __decorate([
     (0, tsoa_1.Security)(constant_1.SECURITY_NAME.admin),
     (0, tsoa_1.Put)("/rename_portofolio/{id}"),

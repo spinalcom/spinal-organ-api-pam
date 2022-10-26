@@ -231,8 +231,8 @@ const models = {
     "ILocation": {
         "dataType": "refObject",
         "properties": {
-            "lat": { "dataType": "double", "required": true },
-            "lng": { "dataType": "double", "required": true },
+            "lat": { "dataType": "double" },
+            "lng": { "dataType": "double" },
         },
         "additionalProperties": { "dataType": "any" },
     },
@@ -244,8 +244,8 @@ const models = {
             "aliasName": { "dataType": "string", "required": true },
             "bosUrl": { "dataType": "string", "required": true },
             "apiUrl": { "dataType": "string", "required": true },
-            "clientId": { "dataType": "string", "required": true },
-            "clientSecret": { "dataType": "string", "required": true },
+            "clientId": { "dataType": "string" },
+            "clientSecret": { "dataType": "string" },
             "address": { "dataType": "string", "required": true },
             "description": { "dataType": "string", "required": true },
             "location": { "ref": "ILocation" },
@@ -254,30 +254,35 @@ const models = {
     },
     // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
     "IEditBuilding": {
-        "dataType": "refObject",
-        "properties": {
-            "name": { "dataType": "string" },
-            "aliasName": { "dataType": "string" },
-            "bosUrl": { "dataType": "string" },
-            "apiUrl": { "dataType": "string" },
-            "clientId": { "dataType": "string" },
-            "clientSecret": { "dataType": "string" },
-            "address": { "dataType": "string" },
-            "description": { "dataType": "string" },
-            "location": { "ref": "ILocation" },
-        },
-        "additionalProperties": false,
+        "dataType": "refAlias",
+        "type": { "dataType": "intersection", "subSchemas": [{ "ref": "IBuilding" }, { "dataType": "nestedObjectLiteral", "nestedProperties": { "unauthorizeApiIds": { "dataType": "array", "array": { "dataType": "string" } }, "unauthorizeAppIds": { "dataType": "array", "array": { "dataType": "string" } }, "authorizeApiIds": { "dataType": "array", "array": { "dataType": "string" } }, "authorizeAppIds": { "dataType": "array", "array": { "dataType": "string" } } } }], "validators": {} },
     },
     // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
     "IPortofolioInfo": {
         "dataType": "refObject",
         "properties": {
             "name": { "dataType": "string", "required": true },
-            "buildingIds": { "dataType": "array", "array": { "dataType": "string" } },
             "appIds": { "dataType": "array", "array": { "dataType": "string" } },
             "apiIds": { "dataType": "array", "array": { "dataType": "string" } },
         },
         "additionalProperties": false,
+    },
+    // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
+    "IEditProtofolio": {
+        "dataType": "refObject",
+        "properties": {
+            "name": { "dataType": "string" },
+            "authorizeAppIds": { "dataType": "array", "array": { "dataType": "string" } },
+            "unauthorizeAppIds": { "dataType": "array", "array": { "dataType": "string" } },
+            "authorizeApiIds": { "dataType": "array", "array": { "dataType": "string" } },
+            "unauthorizeApiIds": { "dataType": "array", "array": { "dataType": "string" } },
+        },
+        "additionalProperties": false,
+    },
+    // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
+    "IBuildingCreation": {
+        "dataType": "refAlias",
+        "type": { "dataType": "intersection", "subSchemas": [{ "ref": "IBuilding" }, { "dataType": "nestedObjectLiteral", "nestedProperties": { "apiIds": { "dataType": "array", "array": { "dataType": "string" } }, "appIds": { "dataType": "array", "array": { "dataType": "string" } } } }], "validators": {} },
     },
     // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
 };
@@ -1134,23 +1139,6 @@ function RegisterRoutes(app) {
         }
     });
     // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
-    app.post('/api/v1/pam/create_building', authenticateMiddleware([{ "admin": [] }]), ...((0, runtime_1.fetchMiddlewares)(building_controller_1.BuildingController)), ...((0, runtime_1.fetchMiddlewares)(building_controller_1.BuildingController.prototype.createBuilding)), function BuildingController_createBuilding(request, response, next) {
-        const args = {
-            buildingInfo: { "in": "body", "name": "buildingInfo", "required": true, "ref": "IBuilding" },
-        };
-        // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
-        let validatedArgs = [];
-        try {
-            validatedArgs = getValidatedArgs(args, request, response);
-            const controller = new building_controller_1.BuildingController();
-            const promise = controller.createBuilding.apply(controller, validatedArgs);
-            promiseHandler(controller, promise, response, undefined, next);
-        }
-        catch (err) {
-            return next(err);
-        }
-    });
-    // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
     app.post('/api/v1/pam/get_building/:id', authenticateMiddleware([{ "admin": [] }]), ...((0, runtime_1.fetchMiddlewares)(building_controller_1.BuildingController)), ...((0, runtime_1.fetchMiddlewares)(building_controller_1.BuildingController.prototype.getBuildingById)), function BuildingController_getBuildingById(request, response, next) {
         const args = {
             id: { "in": "path", "name": "id", "required": true, "dataType": "string" },
@@ -1161,21 +1149,6 @@ function RegisterRoutes(app) {
             validatedArgs = getValidatedArgs(args, request, response);
             const controller = new building_controller_1.BuildingController();
             const promise = controller.getBuildingById.apply(controller, validatedArgs);
-            promiseHandler(controller, promise, response, undefined, next);
-        }
-        catch (err) {
-            return next(err);
-        }
-    });
-    // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
-    app.get('/api/v1/pam/get_all_buildings', authenticateMiddleware([{ "admin": [] }]), ...((0, runtime_1.fetchMiddlewares)(building_controller_1.BuildingController)), ...((0, runtime_1.fetchMiddlewares)(building_controller_1.BuildingController.prototype.getAllBuildings)), function BuildingController_getAllBuildings(request, response, next) {
-        const args = {};
-        // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
-        let validatedArgs = [];
-        try {
-            validatedArgs = getValidatedArgs(args, request, response);
-            const controller = new building_controller_1.BuildingController();
-            const promise = controller.getAllBuildings.apply(controller, validatedArgs);
             promiseHandler(controller, promise, response, undefined, next);
         }
         catch (err) {
@@ -1445,6 +1418,24 @@ function RegisterRoutes(app) {
         }
     });
     // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
+    app.put('/api/v1/pam/update_portofolio/:portofolioId', authenticateMiddleware([{ "admin": [] }]), ...((0, runtime_1.fetchMiddlewares)(portofolio_controller_1.PortofolioController)), ...((0, runtime_1.fetchMiddlewares)(portofolio_controller_1.PortofolioController.prototype.updatePortofolio)), function PortofolioController_updatePortofolio(request, response, next) {
+        const args = {
+            portofolioId: { "in": "path", "name": "portofolioId", "required": true, "dataType": "string" },
+            data: { "in": "body", "name": "data", "required": true, "ref": "IEditProtofolio" },
+        };
+        // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
+        let validatedArgs = [];
+        try {
+            validatedArgs = getValidatedArgs(args, request, response);
+            const controller = new portofolio_controller_1.PortofolioController();
+            const promise = controller.updatePortofolio.apply(controller, validatedArgs);
+            promiseHandler(controller, promise, response, undefined, next);
+        }
+        catch (err) {
+            return next(err);
+        }
+    });
+    // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
     app.put('/api/v1/pam/rename_portofolio/:id', authenticateMiddleware([{ "admin": [] }]), ...((0, runtime_1.fetchMiddlewares)(portofolio_controller_1.PortofolioController)), ...((0, runtime_1.fetchMiddlewares)(portofolio_controller_1.PortofolioController.prototype.renamePortofolio)), function PortofolioController_renamePortofolio(request, response, next) {
         const args = {
             id: { "in": "path", "name": "id", "required": true, "dataType": "string" },
@@ -1547,7 +1538,7 @@ function RegisterRoutes(app) {
     app.post('/api/v1/pam/add_building_to_portofolio/:portofolioId', authenticateMiddleware([{ "admin": [] }]), ...((0, runtime_1.fetchMiddlewares)(portofolio_controller_1.PortofolioController)), ...((0, runtime_1.fetchMiddlewares)(portofolio_controller_1.PortofolioController.prototype.addBuilding)), function PortofolioController_addBuilding(request, response, next) {
         const args = {
             portofolioId: { "in": "path", "name": "portofolioId", "required": true, "dataType": "string" },
-            body: { "in": "body", "name": "body", "required": true, "dataType": "nestedObjectLiteral", "nestedProperties": { "buildingId": { "dataType": "array", "array": { "dataType": "string" }, "required": true } } },
+            body: { "in": "body", "name": "body", "required": true, "ref": "IBuildingCreation" },
         };
         // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
         let validatedArgs = [];

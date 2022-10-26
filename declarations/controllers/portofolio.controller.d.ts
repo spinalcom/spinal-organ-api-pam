@@ -1,8 +1,11 @@
-import { IApiRoute, IApp, IBuilding, IPortofolioData, IPortofolioInfo } from "../interfaces";
+import { IApiRoute, IApp, IBuilding, IBuildingCreation, IEditProtofolio, IPortofolioData, IPortofolioInfo } from "../interfaces";
 import { Controller } from "tsoa";
 export declare class PortofolioController extends Controller {
     constructor();
     addPortofolio(data: IPortofolioInfo): Promise<IPortofolioData | {
+        message: string;
+    }>;
+    updatePortofolio(portofolioId: string, data: IEditProtofolio): Promise<IPortofolioData | {
         message: string;
     }>;
     renamePortofolio(id: string, data: {
@@ -25,9 +28,7 @@ export declare class PortofolioController extends Controller {
     removePortofolio(id: string): Promise<{
         message: string;
     }>;
-    addBuilding(portofolioId: string, body: {
-        buildingId: string[];
-    }): Promise<IBuilding[] | {
+    addBuilding(portofolioId: string, body: IBuildingCreation): Promise<IBuilding[] | {
         message: string;
     }>;
     getBuilding(portofolioId: string, appId: string): Promise<IBuilding | {

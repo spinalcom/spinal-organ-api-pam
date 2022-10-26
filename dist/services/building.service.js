@@ -40,7 +40,7 @@ const openGeocoder = require("node-open-geocoder");
 const axios_1 = require("axios");
 const portofolio_service_1 = require("./portofolio.service");
 const _1 = require(".");
-const axiosInstance = axios_1.default.create({ baseURL: `http://localhost:${process.env.HUB_PORT}` });
+// const axiosInstance = axios.create({ baseURL: `http://localhost:${process.env.SERVER_PORT}` });
 // import * as NodeGeocoder from "node-geocoder";
 class BuildingService {
     constructor() { }
@@ -59,11 +59,22 @@ class BuildingService {
     }
     createBuilding(buildingInfo) {
         return __awaiter(this, void 0, void 0, function* () {
+            yield this.setLocation(buildingInfo);
             buildingInfo.type = constant_1.BUILDING_TYPE;
+            const appIds = Object.assign([], buildingInfo.appIds);
+            const apiIds = Object.assign([], buildingInfo.apiIds);
+            delete buildingInfo.appIds;
+            delete buildingInfo.apiIds;
+            buildingInfo.apiUrl = buildingInfo.apiUrl.replace(/\/$/, el => "");
             const id = spinal_env_viewer_graph_service_1.SpinalGraphService.createNode(buildingInfo, undefined);
-            const node = spinal_env_viewer_graph_service_1.SpinalGraphService.getRealNode(id);
-            this.context.addChildInContext(node, constant_1.BUILDING_RELATION_NAME, constant_1.PTR_LST_TYPE, this.context);
-            return node;
+            const detail = yield this.getBuildingDetails(buildingInfo.apiUrl);
+            const building = spinal_env_viewer_graph_service_1.SpinalGraphService.getRealNode(id);
+            building.info.add_attr({ detail });
+            return Promise.all([this.addAppToBuilding(building, appIds || []), this.addApiToBuilding(building, apiIds || [])])
+                .then(([apps, apis]) => __awaiter(this, void 0, void 0, function* () {
+                yield this.context.addChildInContext(building, constant_1.BUILDING_RELATION_NAME, constant_1.PTR_LST_TYPE, this.context);
+                return { node: building, apps, apis };
+            }));
         });
     }
     getAllBuildings() {
@@ -103,9 +114,9 @@ class BuildingService {
             return false;
         });
     }
-    addBuildingToPortofolio(portfolioId, buildingId) {
+    addBuildingToPortofolio(portfolioId, building) {
         return __awaiter(this, void 0, void 0, function* () {
-            const data = yield portofolio_service_1.PortofolioService.getInstance().addBuildingToPortofolio(portfolioId, buildingId);
+            const data = yield portofolio_service_1.PortofolioService.getInstance().addBuildingToPortofolio(portfolioId, building);
             return data;
         });
     }
@@ -127,14 +138,44 @@ class BuildingService {
             const node = yield this.getBuildingById(buildingId);
             if (!node)
                 throw new Error(`no Building found for ${buildingId}`);
-            for (const key in newData) {
-                if (Object.prototype.hasOwnProperty.call(newData, key) && node.info[key]) {
-                    const element = newData[key];
-                    node.info[key].set(element);
+            const apps = newData.authorizeAppIds || [];
+            const apis = newData.authorizeApiIds || [];
+            const unauthorizeAppIds = newData.unauthorizeAppIds || [];
+            const unauthorizeApiIds = newData.unauthorizeApiIds || [];
+            yield Promise.all([this.addAppToBuilding(node, apps), this.addApiToBuilding(node, apis)]);
+            return Promise.all([this.removeAppFromBuilding(node, unauthorizeAppIds), this.removeApisFromBuilding(node, unauthorizeApiIds)])
+                .then((result) => {
+                delete newData.appIds;
+                delete newData.apiIds;
+                delete newData.unauthorizeAppIds;
+                delete newData.unauthorizeApiIds;
+                for (const key in newData) {
+                    if (Object.prototype.hasOwnProperty.call(newData, key) && node.info[key]) {
+                        const element = newData[key];
+                        node.info[key].set(element);
+                    }
                 }
-            }
-            return node;
+                return this.getBuildingStructure(node);
+            });
         });
+    }
+    getBuildingStructure(building) {
+        return __awaiter(this, void 0, void 0, function* () {
+            if (typeof building === "string")
+                building = yield this.getBuildingById(building);
+            if (!(building instanceof spinal_env_viewer_graph_service_1.SpinalNode))
+                return;
+            return Promise.all([this.getAppsFromBuilding(building), this.getApisFromBuilding(building)]).then(([apps, apis]) => {
+                return {
+                    node: building,
+                    apps,
+                    apis
+                };
+            });
+        });
+    }
+    formatBuildingStructure(building) {
+        return Object.assign(Object.assign({}, (building.node.info.get())), { apps: building.apps.map(el => el.info.get()), apis: building.apis.map(el => el.info.get()) });
     }
     // public async deleteBuildingFromPortofolio(portofolioId: string, buildingId: string | string[]): Promise<string> {
     // const node = await this.getBuildingFromPortofolio(portofolioId, buildingId);
@@ -179,10 +220,10 @@ class BuildingService {
             });
         });
     }
-    getBuildingDetails(buildingId) {
+    getBuildingDetails(batimentUrl) {
         return __awaiter(this, void 0, void 0, function* () {
-            const detail = yield this._getBuildingTypeCount(buildingId);
-            detail.area = yield this._getBuildingArea(buildingId);
+            const detail = yield this._getBuildingTypeCount(batimentUrl);
+            detail.area = yield this._getBuildingArea(batimentUrl);
             return detail;
         });
     }
@@ -349,8 +390,9 @@ class BuildingService {
             });
         });
     }
-    _getBuildingTypeCount(buildingId) {
-        return axiosInstance.get(`${constant_1.BOS_BASE_URI_V2}/${buildingId}/api/v1/geographicContext/tree`)
+    _getBuildingTypeCount(batimentUrl) {
+        return axios_1.default
+            .get(`${batimentUrl}/api/v1/geographicContext/tree`)
             .then(res => {
             return this._countTypeHelper(res.data);
         })
@@ -359,9 +401,9 @@ class BuildingService {
             return {};
         });
     }
-    _getBuildingArea(buildingId) {
-        return axiosInstance
-            .get(`${constant_1.BOS_BASE_URI_V2}/${buildingId}/api/v1/building/read`)
+    _getBuildingArea(batimentUrl) {
+        return axios_1.default
+            .get(`${batimentUrl}/api/v1/building/read`)
             .then((response) => {
             return response.data.area;
         })

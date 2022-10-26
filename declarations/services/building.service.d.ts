@@ -1,13 +1,13 @@
 /// <reference types="node" />
 import { SpinalContext, SpinalNode } from "spinal-env-viewer-graph-service";
-import { IBuilding, IEditBuilding, ILocation } from "../interfaces";
+import { IBuilding, IEditBuilding, ILocation, IBuildingCreation, IBuildingDetails } from "../interfaces";
 export declare class BuildingService {
     private static instance;
     context: SpinalContext;
     private constructor();
     static getInstance(): BuildingService;
     init(): Promise<SpinalContext>;
-    createBuilding(buildingInfo: IBuilding): Promise<SpinalNode>;
+    createBuilding(buildingInfo: IBuildingCreation): Promise<IBuildingDetails>;
     getAllBuildings(): Promise<SpinalNode[]>;
     getAllBuildingsApps(): Promise<{
         node: SpinalNode;
@@ -15,17 +15,19 @@ export declare class BuildingService {
     }[]>;
     getBuildingById(id: string): Promise<SpinalNode>;
     deleteBuilding(id: string): Promise<boolean>;
-    addBuildingToPortofolio(portfolioId: string, buildingId: string | string[]): Promise<SpinalNode[]>;
+    addBuildingToPortofolio(portfolioId: string, building: IBuildingCreation): Promise<IBuildingDetails>;
     getBuildingFromPortofolio(portofolioId: string, buildingId: string): Promise<void | SpinalNode>;
     getAllBuildingsFromPortofolio(portfolioId: string): Promise<SpinalNode[]>;
-    updateBuilding(buildingId: string, newData: IEditBuilding): Promise<SpinalNode>;
+    updateBuilding(buildingId: string, newData: IEditBuilding): Promise<IBuildingDetails>;
+    getBuildingStructure(building: string | SpinalNode): Promise<IBuildingDetails>;
+    formatBuildingStructure(building: IBuildingDetails): any;
     validateBuilding(buildingInfo: IBuilding): {
         isValid: boolean;
         message?: string;
     };
-    setLocation(buildingInfo: IEditBuilding): Promise<IEditBuilding>;
+    setLocation(buildingInfo: IBuildingCreation): Promise<IBuildingCreation>;
     getLatLngViaAddress(address: string): Promise<ILocation>;
-    getBuildingDetails(buildingId: string): Promise<{
+    getBuildingDetails(batimentUrl: string): Promise<{
         [key: string]: number;
     }>;
     formatBuilding(data: IBuilding): Promise<IBuilding>;

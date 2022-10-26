@@ -179,6 +179,8 @@ export class AppProfileService {
 
     return data.reduce(async (prom, { appsIds, portofolioId }) => {
       const liste = await prom;
+      if (appsIds.length === 0) return liste;
+
       const portofolio = await authorizationInstance.authorizeProfileToAccessPortofolio(node, portofolioId)
       const apps = await authorizationInstance.authorizeProfileToAccessPortofolioApp(node, portofolioId, appsIds);
 
@@ -215,6 +217,8 @@ export class AppProfileService {
 
     return data.reduce(async (prom, { apisIds, portofolioId }) => {
       const liste = await prom;
+      if (apisIds.length === 0) return liste;
+
       const portofolio = await authorizationInstance.authorizeProfileToAccessPortofolio(node, portofolioId)
       const apis = await authorizationInstance.authorizeProfileToAccessPortofolioApisRoutes(node, portofolioId, apisIds);
 

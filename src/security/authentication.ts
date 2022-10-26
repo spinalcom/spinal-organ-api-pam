@@ -29,6 +29,7 @@ import { AuthentificationService } from "../services";
 
 
 export async function expressAuthentication(request: express.Request, securityName: string, scopes?: string[]): Promise<any> {
+
     const authInstance = AuthentificationService.getInstance();
     const header = request.headers.authorization || request.headers.Authorization;
 

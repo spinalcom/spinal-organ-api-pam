@@ -33,29 +33,6 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.PortofolioService = void 0;
-/*
- * Copyright 2022 SpinalCom - www.spinalcom.com
- *
- * This file is part of SpinalCore.
- *
- * Please read all of the following terms and conditions
- * of the Free Software license Agreement ("Agreement")
- * carefully.
- *
- * This Agreement is a legally binding contract between
- * the Licensee (as defined below) and SpinalCom that
- * sets forth the terms and conditions that govern your
- * use of the Program. By installing and/or using the
- * Program, you agree to abide by all the terms and
- * conditions stated or referenced herein.
- *
- * If you do not agree to abide by these terms and
- * conditions, do not demonstrate your acceptance and do
- * not install or use the Program.
- * You should have received a copy of the license along
- * with this file. If not, see
- * <http://resources.spinalcom.com/licenses.pdf>.
- */
 const spinal_env_viewer_graph_service_1 = require("spinal-env-viewer-graph-service");
 const configFile_service_1 = require("./configFile.service");
 const constant_1 = require("../constant");
@@ -77,17 +54,17 @@ class PortofolioService {
             return this.context;
         });
     }
-    addPortofolio(portofolioName, buildingsIds = [], appsIds = [], apisIds = []) {
+    addPortofolio(portofolioName, appsIds = [], apisIds = []) {
         return __awaiter(this, void 0, void 0, function* () {
             const node = new spinal_env_viewer_graph_service_1.SpinalNode(portofolioName, constant_1.PORTOFOLIO_TYPE);
             yield this.context.addChildInContext(node, constant_1.CONTEXT_TO_PORTOFOLIO_RELATION_NAME, constant_1.PTR_LST_TYPE, this.context);
             const apps = yield this.addAppToPortofolio(node, appsIds);
             const apis = yield this.addApiToPortofolio(node, apisIds);
-            const buildings = yield this.addBuildingToPortofolio(node, buildingsIds);
+            // const buildings = await this.addBuildingToPortofolio(node, buildingsIds);
             return {
                 node,
                 apps,
-                buildings,
+                buildings: [],
                 apis
             };
         });
@@ -99,6 +76,25 @@ class PortofolioService {
                 return false;
             portofolio.info.name.set(newName.trim());
             return true;
+        });
+    }
+    updateProtofolio(portofolioId, newData) {
+        var _a;
+        return __awaiter(this, void 0, void 0, function* () {
+            const node = yield this.getPortofolio(portofolioId);
+            if (!node)
+                return;
+            if ((_a = newData.name) === null || _a === void 0 ? void 0 : _a.trim())
+                node.info.name.set(newData.name.trim());
+            if (newData.authorizeAppIds)
+                yield this.addAppToPortofolio(node, newData.authorizeAppIds);
+            if (newData.authorizeApiIds)
+                yield this.addApiToPortofolio(node, newData.authorizeApiIds);
+            if (newData.unauthorizeAppIds)
+                yield this.removeAppFromPortofolio(node, newData.unauthorizeAppIds);
+            if (newData.unauthorizeApiIds)
+                yield this.removeApiFromPortofolio(node, newData.unauthorizeApiIds);
+            return this.getPortofolioDetails(node);
         });
     }
     getAllPortofolio() {
@@ -116,7 +112,12 @@ class PortofolioService {
             if (!node)
                 throw new Error(`No portofolio found for {portofolio}`);
             const [apps, buildings, apis] = yield Promise.all([this.getPortofolioApps(node), this.getPortofolioBuildings(node), this.getPortofolioApis(node)]);
-            return { node, apps, buildings, apis };
+            return {
+                node,
+                apps,
+                buildings: yield Promise.all(buildings.map(el => building_service_1.BuildingService.getInstance().getBuildingStructure(el))),
+                apis
+            };
         });
     }
     getAllPortofoliosDetails() {
@@ -135,6 +136,8 @@ class PortofolioService {
         return __awaiter(this, void 0, void 0, function* () {
             try {
                 const node = portofolio instanceof spinal_env_viewer_graph_service_1.SpinalNode ? portofolio : yield this.getPortofolio(portofolio);
+                const buildings = yield this.getPortofolioBuildings(node);
+                yield Promise.all(buildings.map(el => building_service_1.BuildingService.getInstance().deleteBuilding(el.getId().get())));
                 yield this.context.removeChild(node, constant_1.CONTEXT_TO_PORTOFOLIO_RELATION_NAME, constant_1.PTR_LST_TYPE);
                 return true;
             }
@@ -295,28 +298,28 @@ class PortofolioService {
     //////////////////////////////////////////////////////
     //                      BUILDINGS                   //
     //////////////////////////////////////////////////////
-    addBuildingToPortofolio(portofolio, buildingId) {
+    addBuildingToPortofolio(portofolio, buildingInfo) {
         return __awaiter(this, void 0, void 0, function* () {
             if (typeof portofolio === "string")
                 portofolio = yield this.getPortofolio(portofolio);
             if (!(portofolio instanceof spinal_env_viewer_graph_service_1.SpinalNode))
                 throw new Error(`No portofolio found for ${portofolio}`);
-            if (!Array.isArray(buildingId))
-                buildingId = [buildingId];
-            return buildingId.reduce((prom, id) => __awaiter(this, void 0, void 0, function* () {
-                const liste = yield prom;
-                const buildingNode = yield building_service_1.BuildingService.getInstance().getBuildingById(id);
-                if (!(buildingNode instanceof spinal_env_viewer_graph_service_1.SpinalNode))
-                    return liste;
-                const childrenIds = portofolio.getChildrenIds();
-                const isChild = childrenIds.find(el => el === id);
-                if (!isChild)
-                    portofolio.addChildInContext(buildingNode, constant_1.BUILDING_RELATION_NAME, constant_1.PTR_LST_TYPE, this.context);
-                liste.push(buildingNode);
-                return liste;
-                //         const appNode = AppService.getInstance().getAppById(appId);
-                //         if (!(appNode instanceof SpinalNode)) throw new Error(`No application found for ${appId}`);
-            }), Promise.resolve([]));
+            // if (!Array.isArray(buildingId)) buildingId = [buildingId];
+            const structure = yield building_service_1.BuildingService.getInstance().createBuilding(buildingInfo);
+            portofolio.addChildInContext(structure.node, constant_1.BUILDING_RELATION_NAME, constant_1.PTR_LST_TYPE, this.context);
+            return structure;
+            // return buildingId.reduce(async (prom, id: string) => {
+            //     const liste = await prom;
+            //     const buildingNode = await BuildingService.getInstance().getBuildingById(id);
+            //     if (!(buildingNode instanceof SpinalNode)) return liste;
+            //     const childrenIds = (<SpinalNode>portofolio).getChildrenIds();
+            //     const isChild = childrenIds.find(el => el === id);
+            //     if (!isChild) (<SpinalNode>portofolio).addChildInContext(buildingNode, BUILDING_RELATION_NAME, PTR_LST_TYPE, this.context);
+            //     liste.push(buildingNode);
+            //     return liste;
+            //     //         const appNode = AppService.getInstance().getAppById(appId);
+            //     //         if (!(appNode instanceof SpinalNode)) throw new Error(`No application found for ${appId}`);
+            // }, Promise.resolve([]))
         });
     }
     getPortofolioBuildings(portofolio) {
@@ -358,8 +361,8 @@ class PortofolioService {
             return buildings.find(el => el.getId().get() === buildingId);
         });
     }
-    _formatDetails(node, apps, buildings, apis = []) {
-        return Object.assign(Object.assign({}, node.info.get()), { buildings: buildings.map(el => el.info.get()), apps: apps.map(el => el.info.get()), apis: apis.map(el => el.info.get()) });
+    _formatDetails(data) {
+        return Object.assign(Object.assign({}, (data.node.info.get())), { buildings: data.buildings.map(el => building_service_1.BuildingService.getInstance().formatBuildingStructure(el)), apps: data.apps.map(el => el.info.get()), apis: data.apis.map(el => el.info.get()) });
     }
 }
 exports.PortofolioService = PortofolioService;

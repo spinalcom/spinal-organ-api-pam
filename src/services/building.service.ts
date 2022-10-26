@@ -26,14 +26,16 @@ import {
     BOS_BASE_URI_V2, BUILDING_CONTEXT_NAME, BUILDING_CONTEXT_TYPE, BUILDING_TYPE, BUILDING_RELATION_NAME, PTR_LST_TYPE, APP_RELATION_NAME, BUILDING_API_GROUP_TYPE, API_RELATION_NAME
 } from "../constant";
 import { SpinalContext, SpinalGraphService, SpinalNode } from "spinal-env-viewer-graph-service";
-import { IBuilding, IEditBuilding, ILocation } from "../interfaces";
+import { IBosAuthRes, IBuilding, IEditBuilding, ILocation, IBuildingCreation, IBuildingDetails } from "../interfaces";
 import * as openGeocoder from "node-open-geocoder";
 // const { config: { server_port } } = require("../../config");
 
 import axios from "axios";
 import { PortofolioService } from "./portofolio.service";
 import { APIService, AppService, configServiceInstance } from ".";
-const axiosInstance = axios.create({ baseURL: `http://localhost:${process.env.HUB_PORT}` });
+// const axiosInstance = axios.create({ baseURL: `http://localhost:${process.env.SERVER_PORT}` });
+
+
 // import * as NodeGeocoder from "node-geocoder";
 
 
@@ -55,18 +57,37 @@ export class BuildingService {
         return this.context;
     }
 
-    public async createBuilding(buildingInfo: IBuilding): Promise<SpinalNode> {
+    public async createBuilding(buildingInfo: IBuildingCreation): Promise<IBuildingDetails> {
+
+        await this.setLocation(buildingInfo);
         buildingInfo.type = BUILDING_TYPE;
+        const appIds = Object.assign([], buildingInfo.appIds);
+        const apiIds = Object.assign([], buildingInfo.apiIds);
+
+        delete buildingInfo.appIds;
+        delete buildingInfo.apiIds;
+
+        buildingInfo.apiUrl = buildingInfo.apiUrl.replace(/\/$/, el => "");
+
         const id = SpinalGraphService.createNode(buildingInfo, undefined);
-        const node = SpinalGraphService.getRealNode(id);
-        this.context.addChildInContext(node, BUILDING_RELATION_NAME, PTR_LST_TYPE, this.context);
-        return node;
+        const detail = await this.getBuildingDetails(buildingInfo.apiUrl);
+
+        const building = SpinalGraphService.getRealNode(id);
+
+        building.info.add_attr({ detail });
+
+        return Promise.all([this.addAppToBuilding(building, appIds || []), this.addApiToBuilding(building, apiIds || [])])
+            .then(async ([apps, apis]) => {
+                await this.context.addChildInContext(building, BUILDING_RELATION_NAME, PTR_LST_TYPE, this.context);
+
+                return { node: building, apps, apis };
+            })
+
     }
 
     public async getAllBuildings(): Promise<SpinalNode[]> {
         return this.context.getChildren([BUILDING_RELATION_NAME]);
     }
-
 
     public async getAllBuildingsApps(): Promise<{ node: SpinalNode, apps: SpinalNode[] }[]> {
         const buildings = await this.getAllBuildings();
@@ -98,8 +119,8 @@ export class BuildingService {
         return false;
     }
 
-    public async addBuildingToPortofolio(portfolioId: string, buildingId: string | string[]): Promise<SpinalNode[]> {
-        const data = await PortofolioService.getInstance().addBuildingToPortofolio(portfolioId, buildingId);
+    public async addBuildingToPortofolio(portfolioId: string, building: IBuildingCreation): Promise<IBuildingDetails> {
+        const data = await PortofolioService.getInstance().addBuildingToPortofolio(portfolioId, building);
         return data;
     }
 
@@ -115,18 +136,55 @@ export class BuildingService {
         // return context.getChildrenInContext();
     }
 
-    public async updateBuilding(buildingId: string, newData: IEditBuilding): Promise<SpinalNode> {
+    public async updateBuilding(buildingId: string, newData: IEditBuilding): Promise<IBuildingDetails> {
         const node = await this.getBuildingById(buildingId);
         if (!node) throw new Error(`no Building found for ${buildingId}`);
 
-        for (const key in newData) {
-            if (Object.prototype.hasOwnProperty.call(newData, key) && node.info[key]) {
-                const element = newData[key];
-                node.info[key].set(element);
-            }
-        }
+        const apps = newData.authorizeAppIds || [];
+        const apis = newData.authorizeApiIds || [];
+        const unauthorizeAppIds = newData.unauthorizeAppIds || [];
+        const unauthorizeApiIds = newData.unauthorizeApiIds || [];
 
-        return node;
+        await Promise.all([this.addAppToBuilding(node, apps), this.addApiToBuilding(node, apis)])
+
+        return Promise.all([this.removeAppFromBuilding(node, unauthorizeAppIds), this.removeApisFromBuilding(node, unauthorizeApiIds)])
+            .then((result) => {
+                delete newData.appIds
+                delete newData.apiIds
+                delete newData.unauthorizeAppIds
+                delete newData.unauthorizeApiIds
+
+                for (const key in newData) {
+                    if (Object.prototype.hasOwnProperty.call(newData, key) && node.info[key]) {
+                        const element = newData[key];
+                        node.info[key].set(element);
+                    }
+                }
+
+                return this.getBuildingStructure(node);
+            })
+    }
+
+    public async getBuildingStructure(building: string | SpinalNode): Promise<IBuildingDetails> {
+        if (typeof building === "string") building = await this.getBuildingById(building);
+        if (!(building instanceof SpinalNode)) return;
+
+        return Promise.all([this.getAppsFromBuilding(building), this.getApisFromBuilding(building)]).then(([apps, apis]) => {
+            return {
+                node: <SpinalNode>building,
+                apps,
+                apis
+            }
+        })
+
+    }
+
+    public formatBuildingStructure(building: IBuildingDetails) {
+        return {
+            ...(building.node.info.get()),
+            apps: building.apps.map(el => el.info.get()),
+            apis: building.apis.map(el => el.info.get())
+        }
     }
 
     // public async deleteBuildingFromPortofolio(portofolioId: string, buildingId: string | string[]): Promise<string> {
@@ -143,7 +201,7 @@ export class BuildingService {
         return { isValid: true }
     }
 
-    public async setLocation(buildingInfo: IEditBuilding): Promise<IEditBuilding> {
+    public async setLocation(buildingInfo: IBuildingCreation): Promise<IBuildingCreation> {
         if (!buildingInfo.address) return;
 
         if (!buildingInfo.location || !buildingInfo.location.latlng) {
@@ -173,9 +231,9 @@ export class BuildingService {
     }
 
 
-    public async getBuildingDetails(buildingId: string): Promise<{ [key: string]: number }> {
-        const detail: any = await this._getBuildingTypeCount(buildingId);
-        detail.area = await this._getBuildingArea(buildingId)
+    public async getBuildingDetails(batimentUrl: string): Promise<{ [key: string]: number }> {
+        const detail: any = await this._getBuildingTypeCount(batimentUrl);
+        detail.area = await this._getBuildingArea(batimentUrl);
 
         return detail;
     }
@@ -338,8 +396,9 @@ export class BuildingService {
         })
     }
 
-    private _getBuildingTypeCount(buildingId: string): Promise<{ [key: string]: number }> {
-        return axiosInstance.get(`${BOS_BASE_URI_V2}/${buildingId}/api/v1/geographicContext/tree`)
+    private _getBuildingTypeCount(batimentUrl: string): Promise<{ [key: string]: number }> {
+        return axios
+            .get(`${batimentUrl}/api/v1/geographicContext/tree`)
             .then(res => {
                 return this._countTypeHelper(res.data);
             })
@@ -349,9 +408,9 @@ export class BuildingService {
             });
     }
 
-    private _getBuildingArea(buildingId: string): Promise<number> {
-        return axiosInstance
-            .get(`${BOS_BASE_URI_V2}/${buildingId}/api/v1/building/read`)
+    private _getBuildingArea(batimentUrl: string): Promise<number> {
+        return axios
+            .get(`${batimentUrl}/api/v1/building/read`)
             .then((response) => {
                 return response.data.area;
             })

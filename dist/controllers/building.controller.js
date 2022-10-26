@@ -45,29 +45,6 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.BuildingController = void 0;
-/*
- * Copyright 2022 SpinalCom - www.spinalcom.com
- *
- * This file is part of SpinalCore.
- *
- * Please read all of the following terms and conditions
- * of the Free Software license Agreement ("Agreement")
- * carefully.
- *
- * This Agreement is a legally binding contract between
- * the Licensee (as defined below) and SpinalCom that
- * sets forth the terms and conditions that govern your
- * use of the Program. By installing and/or using the
- * Program, you agree to abide by all the terms and
- * conditions stated or referenced herein.
- *
- * If you do not agree to abide by these terms and
- * conditions, do not demonstrate your acceptance and do
- * not install or use the Program.
- * You should have received a copy of the license along
- * with this file. If not, see
- * <http://resources.spinalcom.com/licenses.pdf>.
- */
 const services_1 = require("../services");
 const tsoa_1 = require("tsoa");
 const constant_1 = require("../constant");
@@ -76,27 +53,30 @@ let BuildingController = class BuildingController extends tsoa_1.Controller {
     constructor() {
         super();
     }
-    createBuilding(buildingInfo) {
-        return __awaiter(this, void 0, void 0, function* () {
-            try {
-                const validationResult = serviceInstance.validateBuilding(buildingInfo);
-                if (!validationResult.isValid) {
-                    this.setStatus(constant_1.HTTP_CODES.BAD_REQUEST);
-                    return { message: validationResult.message };
-                }
-                ;
-                yield serviceInstance.setLocation(buildingInfo);
-                const node = yield serviceInstance.createBuilding(buildingInfo);
-                const data = yield serviceInstance.formatBuilding(node.info.get());
-                this.setStatus(constant_1.HTTP_CODES.OK);
-                return data;
-            }
-            catch (error) {
-                this.setStatus(constant_1.HTTP_CODES.INTERNAL_ERROR);
-                return { message: error.message };
-            }
-        });
+    /*
+    @Security(SECURITY_NAME.admin)
+    @Post("/create_building")
+    public async createBuilding(@Body() buildingInfo: IBuilding): Promise<IBuilding | { message: string }> {
+        try {
+
+            const validationResult = serviceInstance.validateBuilding(buildingInfo);
+            if (!validationResult.isValid) {
+                this.setStatus(HTTP_CODES.BAD_REQUEST);
+                return { message: validationResult.message }
+            };
+
+            await serviceInstance.setLocation(buildingInfo);
+
+            const node = await serviceInstance.createBuilding(buildingInfo);
+            // const data = await serviceInstance.formatBuilding(node.info.get());
+            this.setStatus(HTTP_CODES.OK);
+            return node.getInfo().get();
+        } catch (error) {
+            this.setStatus(HTTP_CODES.INTERNAL_ERROR)
+            return { message: error.message };
+        }
     }
+*/
     getBuildingById(id) {
         return __awaiter(this, void 0, void 0, function* () {
             try {
@@ -116,21 +96,24 @@ let BuildingController = class BuildingController extends tsoa_1.Controller {
             }
         });
     }
-    getAllBuildings() {
-        return __awaiter(this, void 0, void 0, function* () {
-            try {
-                const nodes = (yield serviceInstance.getAllBuildings()) || [];
-                const promises = nodes.map(el => serviceInstance.formatBuilding(el.info.get()));
-                const data = yield Promise.all(promises);
-                this.setStatus(constant_1.HTTP_CODES.OK);
-                return data;
-            }
-            catch (error) {
-                this.setStatus(constant_1.HTTP_CODES.INTERNAL_ERROR);
-                return { message: error.message };
-            }
-        });
-    }
+    /*
+    @Security(SECURITY_NAME.admin)
+    @Get("/get_all_buildings")
+    public async getAllBuildings(): Promise<IBuilding[] | { message: string }> {
+        try {
+            const nodes = await serviceInstance.getAllBuildings() || [];
+
+            const promises = nodes.map(el => serviceInstance.formatBuilding(el.info.get()))
+
+            const data = await Promise.all(promises);
+            this.setStatus(HTTP_CODES.OK);
+            return data;
+
+        } catch (error) {
+            this.setStatus(HTTP_CODES.INTERNAL_ERROR)
+            return { message: error.message };
+        }
+    }*/
     getAllBuildingsApps() {
         return __awaiter(this, void 0, void 0, function* () {
             try {
@@ -167,7 +150,7 @@ let BuildingController = class BuildingController extends tsoa_1.Controller {
                 yield serviceInstance.setLocation(data);
                 const node = yield serviceInstance.updateBuilding(id, data);
                 if (node) {
-                    const data = yield serviceInstance.formatBuilding(node.info.get());
+                    const data = yield serviceInstance.formatBuildingStructure(node);
                     this.setStatus(constant_1.HTTP_CODES.OK);
                     return data;
                 }
@@ -346,27 +329,12 @@ let BuildingController = class BuildingController extends tsoa_1.Controller {
 };
 __decorate([
     (0, tsoa_1.Security)(constant_1.SECURITY_NAME.admin),
-    (0, tsoa_1.Post)("/create_building"),
-    __param(0, (0, tsoa_1.Body)()),
-    __metadata("design:type", Function),
-    __metadata("design:paramtypes", [Object]),
-    __metadata("design:returntype", Promise)
-], BuildingController.prototype, "createBuilding", null);
-__decorate([
-    (0, tsoa_1.Security)(constant_1.SECURITY_NAME.admin),
     (0, tsoa_1.Post)("/get_building/{id}"),
     __param(0, (0, tsoa_1.Path)()),
     __metadata("design:type", Function),
     __metadata("design:paramtypes", [String]),
     __metadata("design:returntype", Promise)
 ], BuildingController.prototype, "getBuildingById", null);
-__decorate([
-    (0, tsoa_1.Security)(constant_1.SECURITY_NAME.admin),
-    (0, tsoa_1.Get)("/get_all_buildings"),
-    __metadata("design:type", Function),
-    __metadata("design:paramtypes", []),
-    __metadata("design:returntype", Promise)
-], BuildingController.prototype, "getAllBuildings", null);
 __decorate([
     (0, tsoa_1.Security)(constant_1.SECURITY_NAME.admin),
     (0, tsoa_1.Get)("/get_all_buildings_apps"),

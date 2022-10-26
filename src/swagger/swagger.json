@@ -451,10 +451,6 @@
 						"format": "double"
 					}
 				},
-				"required": [
-					"lat",
-					"lng"
-				],
 				"type": "object",
 				"additionalProperties": {}
 			},
@@ -493,8 +489,6 @@
 					"aliasName",
 					"bosUrl",
 					"apiUrl",
-					"clientId",
-					"clientSecret",
 					"address",
 					"description"
 				],
@@ -502,48 +496,45 @@
 				"additionalProperties": {}
 			},
 			"IEditBuilding": {
-				"properties": {
-					"name": {
-						"type": "string"
+				"allOf": [
+					{
+						"$ref": "#/components/schemas/IBuilding"
 					},
-					"aliasName": {
-						"type": "string"
-					},
-					"bosUrl": {
-						"type": "string"
-					},
-					"apiUrl": {
-						"type": "string"
-					},
-					"clientId": {
-						"type": "string"
-					},
-					"clientSecret": {
-						"type": "string"
-					},
-					"address": {
-						"type": "string"
-					},
-					"description": {
-						"type": "string"
-					},
-					"location": {
-						"$ref": "#/components/schemas/ILocation"
+					{
+						"properties": {
+							"unauthorizeApiIds": {
+								"items": {
+									"type": "string"
+								},
+								"type": "array"
+							},
+							"unauthorizeAppIds": {
+								"items": {
+									"type": "string"
+								},
+								"type": "array"
+							},
+							"authorizeApiIds": {
+								"items": {
+									"type": "string"
+								},
+								"type": "array"
+							},
+							"authorizeAppIds": {
+								"items": {
+									"type": "string"
+								},
+								"type": "array"
+							}
+						},
+						"type": "object"
 					}
-				},
-				"type": "object",
-				"additionalProperties": false
+				]
 			},
 			"IPortofolioInfo": {
 				"properties": {
 					"name": {
 						"type": "string"
-					},
-					"buildingIds": {
-						"items": {
-							"type": "string"
-						},
-						"type": "array"
 					},
 					"appIds": {
 						"items": {
@@ -563,6 +554,63 @@
 				],
 				"type": "object",
 				"additionalProperties": false
+			},
+			"IEditProtofolio": {
+				"properties": {
+					"name": {
+						"type": "string"
+					},
+					"authorizeAppIds": {
+						"items": {
+							"type": "string"
+						},
+						"type": "array"
+					},
+					"unauthorizeAppIds": {
+						"items": {
+							"type": "string"
+						},
+						"type": "array"
+					},
+					"authorizeApiIds": {
+						"items": {
+							"type": "string"
+						},
+						"type": "array"
+					},
+					"unauthorizeApiIds": {
+						"items": {
+							"type": "string"
+						},
+						"type": "array"
+					}
+				},
+				"type": "object",
+				"additionalProperties": false
+			},
+			"IBuildingCreation": {
+				"allOf": [
+					{
+						"$ref": "#/components/schemas/IBuilding"
+					},
+					{
+						"properties": {
+							"apiIds": {
+								"items": {
+									"type": "string"
+								},
+								"type": "array"
+							},
+							"appIds": {
+								"items": {
+									"type": "string"
+								},
+								"type": "array"
+							}
+						},
+						"type": "object"
+					}
+				]
 			}
 		},
 		"securitySchemes": {
@@ -3237,57 +3285,6 @@
 				"parameters": []
 			}
 		},
-		"/api/v1/pam/create_building": {
-			"post": {
-				"operationId": "CreateBuilding",
-				"responses": {
-					"200": {
-						"description": "Ok",
-						"content": {
-							"application/json": {
-								"schema": {
-									"anyOf": [
-										{
-											"$ref": "#/components/schemas/IBuilding"
-										},
-										{
-											"properties": {
-												"message": {
-													"type": "string"
-												}
-											},
-											"required": [
-												"message"
-											],
-											"type": "object"
-										}
-									]
-								}
-							}
-						}
-					}
-				},
-				"tags": [
-					"Building"
-				],
-				"security": [
-					{
-						"admin": []
-					}
-				],
-				"parameters": [],
-				"requestBody": {
-					"required": true,
-					"content": {
-						"application/json": {
-							"schema": {
-								"$ref": "#/components/schemas/IBuilding"
-							}
-						}
-					}
-				}
-			}
-		},
 		"/api/v1/pam/get_building/{id}": {
 			"post": {
 				"operationId": "GetBuildingById",
@@ -3336,50 +3333,6 @@
 						}
 					}
 				]
-			}
-		},
-		"/api/v1/pam/get_all_buildings": {
-			"get": {
-				"operationId": "GetAllBuildings",
-				"responses": {
-					"200": {
-						"description": "Ok",
-						"content": {
-							"application/json": {
-								"schema": {
-									"anyOf": [
-										{
-											"items": {
-												"$ref": "#/components/schemas/IBuilding"
-											},
-											"type": "array"
-										},
-										{
-											"properties": {
-												"message": {
-													"type": "string"
-												}
-											},
-											"required": [
-												"message"
-											],
-											"type": "object"
-										}
-									]
-								}
-							}
-						}
-					}
-				},
-				"tags": [
-					"Building"
-				],
-				"security": [
-					{
-						"admin": []
-					}
-				],
-				"parameters": []
 			}
 		},
 		"/api/v1/pam/get_all_buildings_apps": {
@@ -4287,6 +4240,66 @@
 				}
 			}
 		},
+		"/api/v1/pam/update_portofolio/{portofolioId}": {
+			"put": {
+				"operationId": "UpdatePortofolio",
+				"responses": {
+					"200": {
+						"description": "Ok",
+						"content": {
+							"application/json": {
+								"schema": {
+									"anyOf": [
+										{
+											"$ref": "#/components/schemas/IPortofolioData"
+										},
+										{
+											"properties": {
+												"message": {
+													"type": "string"
+												}
+											},
+											"required": [
+												"message"
+											],
+											"type": "object"
+										}
+									]
+								}
+							}
+						}
+					}
+				},
+				"tags": [
+					"Portofolio"
+				],
+				"security": [
+					{
+						"admin": []
+					}
+				],
+				"parameters": [
+					{
+						"in": "path",
+						"name": "portofolioId",
+						"required": true,
+						"schema": {
+							"type": "string"
+						}
+					}
+				],
+				"requestBody": {
+					"required": true,
+					"content": {
+						"application/json": {
+							"schema": {
+								"$ref": "#/components/schemas/IEditProtofolio"
+							}
+						}
+					}
+				}
+			}
+		},
 		"/api/v1/pam/rename_portofolio/{id}": {
 			"put": {
 				"operationId": "RenamePortofolio",
@@ -4626,18 +4639,7 @@
 					"content": {
 						"application/json": {
 							"schema": {
-								"properties": {
-									"buildingId": {
-										"items": {
-											"type": "string"
-										},
-										"type": "array"
-									}
-								},
-								"required": [
-									"buildingId"
-								],
-								"type": "object"
+								"$ref": "#/components/schemas/IBuildingCreation"
 							}
 						}
 					}

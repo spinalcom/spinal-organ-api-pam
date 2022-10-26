@@ -2,13 +2,7 @@ import { IApiRoute, IApp, IBuilding, IEditBuilding } from "../interfaces";
 import { Controller } from "tsoa";
 export declare class BuildingController extends Controller {
     constructor();
-    createBuilding(buildingInfo: IBuilding): Promise<IBuilding | {
-        message: string;
-    }>;
     getBuildingById(id: string): Promise<IBuilding | {
-        message: string;
-    }>;
-    getAllBuildings(): Promise<IBuilding[] | {
         message: string;
     }>;
     getAllBuildingsApps(): Promise<(IBuilding & {

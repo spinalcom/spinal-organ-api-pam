@@ -24,7 +24,7 @@
 
 import { BuildingService, PortofolioService } from "../services";
 
-import { IApiRoute, IApp, IBuilding, IPortofolioData, IPortofolioInfo } from "../interfaces";
+import { IApiRoute, IApp, IBuilding, IBuildingCreation, IEditProtofolio, IPortofolioData, IPortofolioInfo } from "../interfaces";
 import { Body, Controller, Path, Post, Route, Tags, Put, Get, Delete, UploadedFile, Security } from "tsoa";
 import { HTTP_CODES, SECURITY_NAME } from "../constant";
 
@@ -46,12 +46,26 @@ export class PortofolioController extends Controller {
     @Post("/add_portofolio")
     public async addPortofolio(@Body() data: IPortofolioInfo): Promise<IPortofolioData | { message: string }> {
         try {
-            const { name, buildingIds, appIds, apiIds } = data;
+            const { name, appIds, apiIds } = data;
 
-            const { node, apps, buildings, apis } = await portofolioInstance.addPortofolio(name, buildingIds, appIds, apiIds);
-            const details = portofolioInstance._formatDetails(node, apps, buildings, apis);
+            const res = await portofolioInstance.addPortofolio(name, appIds, apiIds);
+            const details = portofolioInstance._formatDetails(res);
 
             this.setStatus(HTTP_CODES.CREATED);
+            return details;
+        } catch (error) {
+            this.setStatus(HTTP_CODES.INTERNAL_ERROR)
+            return { message: error.message };
+        }
+    }
+
+    @Security(SECURITY_NAME.admin)
+    @Put("/update_portofolio/{portofolioId}")
+    public async updatePortofolio(@Path() portofolioId: string, @Body() data: IEditProtofolio): Promise<IPortofolioData | { message: string }> {
+        try {
+            const res = await portofolioInstance.updateProtofolio(portofolioId, data);
+            const details = portofolioInstance._formatDetails(res);
+            this.setStatus(HTTP_CODES.OK)
             return details;
         } catch (error) {
             this.setStatus(HTTP_CODES.INTERNAL_ERROR)
@@ -106,8 +120,8 @@ export class PortofolioController extends Controller {
     @Get("/get_portofolio_details/{id}")
     public async getPortofolioDetails(@Path() id: string): Promise<IPortofolioData | { message: string }> {
         try {
-            const { node, apps, buildings } = await portofolioInstance.getPortofolioDetails(id);
-            const details = portofolioInstance._formatDetails(node, apps, buildings);
+            const res = await portofolioInstance.getPortofolioDetails(id);
+            const details = portofolioInstance._formatDetails(res);
             this.setStatus(HTTP_CODES.OK)
             return details;
         } catch (error) {
@@ -121,7 +135,7 @@ export class PortofolioController extends Controller {
     public async getAllPortofoliosDetails(): Promise<any[] | { message: string }> {
         try {
             const portofolios = await portofolioInstance.getAllPortofoliosDetails();
-            const details = portofolios.map(({ node, apps, buildings }) => portofolioInstance._formatDetails(node, apps, buildings))
+            const details = portofolios.map((res) => portofolioInstance._formatDetails(res))
             this.setStatus(HTTP_CODES.OK);
             return details;
         } catch (error) {
@@ -147,16 +161,15 @@ export class PortofolioController extends Controller {
 
     @Security(SECURITY_NAME.admin)
     @Post("/add_building_to_portofolio/{portofolioId}")
-    public async addBuilding(@Path() portofolioId: string, @Body() body: { buildingId: string[] }): Promise<IBuilding[] | { message: string }> {
+    public async addBuilding(@Path() portofolioId: string, @Body() body: IBuildingCreation): Promise<IBuilding[] | { message: string }> {
         try {
-            const nodes = await serviceInstance.addBuildingToPortofolio(portofolioId, body.buildingId);
-            if (!nodes || nodes.length === 0) {
+            const node = await serviceInstance.addBuildingToPortofolio(portofolioId, body);
+            if (!node) {
                 this.setStatus(HTTP_CODES.BAD_REQUEST);
                 return { message: "Something went wrong, please check your input data" };
             }
             this.setStatus(HTTP_CODES.OK);
-            const promises = nodes.map(node => serviceInstance.formatBuilding(node.info.get()));
-            return Promise.all(promises);
+            return BuildingService.getInstance().formatBuildingStructure(node);
         } catch (error) {
             this.setStatus(HTTP_CODES.INTERNAL_ERROR)
             return { message: error.message };

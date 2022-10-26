@@ -167,6 +167,8 @@ class AppProfileService {
                 return;
             return data.reduce((prom, { appsIds, portofolioId }) => __awaiter(this, void 0, void 0, function* () {
                 const liste = yield prom;
+                if (appsIds.length === 0)
+                    return liste;
                 const portofolio = yield authorization_service_1.authorizationInstance.authorizeProfileToAccessPortofolio(node, portofolioId);
                 const apps = yield authorization_service_1.authorizationInstance.authorizeProfileToAccessPortofolioApp(node, portofolioId, appsIds);
                 liste.push({
@@ -199,6 +201,8 @@ class AppProfileService {
                 return;
             return data.reduce((prom, { apisIds, portofolioId }) => __awaiter(this, void 0, void 0, function* () {
                 const liste = yield prom;
+                if (apisIds.length === 0)
+                    return liste;
                 const portofolio = yield authorization_service_1.authorizationInstance.authorizeProfileToAccessPortofolio(node, portofolioId);
                 const apis = yield authorization_service_1.authorizationInstance.authorizeProfileToAccessPortofolioApisRoutes(node, portofolioId, apisIds);
                 liste.push({
