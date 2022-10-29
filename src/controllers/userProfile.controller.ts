@@ -23,7 +23,7 @@
  */
 
 import { HTTP_CODES, SECURITY_NAME } from "../constant";
-import { IBosAuth, IBosData, IPortofolioAuth, IPortofolioData, IProfile, IProfileData } from "../interfaces";
+import { IBosAuth, IBosData, IPortofolioAuth, IPortofolioData, IProfile, IProfileData, IProfileEdit } from "../interfaces";
 import { UserProfileService } from "../services";
 import { Route, Tags, Controller, Post, Get, Put, Delete, Body, Path, Security } from "tsoa";
 import { _formatProfile, _getNodeListInfo, _formatProfileKeys, _formatAuthorizationData, _formatPortofolioAuthRes, _formatBosAuthRes } from '../utils/profileUtils'
@@ -90,7 +90,7 @@ export class UserProfileController extends Controller {
 
     @Security(SECURITY_NAME.admin)
     @Put("/edit_profile/{id}")
-    public async updateUserProfile(@Path() id: string, @Body() data: IProfile): Promise<IProfileData | { message: string }> {
+    public async updateUserProfile(@Path() id: string, @Body() data: IProfileEdit): Promise<IProfileData | { message: string }> {
         try {
             const node = await serviceInstance.updateUserProfile(id, data);
             if (node) {

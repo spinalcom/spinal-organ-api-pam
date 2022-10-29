@@ -1,5 +1,5 @@
 import { SpinalGraph, SpinalContext, SpinalNode } from 'spinal-env-viewer-graph-service';
-import { IProfile, IBosAuth, IPortofolioAuth, IPortofolioAuthRes, IBosAuthRes, IProfileRes } from '../interfaces';
+import { IProfile, IBosAuth, IPortofolioAuth, IPortofolioAuthRes, IBosAuthRes, IProfileRes, IProfileEdit } from '../interfaces';
 export declare class AppProfileService {
     private static instance;
     context: SpinalContext;
@@ -8,7 +8,7 @@ export declare class AppProfileService {
     init(): Promise<SpinalContext>;
     createAppProfile(appProfile: IProfile): Promise<IProfileRes>;
     getAppProfile(appProfile: string | SpinalNode): Promise<IProfileRes>;
-    updateAppProfile(appProfileId: string, appProfile: IProfile): Promise<IProfileRes>;
+    updateAppProfile(appProfileId: string, appProfile: IProfileEdit): Promise<IProfileRes>;
     getAllAppProfile(): Promise<IProfileRes[]>;
     getAllAppProfileNodes(): Promise<SpinalNode<import("spinal-core-connectorjs").Model>[]>;
     deleteAppProfile(appProfileId: string): Promise<string>;
@@ -33,10 +33,11 @@ export declare class AppProfileService {
     getAuthorizedBosApis(profile: SpinalNode | string, portofolioId: string, bosId: string): Promise<SpinalNode[]>;
     getBosAuthStructure(profile: string | SpinalNode, portofolioId: string): Promise<IBosAuthRes[]>;
     private _authorizeIPortofolioAuth;
+    private _unauthorizeIPortofolioAuth;
     private _authorizeIBosAuth;
+    private _unauthorizeIBosAuth;
     _getAppProfileNodeGraph(profileId: string): Promise<SpinalGraph | void>;
     private _findChildInContext;
-    private _addProfileToGraph;
     private _createAppProfileNode;
     private _getAppProfileNode;
     private _renameProfile;

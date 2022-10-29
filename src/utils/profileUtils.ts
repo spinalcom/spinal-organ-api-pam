@@ -50,7 +50,7 @@ export function _formatBosAuthRes(data: IBosAuthRes): IBosData {
     }
 }
 
-export function _getNodeListInfo(nodes: SpinalNode[]): any[] {
+export function _getNodeListInfo(nodes: SpinalNode[] = []): any[] {
     return nodes.map(el => el.info.get());
 }
 

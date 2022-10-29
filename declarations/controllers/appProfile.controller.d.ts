@@ -1,4 +1,4 @@
-import { IApiRoute, IBosAuth, IBosData, IPortofolioAuth, IPortofolioData, IProfile, IProfileData } from "../interfaces";
+import { IApiRoute, IBosAuth, IBosData, IPortofolioAuth, IPortofolioData, IProfile, IProfileData, IProfileEdit } from "../interfaces";
 import { Controller } from 'tsoa';
 export declare class AppProfileController extends Controller {
     constructor();
@@ -11,7 +11,7 @@ export declare class AppProfileController extends Controller {
     getAllAppProfile(): Promise<IProfileData[] | {
         message: string;
     }>;
-    updateAppProfile(id: string, data: IProfile): Promise<IProfileData | {
+    updateAppProfile(id: string, data: IProfileEdit): Promise<IProfileData | {
         message: string;
     }>;
     deleteAppProfile(id: string): Promise<{

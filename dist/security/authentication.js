@@ -33,25 +33,20 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.expressAuthentication = void 0;
-const constant_1 = require("../constant");
-const services_1 = require("../services");
 function expressAuthentication(request, securityName, scopes) {
-    var _a;
     return __awaiter(this, void 0, void 0, function* () {
-        const authInstance = services_1.AuthentificationService.getInstance();
-        const header = request.headers.authorization || request.headers.Authorization;
-        if (!header)
-            throw new Error(constant_1.SECURITY_MESSAGES.INVALID_TOKEN);
-        const [, token] = header.split(" ");
-        if (!token)
-            throw new Error(constant_1.SECURITY_MESSAGES.INVALID_TOKEN);
-        const tokenInfo = yield authInstance.tokenIsValid(token);
-        if (!tokenInfo)
-            throw new Error(constant_1.SECURITY_MESSAGES.INVALID_TOKEN);
-        if (securityName == constant_1.SECURITY_NAME.admin && !(((_a = tokenInfo.userInfo) === null || _a === void 0 ? void 0 : _a.type) == constant_1.USER_TYPES.ADMIN)) {
-            throw new Error(constant_1.SECURITY_MESSAGES.UNAUTHORIZED);
-        }
-        return tokenInfo;
+        return;
+        // const authInstance = AuthentificationService.getInstance();
+        // const header = request.headers.authorization || request.headers.Authorization;
+        // if (!header) throw new Error(SECURITY_MESSAGES.INVALID_TOKEN);
+        // const [, token] = (<string>header).split(" ");
+        // if (!token) throw new Error(SECURITY_MESSAGES.INVALID_TOKEN);
+        // const tokenInfo: any = await authInstance.tokenIsValid(token);
+        // if (!tokenInfo) throw new Error(SECURITY_MESSAGES.INVALID_TOKEN);
+        // if (securityName == SECURITY_NAME.admin && !(tokenInfo.userInfo?.type == USER_TYPES.ADMIN)) {
+        //     throw new Error(SECURITY_MESSAGES.UNAUTHORIZED);
+        // }
+        // return tokenInfo;
     });
 }
 exports.expressAuthentication = expressAuthentication;

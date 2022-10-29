@@ -102,6 +102,14 @@ class UserProfileService {
             if (!profileNode)
                 return;
             this._renameProfile(profileNode, userProfile.name);
+            if (userProfile.authorize) {
+                yield userProfile.authorize.reduce((prom, item) => __awaiter(this, void 0, void 0, function* () {
+                    const liste = yield prom;
+                    yield this._authorizeIPortofolioAuth(profileNode, item);
+                    yield this._unauthorizeIPortofolioAuth(profileNode, item);
+                    return liste;
+                }), Promise.resolve([]));
+            }
             // const { authorizeApis, authorizeBos, authorizePortofolio, unauthorizeApis, unauthorizeBos, unauthorizePortofolio } = _formatAuthorizationData(appProfile);
             // await this._unauthorizeOnEdit(profileNode, unauthorizeApis, <any>unauthorizeBos, <any>unauthorizePortofolio);
             // const filteredPortofolio = _filterPortofolioList(<any>authorizePortofolio, <any>unauthorizePortofolio);
@@ -167,6 +175,8 @@ class UserProfileService {
                 return;
             return data.reduce((prom, { appsIds, portofolioId }) => __awaiter(this, void 0, void 0, function* () {
                 const liste = yield prom;
+                if (!appsIds || appsIds.length === 0)
+                    return liste;
                 const portofolio = yield authorization_service_1.authorizationInstance.authorizeProfileToAccessPortofolio(node, portofolioId);
                 const apps = yield authorization_service_1.authorizationInstance.authorizeProfileToAccessPortofolioApp(node, portofolioId, appsIds);
                 liste.push({
@@ -297,6 +307,8 @@ class UserProfileService {
                 return;
             return data.reduce((prom, { buildingId, appsIds }) => __awaiter(this, void 0, void 0, function* () {
                 const liste = yield prom;
+                if (!appsIds || appsIds.length === 0)
+                    return liste;
                 const bos = yield authorization_service_1.authorizationInstance.authorizeProfileToAccessBos(node, portofolioId, buildingId);
                 const apps = yield authorization_service_1.authorizationInstance.authorizeProfileToAccessBosApp(node, portofolioId, buildingId, appsIds);
                 liste.push({
@@ -399,29 +411,40 @@ class UserProfileService {
     ///                       PRIVATES                      //
     //////////////////////////////////////////////////////////
     _authorizeIPortofolioAuth(profile, portofolioAuth) {
-        var _a, _b;
+        var _a;
         return __awaiter(this, void 0, void 0, function* () {
             const portofolio = yield this.authorizePortofolio(profile, portofolioAuth.portofolioId);
-            const [appsData, apisData] = yield Promise.all([this.authorizeToAccessPortofolioApp(profile, portofolioAuth), this.authorizeToAccessPortofolioApisRoute(profile, portofolioAuth)]);
+            const appsData = yield this.authorizeToAccessPortofolioApp(profile, portofolioAuth);
             const buildingProm = portofolioAuth.building.map(bos => this._authorizeIBosAuth(profile, bos, portofolioAuth.portofolioId));
             return {
                 portofolio: portofolio[0],
                 apps: (_a = appsData[0]) === null || _a === void 0 ? void 0 : _a.apps,
-                apis: (_b = apisData[0]) === null || _b === void 0 ? void 0 : _b.apis,
                 buildings: yield Promise.all(buildingProm)
             };
         });
     }
+    _unauthorizeIPortofolioAuth(profile, portofolioAuth) {
+        return __awaiter(this, void 0, void 0, function* () {
+            yield this.unauthorizeToAccessPortofolioApp(profile, { portofolioId: portofolioAuth.portofolioId, appsIds: portofolioAuth.unauthorizeAppsIds });
+            const buildingProm = portofolioAuth.building.map(bos => this._unauthorizeIBosAuth(profile, bos, portofolioAuth.portofolioId));
+            yield Promise.all(buildingProm);
+        });
+    }
     _authorizeIBosAuth(profile, bosAuth, portofolioId) {
-        var _a, _b;
+        var _a;
         return __awaiter(this, void 0, void 0, function* () {
             const [building] = yield this.authorizeToAccessBos(profile, portofolioId, bosAuth.buildingId);
-            const [appsData, apisData] = yield Promise.all([this.authorizeToAccessBosApp(profile, portofolioId, bosAuth), this.authorizeToAccessBosApiRoute(profile, portofolioId, bosAuth)]);
+            const appsData = yield this.authorizeToAccessBosApp(profile, portofolioId, bosAuth);
             return {
                 building,
                 apps: (_a = appsData[0]) === null || _a === void 0 ? void 0 : _a.apps,
-                apis: (_b = apisData[0]) === null || _b === void 0 ? void 0 : _b.apis
             };
+        });
+    }
+    _unauthorizeIBosAuth(profile, bosAuth, portofolioId) {
+        return __awaiter(this, void 0, void 0, function* () {
+            const appsData = yield this.unauthorizeToAccessBosApp(profile, portofolioId, { buildingId: bosAuth.buildingId, appsIds: bosAuth.unauthorizeAppsIds });
+            return appsData;
         });
     }
     _getUserProfileNodeGraph(profileId) {

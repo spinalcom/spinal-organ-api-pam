@@ -113,6 +113,40 @@ const models: TsoaRoute.Models = {
         "additionalProperties": false,
     },
     // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
+    "IBosAuthEdit": {
+        "dataType": "refObject",
+        "properties": {
+            "buildingId": {"dataType":"string","required":true},
+            "appsIds": {"dataType":"array","array":{"dataType":"string"}},
+            "apisIds": {"dataType":"array","array":{"dataType":"string"}},
+            "unauthorizeAppsIds": {"dataType":"array","array":{"dataType":"string"}},
+            "unauthorizeApisIds": {"dataType":"array","array":{"dataType":"string"}},
+        },
+        "additionalProperties": false,
+    },
+    // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
+    "IPortofolioAuthEdit": {
+        "dataType": "refObject",
+        "properties": {
+            "portofolioId": {"dataType":"string","required":true},
+            "appsIds": {"dataType":"array","array":{"dataType":"string"}},
+            "apisIds": {"dataType":"array","array":{"dataType":"string"}},
+            "unauthorizeAppsIds": {"dataType":"array","array":{"dataType":"string"}},
+            "unauthorizeApisIds": {"dataType":"array","array":{"dataType":"string"}},
+            "building": {"dataType":"array","array":{"dataType":"refObject","ref":"IBosAuthEdit"}},
+        },
+        "additionalProperties": false,
+    },
+    // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
+    "IProfileEdit": {
+        "dataType": "refObject",
+        "properties": {
+            "name": {"dataType":"string"},
+            "authorize": {"dataType":"array","array":{"dataType":"refObject","ref":"IPortofolioAuthEdit"}},
+        },
+        "additionalProperties": false,
+    },
+    // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
     "IEditApp": {
         "dataType": "refObject",
         "properties": {
@@ -686,7 +720,7 @@ export function RegisterRoutes(app: express.Router) {
             function AppProfileController_updateAppProfile(request: any, response: any, next: any) {
             const args = {
                     id: {"in":"path","name":"id","required":true,"dataType":"string"},
-                    data: {"in":"body","name":"data","required":true,"ref":"IProfile"},
+                    data: {"in":"body","name":"data","required":true,"ref":"IProfileEdit"},
             };
 
             // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
@@ -1471,6 +1505,7 @@ export function RegisterRoutes(app: express.Router) {
         });
         // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
         app.post('/api/v1/pam/register_admin',
+            authenticateMiddleware([{"admin":[]}]),
             ...(fetchMiddlewares<RequestHandler>(AuthController)),
             ...(fetchMiddlewares<RequestHandler>(AuthController.prototype.registerToAdmin)),
 
@@ -1496,6 +1531,7 @@ export function RegisterRoutes(app: express.Router) {
         });
         // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
         app.get('/api/v1/pam/get_pam_to_auth_credential',
+            authenticateMiddleware([{"admin":[]}]),
             ...(fetchMiddlewares<RequestHandler>(AuthController)),
             ...(fetchMiddlewares<RequestHandler>(AuthController.prototype.getBosToAdminCredential)),
 
@@ -1520,6 +1556,7 @@ export function RegisterRoutes(app: express.Router) {
         });
         // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
         app.delete('/api/v1/pam/delete_admin',
+            authenticateMiddleware([{"admin":[]}]),
             ...(fetchMiddlewares<RequestHandler>(AuthController)),
             ...(fetchMiddlewares<RequestHandler>(AuthController.prototype.deleteAdmin)),
 
@@ -1544,6 +1581,7 @@ export function RegisterRoutes(app: express.Router) {
         });
         // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
         app.get('/api/v1/pam/get_admin_to_pam_credential',
+            authenticateMiddleware([{"admin":[]}]),
             ...(fetchMiddlewares<RequestHandler>(AuthController)),
             ...(fetchMiddlewares<RequestHandler>(AuthController.prototype.getAdminCredential)),
 
@@ -1568,6 +1606,7 @@ export function RegisterRoutes(app: express.Router) {
         });
         // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
         app.put('/api/v1/pam/update_data',
+            authenticateMiddleware([{"admin":[]}]),
             ...(fetchMiddlewares<RequestHandler>(AuthController)),
             ...(fetchMiddlewares<RequestHandler>(AuthController.prototype.syncDataToAdmin)),
 
@@ -2657,7 +2696,7 @@ export function RegisterRoutes(app: express.Router) {
             function UserProfileController_updateUserProfile(request: any, response: any, next: any) {
             const args = {
                     id: {"in":"path","name":"id","required":true,"dataType":"string"},
-                    data: {"in":"body","name":"data","required":true,"ref":"IProfile"},
+                    data: {"in":"body","name":"data","required":true,"ref":"IProfileEdit"},
             };
 
             // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa

@@ -36,11 +36,13 @@ exports.proxyOptions = exports.canAccess = exports.formatUri = void 0;
 const constant_1 = require("../constant");
 const services_1 = require("../services");
 const utils_1 = require("../utils/pam_v1_utils/utils");
+const corrspondance_1 = require("./corrspondance");
 const apiServerEndpoint = "/api/v1/";
 function formatUri(argUrl, uri) {
     const base = argUrl.replace(new RegExp(`^${uri}*/`), (el) => "");
     let url = base.split("/").slice(1).join("/");
-    return /^api\/v1/.test(url) ? ('/' + url) : (apiServerEndpoint + url);
+    const correspondance = _getCorrespondance(url);
+    return /^api\/v1/.test(correspondance) ? ('/' + correspondance) : (apiServerEndpoint + correspondance);
 }
 exports.formatUri = formatUri;
 function canAccess(buildingId, api, profileId, isAppProfile) {
@@ -57,6 +59,29 @@ function canAccess(buildingId, api, profileId, isAppProfile) {
     });
 }
 exports.canAccess = canAccess;
+function _getCorrespondance(url) {
+    const found = Object.keys(corrspondance_1.correspondanceObj).find(el => {
+        const t = el.replace(/\{(.*?)\}/g, (el) => '(.*?)');
+        const regex = new RegExp(`^${t}$`);
+        return url.match(regex);
+    });
+    if (found) {
+        const urls = url.split("/");
+        const list = corrspondance_1.correspondanceObj[found].split("/");
+        let final = "";
+        for (let index = 0; index < list.length; index++) {
+            const element = list[index];
+            let item = "";
+            if (element.includes("{") && element.includes("}"))
+                item = urls[index];
+            else
+                item = list[index];
+            final += index === 0 ? item : "/" + item;
+        }
+        return final;
+    }
+    return url;
+}
 function hasAccessToBuilding(profile, buildingId) {
     for (const { buildings } of profile.authorized) {
         const found = buildings.find(({ building }) => building.getId().get() === buildingId);

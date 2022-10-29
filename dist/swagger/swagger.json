@@ -204,6 +204,99 @@
                 "type": "object",
                 "additionalProperties": false
             },
+            "IBosAuthEdit": {
+                "properties": {
+                    "buildingId": {
+                        "type": "string"
+                    },
+                    "appsIds": {
+                        "items": {
+                            "type": "string"
+                        },
+                        "type": "array"
+                    },
+                    "apisIds": {
+                        "items": {
+                            "type": "string"
+                        },
+                        "type": "array"
+                    },
+                    "unauthorizeAppsIds": {
+                        "items": {
+                            "type": "string"
+                        },
+                        "type": "array"
+                    },
+                    "unauthorizeApisIds": {
+                        "items": {
+                            "type": "string"
+                        },
+                        "type": "array"
+                    }
+                },
+                "required": [
+                    "buildingId"
+                ],
+                "type": "object",
+                "additionalProperties": false
+            },
+            "IPortofolioAuthEdit": {
+                "properties": {
+                    "portofolioId": {
+                        "type": "string"
+                    },
+                    "appsIds": {
+                        "items": {
+                            "type": "string"
+                        },
+                        "type": "array"
+                    },
+                    "apisIds": {
+                        "items": {
+                            "type": "string"
+                        },
+                        "type": "array"
+                    },
+                    "unauthorizeAppsIds": {
+                        "items": {
+                            "type": "string"
+                        },
+                        "type": "array"
+                    },
+                    "unauthorizeApisIds": {
+                        "items": {
+                            "type": "string"
+                        },
+                        "type": "array"
+                    },
+                    "building": {
+                        "items": {
+                            "$ref": "#/components/schemas/IBosAuthEdit"
+                        },
+                        "type": "array"
+                    }
+                },
+                "required": [
+                    "portofolioId"
+                ],
+                "type": "object",
+                "additionalProperties": false
+            },
+            "IProfileEdit": {
+                "properties": {
+                    "name": {
+                        "type": "string"
+                    },
+                    "authorize": {
+                        "items": {
+                            "$ref": "#/components/schemas/IPortofolioAuthEdit"
+                        },
+                        "type": "array"
+                    }
+                },
+                "type": "object",
+                "additionalProperties": false
+            },
             "IEditApp": {
                 "properties": {
                     "name": {
@@ -1451,7 +1544,7 @@
                     "content": {
                         "application/json": {
                             "schema": {
-                                "$ref": "#/components/schemas/IProfile"
+                                "$ref": "#/components/schemas/IProfileEdit"
                             }
                         }
                     }
@@ -3125,7 +3218,11 @@
                 "tags": [
                     "Auth"
                 ],
-                "security": [],
+                "security": [
+                    {
+                        "admin": []
+                    }
+                ],
                 "parameters": [],
                 "requestBody": {
                     "required": true,
@@ -3184,7 +3281,11 @@
                 "tags": [
                     "Auth"
                 ],
-                "security": [],
+                "security": [
+                    {
+                        "admin": []
+                    }
+                ],
                 "parameters": []
             }
         },
@@ -3214,7 +3315,11 @@
                 "tags": [
                     "Auth"
                 ],
-                "security": [],
+                "security": [
+                    {
+                        "admin": []
+                    }
+                ],
                 "parameters": []
             }
         },
@@ -3251,7 +3356,11 @@
                 "tags": [
                     "Auth"
                 ],
-                "security": [],
+                "security": [
+                    {
+                        "admin": []
+                    }
+                ],
                 "parameters": []
             }
         },
@@ -3281,7 +3390,11 @@
                 "tags": [
                     "Auth"
                 ],
-                "security": [],
+                "security": [
+                    {
+                        "admin": []
+                    }
+                ],
                 "parameters": []
             }
         },
@@ -5651,7 +5764,7 @@
                     "content": {
                         "application/json": {
                             "schema": {
-                                "$ref": "#/components/schemas/IProfile"
+                                "$ref": "#/components/schemas/IProfileEdit"
                             }
                         }
                     }

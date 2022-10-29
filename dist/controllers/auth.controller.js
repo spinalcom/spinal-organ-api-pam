@@ -182,6 +182,7 @@ __decorate([
     __metadata("design:returntype", Promise)
 ], AuthController.prototype, "authenticateAdmin", null);
 __decorate([
+    (0, tsoa_1.Security)(constant_1.SECURITY_NAME.admin),
     (0, tsoa_1.Post)("/register_admin"),
     __param(0, (0, tsoa_1.Body)()),
     __metadata("design:type", Function),
@@ -189,24 +190,28 @@ __decorate([
     __metadata("design:returntype", Promise)
 ], AuthController.prototype, "registerToAdmin", null);
 __decorate([
+    (0, tsoa_1.Security)(constant_1.SECURITY_NAME.admin),
     (0, tsoa_1.Get)("/get_pam_to_auth_credential"),
     __metadata("design:type", Function),
     __metadata("design:paramtypes", []),
     __metadata("design:returntype", Promise)
 ], AuthController.prototype, "getBosToAdminCredential", null);
 __decorate([
+    (0, tsoa_1.Security)(constant_1.SECURITY_NAME.admin),
     (0, tsoa_1.Delete)("/delete_admin"),
     __metadata("design:type", Function),
     __metadata("design:paramtypes", []),
     __metadata("design:returntype", Promise)
 ], AuthController.prototype, "deleteAdmin", null);
 __decorate([
+    (0, tsoa_1.Security)(constant_1.SECURITY_NAME.admin),
     (0, tsoa_1.Get)("/get_admin_to_pam_credential"),
     __metadata("design:type", Function),
     __metadata("design:paramtypes", []),
     __metadata("design:returntype", Promise)
 ], AuthController.prototype, "getAdminCredential", null);
 __decorate([
+    (0, tsoa_1.Security)(constant_1.SECURITY_NAME.admin),
     (0, tsoa_1.Put)("/update_data"),
     __metadata("design:type", Function),
     __metadata("design:paramtypes", []),

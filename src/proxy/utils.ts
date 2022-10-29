@@ -30,6 +30,7 @@ import { IApiRoute, IBosAuthRes, IProfileRes } from "../interfaces";
 import { AppProfileService, UserProfileService } from "../services";
 import AuthorizationService from "../services/authorization.service";
 import { Utils } from "../utils/pam_v1_utils/utils";
+import { correspondanceObj } from "./corrspondance";
 
 const apiServerEndpoint = "/api/v1/";
 
@@ -37,7 +38,8 @@ export function formatUri(argUrl: string, uri: string): string {
     const base = argUrl.replace(new RegExp(`^${uri}*/`), (el) => "");
     let url = base.split("/").slice(1).join("/");
 
-    return /^api\/v1/.test(url) ? ('/' + url) : (apiServerEndpoint + url);
+    const correspondance = _getCorrespondance(url);
+    return /^api\/v1/.test(correspondance) ? ('/' + correspondance) : (apiServerEndpoint + correspondance);
 }
 
 export async function canAccess(buildingId: string, api: { method: string; route: string }, profileId: string, isAppProfile): Promise<boolean> {
@@ -54,6 +56,33 @@ export async function canAccess(buildingId: string, api: { method: string; route
     return true;
 }
 
+
+function _getCorrespondance(url: string) {
+    const found = Object.keys(correspondanceObj).find(el => {
+        const t = el.replace(/\{(.*?)\}/g, (el) => '(.*?)')
+        const regex = new RegExp(`^${t}$`);
+        return url.match(regex);
+    })
+
+    if (found) {
+        const urls = url.split("/");
+        const list = correspondanceObj[found].split("/");
+        let final = "";
+
+        for (let index = 0; index < list.length; index++) {
+            const element = list[index];
+            let item = ""
+            if (element.includes("{") && element.includes("}")) item = urls[index];
+            else item = list[index];
+
+            final += index === 0 ? item : "/" + item
+        }
+        return final;
+    }
+
+
+    return url;
+}
 
 function hasAccessToBuilding(profile: IProfileRes, buildingId: string): IBosAuthRes {
     for (const { buildings } of profile.authorized) {

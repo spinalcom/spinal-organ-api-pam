@@ -74,6 +74,10 @@ function useClientMiddleWare(app: express.Express) {
   app.get("/", (req, res) => {
     res.redirect("/docs");
   })
+
+  // app.get("/v1/building_list", (req, res) => {
+  //   res.redirect("")
+  // })
 }
 
 function initSwagger(app: express.Express) {

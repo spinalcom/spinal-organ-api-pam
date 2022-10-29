@@ -1,4 +1,4 @@
-import { IBosAuth, IBosData, IPortofolioData, IProfile, IProfileData } from "../interfaces";
+import { IBosAuth, IBosData, IPortofolioData, IProfile, IProfileData, IProfileEdit } from "../interfaces";
 import { Controller } from "tsoa";
 export declare class UserProfileController extends Controller {
     constructor();
@@ -11,7 +11,7 @@ export declare class UserProfileController extends Controller {
     getAllUserProfile(): Promise<IProfileData[] | {
         message: string;
     }>;
-    updateUserProfile(id: string, data: IProfile): Promise<IProfileData | {
+    updateUserProfile(id: string, data: IProfileEdit): Promise<IProfileData | {
         message: string;
     }>;
     deleteUserProfile(id: string): Promise<{

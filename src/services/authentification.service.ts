@@ -216,13 +216,14 @@ export class AuthentificationService {
             const data = result.data;
             data.profile = await this._getProfileInfo(data.token, adminCredential, isUser);
             if (isUser) data.userInfo = await this._getUserInfo(data.userId, adminCredential, data.token);
-            // else data.userInfo = await this._getApplicationInfo()
-            this._saveUserToken(data);
+            else data.userInfo = await this._getApplicationInfo(data.applicationId, adminCredential, data.token);
+            await this._saveUserToken(data);
             return {
                 code: HTTP_CODES.OK,
                 data
             }
         }).catch(err => {
+            console.error(err)
             return {
                 code: HTTP_CODES.UNAUTHORIZED,
                 data: "bad credential"

@@ -29,3 +29,22 @@ export interface IBosAuthRes {
     apps?: SpinalNode[];
     apis?: SpinalNode[];
 }
+export interface IPortofolioAuthEdit {
+    portofolioId: string;
+    appsIds?: string[];
+    apisIds?: string[];
+    unauthorizeAppsIds?: string[];
+    unauthorizeApisIds?: string[];
+    building?: IBosAuthEdit[];
+}
+export interface IBosAuthEdit {
+    buildingId: string;
+    appsIds?: string[];
+    apisIds?: string[];
+    unauthorizeAppsIds?: string[];
+    unauthorizeApisIds?: string[];
+}
+export interface IProfileEdit {
+    name?: string;
+    authorize?: IPortofolioAuthEdit[];
+}

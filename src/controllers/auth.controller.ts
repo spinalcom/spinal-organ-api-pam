@@ -24,8 +24,8 @@
 
 import { AuthentificationService } from "../services";
 import * as express from "express";
-import { HTTP_CODES } from "../constant";
-import { Body, Route, Tags, Controller, Post, Get, Put, Delete } from "tsoa";
+import { HTTP_CODES, SECURITY_NAME } from "../constant";
+import { Body, Route, Tags, Controller, Post, Get, Put, Delete, Security } from "tsoa";
 import { IAdmin, IAdminCredential, IAppCredential, IApplicationToken, IPamCredential, IPamInfo, IUserCredential, IUserToken } from "../interfaces";
 
 const serviceInstance = AuthentificationService.getInstance();
@@ -62,6 +62,7 @@ export class AuthController extends Controller {
         }
     }
 
+    @Security(SECURITY_NAME.admin)
     @Post("/register_admin")
     public async registerToAdmin(@Body() data: { pamInfo: IPamInfo, adminInfo: IAdmin }): Promise<IPamCredential | { message: string }> {
         try {
@@ -75,6 +76,7 @@ export class AuthController extends Controller {
         }
     }
 
+    @Security(SECURITY_NAME.admin)
     @Get("/get_pam_to_auth_credential")
     public async getBosToAdminCredential(): Promise<IPamCredential | { message: string }> {
         try {
@@ -103,6 +105,7 @@ export class AuthController extends Controller {
     //     }
     // }
 
+    @Security(SECURITY_NAME.admin)
     @Delete("/delete_admin")
     public async deleteAdmin(): Promise<{ message: string }> {
         try {
@@ -117,6 +120,7 @@ export class AuthController extends Controller {
         }
     }
 
+    @Security(SECURITY_NAME.admin)
     @Get("/get_admin_to_pam_credential")
     public async getAdminCredential(): Promise<IAdminCredential | { message: string }> {
         try {
@@ -135,6 +139,7 @@ export class AuthController extends Controller {
         }
     }
 
+    @Security(SECURITY_NAME.admin)
     @Put("/update_data")
     public async syncDataToAdmin(): Promise<{ message: string }> {
         try {

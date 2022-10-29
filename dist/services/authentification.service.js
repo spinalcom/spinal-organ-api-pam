@@ -214,13 +214,15 @@ class AuthentificationService {
             data.profile = yield this._getProfileInfo(data.token, adminCredential, isUser);
             if (isUser)
                 data.userInfo = yield this._getUserInfo(data.userId, adminCredential, data.token);
-            // else data.userInfo = await this._getApplicationInfo()
-            this._saveUserToken(data);
+            else
+                data.userInfo = yield this._getApplicationInfo(data.applicationId, adminCredential, data.token);
+            yield this._saveUserToken(data);
             return {
                 code: constant_1.HTTP_CODES.OK,
                 data
             };
         })).catch(err => {
+            console.error(err);
             return {
                 code: constant_1.HTTP_CODES.UNAUTHORIZED,
                 data: "bad credential"

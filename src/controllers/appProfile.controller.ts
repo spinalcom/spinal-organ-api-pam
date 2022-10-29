@@ -71,7 +71,7 @@
  */
 
 import { HTTP_CODES, SECURITY_NAME } from "../constant";
-import { IApiRoute, IAppProfile, IBosAuth, IBosData, IPortofolioAuth, IPortofolioData, IProfile, IProfileData } from "../interfaces";
+import { IApiRoute, IAppProfile, IBosAuth, IBosData, IPortofolioAuth, IPortofolioData, IProfile, IProfileData, IProfileEdit } from "../interfaces";
 import { AppProfileService } from "../services";
 import { Route, Tags, Get, Post, Put, Delete, Path, Body, Controller, Security } from 'tsoa';
 import { _formatBosAuthRes, _formatPortofolioAuthRes, _formatProfile, _getNodeListInfo } from "../utils/profileUtils";
@@ -138,7 +138,7 @@ export class AppProfileController extends Controller {
 
     @Security(SECURITY_NAME.admin)
     @Put("/edit_profile/{id}")
-    public async updateAppProfile(@Path() id: string, @Body() data: IProfile): Promise<IProfileData | { message: string }> {
+    public async updateAppProfile(@Path() id: string, @Body() data: IProfileEdit): Promise<IProfileData | { message: string }> {
         try {
             const node = await serviceInstance.updateAppProfile(id, data);
             if (node) {

@@ -36,7 +36,7 @@ function _formatBosAuthRes(data) {
     return Object.assign(Object.assign({}, data.building.info.get()), { apps: _getNodeListInfo(data.apps), apis: _getNodeListInfo(data.apis) });
 }
 exports._formatBosAuthRes = _formatBosAuthRes;
-function _getNodeListInfo(nodes) {
+function _getNodeListInfo(nodes = []) {
     return nodes.map(el => el.info.get());
 }
 exports._getNodeListInfo = _getNodeListInfo;
