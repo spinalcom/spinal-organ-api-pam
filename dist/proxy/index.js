@@ -86,7 +86,7 @@ function configureProxy(app, useV1 = false) {
                 return res.status(constant_1.HTTP_CODES.UNAUTHORIZED).send(error.message);
             }
         }));
-        app.post("/api/oauth/token", (req, res) => {
+        app.post("/v1/oauth/token", (req, res) => {
             res.redirect(307, `${constant_1.PAM_BASE_URI}/auth`);
         });
     }

@@ -49,8 +49,13 @@ exports.getProfileBuildings = getProfileBuildings;
 function formatUri(argUrl, uri) {
     const base = argUrl.replace(new RegExp(`^${uri}*/`), (el) => "");
     let url = base.split("/").slice(1).join("/");
+    let query = "";
+    if (url.includes("?")) {
+        query = url.slice(url.indexOf("?"));
+        url = url.substring(0, url.indexOf('?'));
+    }
     const correspondance = _getCorrespondance(url);
-    return /^api\/v1/.test(correspondance) ? ('/' + correspondance) : (apiServerEndpoint + correspondance);
+    return (/^api\/v1/.test(correspondance) ? ('/' + correspondance) : (apiServerEndpoint + correspondance)) + query;
 }
 exports.formatUri = formatUri;
 function canAccess(buildingId, api, profileId, isAppProfile) {
@@ -59,6 +64,8 @@ function canAccess(buildingId, api, profileId, isAppProfile) {
         const buildingAccess = _hasAccessToBuilding(profile, buildingId);
         if (!buildingAccess)
             return false;
+        if (api.route.includes("?"))
+            api.route = api.route.substring(0, api.route.indexOf('?'));
         const routeFound = _hasAccessToApiRoute(buildingAccess, api);
         if (!routeFound)
             return false;

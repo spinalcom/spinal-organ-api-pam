@@ -30,7 +30,7 @@ import { IApiRoute, IBosAuthRes, IProfileRes } from "../interfaces";
 import { AppProfileService, UserProfileService } from "../services";
 import AuthorizationService from "../services/authorization.service";
 import { Utils } from "../utils/pam_v1_utils/utils";
-import { correspondanceObj } from "./corrspondance";
+import { correspondanceObj } from "./correspondance";
 
 const apiServerEndpoint = "/api/v1/";
 
@@ -46,9 +46,13 @@ export async function getProfileBuildings(profileId: string, isApp: boolean) {
 export function formatUri(argUrl: string, uri: string): string {
     const base = argUrl.replace(new RegExp(`^${uri}*/`), (el) => "");
     let url = base.split("/").slice(1).join("/");
-
+    let query = "";
+    if (url.includes("?")) {
+        query = url.slice(url.indexOf("?"))
+        url = url.substring(0, url.indexOf('?'))
+    }
     const correspondance = _getCorrespondance(url);
-    return /^api\/v1/.test(correspondance) ? ('/' + correspondance) : (apiServerEndpoint + correspondance);
+    return (/^api\/v1/.test(correspondance) ? ('/' + correspondance) : (apiServerEndpoint + correspondance)) + query;
 }
 
 export async function canAccess(buildingId: string, api: { method: string; route: string }, profileId: string, isAppProfile): Promise<boolean> {
@@ -57,6 +61,8 @@ export async function canAccess(buildingId: string, api: { method: string; route
 
     const buildingAccess = _hasAccessToBuilding(profile, buildingId);
     if (!buildingAccess) return false;
+
+    if (api.route.includes("?")) api.route = api.route.substring(0, api.route.indexOf('?'));
 
     const routeFound = _hasAccessToApiRoute(buildingAccess, api);
     if (!routeFound) return false;

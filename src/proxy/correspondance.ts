@@ -21,11 +21,11 @@
  * with this file. If not, see
  * <http://resources.spinalcom.com/licenses.pdf>.
  */
-
 export const correspondanceObj = {
     "context/{idContext}/nodeTypeList/{type}": "context/{id}/nodesOfType/{type}",
     "geographicContext": "geographicContext/tree",
     "floor_list": "floor/list",
+    "workflow_list": "workflow/list",
     "workflow/{idWorkFlow}/process_list": "workflow/{id}/processList",
     "workflow/{idWorkFlow}/process/{processId}/step_list": "workflow/{workflowId}/process/{processId}/stepList",
     "node/{idNode}/children_node": "relation/{id}/children_node",

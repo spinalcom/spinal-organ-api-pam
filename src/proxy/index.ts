@@ -91,7 +91,7 @@ export default function configureProxy(app: express.Express, useV1: boolean = fa
             }
         })
 
-        app.post("/api/oauth/token", (req: express.Request, res: express.Response) => {
+        app.post("/v1/oauth/token", (req: express.Request, res: express.Response) => {
             res.redirect(307, `${PAM_BASE_URI}/auth`)
         })
     }

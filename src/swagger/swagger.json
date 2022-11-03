@@ -551,6 +551,19 @@
 				"type": "object",
 				"additionalProperties": false
 			},
+			"HTTP_CODES": {
+				"enum": [
+					200,
+					201,
+					202,
+					400,
+					401,
+					403,
+					404,
+					500
+				],
+				"type": "number"
+			},
 			"ILocation": {
 				"properties": {
 					"lat": {
@@ -3373,6 +3386,90 @@
 					}
 				],
 				"parameters": []
+			}
+		},
+		"/api/v1/pam/getTokenData": {
+			"post": {
+				"operationId": "TokenIsValid",
+				"responses": {
+					"200": {
+						"description": "Ok",
+						"content": {
+							"application/json": {
+								"schema": {
+									"anyOf": [
+										{
+											"properties": {
+												"message": {},
+												"data": {
+													"anyOf": [
+														{
+															"$ref": "#/components/schemas/IApplicationToken"
+														},
+														{
+															"$ref": "#/components/schemas/IUserToken"
+														}
+													]
+												},
+												"code": {
+													"$ref": "#/components/schemas/HTTP_CODES"
+												}
+											},
+											"required": [
+												"data",
+												"code"
+											],
+											"type": "object"
+										},
+										{
+											"properties": {
+												"data": {},
+												"message": {
+													"type": "string"
+												},
+												"code": {
+													"$ref": "#/components/schemas/HTTP_CODES"
+												}
+											},
+											"required": [
+												"message",
+												"code"
+											],
+											"type": "object"
+										}
+									]
+								}
+							}
+						}
+					}
+				},
+				"tags": [
+					"Auth"
+				],
+				"security": [
+					{
+						"all": []
+					}
+				],
+				"parameters": [],
+				"requestBody": {
+					"required": true,
+					"content": {
+						"application/json": {
+							"schema": {
+								"properties": {
+									"token": {
+										"type": "string"
+									}
+								},
+								"required": [
+									"token"
+								],
+								"type": "object"
+							}
+						}
+					}
+				}
 			}
 		},
 		"/api/v1/pam/get_building/{id}": {

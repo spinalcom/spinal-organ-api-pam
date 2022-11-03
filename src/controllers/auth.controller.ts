@@ -51,18 +51,6 @@ export class AuthController extends Controller {
         }
     }
 
-    // @Security(SECURITY_NAME.all)
-    // @Post("/auth/admin")
-    // public async authenticateAdmin(@Body() credential: IUserCredential): Promise<string | IApplicationToken | IUserToken | { message: string }> {
-    //     try {
-    //         const { code, message } = await serviceInstance.authenticateAdmin(credential);
-    //         this.setStatus(code);
-    //         return message;
-    //     } catch (error) {
-    //         this.setStatus(HTTP_CODES.INTERNAL_ERROR)
-    //         return { message: error.message };
-    //     }
-    // }
 
     @Security(SECURITY_NAME.admin)
     @Post("/register_admin")
@@ -151,6 +139,27 @@ export class AuthController extends Controller {
         } catch (error) {
             this.setStatus(HTTP_CODES.INTERNAL_ERROR)
             return { message: error.message }
+        }
+    }
+
+
+    @Security(SECURITY_NAME.all)
+    @Post("/getTokenData")
+    public async tokenIsValid(@Body() data: { token: string }) {
+        try {
+            const token = await serviceInstance.tokenIsValid(data.token);
+            const code = token ? HTTP_CODES.OK : HTTP_CODES.UNAUTHORIZED;
+            this.setStatus(code);
+            return {
+                code,
+                data: token
+            }
+        } catch (error) {
+            this.setStatus(HTTP_CODES.UNAUTHORIZED)
+            return {
+                code: HTTP_CODES.UNAUTHORIZED,
+                message: "Token is expired or invalid"
+            }
         }
     }
 

@@ -1,4 +1,6 @@
 "use strict";
+Object.defineProperty(exports, "__esModule", { value: true });
+exports.correspondanceObj = void 0;
 /*
  * Copyright 2022 SpinalCom - www.spinalcom.com
  *
@@ -22,12 +24,11 @@
  * with this file. If not, see
  * <http://resources.spinalcom.com/licenses.pdf>.
  */
-Object.defineProperty(exports, "__esModule", { value: true });
-exports.correspondanceObj = void 0;
 exports.correspondanceObj = {
     "context/{idContext}/nodeTypeList/{type}": "context/{id}/nodesOfType/{type}",
     "geographicContext": "geographicContext/tree",
     "floor_list": "floor/list",
+    "workflow_list": "workflow/list",
     "workflow/{idWorkFlow}/process_list": "workflow/{id}/processList",
     "workflow/{idWorkFlow}/process/{processId}/step_list": "workflow/{workflowId}/process/{processId}/stepList",
     "node/{idNode}/children_node": "relation/{id}/children_node",

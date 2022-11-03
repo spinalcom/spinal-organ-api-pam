@@ -66,18 +66,6 @@ let AuthController = class AuthController extends tsoa_1.Controller {
             }
         });
     }
-    // @Security(SECURITY_NAME.all)
-    // @Post("/auth/admin")
-    // public async authenticateAdmin(@Body() credential: IUserCredential): Promise<string | IApplicationToken | IUserToken | { message: string }> {
-    //     try {
-    //         const { code, message } = await serviceInstance.authenticateAdmin(credential);
-    //         this.setStatus(code);
-    //         return message;
-    //     } catch (error) {
-    //         this.setStatus(HTTP_CODES.INTERNAL_ERROR)
-    //         return { message: error.message };
-    //     }
-    // }
     registerToAdmin(data) {
         return __awaiter(this, void 0, void 0, function* () {
             try {
@@ -165,6 +153,26 @@ let AuthController = class AuthController extends tsoa_1.Controller {
             }
         });
     }
+    tokenIsValid(data) {
+        return __awaiter(this, void 0, void 0, function* () {
+            try {
+                const token = yield serviceInstance.tokenIsValid(data.token);
+                const code = token ? constant_1.HTTP_CODES.OK : constant_1.HTTP_CODES.UNAUTHORIZED;
+                this.setStatus(code);
+                return {
+                    code,
+                    data: token
+                };
+            }
+            catch (error) {
+                this.setStatus(constant_1.HTTP_CODES.UNAUTHORIZED);
+                return {
+                    code: constant_1.HTTP_CODES.UNAUTHORIZED,
+                    message: "Token is expired or invalid"
+                };
+            }
+        });
+    }
 };
 __decorate([
     (0, tsoa_1.Security)(constant_1.SECURITY_NAME.all),
@@ -210,6 +218,14 @@ __decorate([
     __metadata("design:paramtypes", []),
     __metadata("design:returntype", Promise)
 ], AuthController.prototype, "syncDataToAdmin", null);
+__decorate([
+    (0, tsoa_1.Security)(constant_1.SECURITY_NAME.all),
+    (0, tsoa_1.Post)("/getTokenData"),
+    __param(0, (0, tsoa_1.Body)()),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [Object]),
+    __metadata("design:returntype", Promise)
+], AuthController.prototype, "tokenIsValid", null);
 AuthController = __decorate([
     (0, tsoa_1.Route)("/api/v1/pam"),
     (0, tsoa_1.Tags)("Auth"),
