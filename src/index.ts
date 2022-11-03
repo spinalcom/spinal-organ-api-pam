@@ -27,21 +27,17 @@ const path = require("path");
 require("dotenv").config(path.resolve(__dirname, "../.env"));
 import { spinalCore } from 'spinal-core-connectorjs_type';
 import { configServiceInstance } from './services/configFile.service';
-// const { spinalConnector: { user, password, host, port }, config: { directory_path, fileName } } = require("../config");
 
-import initExpress from './initExpress';
-// import initSwagger from "./swagger";
+import expressServer from './server';
 
-// import routes from "./old_routes";
-import { RegisterRoutes } from './routes'
 
 const conn = spinalCore.connect(`http://${process.env.USER_ID}:${process.env.USER_MDP}@${process.env.HUB_HOST}:${process.env.HUB_PORT}/`);
 
 
 configServiceInstance.init(conn).then(() => {
-  const { app } = initExpress();
-  // initSwagger(app);
-  RegisterRoutes(app);
+
+  const { app } = expressServer();
+
 }).catch((err: Error) => {
   console.error(err);
 });

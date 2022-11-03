@@ -66,19 +66,18 @@ let AuthController = class AuthController extends tsoa_1.Controller {
             }
         });
     }
-    authenticateAdmin(credential) {
-        return __awaiter(this, void 0, void 0, function* () {
-            try {
-                const { code, message } = yield serviceInstance.authenticateAdmin(credential);
-                this.setStatus(code);
-                return message;
-            }
-            catch (error) {
-                this.setStatus(constant_1.HTTP_CODES.INTERNAL_ERROR);
-                return { message: error.message };
-            }
-        });
-    }
+    // @Security(SECURITY_NAME.all)
+    // @Post("/auth/admin")
+    // public async authenticateAdmin(@Body() credential: IUserCredential): Promise<string | IApplicationToken | IUserToken | { message: string }> {
+    //     try {
+    //         const { code, message } = await serviceInstance.authenticateAdmin(credential);
+    //         this.setStatus(code);
+    //         return message;
+    //     } catch (error) {
+    //         this.setStatus(HTTP_CODES.INTERNAL_ERROR)
+    //         return { message: error.message };
+    //     }
+    // }
     registerToAdmin(data) {
         return __awaiter(this, void 0, void 0, function* () {
             try {
@@ -168,19 +167,13 @@ let AuthController = class AuthController extends tsoa_1.Controller {
     }
 };
 __decorate([
+    (0, tsoa_1.Security)(constant_1.SECURITY_NAME.all),
     (0, tsoa_1.Post)("/auth"),
     __param(0, (0, tsoa_1.Body)()),
     __metadata("design:type", Function),
     __metadata("design:paramtypes", [Object]),
     __metadata("design:returntype", Promise)
 ], AuthController.prototype, "authenticate", null);
-__decorate([
-    (0, tsoa_1.Post)("/auth/admin"),
-    __param(0, (0, tsoa_1.Body)()),
-    __metadata("design:type", Function),
-    __metadata("design:paramtypes", [Object]),
-    __metadata("design:returntype", Promise)
-], AuthController.prototype, "authenticateAdmin", null);
 __decorate([
     (0, tsoa_1.Security)(constant_1.SECURITY_NAME.admin),
     (0, tsoa_1.Post)("/register_admin"),

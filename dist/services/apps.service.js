@@ -39,6 +39,7 @@ const building_service_1 = require("./building.service");
 const configFile_service_1 = require("./configFile.service");
 const portofolio_service_1 = require("./portofolio.service");
 const spinal_env_viewer_plugin_excel_manager_service_1 = require("spinal-env-viewer-plugin-excel-manager-service");
+const adminProfile_service_1 = require("./adminProfile.service");
 exports.AppsType = Object.freeze({
     admin: "admin",
     building: "building",
@@ -75,6 +76,7 @@ class AppService {
             appInfo.type = constant_1.ADMIN_APP_TYPE;
             const appId = spinal_env_viewer_graph_service_1.SpinalGraphService.createNode(appInfo, undefined);
             const node = spinal_env_viewer_graph_service_1.SpinalGraphService.getRealNode(appId);
+            yield adminProfile_service_1.AdminProfileService.getInstance().addAppToProfil(node);
             return groupNode.addChildInContext(node, constant_1.APP_RELATION_NAME, constant_1.PTR_LST_TYPE, this.context);
         });
     }

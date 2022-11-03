@@ -291,7 +291,7 @@ __decorate([
     __metadata("design:returntype", Promise)
 ], UserProfileController.prototype, "createUserProfile", null);
 __decorate([
-    (0, tsoa_1.Security)(constant_1.SECURITY_NAME.admin),
+    (0, tsoa_1.Security)(constant_1.SECURITY_NAME.profile),
     (0, tsoa_1.Get)("/get_profile/{id}"),
     __param(0, (0, tsoa_1.Path)()),
     __metadata("design:type", Function),
@@ -323,7 +323,7 @@ __decorate([
     __metadata("design:returntype", Promise)
 ], UserProfileController.prototype, "deleteUserProfile", null);
 __decorate([
-    (0, tsoa_1.Security)(constant_1.SECURITY_NAME.admin),
+    (0, tsoa_1.Security)(constant_1.SECURITY_NAME.profile),
     (0, tsoa_1.Get)("/get_authorized_portofolio/{profileId}"),
     __param(0, (0, tsoa_1.Path)()),
     __metadata("design:type", Function),
@@ -340,7 +340,7 @@ __decorate([
     __metadata("design:returntype", Promise)
 ], UserProfileController.prototype, "authorizeToAccessPortofolioApps", null);
 __decorate([
-    (0, tsoa_1.Security)(constant_1.SECURITY_NAME.admin),
+    (0, tsoa_1.Security)(constant_1.SECURITY_NAME.profile),
     (0, tsoa_1.Get)("/get_authorized_portofolio_apps/{profileId}/{portofolioId}"),
     __param(0, (0, tsoa_1.Path)()),
     __param(1, (0, tsoa_1.Path)()),
@@ -358,7 +358,7 @@ __decorate([
     __metadata("design:returntype", Promise)
 ], UserProfileController.prototype, "unauthorizeToAccessPortofolioApps", null);
 __decorate([
-    (0, tsoa_1.Security)(constant_1.SECURITY_NAME.admin),
+    (0, tsoa_1.Security)(constant_1.SECURITY_NAME.profile),
     (0, tsoa_1.Get)("/get_authorized_bos/{profileId}/{portofolioId}"),
     __param(0, (0, tsoa_1.Path)()),
     __param(1, (0, tsoa_1.Path)()),
@@ -377,7 +377,7 @@ __decorate([
     __metadata("design:returntype", Promise)
 ], UserProfileController.prototype, "authorizeToAccessBosApps", null);
 __decorate([
-    (0, tsoa_1.Security)(constant_1.SECURITY_NAME.admin),
+    (0, tsoa_1.Security)(constant_1.SECURITY_NAME.profile),
     (0, tsoa_1.Get)("/get_authorized_bos_apps/{profileId}/{portofolioId}/{bosId}"),
     __param(0, (0, tsoa_1.Path)()),
     __param(1, (0, tsoa_1.Path)()),

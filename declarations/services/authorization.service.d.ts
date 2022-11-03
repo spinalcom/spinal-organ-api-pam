@@ -1,9 +1,9 @@
-import { SpinalNode } from "spinal-env-viewer-graph-service";
+import { SpinalContext, SpinalNode } from "spinal-env-viewer-graph-service";
 export default class AuthorizationService {
     private static instance;
     private constructor();
     static getInstance(): AuthorizationService;
-    profileHasAccess(profile: SpinalNode, node: SpinalNode): Promise<boolean>;
+    profileHasAccess(profile: SpinalNode, node: SpinalNode | string): Promise<boolean>;
     authorizeProfileToAccessPortofolio(profile: SpinalNode, portofolioId: string): Promise<SpinalNode>;
     authorizeProfileToAccessPortofolioApp(profile: SpinalNode, portofolioId: string, appIds: string | string[]): Promise<SpinalNode[]>;
     unauthorizeProfileToAccessPortofolio(profile: SpinalNode, portofolioId: string): Promise<boolean>;
@@ -23,7 +23,7 @@ export default class AuthorizationService {
     getAuthorizedApisRoutesFromProfile(profile: SpinalNode, portofolioId: string): Promise<SpinalNode[]>;
     getAuthorizedBosApisRoutesFromProfile(profile: SpinalNode, portofolioId: string, BosId: string): Promise<SpinalNode[]>;
     private _getRefTree;
-    private _getAuthorizedPortofolioContext;
+    _getAuthorizedPortofolioContext(profile: SpinalNode, createIfNotExist?: boolean): Promise<SpinalContext>;
     private _getAuthorizedApisRoutesContext;
     private _getAuthorizedBosContext;
     private _getOrCreateContext;

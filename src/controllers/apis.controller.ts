@@ -71,7 +71,7 @@ export class APIController extends Controller {
     }
 
 
-    @Security(SECURITY_NAME.admin)
+    @Security(SECURITY_NAME.profile)
     @Get("/get_portofolio_api_route/{id}")
     public async getPortofolioApiRouteById(@Path() id: string): Promise<IApiRoute | { message: string }> {
         try {
@@ -180,7 +180,7 @@ export class APIController extends Controller {
         }
     }
 
-    @Security(SECURITY_NAME.admin)
+    @Security(SECURITY_NAME.profile)
     @Get("/get_bos_api_route/{id}")
     public async getBosApiRouteById(@Path() id: string): Promise<IApiRoute | { message: string }> {
         try {

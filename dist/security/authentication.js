@@ -33,21 +33,42 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.expressAuthentication = void 0;
+const constant_1 = require("../constant");
+const services_1 = require("../services");
+const utils_1 = require("./utils");
+const AuthError_1 = require("./AuthError");
 function expressAuthentication(request, securityName, scopes) {
+    var _a;
     return __awaiter(this, void 0, void 0, function* () {
-        return;
-        // const authInstance = AuthentificationService.getInstance();
-        // const header = request.headers.authorization || request.headers.Authorization;
-        // if (!header) throw new Error(SECURITY_MESSAGES.INVALID_TOKEN);
-        // const [, token] = (<string>header).split(" ");
-        // if (!token) throw new Error(SECURITY_MESSAGES.INVALID_TOKEN);
-        // const tokenInfo: any = await authInstance.tokenIsValid(token);
-        // if (!tokenInfo) throw new Error(SECURITY_MESSAGES.INVALID_TOKEN);
-        // if (securityName == SECURITY_NAME.admin && !(tokenInfo.userInfo?.type == USER_TYPES.ADMIN)) {
-        //     throw new Error(SECURITY_MESSAGES.UNAUTHORIZED);
-        // }
-        // return tokenInfo;
+        if (securityName === constant_1.SECURITY_NAME.all)
+            return;
+        const token = getToken(request);
+        if (!token)
+            throw new AuthError_1.AuthError(constant_1.SECURITY_MESSAGES.INVALID_TOKEN);
+        const authInstance = services_1.AuthentificationService.getInstance();
+        const tokenInfo = yield authInstance.tokenIsValid(token);
+        if (!tokenInfo)
+            throw new AuthError_1.AuthError(constant_1.SECURITY_MESSAGES.INVALID_TOKEN);
+        if (((_a = tokenInfo.userInfo) === null || _a === void 0 ? void 0 : _a.type) == constant_1.USER_TYPES.ADMIN) {
+            return tokenInfo;
+        }
+        const profileId = tokenInfo.profile.profileId || tokenInfo.profile.appProfileBosConfigId || tokenInfo.profile.userProfileBosConfigId;
+        if (securityName === constant_1.SECURITY_NAME.profile) {
+            const hasAccess = yield (0, utils_1.checkIfProfileHasAccess)(request, profileId);
+            if (!hasAccess)
+                throw new AuthError_1.AuthError(constant_1.SECURITY_MESSAGES.UNAUTHORIZED);
+        }
+        return tokenInfo;
     });
 }
 exports.expressAuthentication = expressAuthentication;
+function getToken(request) {
+    const header = request.headers.authorization || request.headers.Authorization;
+    if (header) {
+        const [, token] = header.split(" ");
+        if (token)
+            return token;
+    }
+    return request.body.token || request.query.token || request.headers["x-access-token"];
+}
 //# sourceMappingURL=authentication.js.map

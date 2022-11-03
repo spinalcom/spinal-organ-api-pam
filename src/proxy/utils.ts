@@ -34,6 +34,15 @@ import { correspondanceObj } from "./corrspondance";
 
 const apiServerEndpoint = "/api/v1/";
 
+
+export async function getProfileBuildings(profileId: string, isApp: boolean) {
+    const instance = isApp ? AppProfileService.getInstance() : UserProfileService.getInstance();
+    const buildings = await instance.getAllAuthorizedBos(profileId);
+    return buildings.map(el => el.info.get());
+}
+
+
+
 export function formatUri(argUrl: string, uri: string): string {
     const base = argUrl.replace(new RegExp(`^${uri}*/`), (el) => "");
     let url = base.split("/").slice(1).join("/");
@@ -43,19 +52,44 @@ export function formatUri(argUrl: string, uri: string): string {
 }
 
 export async function canAccess(buildingId: string, api: { method: string; route: string }, profileId: string, isAppProfile): Promise<boolean> {
-    // const access = AuthorizationService.getInstance().profileHasAccess()
+
     const profile = isAppProfile ? await AppProfileService.getInstance().getAppProfile(profileId) : await UserProfileService.getInstance().getUserProfile(profileId)
 
-    const buildingAccess = hasAccessToBuilding(profile, buildingId);
+    const buildingAccess = _hasAccessToBuilding(profile, buildingId);
     if (!buildingAccess) return false;
 
-    const routeFound = hasAccessToApiRoute(buildingAccess, api);
+    const routeFound = _hasAccessToApiRoute(buildingAccess, api);
     if (!routeFound) return false;
 
 
     return true;
 }
 
+export const proxyOptions = (useV1: boolean): ProxyOptions => {
+    return {
+        memoizeHost: false,
+        proxyReqPathResolver: (req: express.Request) => req["endpoint"],
+        userResDecorator: (proxyRes, proxyResData) => {
+            return new Promise((resolve, reject) => {
+                if (!useV1) return resolve(proxyResData);
+                if (proxyRes.statusCode == HTTP_CODES.NOT_FOUND) return resolve(proxyResData);
+
+                try {
+                    const response = JSON.parse(proxyResData.toString());
+                    const data = Utils.getReturnObj(null, response, _get_method((<any>proxyRes).req.method));
+                    resolve(data);
+                } catch (error) {
+                    resolve(proxyResData)
+                }
+            });
+        }
+    }
+}
+
+
+///////////////////////////////////
+//            PRIVATES           //
+///////////////////////////////////
 
 function _getCorrespondance(url: string) {
     const found = Object.keys(correspondanceObj).find(el => {
@@ -84,7 +118,7 @@ function _getCorrespondance(url: string) {
     return url;
 }
 
-function hasAccessToBuilding(profile: IProfileRes, buildingId: string): IBosAuthRes {
+function _hasAccessToBuilding(profile: IProfileRes, buildingId: string): IBosAuthRes {
     for (const { buildings } of profile.authorized) {
         const found = buildings.find(({ building }) => building.getId().get() === buildingId);
         if (found) return found;
@@ -93,7 +127,7 @@ function hasAccessToBuilding(profile: IProfileRes, buildingId: string): IBosAuth
     return;
 }
 
-function hasAccessToApiRoute(building: IBosAuthRes, apiRoute: { method: string; route: string }): SpinalNode {
+function _hasAccessToApiRoute(building: IBosAuthRes, apiRoute: { method: string; route: string }): SpinalNode {
     return building.apis.find(node => {
         const route = node.info.get();
         if (apiRoute.method.toUpperCase() !== route.method.toUpperCase()) return false;
@@ -104,29 +138,7 @@ function hasAccessToApiRoute(building: IBosAuthRes, apiRoute: { method: string; 
     })
 }
 
-
-export const proxyOptions = (useV1: boolean): ProxyOptions => {
-    return {
-        memoizeHost: false,
-        proxyReqPathResolver: (req: express.Request) => req["endpoint"],
-        userResDecorator: (proxyRes, proxyResData) => {
-            return new Promise((resolve, reject) => {
-                if (!useV1) return resolve(proxyResData);
-                if (proxyRes.statusCode == HTTP_CODES.NOT_FOUND) return resolve(proxyResData);
-
-                try {
-                    const response = JSON.parse(proxyResData.toString());
-                    const data = Utils.getReturnObj(null, response, get_method((<any>proxyRes).req.method));
-                    resolve(data);
-                } catch (error) {
-                    resolve(proxyResData)
-                }
-            });
-        }
-    }
-}
-
-function get_method(method: string) {
+function _get_method(method: string) {
     switch (method) {
         case "GET":
             return "READ";

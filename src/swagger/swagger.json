@@ -429,6 +429,24 @@
 				"type": "object",
 				"additionalProperties": false
 			},
+			"IOAuth2Credential": {
+				"properties": {
+					"client_id": {
+						"type": "string"
+					},
+					"client_secret": {
+						"type": "string"
+					}
+				},
+				"required": [
+					"client_id",
+					"client_secret"
+				],
+				"type": "object",
+				"additionalProperties": {
+					"type": "string"
+				}
+			},
 			"IPamCredential": {
 				"properties": {
 					"id": {
@@ -711,6 +729,11 @@
 				"type": "http",
 				"scheme": "bearer",
 				"bearerFormat": "JWT"
+			},
+			"all": {
+				"type": "http",
+				"scheme": "bearer",
+				"bearerFormat": "JWT"
 			}
 		}
 	},
@@ -870,7 +893,7 @@
 				],
 				"security": [
 					{
-						"admin": []
+						"profile": []
 					}
 				],
 				"parameters": [
@@ -1181,7 +1204,7 @@
 				],
 				"security": [
 					{
-						"admin": []
+						"profile": []
 					}
 				],
 				"parameters": [
@@ -1432,7 +1455,7 @@
 				],
 				"security": [
 					{
-						"admin": []
+						"profile": []
 					}
 				],
 				"parameters": [
@@ -1632,7 +1655,7 @@
 				],
 				"security": [
 					{
-						"admin": []
+						"profile": []
 					}
 				],
 				"parameters": [
@@ -1748,7 +1771,7 @@
 				],
 				"security": [
 					{
-						"admin": []
+						"profile": []
 					}
 				],
 				"parameters": [
@@ -1887,7 +1910,7 @@
 				],
 				"security": [
 					{
-						"admin": []
+						"profile": []
 					}
 				],
 				"parameters": [
@@ -2019,7 +2042,7 @@
 				],
 				"security": [
 					{
-						"admin": []
+						"profile": []
 					}
 				],
 				"parameters": [
@@ -2509,7 +2532,7 @@
 				],
 				"security": [
 					{
-						"admin": []
+						"profile": []
 					}
 				],
 				"parameters": [
@@ -2559,7 +2582,7 @@
 				],
 				"security": [
 					{
-						"admin": []
+						"profile": []
 					}
 				],
 				"parameters": [
@@ -3111,7 +3134,11 @@
 				"tags": [
 					"Auth"
 				],
-				"security": [],
+				"security": [
+					{
+						"all": []
+					}
+				],
 				"parameters": [],
 				"requestBody": {
 					"required": true,
@@ -3124,61 +3151,11 @@
 									},
 									{
 										"$ref": "#/components/schemas/IAppCredential"
+									},
+									{
+										"$ref": "#/components/schemas/IOAuth2Credential"
 									}
 								]
-							}
-						}
-					}
-				}
-			}
-		},
-		"/api/v1/pam/auth/admin": {
-			"post": {
-				"operationId": "AuthenticateAdmin",
-				"responses": {
-					"200": {
-						"description": "Ok",
-						"content": {
-							"application/json": {
-								"schema": {
-									"anyOf": [
-										{
-											"type": "string"
-										},
-										{
-											"$ref": "#/components/schemas/IApplicationToken"
-										},
-										{
-											"$ref": "#/components/schemas/IUserToken"
-										},
-										{
-											"properties": {
-												"message": {
-													"type": "string"
-												}
-											},
-											"required": [
-												"message"
-											],
-											"type": "object"
-										}
-									]
-								}
-							}
-						}
-					}
-				},
-				"tags": [
-					"Auth"
-				],
-				"security": [],
-				"parameters": [],
-				"requestBody": {
-					"required": true,
-					"content": {
-						"application/json": {
-							"schema": {
-								"$ref": "#/components/schemas/IUserCredential"
 							}
 						}
 					}
@@ -3433,7 +3410,7 @@
 				],
 				"security": [
 					{
-						"admin": []
+						"profile": []
 					}
 				],
 				"parameters": [
@@ -3727,7 +3704,7 @@
 				],
 				"security": [
 					{
-						"admin": []
+						"profile": []
 					}
 				],
 				"parameters": [
@@ -3777,7 +3754,7 @@
 				],
 				"security": [
 					{
-						"admin": []
+						"profile": []
 					}
 				],
 				"parameters": [
@@ -3905,7 +3882,7 @@
 				],
 				"security": [
 					{
-						"admin": []
+						"profile": []
 					}
 				],
 				"parameters": [
@@ -4040,7 +4017,7 @@
 				],
 				"security": [
 					{
-						"admin": []
+						"profile": []
 					}
 				],
 				"parameters": [
@@ -4090,7 +4067,7 @@
 				],
 				"security": [
 					{
-						"admin": []
+						"profile": []
 					}
 				],
 				"parameters": [
@@ -4218,7 +4195,7 @@
 				],
 				"security": [
 					{
-						"admin": []
+						"profile": []
 					}
 				],
 				"parameters": [
@@ -4546,7 +4523,7 @@
 				],
 				"security": [
 					{
-						"admin": []
+						"profile": []
 					}
 				],
 				"parameters": [
@@ -4596,7 +4573,7 @@
 				],
 				"security": [
 					{
-						"admin": []
+						"profile": []
 					}
 				],
 				"parameters": [
@@ -4759,7 +4736,7 @@
 				}
 			}
 		},
-		"/api/v1/pam/get_building_from_portofolio/{portofolioId}/{appId}": {
+		"/api/v1/pam/get_building_from_portofolio/{portofolioId}/{buildingId}": {
 			"get": {
 				"operationId": "GetBuilding",
 				"responses": {
@@ -4794,7 +4771,7 @@
 				],
 				"security": [
 					{
-						"admin": []
+						"profile": []
 					}
 				],
 				"parameters": [
@@ -4808,7 +4785,7 @@
 					},
 					{
 						"in": "path",
-						"name": "appId",
+						"name": "buildingId",
 						"required": true,
 						"schema": {
 							"type": "string"
@@ -4855,7 +4832,7 @@
 				],
 				"security": [
 					{
-						"admin": []
+						"profile": []
 					}
 				],
 				"parameters": [
@@ -5052,7 +5029,7 @@
 				],
 				"security": [
 					{
-						"admin": []
+						"profile": []
 					}
 				],
 				"parameters": [
@@ -5102,7 +5079,7 @@
 				],
 				"security": [
 					{
-						"admin": []
+						"profile": []
 					}
 				],
 				"parameters": [
@@ -5230,7 +5207,7 @@
 				],
 				"security": [
 					{
-						"admin": []
+						"profile": []
 					}
 				],
 				"parameters": [
@@ -5365,7 +5342,7 @@
 				],
 				"security": [
 					{
-						"admin": []
+						"profile": []
 					}
 				],
 				"parameters": [
@@ -5415,7 +5392,7 @@
 				],
 				"security": [
 					{
-						"admin": []
+						"profile": []
 					}
 				],
 				"parameters": [
@@ -5543,7 +5520,7 @@
 				],
 				"security": [
 					{
-						"admin": []
+						"profile": []
 					}
 				],
 				"parameters": [
@@ -5652,7 +5629,7 @@
 				],
 				"security": [
 					{
-						"admin": []
+						"profile": []
 					}
 				],
 				"parameters": [
@@ -5852,7 +5829,7 @@
 				],
 				"security": [
 					{
-						"admin": []
+						"profile": []
 					}
 				],
 				"parameters": [
@@ -5981,7 +5958,7 @@
 				],
 				"security": [
 					{
-						"admin": []
+						"profile": []
 					}
 				],
 				"parameters": [
@@ -6113,7 +6090,7 @@
 				],
 				"security": [
 					{
-						"admin": []
+						"profile": []
 					}
 				],
 				"parameters": [
@@ -6243,7 +6220,7 @@
 				],
 				"security": [
 					{
-						"admin": []
+						"profile": []
 					}
 				],
 				"parameters": [

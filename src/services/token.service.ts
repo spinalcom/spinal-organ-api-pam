@@ -27,6 +27,7 @@ import { TOKEN_LIST_CONTEXT_TYPE, TOKEN_LIST_CONTEXT_NAME, TOKEN_TYPE, PTR_LST_T
 import { configServiceInstance } from "./configFile.service";
 import * as jwt from "jsonwebtoken";
 import { Model } from 'spinal-core-connectorjs_type';
+import { AdminProfileService } from "./adminProfile.service";
 
 
 export class TokenService {
@@ -55,15 +56,19 @@ export class TokenService {
         const playload: any = {
             userInfo: userNode.info.get()
         };
-        durationInMin = durationInMin || 60 * 60;
+        durationInMin = durationInMin || 7 * 24 * 60 * 60; // par default 7jrs
         const key = secret || this._generateString(15);
         const token = jwt.sign(playload, key, { expiresIn: durationInMin });
 
+        const adminProfile = await AdminProfileService.getInstance().getAdminProfile()
         const now = Date.now();
         playload.createdToken = now;
         playload.expieredToken = now + (durationInMin * 60 * 1000);
         playload.userId = userNode.getId().get();
         playload.token = token;
+        playload.profile = {
+            profileId: adminProfile.getId().get()
+        }
 
         const tokenNode = await this.addTokenToContext(token, playload);
         await userNode.addChild(tokenNode, TOKEN_RELATION_NAME, PTR_LST_TYPE);

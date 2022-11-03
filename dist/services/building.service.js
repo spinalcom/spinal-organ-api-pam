@@ -40,8 +40,10 @@ const openGeocoder = require("node-open-geocoder");
 const axios_1 = require("axios");
 const portofolio_service_1 = require("./portofolio.service");
 const _1 = require(".");
+const adminProfile_service_1 = require("./adminProfile.service");
 // const axiosInstance = axios.create({ baseURL: `http://localhost:${process.env.SERVER_PORT}` });
 // import * as NodeGeocoder from "node-geocoder";
+const adminProfileInstance = adminProfile_service_1.AdminProfileService.getInstance();
 class BuildingService {
     constructor() { }
     static getInstance() {
@@ -244,7 +246,7 @@ class BuildingService {
                 throw new Error(`No building found for ${building}`);
             if (!Array.isArray(applicationId))
                 applicationId = [applicationId];
-            return applicationId.reduce((prom, appId) => __awaiter(this, void 0, void 0, function* () {
+            const data = yield applicationId.reduce((prom, appId) => __awaiter(this, void 0, void 0, function* () {
                 const liste = yield prom;
                 const appNode = yield _1.AppService.getInstance().getBuildingApp(appId);
                 if (!(appNode instanceof spinal_env_viewer_graph_service_1.SpinalNode))
@@ -256,6 +258,8 @@ class BuildingService {
                 liste.push(appNode);
                 return liste;
             }), Promise.resolve([]));
+            adminProfileInstance.syncAdminProfile();
+            return data;
         });
     }
     getAppsFromBuilding(building) {
@@ -312,7 +316,7 @@ class BuildingService {
                 throw new Error(`No building found for ${building}`);
             if (!Array.isArray(apisIds))
                 apisIds = [apisIds];
-            return apisIds.reduce((prom, appId) => __awaiter(this, void 0, void 0, function* () {
+            const data = yield apisIds.reduce((prom, appId) => __awaiter(this, void 0, void 0, function* () {
                 const liste = yield prom;
                 const apiNode = yield _1.APIService.getInstance().getApiRouteById(appId, constant_1.BUILDING_API_GROUP_TYPE);
                 if (!(apiNode instanceof spinal_env_viewer_graph_service_1.SpinalNode))
@@ -324,6 +328,8 @@ class BuildingService {
                 liste.push(apiNode);
                 return liste;
             }), Promise.resolve([]));
+            adminProfileInstance.syncAdminProfile();
+            return data;
         });
     }
     getApisFromBuilding(building) {

@@ -26,7 +26,7 @@ import { AuthentificationService } from "../services";
 import * as express from "express";
 import { HTTP_CODES, SECURITY_NAME } from "../constant";
 import { Body, Route, Tags, Controller, Post, Get, Put, Delete, Security } from "tsoa";
-import { IAdmin, IAdminCredential, IAppCredential, IApplicationToken, IPamCredential, IPamInfo, IUserCredential, IUserToken } from "../interfaces";
+import { IAdmin, IAdminCredential, IAppCredential, IApplicationToken, IOAuth2Credential, IPamCredential, IPamInfo, IUserCredential, IUserToken } from "../interfaces";
 
 const serviceInstance = AuthentificationService.getInstance();
 
@@ -38,8 +38,9 @@ export class AuthController extends Controller {
         super();
     }
 
+    @Security(SECURITY_NAME.all)
     @Post("/auth")
-    public async authenticate(@Body() credential: IUserCredential | IAppCredential): Promise<string | IApplicationToken | IUserToken | { message: string }> {
+    public async authenticate(@Body() credential: IUserCredential | IAppCredential | IOAuth2Credential): Promise<string | IApplicationToken | IUserToken | { message: string }> {
         try {
             const { code, data } = await serviceInstance.authenticate(credential);
             this.setStatus(code);
@@ -50,17 +51,18 @@ export class AuthController extends Controller {
         }
     }
 
-    @Post("/auth/admin")
-    public async authenticateAdmin(@Body() credential: IUserCredential): Promise<string | IApplicationToken | IUserToken | { message: string }> {
-        try {
-            const { code, message } = await serviceInstance.authenticateAdmin(credential);
-            this.setStatus(code);
-            return message;
-        } catch (error) {
-            this.setStatus(HTTP_CODES.INTERNAL_ERROR)
-            return { message: error.message };
-        }
-    }
+    // @Security(SECURITY_NAME.all)
+    // @Post("/auth/admin")
+    // public async authenticateAdmin(@Body() credential: IUserCredential): Promise<string | IApplicationToken | IUserToken | { message: string }> {
+    //     try {
+    //         const { code, message } = await serviceInstance.authenticateAdmin(credential);
+    //         this.setStatus(code);
+    //         return message;
+    //     } catch (error) {
+    //         this.setStatus(HTTP_CODES.INTERNAL_ERROR)
+    //         return { message: error.message };
+    //     }
+    // }
 
     @Security(SECURITY_NAME.admin)
     @Post("/register_admin")

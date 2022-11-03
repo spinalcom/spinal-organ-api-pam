@@ -29,6 +29,7 @@ import { BuildingService } from "./building.service";
 import { configServiceInstance } from "./configFile.service";
 import { PortofolioService } from "./portofolio.service";
 import { SpinalExcelManager } from "spinal-env-viewer-plugin-excel-manager-service";
+import { AdminProfileService } from "./adminProfile.service";
 
 export const AppsType = Object.freeze({
   admin: "admin",
@@ -72,6 +73,7 @@ export class AppService {
     appInfo.type = ADMIN_APP_TYPE;
     const appId = SpinalGraphService.createNode(appInfo, undefined);
     const node = SpinalGraphService.getRealNode(appId);
+    await AdminProfileService.getInstance().addAppToProfil(node);
     return groupNode.addChildInContext(node, APP_RELATION_NAME, PTR_LST_TYPE, this.context);
   }
 

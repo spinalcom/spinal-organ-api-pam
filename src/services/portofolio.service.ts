@@ -29,6 +29,10 @@ import { AppService } from './apps.service'
 import { IEditProtofolio, IPortofolioData, IPortofolioDetails, IBuilding, IBuildingCreation, IBuildingDetails } from "../interfaces";
 import { BuildingService } from "./building.service";
 import { APIService } from "./apis.service";
+import { AdminProfileService } from "./adminProfile.service";
+
+
+const adminProfileInstance = AdminProfileService.getInstance();
 
 export class PortofolioService {
     private static instance: PortofolioService;
@@ -54,6 +58,8 @@ export class PortofolioService {
         const apps = await this.addAppToPortofolio(node, appsIds);
         const apis = await this.addApiToPortofolio(node, apisIds);
         // const buildings = await this.addBuildingToPortofolio(node, buildingsIds);
+
+        adminProfileInstance.syncAdminProfile();
 
         return {
             node,
@@ -145,7 +151,7 @@ export class PortofolioService {
 
         if (!Array.isArray(applicationId)) applicationId = [applicationId];
 
-        return applicationId.reduce(async (prom, appId: string) => {
+        const data = await applicationId.reduce(async (prom, appId: string) => {
             const liste = await prom;
             const appNode = await AppService.getInstance().getPortofolioApp(appId);
             if (!(appNode instanceof SpinalNode)) return liste;
@@ -158,6 +164,10 @@ export class PortofolioService {
             return liste;
 
         }, Promise.resolve([]))
+
+        adminProfileInstance.syncAdminProfile();
+
+        return data;
     }
 
 
@@ -182,7 +192,7 @@ export class PortofolioService {
 
         if (!Array.isArray(applicationId)) applicationId = [applicationId];
 
-        return applicationId.reduce(async (prom, appId: string) => {
+        const data = await applicationId.reduce(async (prom, appId: string) => {
             const liste = await prom;
             const appNode = await this.getAppFromPortofolio(portofolio, appId);
             if (!(appNode instanceof SpinalNode)) return liste
@@ -194,7 +204,10 @@ export class PortofolioService {
 
             return liste;
 
-        }, Promise.resolve([]))
+        }, Promise.resolve([]));
+
+        adminProfileInstance.syncAdminProfile();
+        return data
 
     }
 
@@ -213,7 +226,7 @@ export class PortofolioService {
 
         if (!Array.isArray(apisIds)) apisIds = [apisIds];
 
-        return apisIds.reduce(async (prom, apiId: string) => {
+        const data = await apisIds.reduce(async (prom, apiId: string) => {
             const liste = await prom;
             const apiNode = await APIService.getInstance().getApiRouteById(apiId, PORTOFOLIO_API_GROUP_TYPE);
             if (!(apiNode instanceof SpinalNode)) return liste;
@@ -226,6 +239,10 @@ export class PortofolioService {
             return liste;
 
         }, Promise.resolve([]))
+
+        adminProfileInstance.syncAdminProfile();
+
+        return data;
     }
 
     public async getPortofolioApis(portofolio: string | SpinalNode): Promise<SpinalNode[]> {
@@ -249,7 +266,7 @@ export class PortofolioService {
 
         if (!Array.isArray(apisIds)) apisIds = [apisIds];
 
-        return apisIds.reduce(async (prom, apiId: string) => {
+        const data = await apisIds.reduce(async (prom, apiId: string) => {
             const liste = await prom;
             const appNode = await this.getApiFromPortofolio(portofolio, apiId);
             if (!(appNode instanceof SpinalNode)) return liste
@@ -263,6 +280,9 @@ export class PortofolioService {
 
         }, Promise.resolve([]))
 
+        adminProfileInstance.removeFromAdminProfile({ portofolioId: portofolio.getId().get(), unauthorizeApisIds: apisIds });
+
+        return data;
     }
 
     public async portofolioHasApi(portofolio: string | SpinalNode, apiId: string): Promise<SpinalNode | void> {
@@ -288,7 +308,9 @@ export class PortofolioService {
 
         const structure = await BuildingService.getInstance().createBuilding(buildingInfo);
 
-        (<SpinalNode>portofolio).addChildInContext(structure.node, BUILDING_RELATION_NAME, PTR_LST_TYPE, this.context);
+        await (<SpinalNode>portofolio).addChildInContext(structure.node, BUILDING_RELATION_NAME, PTR_LST_TYPE, this.context);
+        adminProfileInstance.syncAdminProfile();
+
         return structure;
         // return buildingId.reduce(async (prom, id: string) => {
         //     const liste = await prom;
@@ -320,7 +342,7 @@ export class PortofolioService {
 
         if (!Array.isArray(buildingId)) buildingId = [buildingId];
 
-        return buildingId.reduce(async (prom, id: string) => {
+        const data = await buildingId.reduce(async (prom, id: string) => {
             const liste = await prom;
             const buildingNode = await this.getBuildingFromPortofolio(portofolio, id);
             if (!(buildingNode instanceof SpinalNode)) return liste;
@@ -337,6 +359,7 @@ export class PortofolioService {
 
         }, Promise.resolve([]));
 
+        return data;
     }
 
     public async getBuildingFromPortofolio(portofolio: string | SpinalNode, buildingId: string): Promise<SpinalNode | void> {

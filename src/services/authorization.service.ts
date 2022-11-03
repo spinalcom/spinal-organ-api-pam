@@ -51,14 +51,25 @@ export default class AuthorizationService {
         return this.instance;
     }
 
-    public async profileHasAccess(profile: SpinalNode, node: SpinalNode): Promise<boolean> {
-        // const context = await this._getContextByType(profile, elementType);
-        // if (!context) return false;
-        // return node.belongsToContext(context);
+    public async profileHasAccess(profile: SpinalNode, node: SpinalNode | string): Promise<boolean> {
+
         const context = await this._getAuthorizedPortofolioContext(profile, true);
         if (!context) return false;
 
-        return node.belongsToContext(context);
+        const id = typeof node === "string" ? node : node.getId().get();
+
+        const found = await context.findInContextAsyncPredicate(context, (async (node, stop) => {
+            const element = await node.getElement(true);
+            if (element && element.getId().get() === id) {
+                stop();
+                return true;
+            }
+
+            return false;
+        }))
+
+        return found && found.length > 0 ? true : false;
+
     }
 
     // public async removePortofolioReferences(profile: SpinalNode, portofolioId: string): Promise<void> {
@@ -484,7 +495,7 @@ export default class AuthorizationService {
         return { context, portofolioRef, bosRef }
     }
 
-    private async _getAuthorizedPortofolioContext(profile: SpinalNode, createIfNotExist: boolean = false): Promise<SpinalContext> {
+    public async _getAuthorizedPortofolioContext(profile: SpinalNode, createIfNotExist: boolean = false): Promise<SpinalContext> {
         return this._getOrCreateContext(profile, AUTHORIZED_PORTOFOLIO_CONTEXT_NAME, createIfNotExist, AUTHORIZED_PORTOFOLIO_CONTEXT_TYPE);
     }
 

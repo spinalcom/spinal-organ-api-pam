@@ -22,7 +22,7 @@
  * <http://resources.spinalcom.com/licenses.pdf>.
  */
 
-import { IAdmin, IAdminAppProfile, IAdminCredential, IAdminOrgan, IAdminUserProfile, IPamCredential, IJsonData, IPamInfo, IUserCredential, IAppCredential, IApplicationToken, IUserToken } from "../interfaces";
+import { IAdmin, IAdminAppProfile, IAdminCredential, IAdminOrgan, IAdminUserProfile, IPamCredential, IJsonData, IPamInfo, IUserCredential, IAppCredential, IApplicationToken, IUserToken, IOAuth2Credential } from "../interfaces";
 import axios from "axios";
 import { SpinalContext } from "spinal-env-viewer-graph-service";
 import { configServiceInstance } from "./configFile.service";
@@ -47,13 +47,24 @@ export class AuthentificationService {
         return this.instance;
     }
 
-    public async authenticate(info: IUserCredential | IAppCredential): Promise<{ code: number; data: string | IApplicationToken | IUserToken }> {
+    public async authenticate(info: IUserCredential | IAppCredential | IOAuth2Credential): Promise<{ code: number; data: string | IApplicationToken | IUserToken }> {
+        const isUser = "userName" in info && "password" in info ? true : false;
+
+        if (isUser) {
+            const data = await this.authenticateAdmin(<IUserCredential>info);
+            if (data.code !== HTTP_CODES.INTERNAL_ERROR) {
+                return {
+                    code: data.code, data: data.message
+                };
+            }
+        }
+
         const adminCredential = await this.getPamToAdminCredential();
         if (!adminCredential) throw new Error("No authentication platform is registered");
 
-        const isUser = "userName" in info && "password" in info ? true : false;
-        const url = `${adminCredential.urlAdmin}/${isUser ? 'users' : 'applications'}/login`;
+        if (!isUser) info = this._formatInfo(<any>info);
 
+        const url = `${adminCredential.urlAdmin}/${isUser ? 'users' : 'applications'}/login`;
         return this._sendLoginRequest(url, info, adminCredential, isUser);
     }
 
@@ -210,7 +221,7 @@ export class AuthentificationService {
     }
 
 
-    private _sendLoginRequest(url: string, info: IUserCredential | IAppCredential, adminCredential: IPamCredential, isUser: boolean = true): Promise<{ code: number; data: string | IApplicationToken | IUserToken }> {
+    private _sendLoginRequest(url: string, info: IUserCredential | IAppCredential | IOAuth2Credential, adminCredential: IPamCredential, isUser: boolean = true): Promise<{ code: number; data: string | IApplicationToken | IUserToken }> {
 
         return axios.post(url, info).then(async (result) => {
             const data = result.data;
@@ -313,5 +324,20 @@ export class AuthentificationService {
 
         const found = await TokenService.getInstance().getTokenData(token);
         return found?.get();
+    }
+
+
+    private _formatInfo(info: IAppCredential | IOAuth2Credential): IAppCredential {
+        if ("client_id" in info) {
+            info["clientId"] = info["client_id"]
+            delete info.client_id;
+        }
+
+        if ("client_secret" in info) {
+            info["clientSecret"] = info["client_secret"]
+            delete info.client_secret;
+        }
+
+        return <IAppCredential>info;
     }
 }

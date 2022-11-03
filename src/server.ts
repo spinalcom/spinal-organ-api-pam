@@ -23,31 +23,46 @@
  */
 
 
-// import * as bodyParser from 'body-parser';
 import * as cors from 'cors';
 import * as express from 'express';
-// import * as fileUpload from 'express-fileupload';
 import * as morgan from "morgan";
 import * as path from "path";
 import { HTTP_CODES, routesToProxy } from "./constant";
 import configureBosProxy from "./proxy";
-import { AuthentificationService } from './services';
 var proxy = require('express-http-proxy');
 import * as swaggerUi from "swagger-ui-express";
+import { ValidateError } from 'tsoa';
+import { RegisterRoutes } from './routes';
+import { AuthError } from './security/AuthError';
 
 
-// const path = require('path');
+export default function initExpress() {
+
+  var app = express();
+  app.use(morgan('dev'));
+
+  useApiMiddleWare(app);
+  useHubProxy(app);
+  useClientMiddleWare(app);
+  initSwagger(app);
+
+  configureBosProxy(app);
+  configureBosProxy(app, true);
+
+  RegisterRoutes(app);
 
 
-function useApiMiddleWare(app: express.Express) {
+  app.use(errorHandler);
 
-  app.use(cors({ origin: '*' }));
-  // app.use(fileUpload({ createParentPath: true }));
-  app.use(express.json());
-  app.use(express.urlencoded({ extended: true }));
 
-  // app.all(`${PAM_BASE_URI}*`, authorizeRequest);
+  const server_port = process.env.SERVER_PORT || 2022;
+  const server = app.listen(server_port, () => console.log(`api server listening on port ${server_port}!`));
+  return { server, app }
 }
+
+/////////////////////////////////////
+//          Middleware             //
+/////////////////////////////////////
 
 function useHubProxy(app: express.Express) {
   const HUB_HOST = `http://${process.env.HUB_HOST}:${process.env.HUB_PORT}`;
@@ -66,18 +81,9 @@ function useClientMiddleWare(app: express.Express) {
   const root = path.resolve(__dirname, '..')
   app.use(express.static(root));
 
-
-  // app.all(/^\/(?!api).*$/, function (req, res) {
-  //   res.sendFile(path.resolve(root, "index.html"));
-  // });
-
   app.get("/", (req, res) => {
     res.redirect("/docs");
   })
-
-  // app.get("/v1/building_list", (req, res) => {
-  //   res.redirect("")
-  // })
 }
 
 function initSwagger(app: express.Express) {
@@ -92,50 +98,54 @@ function initSwagger(app: express.Express) {
   app.use("/docs", swaggerUi.serve, async (req, res) => {
     return res.send(
       swaggerUi.generateHTML(await import("./swagger/swagger.json"))
-      // swaggerUi.setup(undefined, {
-      //   swaggerOptions: { url: "/swagger.json" },
-      //   customSiteTitle: "PAM APIs",
-      //   customCss: '.topbar-wrapper img {content: url(/logo.png);} .swagger-ui .topbar {background: #dbdbdb;}'
-      // })
     )
-
   }
-
   );
 }
 
-export default function initExpress() {
-  // const absPath = '../../../.browser_organs'.split('/');
-  // const root = path.join(__dirname, ...absPath);
-
-
-  var app = express();
-  app.use(morgan('dev'));
-
-  configureBosProxy(app);
-  configureBosProxy(app, true);
-
-  useHubProxy(app);
-  useApiMiddleWare(app);
-  useClientMiddleWare(app);
-  initSwagger(app);
-
-  const server_port = process.env.SERVER_PORT || 2022;
-  const server = app.listen(server_port, () => console.log(`Example app listening on port ${server_port}!`));
-  return { server, app }
+function useApiMiddleWare(app: express.Express) {
+  app.use(cors({ origin: '*' }));
+  app.use(express.json());
+  app.use(express.urlencoded({ extended: true }));
 }
 
 
-export function authorizeRequest(req: express.Request, res: express.Response, next: express.NextFunction) {
-  let auth = req.headers.authorization;
-  if (auth) {
-    const token = auth.split(" ")[1];
-    const tokenIsValid = AuthentificationService.getInstance().tokenIsValid(token);
-    if (tokenIsValid) return next();
+function errorHandler(err: unknown, req: express.Request, res: express.Response, next: express.NextFunction): express.Response | void {
+  if (err instanceof ValidateError) {
+    return res.status(HTTP_CODES.BAD_REQUEST).send(_formatValidationError(err))
   }
 
-  return res.status(HTTP_CODES.UNAUTHORIZED).send("invalid authorization");
+  if (err instanceof AuthError) {
+    return res.status(HTTP_CODES.UNAUTHORIZED).send({ message: err.message });
+  }
+
+  if (err instanceof Error) {
+    return res.status(HTTP_CODES.INTERNAL_ERROR).json({
+      message: "Internal Server Error",
+    });
+  }
+
+  next();
 }
+
+function _formatValidationError(err: ValidateError) {
+  err
+  return {
+    message: "Validation Failed",
+    details: err?.fields,
+  };
+}
+
+// export function authorizeRequest(req: express.Request, res: express.Response, next: express.NextFunction) {
+//   let auth = req.headers.authorization;
+//   if (auth) {
+//     const token = auth.split(" ")[1];
+//     const tokenIsValid = AuthentificationService.getInstance().tokenIsValid(token);
+//     if (tokenIsValid) return next();
+//   }
+
+//   return res.status(HTTP_CODES.UNAUTHORIZED).send("invalid authorization");
+// }
 
 // export function clientAuthorization(req: express.Request, res: express.Response, next: express.NextFunction) {
 

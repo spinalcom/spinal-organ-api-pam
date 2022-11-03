@@ -23,20 +23,21 @@
  */
 
 import {
-    BOS_BASE_URI_V2, BUILDING_CONTEXT_NAME, BUILDING_CONTEXT_TYPE, BUILDING_TYPE, BUILDING_RELATION_NAME, PTR_LST_TYPE, APP_RELATION_NAME, BUILDING_API_GROUP_TYPE, API_RELATION_NAME
+    BUILDING_CONTEXT_NAME, BUILDING_CONTEXT_TYPE, BUILDING_TYPE, BUILDING_RELATION_NAME, PTR_LST_TYPE, APP_RELATION_NAME, BUILDING_API_GROUP_TYPE, API_RELATION_NAME
 } from "../constant";
 import { SpinalContext, SpinalGraphService, SpinalNode } from "spinal-env-viewer-graph-service";
-import { IBosAuthRes, IBuilding, IEditBuilding, ILocation, IBuildingCreation, IBuildingDetails } from "../interfaces";
+import { IBuilding, IEditBuilding, ILocation, IBuildingCreation, IBuildingDetails } from "../interfaces";
 import * as openGeocoder from "node-open-geocoder";
 // const { config: { server_port } } = require("../../config");
 
 import axios from "axios";
 import { PortofolioService } from "./portofolio.service";
 import { APIService, AppService, configServiceInstance } from ".";
+import { AdminProfileService } from "./adminProfile.service";
 // const axiosInstance = axios.create({ baseURL: `http://localhost:${process.env.SERVER_PORT}` });
 
-
 // import * as NodeGeocoder from "node-geocoder";
+const adminProfileInstance = AdminProfileService.getInstance();
 
 
 export class BuildingService {
@@ -255,7 +256,7 @@ export class BuildingService {
 
         if (!Array.isArray(applicationId)) applicationId = [applicationId];
 
-        return applicationId.reduce(async (prom, appId: string) => {
+        const data = await applicationId.reduce(async (prom, appId: string) => {
             const liste = await prom;
             const appNode = await AppService.getInstance().getBuildingApp(appId);
             if (!(appNode instanceof SpinalNode)) return liste;
@@ -268,7 +269,8 @@ export class BuildingService {
             return liste;
         }, Promise.resolve([]));
 
-
+        adminProfileInstance.syncAdminProfile();
+        return data;
     }
 
     public async getAppsFromBuilding(building: string | SpinalNode): Promise<SpinalNode[]> {
@@ -321,7 +323,7 @@ export class BuildingService {
 
         if (!Array.isArray(apisIds)) apisIds = [apisIds];
 
-        return apisIds.reduce(async (prom, appId: string) => {
+        const data = await apisIds.reduce(async (prom, appId: string) => {
             const liste = await prom;
             const apiNode = await APIService.getInstance().getApiRouteById(appId, BUILDING_API_GROUP_TYPE);
             if (!(apiNode instanceof SpinalNode)) return liste;
@@ -333,6 +335,9 @@ export class BuildingService {
             liste.push(apiNode);
             return liste;
         }, Promise.resolve([]));
+
+        adminProfileInstance.syncAdminProfile();
+        return data;
 
     }
 

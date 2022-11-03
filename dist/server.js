@@ -32,26 +32,36 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
     });
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.authorizeRequest = void 0;
-// import * as bodyParser from 'body-parser';
 const cors = require("cors");
 const express = require("express");
-// import * as fileUpload from 'express-fileupload';
 const morgan = require("morgan");
 const path = require("path");
 const constant_1 = require("./constant");
 const proxy_1 = require("./proxy");
-const services_1 = require("./services");
 var proxy = require('express-http-proxy');
 const swaggerUi = require("swagger-ui-express");
-// const path = require('path');
-function useApiMiddleWare(app) {
-    app.use(cors({ origin: '*' }));
-    // app.use(fileUpload({ createParentPath: true }));
-    app.use(express.json());
-    app.use(express.urlencoded({ extended: true }));
-    // app.all(`${PAM_BASE_URI}*`, authorizeRequest);
+const tsoa_1 = require("tsoa");
+const routes_1 = require("./routes");
+const AuthError_1 = require("./security/AuthError");
+function initExpress() {
+    var app = express();
+    app.use(morgan('dev'));
+    useApiMiddleWare(app);
+    useHubProxy(app);
+    useClientMiddleWare(app);
+    initSwagger(app);
+    (0, proxy_1.default)(app);
+    (0, proxy_1.default)(app, true);
+    (0, routes_1.RegisterRoutes)(app);
+    app.use(errorHandler);
+    const server_port = process.env.SERVER_PORT || 2022;
+    const server = app.listen(server_port, () => console.log(`api server listening on port ${server_port}!`));
+    return { server, app };
 }
+exports.default = initExpress;
+/////////////////////////////////////
+//          Middleware             //
+/////////////////////////////////////
 function useHubProxy(app) {
     const HUB_HOST = `http://${process.env.HUB_HOST}:${process.env.HUB_PORT}`;
     const proxyHub = proxy(HUB_HOST, {
@@ -66,15 +76,9 @@ function useClientMiddleWare(app) {
     const oneDay = 1000 * 60 * 60 * 24;
     const root = path.resolve(__dirname, '..');
     app.use(express.static(root));
-    // app.all(/^\/(?!api).*$/, function (req, res) {
-    //   res.sendFile(path.resolve(root, "index.html"));
-    // });
     app.get("/", (req, res) => {
         res.redirect("/docs");
     });
-    // app.get("/v1/building_list", (req, res) => {
-    //   res.redirect("")
-    // })
 }
 function initSwagger(app) {
     app.use("/swagger.json", (req, res) => {
@@ -84,42 +88,44 @@ function initSwagger(app) {
         res.sendFile('spinalcore.png', { root: path.resolve(__dirname, "./assets") });
     });
     app.use("/docs", swaggerUi.serve, (req, res) => __awaiter(this, void 0, void 0, function* () {
-        return res.send(swaggerUi.generateHTML(yield Promise.resolve().then(() => require("./swagger/swagger.json")))
-        // swaggerUi.setup(undefined, {
-        //   swaggerOptions: { url: "/swagger.json" },
-        //   customSiteTitle: "PAM APIs",
-        //   customCss: '.topbar-wrapper img {content: url(/logo.png);} .swagger-ui .topbar {background: #dbdbdb;}'
-        // })
-        );
+        return res.send(swaggerUi.generateHTML(yield Promise.resolve().then(() => require("./swagger/swagger.json"))));
     }));
 }
-function initExpress() {
-    // const absPath = '../../../.browser_organs'.split('/');
-    // const root = path.join(__dirname, ...absPath);
-    var app = express();
-    app.use(morgan('dev'));
-    (0, proxy_1.default)(app);
-    (0, proxy_1.default)(app, true);
-    useHubProxy(app);
-    useApiMiddleWare(app);
-    useClientMiddleWare(app);
-    initSwagger(app);
-    const server_port = process.env.SERVER_PORT || 2022;
-    const server = app.listen(server_port, () => console.log(`Example app listening on port ${server_port}!`));
-    return { server, app };
+function useApiMiddleWare(app) {
+    app.use(cors({ origin: '*' }));
+    app.use(express.json());
+    app.use(express.urlencoded({ extended: true }));
 }
-exports.default = initExpress;
-function authorizeRequest(req, res, next) {
-    let auth = req.headers.authorization;
-    if (auth) {
-        const token = auth.split(" ")[1];
-        const tokenIsValid = services_1.AuthentificationService.getInstance().tokenIsValid(token);
-        if (tokenIsValid)
-            return next();
+function errorHandler(err, req, res, next) {
+    if (err instanceof tsoa_1.ValidateError) {
+        return res.status(constant_1.HTTP_CODES.BAD_REQUEST).send(_formatValidationError(err));
     }
-    return res.status(constant_1.HTTP_CODES.UNAUTHORIZED).send("invalid authorization");
+    if (err instanceof AuthError_1.AuthError) {
+        return res.status(constant_1.HTTP_CODES.UNAUTHORIZED).send({ message: err.message });
+    }
+    if (err instanceof Error) {
+        return res.status(constant_1.HTTP_CODES.INTERNAL_ERROR).json({
+            message: "Internal Server Error",
+        });
+    }
+    next();
 }
-exports.authorizeRequest = authorizeRequest;
+function _formatValidationError(err) {
+    err;
+    return {
+        message: "Validation Failed",
+        details: err === null || err === void 0 ? void 0 : err.fields,
+    };
+}
+// export function authorizeRequest(req: express.Request, res: express.Response, next: express.NextFunction) {
+//   let auth = req.headers.authorization;
+//   if (auth) {
+//     const token = auth.split(" ")[1];
+//     const tokenIsValid = AuthentificationService.getInstance().tokenIsValid(token);
+//     if (tokenIsValid) return next();
+//   }
+//   return res.status(HTTP_CODES.UNAUTHORIZED).send("invalid authorization");
+// }
 // export function clientAuthorization(req: express.Request, res: express.Response, next: express.NextFunction) {
 //   const loginUrl = "/login";
 //   let originalUrl = req.originalUrl;
@@ -130,4 +136,4 @@ exports.authorizeRequest = authorizeRequest;
 //   if (auth && isLoginUrl) return res.redirect("/");
 //   next();
 // }
-//# sourceMappingURL=initExpress.js.map
+//# sourceMappingURL=server.js.map

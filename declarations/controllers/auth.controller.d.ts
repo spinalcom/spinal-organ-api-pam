@@ -1,11 +1,8 @@
 import { Controller } from "tsoa";
-import { IAdmin, IAdminCredential, IAppCredential, IApplicationToken, IPamCredential, IPamInfo, IUserCredential, IUserToken } from "../interfaces";
+import { IAdmin, IAdminCredential, IAppCredential, IApplicationToken, IOAuth2Credential, IPamCredential, IPamInfo, IUserCredential, IUserToken } from "../interfaces";
 export declare class AuthController extends Controller {
     constructor();
-    authenticate(credential: IUserCredential | IAppCredential): Promise<string | IApplicationToken | IUserToken | {
-        message: string;
-    }>;
-    authenticateAdmin(credential: IUserCredential): Promise<string | IApplicationToken | IUserToken | {
+    authenticate(credential: IUserCredential | IAppCredential | IOAuth2Credential): Promise<string | IApplicationToken | IUserToken | {
         message: string;
     }>;
     registerToAdmin(data: {

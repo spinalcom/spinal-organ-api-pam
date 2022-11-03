@@ -106,6 +106,8 @@ export const TOKEN_TYPE = "token";
 
 export const BUILDING_API_GROUP_TYPE = "BuildingApis";
 export const PORTOFOLIO_API_GROUP_TYPE = "PortofolioApis";
+export const ADMIN_PROFILE_TYPE = "AdminProfile";
+export const ADMIN_PROFILE_NAME = "AdminProfile";
 
 // RelationName
 // export const CONTEXT_TO_APP_CATEGORY_RELATION_NAME = "hasAppCategory";
@@ -189,16 +191,13 @@ export enum HTTP_CODES {
 
 
 export enum SECURITY_MESSAGES {
-    INVALID_TOKEN = "Invalid/expired token ! Please authenticate",
+    INVALID_TOKEN = "Invalid or expired token !",
     UNAUTHORIZED = "Unauthorized"
 }
 
-// export const AUTH_SERVER_URI = 'http://localhost:3054';
-
-// export const SPINALTWIN_CLIENT_ID = 'm9T3YOTHRq';
-// export const SPINALTWIN_CLIENT_SECRET = 'kRBmqiUyofHSL9j8zrNI4bUSwcM3eO';
 
 export enum SECURITY_NAME {
     admin = "admin",
-    simple = "simple"
+    profile = "profile",
+    all = "all"
 } 

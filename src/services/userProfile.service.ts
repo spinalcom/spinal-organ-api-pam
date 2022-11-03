@@ -33,6 +33,7 @@ import {
   _filterPortofolioList,
   _filterBosList,
 } from '../utils/profileUtils';
+import { AdminProfileService } from './adminProfile.service';
 
 
 
@@ -40,6 +41,8 @@ import {
 export class UserProfileService {
   private static instance: UserProfileService;
   public context: SpinalContext;
+  private adminProfile: SpinalNode;
+
   private constructor() { }
 
   public static getInstance(): UserProfileService {
@@ -53,6 +56,8 @@ export class UserProfileService {
   public async init(): Promise<SpinalContext> {
     this.context = await configServiceInstance.getContext(USER_PROFILE_CONTEXT_NAME);
     if (!this.context) this.context = await configServiceInstance.addContext(USER_PROFILE_CONTEXT_NAME, USER_PROFILE_CONTEXT_TYPE);
+
+    await AdminProfileService.getInstance().init(this.context);
     return this.context;
   }
 
@@ -121,19 +126,8 @@ export class UserProfileService {
       }, Promise.resolve([]))
     }
 
-    // const { authorizeApis, authorizeBos, authorizePortofolio, unauthorizeApis, unauthorizeBos, unauthorizePortofolio } = _formatAuthorizationData(appProfile);
-
-
-    // await this._unauthorizeOnEdit(profileNode, unauthorizeApis, <any>unauthorizeBos, <any>unauthorizePortofolio);
-
-    // const filteredPortofolio = _filterPortofolioList(<any>authorizePortofolio, <any>unauthorizePortofolio);
-    // const filteredApis = _filterApisList(authorizeApis, unauthorizeApis);
-    // const filteredBos = _filterBosList(<any>authorizeBos, <any>unauthorizeBos);
-
-    // await this._authorizeOnEdit(profileNode, filteredApis, filteredBos, filteredPortofolio)
     return this.getUserProfile(profileNode);
   }
-
 
   public async getAllUserProfile(): Promise<IProfileRes[]> {
     const contexts = await this.getAllUserProfileNodes();
@@ -357,7 +351,6 @@ export class UserProfileService {
     })
   }
 
-
   public async authorizeToAccessBosApiRoute(profile: SpinalNode | string, portofolioId: string, data: IBosAuth | IBosAuth[]): Promise<IBosAuthRes[]> {
     data = Array.isArray(data) ? data : [data];
 
@@ -395,7 +388,6 @@ export class UserProfileService {
     })
   }
 
-
   public async getAuthorizedBos(profile: SpinalNode | string, portofolioId: string,): Promise<SpinalNode[]> {
     const node = profile instanceof SpinalNode ? profile : await this._getUserProfileNode(profile);
     if (!(node instanceof SpinalNode)) return;
@@ -431,12 +423,22 @@ export class UserProfileService {
     return Promise.all(promises);
   }
 
+
+  public async getAllAuthorizedBos(profile: string | SpinalNode): Promise<SpinalNode[]> {
+    const node = profile instanceof SpinalNode ? profile : await this._getUserProfileNode(profile);
+    const portofolios = await this.getAuthorizedPortofolio(node);
+    const promises = portofolios.map(el => this.getAuthorizedBos(node, el.getId().get()));
+    return Promise.all(promises).then((result) => {
+      return result.flat();
+    })
+  }
+
   ///////////////////////////////////////////////////////////
   ///                       PRIVATES                      //
   //////////////////////////////////////////////////////////
 
 
-  private async _authorizeIPortofolioAuth(profile: SpinalNode, portofolioAuth: IPortofolioAuth): Promise<IPortofolioAuthRes> {
+  public async _authorizeIPortofolioAuth(profile: SpinalNode, portofolioAuth: IPortofolioAuth): Promise<IPortofolioAuthRes> {
 
     const portofolio = await this.authorizePortofolio(profile, portofolioAuth.portofolioId);
     const appsData = await this.authorizeToAccessPortofolioApp(profile, portofolioAuth);
@@ -449,7 +451,7 @@ export class UserProfileService {
 
   }
 
-  private async _unauthorizeIPortofolioAuth(profile: SpinalNode, portofolioAuth: IPortofolioAuthEdit): Promise<any> {
+  public async _unauthorizeIPortofolioAuth(profile: SpinalNode, portofolioAuth: IPortofolioAuthEdit): Promise<any> {
     await this.unauthorizeToAccessPortofolioApp(profile, { portofolioId: portofolioAuth.portofolioId, appsIds: portofolioAuth.unauthorizeAppsIds });
     const buildingProm = portofolioAuth.building.map(bos => this._unauthorizeIBosAuth(profile, bos, portofolioAuth.portofolioId))
     await Promise.all(buildingProm);
@@ -487,9 +489,6 @@ export class UserProfileService {
     })
   }
 
-  private _addProfileToGraph(node: SpinalNode): Promise<SpinalNode> {
-    return this.context.addChildInContext(node, CONTEXT_TO_USER_PROFILE_RELATION_NAME, PTR_LST_TYPE, this.context);
-  }
 
   private async _createUserProfileNode(userProfile: IProfile): Promise<SpinalNode> {
 

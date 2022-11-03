@@ -47,13 +47,19 @@ class AuthorizationService {
     }
     profileHasAccess(profile, node) {
         return __awaiter(this, void 0, void 0, function* () {
-            // const context = await this._getContextByType(profile, elementType);
-            // if (!context) return false;
-            // return node.belongsToContext(context);
             const context = yield this._getAuthorizedPortofolioContext(profile, true);
             if (!context)
                 return false;
-            return node.belongsToContext(context);
+            const id = typeof node === "string" ? node : node.getId().get();
+            const found = yield context.findInContextAsyncPredicate(context, ((node, stop) => __awaiter(this, void 0, void 0, function* () {
+                const element = yield node.getElement(true);
+                if (element && element.getId().get() === id) {
+                    stop();
+                    return true;
+                }
+                return false;
+            })));
+            return found && found.length > 0 ? true : false;
         });
     }
     // public async removePortofolioReferences(profile: SpinalNode, portofolioId: string): Promise<void> {

@@ -1,9 +1,9 @@
-import { IAdmin, IAdminCredential, IPamCredential, IPamInfo, IUserCredential, IAppCredential, IApplicationToken, IUserToken } from "../interfaces";
+import { IAdmin, IAdminCredential, IPamCredential, IPamInfo, IUserCredential, IAppCredential, IApplicationToken, IUserToken, IOAuth2Credential } from "../interfaces";
 export declare class AuthentificationService {
     private static instance;
     private constructor();
     static getInstance(): AuthentificationService;
-    authenticate(info: IUserCredential | IAppCredential): Promise<{
+    authenticate(info: IUserCredential | IAppCredential | IOAuth2Credential): Promise<{
         code: number;
         data: string | IApplicationToken | IUserToken;
     }>;
@@ -34,4 +34,5 @@ export declare class AuthentificationService {
     private _getOrCreateContext;
     private _saveUserToken;
     _getTokenData(token: string): Promise<IApplicationToken | IUserToken>;
+    private _formatInfo;
 }

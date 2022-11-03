@@ -37,6 +37,7 @@ const services_1 = require("../services");
 const proxy = require("express-http-proxy");
 const authentication_1 = require("../security/authentication");
 const utils_1 = require("./utils");
+const utils_2 = require("../utils/pam_v1_utils/utils");
 function configureProxy(app, useV1 = false) {
     let apiData = { url: "", clientId: "", secretId: "" };
     const uri = !useV1 ? constant_1.BOS_BASE_URI_V2 : `(${constant_1.BOS_BASE_URI_V1}|${constant_1.BOS_BASE_URI_V1_2})`;
@@ -44,14 +45,14 @@ function configureProxy(app, useV1 = false) {
         var _a;
         try {
             const { building_id } = req.params;
-            const tokenInfo = yield (0, authentication_1.expressAuthentication)(req, constant_1.SECURITY_NAME.simple);
+            const tokenInfo = yield (0, authentication_1.expressAuthentication)(req, constant_1.SECURITY_NAME.profile);
             req["endpoint"] = (0, utils_1.formatUri)(req.url, uri);
             const building = yield services_1.BuildingService.getInstance().getBuildingById(building_id);
             if (!building)
                 return res.status(constant_1.HTTP_CODES.NOT_FOUND).send(`No building found for ${building_id}`);
             if (((_a = tokenInfo.userInfo) === null || _a === void 0 ? void 0 : _a.type) != constant_1.USER_TYPES.ADMIN) {
                 const isAppProfile = tokenInfo.profile.appProfileBosConfigId ? true : false;
-                const profileId = tokenInfo.profile.appProfileBosConfigId || tokenInfo.profile.userProfileBosConfigId;
+                const profileId = tokenInfo.profile.appProfileBosConfigId || tokenInfo.profile.userProfileBosConfigId || tokenInfo.profile.profileId;
                 const access = yield (0, utils_1.canAccess)(building_id, { method: req.method, route: req.endpoint }, profileId, isAppProfile);
                 if (!access)
                     throw new Error(constant_1.SECURITY_MESSAGES.UNAUTHORIZED);
@@ -63,6 +64,32 @@ function configureProxy(app, useV1 = false) {
             return res.status(constant_1.HTTP_CODES.UNAUTHORIZED).send(error.message);
         }
     }), proxy((req) => apiData.url, (0, utils_1.proxyOptions)(useV1)));
+    if (useV1) {
+        app.get("/v1/building_list", (req, res) => __awaiter(this, void 0, void 0, function* () {
+            try {
+                const tokenInfo = yield (0, authentication_1.expressAuthentication)(req, constant_1.SECURITY_NAME.profile);
+                let isApp;
+                let profileId;
+                if (tokenInfo.profile.appProfileBosConfigId) {
+                    isApp = true;
+                    profileId = tokenInfo.profile.appProfileBosConfigId;
+                }
+                else if (tokenInfo.profile.userProfileBosConfigId || tokenInfo.profile.profileId) {
+                    isApp = false;
+                    profileId = tokenInfo.profile.userProfileBosConfigId || tokenInfo.profile.profileId;
+                }
+                const buildings = yield (0, utils_1.getProfileBuildings)(profileId, isApp);
+                const data = utils_2.Utils.getReturnObj(null, buildings, "READ");
+                return res.send(data);
+            }
+            catch (error) {
+                return res.status(constant_1.HTTP_CODES.UNAUTHORIZED).send(error.message);
+            }
+        }));
+        app.post("/api/oauth/token", (req, res) => {
+            res.redirect(307, `${constant_1.PAM_BASE_URI}/auth`);
+        });
+    }
 }
 exports.default = configureProxy;
 //# sourceMappingURL=index.js.map

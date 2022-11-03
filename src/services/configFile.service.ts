@@ -34,6 +34,7 @@ import {
     UserProfileService, PortofolioService,
     DigitalTwinService, TokenService, UserService
 } from ".";
+import { createDefaultAdminApps } from '../adminApps';
 
 // const { config: { directory_path, fileName } } = require("../../config");
 
@@ -61,6 +62,7 @@ export default class ConfigFileService {
             this.graph = graph;
             return this._initServices().then(async (result) => {
                 await DigitalTwinService.getInstance().createDigitalTwin("PAM DigitalTwin", CONFIG_DEFAULT_DIRECTORY_PATH)
+                await createDefaultAdminApps();
                 return result;
             })
         })

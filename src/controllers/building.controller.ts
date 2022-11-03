@@ -63,7 +63,7 @@ export class BuildingController extends Controller {
         }
     }
 */
-    @Security(SECURITY_NAME.admin)
+    @Security(SECURITY_NAME.profile)
     @Post("/get_building/{id}")
     public async getBuildingById(@Path() id: string): Promise<IBuilding | { message: string }> {
         try {
@@ -182,7 +182,7 @@ export class BuildingController extends Controller {
         }
     }
 
-    @Security(SECURITY_NAME.admin)
+    @Security(SECURITY_NAME.profile)
     @Get("/get_apps_from_building/{buildingId}")
     public async getAppsFromBuilding(@Path() buildingId: string): Promise<IApp[] | { message: string }> {
         try {
@@ -199,7 +199,7 @@ export class BuildingController extends Controller {
         }
     }
 
-    @Security(SECURITY_NAME.admin)
+    @Security(SECURITY_NAME.profile)
     @Get("/get_app_from_building/{buildingId}/{appId}")
     public async getAppFromBuilding(@Path() buildingId: string, @Path() appId: string): Promise<IApp | { message: string }> {
         try {
@@ -235,7 +235,7 @@ export class BuildingController extends Controller {
         }
     }
 
-    @Security(SECURITY_NAME.admin)
+    @Security(SECURITY_NAME.profile)
     @Get("/building_has_app/{buildingId}/{appId}")
     public async buildingHasApp(@Path() buildingId: string, @Path() appId: string): Promise<boolean | { message: string }> {
         try {
@@ -271,7 +271,7 @@ export class BuildingController extends Controller {
         }
     }
 
-    @Security(SECURITY_NAME.admin)
+    @Security(SECURITY_NAME.profile)
     @Get("/get_apisRoute_from_building/{buildingId}")
     public async getApisFromBuilding(@Path() buildingId: string): Promise<IApiRoute[] | { message: string }> {
         try {
@@ -288,7 +288,7 @@ export class BuildingController extends Controller {
         }
     }
 
-    @Security(SECURITY_NAME.admin)
+    @Security(SECURITY_NAME.profile)
     @Get("/get_apiRoute_from_building/{buildingId}/{apiId}")
     public async getApiFromBuilding(@Path() buildingId: string, @Path() apiId: string): Promise<IApiRoute | { message: string }> {
         try {
@@ -324,7 +324,7 @@ export class BuildingController extends Controller {
         }
     }
 
-    @Security(SECURITY_NAME.admin)
+    @Security(SECURITY_NAME.profile)
     @Get("/building_has_apiRoute/{buildingId}/{apiId}")
     public async buildingHasApi(@Path() buildingId: string, @Path() apiId: string): Promise<boolean | { message: string }> {
         try {

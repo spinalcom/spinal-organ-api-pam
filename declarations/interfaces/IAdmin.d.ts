@@ -50,3 +50,8 @@ export interface IAppCredential {
     clientId: string;
     clientSecret: string;
 }
+export interface IOAuth2Credential {
+    client_id: string;
+    client_secret: string;
+    [key: string]: string;
+}

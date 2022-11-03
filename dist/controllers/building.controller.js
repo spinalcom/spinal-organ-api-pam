@@ -328,7 +328,7 @@ let BuildingController = class BuildingController extends tsoa_1.Controller {
     }
 };
 __decorate([
-    (0, tsoa_1.Security)(constant_1.SECURITY_NAME.admin),
+    (0, tsoa_1.Security)(constant_1.SECURITY_NAME.profile),
     (0, tsoa_1.Post)("/get_building/{id}"),
     __param(0, (0, tsoa_1.Path)()),
     __metadata("design:type", Function),
@@ -369,7 +369,7 @@ __decorate([
     __metadata("design:returntype", Promise)
 ], BuildingController.prototype, "addAppToBuilding", null);
 __decorate([
-    (0, tsoa_1.Security)(constant_1.SECURITY_NAME.admin),
+    (0, tsoa_1.Security)(constant_1.SECURITY_NAME.profile),
     (0, tsoa_1.Get)("/get_apps_from_building/{buildingId}"),
     __param(0, (0, tsoa_1.Path)()),
     __metadata("design:type", Function),
@@ -377,7 +377,7 @@ __decorate([
     __metadata("design:returntype", Promise)
 ], BuildingController.prototype, "getAppsFromBuilding", null);
 __decorate([
-    (0, tsoa_1.Security)(constant_1.SECURITY_NAME.admin),
+    (0, tsoa_1.Security)(constant_1.SECURITY_NAME.profile),
     (0, tsoa_1.Get)("/get_app_from_building/{buildingId}/{appId}"),
     __param(0, (0, tsoa_1.Path)()),
     __param(1, (0, tsoa_1.Path)()),
@@ -395,7 +395,7 @@ __decorate([
     __metadata("design:returntype", Promise)
 ], BuildingController.prototype, "removeAppFromBuilding", null);
 __decorate([
-    (0, tsoa_1.Security)(constant_1.SECURITY_NAME.admin),
+    (0, tsoa_1.Security)(constant_1.SECURITY_NAME.profile),
     (0, tsoa_1.Get)("/building_has_app/{buildingId}/{appId}"),
     __param(0, (0, tsoa_1.Path)()),
     __param(1, (0, tsoa_1.Path)()),
@@ -413,7 +413,7 @@ __decorate([
     __metadata("design:returntype", Promise)
 ], BuildingController.prototype, "addApiToBuilding", null);
 __decorate([
-    (0, tsoa_1.Security)(constant_1.SECURITY_NAME.admin),
+    (0, tsoa_1.Security)(constant_1.SECURITY_NAME.profile),
     (0, tsoa_1.Get)("/get_apisRoute_from_building/{buildingId}"),
     __param(0, (0, tsoa_1.Path)()),
     __metadata("design:type", Function),
@@ -421,7 +421,7 @@ __decorate([
     __metadata("design:returntype", Promise)
 ], BuildingController.prototype, "getApisFromBuilding", null);
 __decorate([
-    (0, tsoa_1.Security)(constant_1.SECURITY_NAME.admin),
+    (0, tsoa_1.Security)(constant_1.SECURITY_NAME.profile),
     (0, tsoa_1.Get)("/get_apiRoute_from_building/{buildingId}/{apiId}"),
     __param(0, (0, tsoa_1.Path)()),
     __param(1, (0, tsoa_1.Path)()),
@@ -439,7 +439,7 @@ __decorate([
     __metadata("design:returntype", Promise)
 ], BuildingController.prototype, "removeApisFromBuilding", null);
 __decorate([
-    (0, tsoa_1.Security)(constant_1.SECURITY_NAME.admin),
+    (0, tsoa_1.Security)(constant_1.SECURITY_NAME.profile),
     (0, tsoa_1.Get)("/building_has_apiRoute/{buildingId}/{apiId}"),
     __param(0, (0, tsoa_1.Path)()),
     __param(1, (0, tsoa_1.Path)()),

@@ -38,6 +38,7 @@ const constant_1 = require("../constant");
 const authorization_service_1 = require("./authorization.service");
 const configFile_service_1 = require("./configFile.service");
 const profileUtils_1 = require("../utils/profileUtils");
+const adminProfile_service_1 = require("./adminProfile.service");
 class UserProfileService {
     constructor() { }
     static getInstance() {
@@ -51,6 +52,7 @@ class UserProfileService {
             this.context = yield configFile_service_1.configServiceInstance.getContext(constant_1.USER_PROFILE_CONTEXT_NAME);
             if (!this.context)
                 this.context = yield configFile_service_1.configServiceInstance.addContext(constant_1.USER_PROFILE_CONTEXT_NAME, constant_1.USER_PROFILE_CONTEXT_TYPE);
+            yield adminProfile_service_1.AdminProfileService.getInstance().init(this.context);
             return this.context;
         });
     }
@@ -110,12 +112,6 @@ class UserProfileService {
                     return liste;
                 }), Promise.resolve([]));
             }
-            // const { authorizeApis, authorizeBos, authorizePortofolio, unauthorizeApis, unauthorizeBos, unauthorizePortofolio } = _formatAuthorizationData(appProfile);
-            // await this._unauthorizeOnEdit(profileNode, unauthorizeApis, <any>unauthorizeBos, <any>unauthorizePortofolio);
-            // const filteredPortofolio = _filterPortofolioList(<any>authorizePortofolio, <any>unauthorizePortofolio);
-            // const filteredApis = _filterApisList(authorizeApis, unauthorizeApis);
-            // const filteredBos = _filterBosList(<any>authorizeBos, <any>unauthorizeBos);
-            // await this._authorizeOnEdit(profileNode, filteredApis, filteredBos, filteredPortofolio)
             return this.getUserProfile(profileNode);
         });
     }
@@ -407,6 +403,16 @@ class UserProfileService {
             return Promise.all(promises);
         });
     }
+    getAllAuthorizedBos(profile) {
+        return __awaiter(this, void 0, void 0, function* () {
+            const node = profile instanceof spinal_env_viewer_graph_service_1.SpinalNode ? profile : yield this._getUserProfileNode(profile);
+            const portofolios = yield this.getAuthorizedPortofolio(node);
+            const promises = portofolios.map(el => this.getAuthorizedBos(node, el.getId().get()));
+            return Promise.all(promises).then((result) => {
+                return result.flat();
+            });
+        });
+    }
     ///////////////////////////////////////////////////////////
     ///                       PRIVATES                      //
     //////////////////////////////////////////////////////////
@@ -466,9 +472,6 @@ class UserProfileService {
                 return false;
             });
         });
-    }
-    _addProfileToGraph(node) {
-        return this.context.addChildInContext(node, constant_1.CONTEXT_TO_USER_PROFILE_RELATION_NAME, constant_1.PTR_LST_TYPE, this.context);
     }
     _createUserProfileNode(userProfile) {
         return __awaiter(this, void 0, void 0, function* () {

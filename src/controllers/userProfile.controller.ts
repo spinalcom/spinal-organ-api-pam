@@ -23,7 +23,7 @@
  */
 
 import { HTTP_CODES, SECURITY_NAME } from "../constant";
-import { IBosAuth, IBosData, IPortofolioAuth, IPortofolioData, IProfile, IProfileData, IProfileEdit } from "../interfaces";
+import { IBosAuth, IBosData, IPortofolioData, IProfile, IProfileData, IProfileEdit } from "../interfaces";
 import { UserProfileService } from "../services";
 import { Route, Tags, Controller, Post, Get, Put, Delete, Body, Path, Security } from "tsoa";
 import { _formatProfile, _getNodeListInfo, _formatProfileKeys, _formatAuthorizationData, _formatPortofolioAuthRes, _formatBosAuthRes } from '../utils/profileUtils'
@@ -57,7 +57,7 @@ export class UserProfileController extends Controller {
         }
     }
 
-    @Security(SECURITY_NAME.admin)
+    @Security(SECURITY_NAME.profile)
     @Get("/get_profile/{id}")
     public async getUserProfile(@Path() id: string): Promise<IProfileData | { message: string }> {
         try {
@@ -126,7 +126,7 @@ export class UserProfileController extends Controller {
     //   PORTOFOLIO  //
     ///////////////////
 
-    @Security(SECURITY_NAME.admin)
+    @Security(SECURITY_NAME.profile)
     @Get("/get_authorized_portofolio/{profileId}")
     public async getAuthorizedPortofolioApps(@Path() profileId: string): Promise<IPortofolioData[] | { message: string }> {
         try {
@@ -164,7 +164,7 @@ export class UserProfileController extends Controller {
         }
     }
 
-    @Security(SECURITY_NAME.admin)
+    @Security(SECURITY_NAME.profile)
     @Get("/get_authorized_portofolio_apps/{profileId}/{portofolioId}")
     public async getAuthorizedPortofolioApis(@Path() profileId: string, @Path() portofolioId: string): Promise<any | { message: string }> {
         try {
@@ -211,7 +211,7 @@ export class UserProfileController extends Controller {
     ////////////
 
 
-    @Security(SECURITY_NAME.admin)
+    @Security(SECURITY_NAME.profile)
     @Get("/get_authorized_bos/{profileId}/{portofolioId}")
     public async getAuthorizedBos(@Path() profileId: string, @Path() portofolioId: string): Promise<any | { message: string }> {
         try {
@@ -248,7 +248,7 @@ export class UserProfileController extends Controller {
     }
 
 
-    @Security(SECURITY_NAME.admin)
+    @Security(SECURITY_NAME.profile)
     @Get("/get_authorized_bos_apps/{profileId}/{portofolioId}/{bosId}")
     public async getAuthorizedBosApis(@Path() profileId: string, @Path() portofolioId: string, @Path() bosId: string): Promise<any | { message: string }> {
         try {

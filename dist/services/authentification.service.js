@@ -53,10 +53,20 @@ class AuthentificationService {
     }
     authenticate(info) {
         return __awaiter(this, void 0, void 0, function* () {
+            const isUser = "userName" in info && "password" in info ? true : false;
+            if (isUser) {
+                const data = yield this.authenticateAdmin(info);
+                if (data.code !== constant_1.HTTP_CODES.INTERNAL_ERROR) {
+                    return {
+                        code: data.code, data: data.message
+                    };
+                }
+            }
             const adminCredential = yield this.getPamToAdminCredential();
             if (!adminCredential)
                 throw new Error("No authentication platform is registered");
-            const isUser = "userName" in info && "password" in info ? true : false;
+            if (!isUser)
+                info = this._formatInfo(info);
             const url = `${adminCredential.urlAdmin}/${isUser ? 'users' : 'applications'}/login`;
             return this._sendLoginRequest(url, info, adminCredential, isUser);
         });
@@ -312,6 +322,17 @@ class AuthentificationService {
             const found = yield token_service_1.TokenService.getInstance().getTokenData(token);
             return found === null || found === void 0 ? void 0 : found.get();
         });
+    }
+    _formatInfo(info) {
+        if ("client_id" in info) {
+            info["clientId"] = info["client_id"];
+            delete info.client_id;
+        }
+        if ("client_secret" in info) {
+            info["clientSecret"] = info["client_secret"];
+            delete info.client_secret;
+        }
+        return info;
     }
 }
 exports.AuthentificationService = AuthentificationService;

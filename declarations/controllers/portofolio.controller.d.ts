@@ -31,7 +31,7 @@ export declare class PortofolioController extends Controller {
     addBuilding(portofolioId: string, body: IBuildingCreation): Promise<IBuilding[] | {
         message: string;
     }>;
-    getBuilding(portofolioId: string, appId: string): Promise<IBuilding | {
+    getBuilding(portofolioId: string, buildingId: string): Promise<IBuilding | {
         message: string;
     }>;
     getAllBuilding(portofolioId: string): Promise<IBuilding[] | {

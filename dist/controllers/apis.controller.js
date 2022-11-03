@@ -272,7 +272,7 @@ __decorate([
     __metadata("design:returntype", Promise)
 ], APIController.prototype, "updatePortofolioApiRoute", null);
 __decorate([
-    (0, tsoa_1.Security)(constant_1.SECURITY_NAME.admin),
+    (0, tsoa_1.Security)(constant_1.SECURITY_NAME.profile),
     (0, tsoa_1.Get)("/get_portofolio_api_route/{id}"),
     __param(0, (0, tsoa_1.Path)()),
     __metadata("design:type", Function),
@@ -320,7 +320,7 @@ __decorate([
     __metadata("design:returntype", Promise)
 ], APIController.prototype, "updateBosApiRoute", null);
 __decorate([
-    (0, tsoa_1.Security)(constant_1.SECURITY_NAME.admin),
+    (0, tsoa_1.Security)(constant_1.SECURITY_NAME.profile),
     (0, tsoa_1.Get)("/get_bos_api_route/{id}"),
     __param(0, (0, tsoa_1.Path)()),
     __metadata("design:type", Function),

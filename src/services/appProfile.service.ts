@@ -409,6 +409,15 @@ export class AppProfileService {
     return Promise.all(promises);
   }
 
+  public async getAllAuthorizedBos(profile: string | SpinalNode): Promise<SpinalNode[]> {
+    const node = profile instanceof SpinalNode ? profile : await this._getAppProfileNode(profile);
+    const portofolios = await this.getAuthorizedPortofolio(node);
+    const promises = portofolios.map(el => this.getAuthorizedBos(node, el.getId().get()));
+    return Promise.all(promises).then((result) => {
+      return result.flat();
+    })
+  }
+
   ///////////////////////////////////////////////////////////
   ///                       PRIVATES                      //
   //////////////////////////////////////////////////////////

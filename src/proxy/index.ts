@@ -22,12 +22,13 @@
  * <http://resources.spinalcom.com/licenses.pdf>.
  */
 
-import { BOS_BASE_URI_V2, BOS_BASE_URI_V1, BOS_BASE_URI_V1_2, HTTP_CODES, SECURITY_NAME, USER_TYPES, SECURITY_MESSAGES } from "../constant";
+import { BOS_BASE_URI_V2, BOS_BASE_URI_V1, BOS_BASE_URI_V1_2, HTTP_CODES, SECURITY_NAME, USER_TYPES, SECURITY_MESSAGES, PAM_BASE_URI } from "../constant";
 import * as express from "express";
 import { BuildingService } from '../services'
 import * as proxy from "express-http-proxy";
 import { expressAuthentication } from "../security/authentication"
-import { canAccess, formatUri, proxyOptions } from "./utils";
+import { canAccess, formatUri, getProfileBuildings, proxyOptions } from "./utils";
+import { Utils } from "../utils/pam_v1_utils/utils";
 
 
 
@@ -41,7 +42,7 @@ export default function configureProxy(app: express.Express, useV1: boolean = fa
 
         try {
             const { building_id } = req.params;
-            const tokenInfo = await expressAuthentication(req, SECURITY_NAME.simple);
+            const tokenInfo = await expressAuthentication(req, SECURITY_NAME.profile);
             req["endpoint"] = formatUri(req.url, uri);
 
             const building = await BuildingService.getInstance().getBuildingById(building_id);
@@ -51,7 +52,7 @@ export default function configureProxy(app: express.Express, useV1: boolean = fa
             if (tokenInfo.userInfo?.type != USER_TYPES.ADMIN) {
 
                 const isAppProfile = tokenInfo.profile.appProfileBosConfigId ? true : false;
-                const profileId = tokenInfo.profile.appProfileBosConfigId || tokenInfo.profile.userProfileBosConfigId
+                const profileId = tokenInfo.profile.appProfileBosConfigId || tokenInfo.profile.userProfileBosConfigId || tokenInfo.profile.profileId;
                 const access = await canAccess(building_id, { method: req.method, route: (<any>req).endpoint }, profileId, isAppProfile)
                 if (!access) throw new Error(SECURITY_MESSAGES.UNAUTHORIZED);
 
@@ -65,6 +66,36 @@ export default function configureProxy(app: express.Express, useV1: boolean = fa
         }
 
     }, proxy((req: express.Request) => apiData.url, proxyOptions(useV1)))
+
+
+    if (useV1) {
+        app.get("/v1/building_list", async (req: express.Request, res: express.Response) => {
+            try {
+                const tokenInfo = await expressAuthentication(req, SECURITY_NAME.profile);
+                let isApp;
+                let profileId;
+                if (tokenInfo.profile.appProfileBosConfigId) {
+                    isApp = true;
+                    profileId = tokenInfo.profile.appProfileBosConfigId
+                } else if (tokenInfo.profile.userProfileBosConfigId || tokenInfo.profile.profileId) {
+                    isApp = false;
+                    profileId = tokenInfo.profile.userProfileBosConfigId || tokenInfo.profile.profileId;
+                }
+
+                const buildings = await getProfileBuildings(profileId, isApp);
+
+                const data = Utils.getReturnObj(null, buildings, "READ");
+                return res.send(data);
+            } catch (error) {
+                return res.status(HTTP_CODES.UNAUTHORIZED).send(error.message);
+            }
+        })
+
+        app.post("/api/oauth/token", (req: express.Request, res: express.Response) => {
+            res.redirect(307, `${PAM_BASE_URI}/auth`)
+        })
+    }
+
 }
 
 

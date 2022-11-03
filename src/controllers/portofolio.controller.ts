@@ -103,7 +103,7 @@ export class PortofolioController extends Controller {
         }
     }
 
-    @Security(SECURITY_NAME.admin)
+    @Security(SECURITY_NAME.profile)
     @Get("/get_portofolio/{id}")
     public async getPortofolio(@Path() id: string): Promise<any | { message: string }> {
         try {
@@ -116,7 +116,7 @@ export class PortofolioController extends Controller {
         }
     }
 
-    @Security(SECURITY_NAME.admin)
+    @Security(SECURITY_NAME.profile)
     @Get("/get_portofolio_details/{id}")
     public async getPortofolioDetails(@Path() id: string): Promise<IPortofolioData | { message: string }> {
         try {
@@ -176,12 +176,12 @@ export class PortofolioController extends Controller {
         }
     }
 
-    @Security(SECURITY_NAME.admin)
-    @Get("/get_building_from_portofolio/{portofolioId}/{appId}")
-    public async getBuilding(@Path() portofolioId: string, @Path() appId: string): Promise<IBuilding | { message: string }> {
+    @Security(SECURITY_NAME.profile)
+    @Get("/get_building_from_portofolio/{portofolioId}/{buildingId}")
+    public async getBuilding(@Path() portofolioId: string, @Path() buildingId: string): Promise<IBuilding | { message: string }> {
         try {
 
-            const node = await serviceInstance.getBuildingFromPortofolio(portofolioId, appId);
+            const node = await serviceInstance.getBuildingFromPortofolio(portofolioId, buildingId);
 
             if (node) {
                 const data = await serviceInstance.formatBuilding(node.info.get());
@@ -190,7 +190,7 @@ export class PortofolioController extends Controller {
             };
 
             this.setStatus(HTTP_CODES.NOT_FOUND);
-            return { message: `no Building found for ${appId}` };
+            return { message: `no Building found for ${buildingId}` };
 
         } catch (error) {
             this.setStatus(HTTP_CODES.INTERNAL_ERROR)
@@ -198,7 +198,7 @@ export class PortofolioController extends Controller {
         }
     }
 
-    @Security(SECURITY_NAME.admin)
+    @Security(SECURITY_NAME.profile)
     @Get("/get_all_buildings_from_portofolio/{portofolioId}")
     public async getAllBuilding(@Path() portofolioId: string): Promise<IBuilding[] | { message: string }> {
         try {
@@ -255,7 +255,7 @@ export class PortofolioController extends Controller {
     }
 
 
-    @Security(SECURITY_NAME.admin)
+    @Security(SECURITY_NAME.profile)
     @Get("/get_apps_from_portofolio/{portofolioId}")
     public async getPortofolioApps(@Path() portofolioId: string): Promise<IApp[] | { message: string }> {
         try {
@@ -274,7 +274,7 @@ export class PortofolioController extends Controller {
     }
 
 
-    @Security(SECURITY_NAME.admin)
+    @Security(SECURITY_NAME.profile)
     @Get("/get_app_from_portofolio/{portofolioId}/{applicationId}")
     public async getAppFromPortofolio(@Path() portofolioId: string, @Path() applicationId: string): Promise<IApp | { message: string }> {
         try {
@@ -311,7 +311,7 @@ export class PortofolioController extends Controller {
     }
 
 
-    @Security(SECURITY_NAME.admin)
+    @Security(SECURITY_NAME.profile)
     @Get("/portofolio_has_app/{portofolioId}//{applicationId}")
     public async portofolioHasApp(@Path() portofolioId: string, @Path() applicationId: string): Promise<boolean | { message: string }> {
         try {
@@ -323,9 +323,6 @@ export class PortofolioController extends Controller {
             return { message: error.message };
         }
     }
-
-
-
 
 
     @Security(SECURITY_NAME.admin)
@@ -347,7 +344,7 @@ export class PortofolioController extends Controller {
     }
 
 
-    @Security(SECURITY_NAME.admin)
+    @Security(SECURITY_NAME.profile)
     @Get("/get_apisRoute_from_portofolio/{portofolioId}")
     public async getPortofolioApis(@Path() portofolioId: string): Promise<IApiRoute[] | { message: string }> {
         try {
@@ -366,7 +363,7 @@ export class PortofolioController extends Controller {
     }
 
 
-    @Security(SECURITY_NAME.admin)
+    @Security(SECURITY_NAME.profile)
     @Get("/get_apiRoute_from_portofolio/{portofolioId}/{apiId}")
     public async getApiFromPortofolio(@Path() portofolioId: string, @Path() apiId: string): Promise<IApiRoute | { message: string }> {
         try {
@@ -403,7 +400,7 @@ export class PortofolioController extends Controller {
     }
 
 
-    @Security(SECURITY_NAME.admin)
+    @Security(SECURITY_NAME.profile)
     @Get("/portofolio_has_apiRoute/{portofolioId}/{apiId}")
     public async portofolioHasApi(@Path() portofolioId: string, @Path() apiId: string): Promise<boolean | { message: string }> {
         try {

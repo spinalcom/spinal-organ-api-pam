@@ -216,6 +216,15 @@ const models = {
         "additionalProperties": false,
     },
     // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
+    "IOAuth2Credential": {
+        "dataType": "refObject",
+        "properties": {
+            "client_id": { "dataType": "string", "required": true },
+            "client_secret": { "dataType": "string", "required": true },
+        },
+        "additionalProperties": { "dataType": "string" },
+    },
+    // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
     "IPamCredential": {
         "dataType": "refObject",
         "properties": {
@@ -362,7 +371,7 @@ function RegisterRoutes(app) {
         }
     });
     // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
-    app.get('/api/v1/pam/get_portofolio_api_route/:id', authenticateMiddleware([{ "admin": [] }]), ...((0, runtime_1.fetchMiddlewares)(apis_controller_1.APIController)), ...((0, runtime_1.fetchMiddlewares)(apis_controller_1.APIController.prototype.getPortofolioApiRouteById)), function APIController_getPortofolioApiRouteById(request, response, next) {
+    app.get('/api/v1/pam/get_portofolio_api_route/:id', authenticateMiddleware([{ "profile": [] }]), ...((0, runtime_1.fetchMiddlewares)(apis_controller_1.APIController)), ...((0, runtime_1.fetchMiddlewares)(apis_controller_1.APIController.prototype.getPortofolioApiRouteById)), function APIController_getPortofolioApiRouteById(request, response, next) {
         const args = {
             id: { "in": "path", "name": "id", "required": true, "dataType": "string" },
         };
@@ -463,7 +472,7 @@ function RegisterRoutes(app) {
         }
     });
     // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
-    app.get('/api/v1/pam/get_bos_api_route/:id', authenticateMiddleware([{ "admin": [] }]), ...((0, runtime_1.fetchMiddlewares)(apis_controller_1.APIController)), ...((0, runtime_1.fetchMiddlewares)(apis_controller_1.APIController.prototype.getBosApiRouteById)), function APIController_getBosApiRouteById(request, response, next) {
+    app.get('/api/v1/pam/get_bos_api_route/:id', authenticateMiddleware([{ "profile": [] }]), ...((0, runtime_1.fetchMiddlewares)(apis_controller_1.APIController)), ...((0, runtime_1.fetchMiddlewares)(apis_controller_1.APIController.prototype.getBosApiRouteById)), function APIController_getBosApiRouteById(request, response, next) {
         const args = {
             id: { "in": "path", "name": "id", "required": true, "dataType": "string" },
         };
@@ -546,7 +555,7 @@ function RegisterRoutes(app) {
         }
     });
     // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
-    app.get('/api/v1/pam/app_profile/get_profile/:id', authenticateMiddleware([{ "admin": [] }]), ...((0, runtime_1.fetchMiddlewares)(appProfile_controller_1.AppProfileController)), ...((0, runtime_1.fetchMiddlewares)(appProfile_controller_1.AppProfileController.prototype.getAppProfile)), function AppProfileController_getAppProfile(request, response, next) {
+    app.get('/api/v1/pam/app_profile/get_profile/:id', authenticateMiddleware([{ "profile": [] }]), ...((0, runtime_1.fetchMiddlewares)(appProfile_controller_1.AppProfileController)), ...((0, runtime_1.fetchMiddlewares)(appProfile_controller_1.AppProfileController.prototype.getAppProfile)), function AppProfileController_getAppProfile(request, response, next) {
         const args = {
             id: { "in": "path", "name": "id", "required": true, "dataType": "string" },
         };
@@ -613,7 +622,7 @@ function RegisterRoutes(app) {
         }
     });
     // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
-    app.get('/api/v1/pam/app_profile/get_authorized_portofolio/:profileId', authenticateMiddleware([{ "admin": [] }]), ...((0, runtime_1.fetchMiddlewares)(appProfile_controller_1.AppProfileController)), ...((0, runtime_1.fetchMiddlewares)(appProfile_controller_1.AppProfileController.prototype.getAuthorizedPortofolio)), function AppProfileController_getAuthorizedPortofolio(request, response, next) {
+    app.get('/api/v1/pam/app_profile/get_authorized_portofolio/:profileId', authenticateMiddleware([{ "profile": [] }]), ...((0, runtime_1.fetchMiddlewares)(appProfile_controller_1.AppProfileController)), ...((0, runtime_1.fetchMiddlewares)(appProfile_controller_1.AppProfileController.prototype.getAuthorizedPortofolio)), function AppProfileController_getAuthorizedPortofolio(request, response, next) {
         const args = {
             profileId: { "in": "path", "name": "profileId", "required": true, "dataType": "string" },
         };
@@ -648,7 +657,7 @@ function RegisterRoutes(app) {
         }
     });
     // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
-    app.get('/api/v1/pam/app_profile/get_authorized_portofolio_apis/:profileId/:portofolioId', authenticateMiddleware([{ "admin": [] }]), ...((0, runtime_1.fetchMiddlewares)(appProfile_controller_1.AppProfileController)), ...((0, runtime_1.fetchMiddlewares)(appProfile_controller_1.AppProfileController.prototype.getAuthorizedPortofolioApis)), function AppProfileController_getAuthorizedPortofolioApis(request, response, next) {
+    app.get('/api/v1/pam/app_profile/get_authorized_portofolio_apis/:profileId/:portofolioId', authenticateMiddleware([{ "profile": [] }]), ...((0, runtime_1.fetchMiddlewares)(appProfile_controller_1.AppProfileController)), ...((0, runtime_1.fetchMiddlewares)(appProfile_controller_1.AppProfileController.prototype.getAuthorizedPortofolioApis)), function AppProfileController_getAuthorizedPortofolioApis(request, response, next) {
         const args = {
             profileId: { "in": "path", "name": "profileId", "required": true, "dataType": "string" },
             portofolioId: { "in": "path", "name": "portofolioId", "required": true, "dataType": "string" },
@@ -684,7 +693,7 @@ function RegisterRoutes(app) {
         }
     });
     // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
-    app.get('/api/v1/pam/app_profile/get_authorized_bos/:profileId/:portofolioId', authenticateMiddleware([{ "admin": [] }]), ...((0, runtime_1.fetchMiddlewares)(appProfile_controller_1.AppProfileController)), ...((0, runtime_1.fetchMiddlewares)(appProfile_controller_1.AppProfileController.prototype.getAuthorizedBos)), function AppProfileController_getAuthorizedBos(request, response, next) {
+    app.get('/api/v1/pam/app_profile/get_authorized_bos/:profileId/:portofolioId', authenticateMiddleware([{ "profile": [] }]), ...((0, runtime_1.fetchMiddlewares)(appProfile_controller_1.AppProfileController)), ...((0, runtime_1.fetchMiddlewares)(appProfile_controller_1.AppProfileController.prototype.getAuthorizedBos)), function AppProfileController_getAuthorizedBos(request, response, next) {
         const args = {
             profileId: { "in": "path", "name": "profileId", "required": true, "dataType": "string" },
             portofolioId: { "in": "path", "name": "portofolioId", "required": true, "dataType": "string" },
@@ -721,7 +730,7 @@ function RegisterRoutes(app) {
         }
     });
     // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
-    app.get('/api/v1/pam/app_profile/get_authorized_bos_apis/:profileId/:portofolioId/:bosId', authenticateMiddleware([{ "admin": [] }]), ...((0, runtime_1.fetchMiddlewares)(appProfile_controller_1.AppProfileController)), ...((0, runtime_1.fetchMiddlewares)(appProfile_controller_1.AppProfileController.prototype.getAuthorizedBosApis)), function AppProfileController_getAuthorizedBosApis(request, response, next) {
+    app.get('/api/v1/pam/app_profile/get_authorized_bos_apis/:profileId/:portofolioId/:bosId', authenticateMiddleware([{ "profile": [] }]), ...((0, runtime_1.fetchMiddlewares)(appProfile_controller_1.AppProfileController)), ...((0, runtime_1.fetchMiddlewares)(appProfile_controller_1.AppProfileController.prototype.getAuthorizedBosApis)), function AppProfileController_getAuthorizedBosApis(request, response, next) {
         const args = {
             profileId: { "in": "path", "name": "profileId", "required": true, "dataType": "string" },
             portofolioId: { "in": "path", "name": "portofolioId", "required": true, "dataType": "string" },
@@ -872,7 +881,7 @@ function RegisterRoutes(app) {
         }
     });
     // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
-    app.get('/api/v1/pam/get_portofolio_app/:appId', authenticateMiddleware([{ "admin": [] }]), ...((0, runtime_1.fetchMiddlewares)(apps_controller_1.AppsController)), ...((0, runtime_1.fetchMiddlewares)(apps_controller_1.AppsController.prototype.getPortofolioApp)), function AppsController_getPortofolioApp(request, response, next) {
+    app.get('/api/v1/pam/get_portofolio_app/:appId', authenticateMiddleware([{ "profile": [] }]), ...((0, runtime_1.fetchMiddlewares)(apps_controller_1.AppsController)), ...((0, runtime_1.fetchMiddlewares)(apps_controller_1.AppsController.prototype.getPortofolioApp)), function AppsController_getPortofolioApp(request, response, next) {
         const args = {
             appId: { "in": "path", "name": "appId", "required": true, "dataType": "string" },
         };
@@ -889,7 +898,7 @@ function RegisterRoutes(app) {
         }
     });
     // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
-    app.get('/api/v1/pam/get_building_app/:appId', authenticateMiddleware([{ "admin": [] }]), ...((0, runtime_1.fetchMiddlewares)(apps_controller_1.AppsController)), ...((0, runtime_1.fetchMiddlewares)(apps_controller_1.AppsController.prototype.getBuildingApp)), function AppsController_getBuildingApp(request, response, next) {
+    app.get('/api/v1/pam/get_building_app/:appId', authenticateMiddleware([{ "profile": [] }]), ...((0, runtime_1.fetchMiddlewares)(apps_controller_1.AppsController)), ...((0, runtime_1.fetchMiddlewares)(apps_controller_1.AppsController.prototype.getBuildingApp)), function AppsController_getBuildingApp(request, response, next) {
         const args = {
             appId: { "in": "path", "name": "appId", "required": true, "dataType": "string" },
         };
@@ -1062,9 +1071,9 @@ function RegisterRoutes(app) {
         }
     });
     // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
-    app.post('/api/v1/pam/auth', ...((0, runtime_1.fetchMiddlewares)(auth_controller_1.AuthController)), ...((0, runtime_1.fetchMiddlewares)(auth_controller_1.AuthController.prototype.authenticate)), function AuthController_authenticate(request, response, next) {
+    app.post('/api/v1/pam/auth', authenticateMiddleware([{ "all": [] }]), ...((0, runtime_1.fetchMiddlewares)(auth_controller_1.AuthController)), ...((0, runtime_1.fetchMiddlewares)(auth_controller_1.AuthController.prototype.authenticate)), function AuthController_authenticate(request, response, next) {
         const args = {
-            credential: { "in": "body", "name": "credential", "required": true, "dataType": "union", "subSchemas": [{ "ref": "IUserCredential" }, { "ref": "IAppCredential" }] },
+            credential: { "in": "body", "name": "credential", "required": true, "dataType": "union", "subSchemas": [{ "ref": "IUserCredential" }, { "ref": "IAppCredential" }, { "ref": "IOAuth2Credential" }] },
         };
         // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
         let validatedArgs = [];
@@ -1072,23 +1081,6 @@ function RegisterRoutes(app) {
             validatedArgs = getValidatedArgs(args, request, response);
             const controller = new auth_controller_1.AuthController();
             const promise = controller.authenticate.apply(controller, validatedArgs);
-            promiseHandler(controller, promise, response, undefined, next);
-        }
-        catch (err) {
-            return next(err);
-        }
-    });
-    // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
-    app.post('/api/v1/pam/auth/admin', ...((0, runtime_1.fetchMiddlewares)(auth_controller_1.AuthController)), ...((0, runtime_1.fetchMiddlewares)(auth_controller_1.AuthController.prototype.authenticateAdmin)), function AuthController_authenticateAdmin(request, response, next) {
-        const args = {
-            credential: { "in": "body", "name": "credential", "required": true, "ref": "IUserCredential" },
-        };
-        // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
-        let validatedArgs = [];
-        try {
-            validatedArgs = getValidatedArgs(args, request, response);
-            const controller = new auth_controller_1.AuthController();
-            const promise = controller.authenticateAdmin.apply(controller, validatedArgs);
             promiseHandler(controller, promise, response, undefined, next);
         }
         catch (err) {
@@ -1173,7 +1165,7 @@ function RegisterRoutes(app) {
         }
     });
     // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
-    app.post('/api/v1/pam/get_building/:id', authenticateMiddleware([{ "admin": [] }]), ...((0, runtime_1.fetchMiddlewares)(building_controller_1.BuildingController)), ...((0, runtime_1.fetchMiddlewares)(building_controller_1.BuildingController.prototype.getBuildingById)), function BuildingController_getBuildingById(request, response, next) {
+    app.post('/api/v1/pam/get_building/:id', authenticateMiddleware([{ "profile": [] }]), ...((0, runtime_1.fetchMiddlewares)(building_controller_1.BuildingController)), ...((0, runtime_1.fetchMiddlewares)(building_controller_1.BuildingController.prototype.getBuildingById)), function BuildingController_getBuildingById(request, response, next) {
         const args = {
             id: { "in": "path", "name": "id", "required": true, "dataType": "string" },
         };
@@ -1258,7 +1250,7 @@ function RegisterRoutes(app) {
         }
     });
     // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
-    app.get('/api/v1/pam/get_apps_from_building/:buildingId', authenticateMiddleware([{ "admin": [] }]), ...((0, runtime_1.fetchMiddlewares)(building_controller_1.BuildingController)), ...((0, runtime_1.fetchMiddlewares)(building_controller_1.BuildingController.prototype.getAppsFromBuilding)), function BuildingController_getAppsFromBuilding(request, response, next) {
+    app.get('/api/v1/pam/get_apps_from_building/:buildingId', authenticateMiddleware([{ "profile": [] }]), ...((0, runtime_1.fetchMiddlewares)(building_controller_1.BuildingController)), ...((0, runtime_1.fetchMiddlewares)(building_controller_1.BuildingController.prototype.getAppsFromBuilding)), function BuildingController_getAppsFromBuilding(request, response, next) {
         const args = {
             buildingId: { "in": "path", "name": "buildingId", "required": true, "dataType": "string" },
         };
@@ -1275,7 +1267,7 @@ function RegisterRoutes(app) {
         }
     });
     // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
-    app.get('/api/v1/pam/get_app_from_building/:buildingId/:appId', authenticateMiddleware([{ "admin": [] }]), ...((0, runtime_1.fetchMiddlewares)(building_controller_1.BuildingController)), ...((0, runtime_1.fetchMiddlewares)(building_controller_1.BuildingController.prototype.getAppFromBuilding)), function BuildingController_getAppFromBuilding(request, response, next) {
+    app.get('/api/v1/pam/get_app_from_building/:buildingId/:appId', authenticateMiddleware([{ "profile": [] }]), ...((0, runtime_1.fetchMiddlewares)(building_controller_1.BuildingController)), ...((0, runtime_1.fetchMiddlewares)(building_controller_1.BuildingController.prototype.getAppFromBuilding)), function BuildingController_getAppFromBuilding(request, response, next) {
         const args = {
             buildingId: { "in": "path", "name": "buildingId", "required": true, "dataType": "string" },
             appId: { "in": "path", "name": "appId", "required": true, "dataType": "string" },
@@ -1311,7 +1303,7 @@ function RegisterRoutes(app) {
         }
     });
     // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
-    app.get('/api/v1/pam/building_has_app/:buildingId/:appId', authenticateMiddleware([{ "admin": [] }]), ...((0, runtime_1.fetchMiddlewares)(building_controller_1.BuildingController)), ...((0, runtime_1.fetchMiddlewares)(building_controller_1.BuildingController.prototype.buildingHasApp)), function BuildingController_buildingHasApp(request, response, next) {
+    app.get('/api/v1/pam/building_has_app/:buildingId/:appId', authenticateMiddleware([{ "profile": [] }]), ...((0, runtime_1.fetchMiddlewares)(building_controller_1.BuildingController)), ...((0, runtime_1.fetchMiddlewares)(building_controller_1.BuildingController.prototype.buildingHasApp)), function BuildingController_buildingHasApp(request, response, next) {
         const args = {
             buildingId: { "in": "path", "name": "buildingId", "required": true, "dataType": "string" },
             appId: { "in": "path", "name": "appId", "required": true, "dataType": "string" },
@@ -1347,7 +1339,7 @@ function RegisterRoutes(app) {
         }
     });
     // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
-    app.get('/api/v1/pam/get_apisRoute_from_building/:buildingId', authenticateMiddleware([{ "admin": [] }]), ...((0, runtime_1.fetchMiddlewares)(building_controller_1.BuildingController)), ...((0, runtime_1.fetchMiddlewares)(building_controller_1.BuildingController.prototype.getApisFromBuilding)), function BuildingController_getApisFromBuilding(request, response, next) {
+    app.get('/api/v1/pam/get_apisRoute_from_building/:buildingId', authenticateMiddleware([{ "profile": [] }]), ...((0, runtime_1.fetchMiddlewares)(building_controller_1.BuildingController)), ...((0, runtime_1.fetchMiddlewares)(building_controller_1.BuildingController.prototype.getApisFromBuilding)), function BuildingController_getApisFromBuilding(request, response, next) {
         const args = {
             buildingId: { "in": "path", "name": "buildingId", "required": true, "dataType": "string" },
         };
@@ -1364,7 +1356,7 @@ function RegisterRoutes(app) {
         }
     });
     // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
-    app.get('/api/v1/pam/get_apiRoute_from_building/:buildingId/:apiId', authenticateMiddleware([{ "admin": [] }]), ...((0, runtime_1.fetchMiddlewares)(building_controller_1.BuildingController)), ...((0, runtime_1.fetchMiddlewares)(building_controller_1.BuildingController.prototype.getApiFromBuilding)), function BuildingController_getApiFromBuilding(request, response, next) {
+    app.get('/api/v1/pam/get_apiRoute_from_building/:buildingId/:apiId', authenticateMiddleware([{ "profile": [] }]), ...((0, runtime_1.fetchMiddlewares)(building_controller_1.BuildingController)), ...((0, runtime_1.fetchMiddlewares)(building_controller_1.BuildingController.prototype.getApiFromBuilding)), function BuildingController_getApiFromBuilding(request, response, next) {
         const args = {
             buildingId: { "in": "path", "name": "buildingId", "required": true, "dataType": "string" },
             apiId: { "in": "path", "name": "apiId", "required": true, "dataType": "string" },
@@ -1400,7 +1392,7 @@ function RegisterRoutes(app) {
         }
     });
     // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
-    app.get('/api/v1/pam/building_has_apiRoute/:buildingId/:apiId', authenticateMiddleware([{ "admin": [] }]), ...((0, runtime_1.fetchMiddlewares)(building_controller_1.BuildingController)), ...((0, runtime_1.fetchMiddlewares)(building_controller_1.BuildingController.prototype.buildingHasApi)), function BuildingController_buildingHasApi(request, response, next) {
+    app.get('/api/v1/pam/building_has_apiRoute/:buildingId/:apiId', authenticateMiddleware([{ "profile": [] }]), ...((0, runtime_1.fetchMiddlewares)(building_controller_1.BuildingController)), ...((0, runtime_1.fetchMiddlewares)(building_controller_1.BuildingController.prototype.buildingHasApi)), function BuildingController_buildingHasApi(request, response, next) {
         const args = {
             buildingId: { "in": "path", "name": "buildingId", "required": true, "dataType": "string" },
             apiId: { "in": "path", "name": "apiId", "required": true, "dataType": "string" },
@@ -1503,7 +1495,7 @@ function RegisterRoutes(app) {
         }
     });
     // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
-    app.get('/api/v1/pam/get_portofolio/:id', authenticateMiddleware([{ "admin": [] }]), ...((0, runtime_1.fetchMiddlewares)(portofolio_controller_1.PortofolioController)), ...((0, runtime_1.fetchMiddlewares)(portofolio_controller_1.PortofolioController.prototype.getPortofolio)), function PortofolioController_getPortofolio(request, response, next) {
+    app.get('/api/v1/pam/get_portofolio/:id', authenticateMiddleware([{ "profile": [] }]), ...((0, runtime_1.fetchMiddlewares)(portofolio_controller_1.PortofolioController)), ...((0, runtime_1.fetchMiddlewares)(portofolio_controller_1.PortofolioController.prototype.getPortofolio)), function PortofolioController_getPortofolio(request, response, next) {
         const args = {
             id: { "in": "path", "name": "id", "required": true, "dataType": "string" },
         };
@@ -1520,7 +1512,7 @@ function RegisterRoutes(app) {
         }
     });
     // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
-    app.get('/api/v1/pam/get_portofolio_details/:id', authenticateMiddleware([{ "admin": [] }]), ...((0, runtime_1.fetchMiddlewares)(portofolio_controller_1.PortofolioController)), ...((0, runtime_1.fetchMiddlewares)(portofolio_controller_1.PortofolioController.prototype.getPortofolioDetails)), function PortofolioController_getPortofolioDetails(request, response, next) {
+    app.get('/api/v1/pam/get_portofolio_details/:id', authenticateMiddleware([{ "profile": [] }]), ...((0, runtime_1.fetchMiddlewares)(portofolio_controller_1.PortofolioController)), ...((0, runtime_1.fetchMiddlewares)(portofolio_controller_1.PortofolioController.prototype.getPortofolioDetails)), function PortofolioController_getPortofolioDetails(request, response, next) {
         const args = {
             id: { "in": "path", "name": "id", "required": true, "dataType": "string" },
         };
@@ -1587,10 +1579,10 @@ function RegisterRoutes(app) {
         }
     });
     // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
-    app.get('/api/v1/pam/get_building_from_portofolio/:portofolioId/:appId', authenticateMiddleware([{ "admin": [] }]), ...((0, runtime_1.fetchMiddlewares)(portofolio_controller_1.PortofolioController)), ...((0, runtime_1.fetchMiddlewares)(portofolio_controller_1.PortofolioController.prototype.getBuilding)), function PortofolioController_getBuilding(request, response, next) {
+    app.get('/api/v1/pam/get_building_from_portofolio/:portofolioId/:buildingId', authenticateMiddleware([{ "profile": [] }]), ...((0, runtime_1.fetchMiddlewares)(portofolio_controller_1.PortofolioController)), ...((0, runtime_1.fetchMiddlewares)(portofolio_controller_1.PortofolioController.prototype.getBuilding)), function PortofolioController_getBuilding(request, response, next) {
         const args = {
             portofolioId: { "in": "path", "name": "portofolioId", "required": true, "dataType": "string" },
-            appId: { "in": "path", "name": "appId", "required": true, "dataType": "string" },
+            buildingId: { "in": "path", "name": "buildingId", "required": true, "dataType": "string" },
         };
         // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
         let validatedArgs = [];
@@ -1605,7 +1597,7 @@ function RegisterRoutes(app) {
         }
     });
     // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
-    app.get('/api/v1/pam/get_all_buildings_from_portofolio/:portofolioId', authenticateMiddleware([{ "admin": [] }]), ...((0, runtime_1.fetchMiddlewares)(portofolio_controller_1.PortofolioController)), ...((0, runtime_1.fetchMiddlewares)(portofolio_controller_1.PortofolioController.prototype.getAllBuilding)), function PortofolioController_getAllBuilding(request, response, next) {
+    app.get('/api/v1/pam/get_all_buildings_from_portofolio/:portofolioId', authenticateMiddleware([{ "profile": [] }]), ...((0, runtime_1.fetchMiddlewares)(portofolio_controller_1.PortofolioController)), ...((0, runtime_1.fetchMiddlewares)(portofolio_controller_1.PortofolioController.prototype.getAllBuilding)), function PortofolioController_getAllBuilding(request, response, next) {
         const args = {
             portofolioId: { "in": "path", "name": "portofolioId", "required": true, "dataType": "string" },
         };
@@ -1658,7 +1650,7 @@ function RegisterRoutes(app) {
         }
     });
     // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
-    app.get('/api/v1/pam/get_apps_from_portofolio/:portofolioId', authenticateMiddleware([{ "admin": [] }]), ...((0, runtime_1.fetchMiddlewares)(portofolio_controller_1.PortofolioController)), ...((0, runtime_1.fetchMiddlewares)(portofolio_controller_1.PortofolioController.prototype.getPortofolioApps)), function PortofolioController_getPortofolioApps(request, response, next) {
+    app.get('/api/v1/pam/get_apps_from_portofolio/:portofolioId', authenticateMiddleware([{ "profile": [] }]), ...((0, runtime_1.fetchMiddlewares)(portofolio_controller_1.PortofolioController)), ...((0, runtime_1.fetchMiddlewares)(portofolio_controller_1.PortofolioController.prototype.getPortofolioApps)), function PortofolioController_getPortofolioApps(request, response, next) {
         const args = {
             portofolioId: { "in": "path", "name": "portofolioId", "required": true, "dataType": "string" },
         };
@@ -1675,7 +1667,7 @@ function RegisterRoutes(app) {
         }
     });
     // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
-    app.get('/api/v1/pam/get_app_from_portofolio/:portofolioId/:applicationId', authenticateMiddleware([{ "admin": [] }]), ...((0, runtime_1.fetchMiddlewares)(portofolio_controller_1.PortofolioController)), ...((0, runtime_1.fetchMiddlewares)(portofolio_controller_1.PortofolioController.prototype.getAppFromPortofolio)), function PortofolioController_getAppFromPortofolio(request, response, next) {
+    app.get('/api/v1/pam/get_app_from_portofolio/:portofolioId/:applicationId', authenticateMiddleware([{ "profile": [] }]), ...((0, runtime_1.fetchMiddlewares)(portofolio_controller_1.PortofolioController)), ...((0, runtime_1.fetchMiddlewares)(portofolio_controller_1.PortofolioController.prototype.getAppFromPortofolio)), function PortofolioController_getAppFromPortofolio(request, response, next) {
         const args = {
             portofolioId: { "in": "path", "name": "portofolioId", "required": true, "dataType": "string" },
             applicationId: { "in": "path", "name": "applicationId", "required": true, "dataType": "string" },
@@ -1711,7 +1703,7 @@ function RegisterRoutes(app) {
         }
     });
     // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
-    app.get('/api/v1/pam/portofolio_has_app/:portofolioId/:applicationId', authenticateMiddleware([{ "admin": [] }]), ...((0, runtime_1.fetchMiddlewares)(portofolio_controller_1.PortofolioController)), ...((0, runtime_1.fetchMiddlewares)(portofolio_controller_1.PortofolioController.prototype.portofolioHasApp)), function PortofolioController_portofolioHasApp(request, response, next) {
+    app.get('/api/v1/pam/portofolio_has_app/:portofolioId/:applicationId', authenticateMiddleware([{ "profile": [] }]), ...((0, runtime_1.fetchMiddlewares)(portofolio_controller_1.PortofolioController)), ...((0, runtime_1.fetchMiddlewares)(portofolio_controller_1.PortofolioController.prototype.portofolioHasApp)), function PortofolioController_portofolioHasApp(request, response, next) {
         const args = {
             portofolioId: { "in": "path", "name": "portofolioId", "required": true, "dataType": "string" },
             applicationId: { "in": "path", "name": "applicationId", "required": true, "dataType": "string" },
@@ -1747,7 +1739,7 @@ function RegisterRoutes(app) {
         }
     });
     // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
-    app.get('/api/v1/pam/get_apisRoute_from_portofolio/:portofolioId', authenticateMiddleware([{ "admin": [] }]), ...((0, runtime_1.fetchMiddlewares)(portofolio_controller_1.PortofolioController)), ...((0, runtime_1.fetchMiddlewares)(portofolio_controller_1.PortofolioController.prototype.getPortofolioApis)), function PortofolioController_getPortofolioApis(request, response, next) {
+    app.get('/api/v1/pam/get_apisRoute_from_portofolio/:portofolioId', authenticateMiddleware([{ "profile": [] }]), ...((0, runtime_1.fetchMiddlewares)(portofolio_controller_1.PortofolioController)), ...((0, runtime_1.fetchMiddlewares)(portofolio_controller_1.PortofolioController.prototype.getPortofolioApis)), function PortofolioController_getPortofolioApis(request, response, next) {
         const args = {
             portofolioId: { "in": "path", "name": "portofolioId", "required": true, "dataType": "string" },
         };
@@ -1764,7 +1756,7 @@ function RegisterRoutes(app) {
         }
     });
     // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
-    app.get('/api/v1/pam/get_apiRoute_from_portofolio/:portofolioId/:apiId', authenticateMiddleware([{ "admin": [] }]), ...((0, runtime_1.fetchMiddlewares)(portofolio_controller_1.PortofolioController)), ...((0, runtime_1.fetchMiddlewares)(portofolio_controller_1.PortofolioController.prototype.getApiFromPortofolio)), function PortofolioController_getApiFromPortofolio(request, response, next) {
+    app.get('/api/v1/pam/get_apiRoute_from_portofolio/:portofolioId/:apiId', authenticateMiddleware([{ "profile": [] }]), ...((0, runtime_1.fetchMiddlewares)(portofolio_controller_1.PortofolioController)), ...((0, runtime_1.fetchMiddlewares)(portofolio_controller_1.PortofolioController.prototype.getApiFromPortofolio)), function PortofolioController_getApiFromPortofolio(request, response, next) {
         const args = {
             portofolioId: { "in": "path", "name": "portofolioId", "required": true, "dataType": "string" },
             apiId: { "in": "path", "name": "apiId", "required": true, "dataType": "string" },
@@ -1800,7 +1792,7 @@ function RegisterRoutes(app) {
         }
     });
     // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
-    app.get('/api/v1/pam/portofolio_has_apiRoute/:portofolioId/:apiId', authenticateMiddleware([{ "admin": [] }]), ...((0, runtime_1.fetchMiddlewares)(portofolio_controller_1.PortofolioController)), ...((0, runtime_1.fetchMiddlewares)(portofolio_controller_1.PortofolioController.prototype.portofolioHasApi)), function PortofolioController_portofolioHasApi(request, response, next) {
+    app.get('/api/v1/pam/portofolio_has_apiRoute/:portofolioId/:apiId', authenticateMiddleware([{ "profile": [] }]), ...((0, runtime_1.fetchMiddlewares)(portofolio_controller_1.PortofolioController)), ...((0, runtime_1.fetchMiddlewares)(portofolio_controller_1.PortofolioController.prototype.portofolioHasApi)), function PortofolioController_portofolioHasApi(request, response, next) {
         const args = {
             portofolioId: { "in": "path", "name": "portofolioId", "required": true, "dataType": "string" },
             apiId: { "in": "path", "name": "apiId", "required": true, "dataType": "string" },
@@ -1835,7 +1827,7 @@ function RegisterRoutes(app) {
         }
     });
     // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
-    app.get('/api/v1/pam/user_profile/get_profile/:id', authenticateMiddleware([{ "admin": [] }]), ...((0, runtime_1.fetchMiddlewares)(userProfile_controller_1.UserProfileController)), ...((0, runtime_1.fetchMiddlewares)(userProfile_controller_1.UserProfileController.prototype.getUserProfile)), function UserProfileController_getUserProfile(request, response, next) {
+    app.get('/api/v1/pam/user_profile/get_profile/:id', authenticateMiddleware([{ "profile": [] }]), ...((0, runtime_1.fetchMiddlewares)(userProfile_controller_1.UserProfileController)), ...((0, runtime_1.fetchMiddlewares)(userProfile_controller_1.UserProfileController.prototype.getUserProfile)), function UserProfileController_getUserProfile(request, response, next) {
         const args = {
             id: { "in": "path", "name": "id", "required": true, "dataType": "string" },
         };
@@ -1902,7 +1894,7 @@ function RegisterRoutes(app) {
         }
     });
     // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
-    app.get('/api/v1/pam/user_profile/get_authorized_portofolio/:profileId', authenticateMiddleware([{ "admin": [] }]), ...((0, runtime_1.fetchMiddlewares)(userProfile_controller_1.UserProfileController)), ...((0, runtime_1.fetchMiddlewares)(userProfile_controller_1.UserProfileController.prototype.getAuthorizedPortofolioApps)), function UserProfileController_getAuthorizedPortofolioApps(request, response, next) {
+    app.get('/api/v1/pam/user_profile/get_authorized_portofolio/:profileId', authenticateMiddleware([{ "profile": [] }]), ...((0, runtime_1.fetchMiddlewares)(userProfile_controller_1.UserProfileController)), ...((0, runtime_1.fetchMiddlewares)(userProfile_controller_1.UserProfileController.prototype.getAuthorizedPortofolioApps)), function UserProfileController_getAuthorizedPortofolioApps(request, response, next) {
         const args = {
             profileId: { "in": "path", "name": "profileId", "required": true, "dataType": "string" },
         };
@@ -1937,7 +1929,7 @@ function RegisterRoutes(app) {
         }
     });
     // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
-    app.get('/api/v1/pam/user_profile/get_authorized_portofolio_apps/:profileId/:portofolioId', authenticateMiddleware([{ "admin": [] }]), ...((0, runtime_1.fetchMiddlewares)(userProfile_controller_1.UserProfileController)), ...((0, runtime_1.fetchMiddlewares)(userProfile_controller_1.UserProfileController.prototype.getAuthorizedPortofolioApis)), function UserProfileController_getAuthorizedPortofolioApis(request, response, next) {
+    app.get('/api/v1/pam/user_profile/get_authorized_portofolio_apps/:profileId/:portofolioId', authenticateMiddleware([{ "profile": [] }]), ...((0, runtime_1.fetchMiddlewares)(userProfile_controller_1.UserProfileController)), ...((0, runtime_1.fetchMiddlewares)(userProfile_controller_1.UserProfileController.prototype.getAuthorizedPortofolioApis)), function UserProfileController_getAuthorizedPortofolioApis(request, response, next) {
         const args = {
             profileId: { "in": "path", "name": "profileId", "required": true, "dataType": "string" },
             portofolioId: { "in": "path", "name": "portofolioId", "required": true, "dataType": "string" },
@@ -1973,7 +1965,7 @@ function RegisterRoutes(app) {
         }
     });
     // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
-    app.get('/api/v1/pam/user_profile/get_authorized_bos/:profileId/:portofolioId', authenticateMiddleware([{ "admin": [] }]), ...((0, runtime_1.fetchMiddlewares)(userProfile_controller_1.UserProfileController)), ...((0, runtime_1.fetchMiddlewares)(userProfile_controller_1.UserProfileController.prototype.getAuthorizedBos)), function UserProfileController_getAuthorizedBos(request, response, next) {
+    app.get('/api/v1/pam/user_profile/get_authorized_bos/:profileId/:portofolioId', authenticateMiddleware([{ "profile": [] }]), ...((0, runtime_1.fetchMiddlewares)(userProfile_controller_1.UserProfileController)), ...((0, runtime_1.fetchMiddlewares)(userProfile_controller_1.UserProfileController.prototype.getAuthorizedBos)), function UserProfileController_getAuthorizedBos(request, response, next) {
         const args = {
             profileId: { "in": "path", "name": "profileId", "required": true, "dataType": "string" },
             portofolioId: { "in": "path", "name": "portofolioId", "required": true, "dataType": "string" },
@@ -2010,7 +2002,7 @@ function RegisterRoutes(app) {
         }
     });
     // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
-    app.get('/api/v1/pam/user_profile/get_authorized_bos_apps/:profileId/:portofolioId/:bosId', authenticateMiddleware([{ "admin": [] }]), ...((0, runtime_1.fetchMiddlewares)(userProfile_controller_1.UserProfileController)), ...((0, runtime_1.fetchMiddlewares)(userProfile_controller_1.UserProfileController.prototype.getAuthorizedBosApis)), function UserProfileController_getAuthorizedBosApis(request, response, next) {
+    app.get('/api/v1/pam/user_profile/get_authorized_bos_apps/:profileId/:portofolioId/:bosId', authenticateMiddleware([{ "profile": [] }]), ...((0, runtime_1.fetchMiddlewares)(userProfile_controller_1.UserProfileController)), ...((0, runtime_1.fetchMiddlewares)(userProfile_controller_1.UserProfileController.prototype.getAuthorizedBosApis)), function UserProfileController_getAuthorizedBosApis(request, response, next) {
         const args = {
             profileId: { "in": "path", "name": "profileId", "required": true, "dataType": "string" },
             portofolioId: { "in": "path", "name": "portofolioId", "required": true, "dataType": "string" },

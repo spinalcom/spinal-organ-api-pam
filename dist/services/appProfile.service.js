@@ -398,6 +398,16 @@ class AppProfileService {
             return Promise.all(promises);
         });
     }
+    getAllAuthorizedBos(profile) {
+        return __awaiter(this, void 0, void 0, function* () {
+            const node = profile instanceof spinal_env_viewer_graph_service_1.SpinalNode ? profile : yield this._getAppProfileNode(profile);
+            const portofolios = yield this.getAuthorizedPortofolio(node);
+            const promises = portofolios.map(el => this.getAuthorizedBos(node, el.getId().get()));
+            return Promise.all(promises).then((result) => {
+                return result.flat();
+            });
+        });
+    }
     ///////////////////////////////////////////////////////////
     ///                       PRIVATES                      //
     //////////////////////////////////////////////////////////

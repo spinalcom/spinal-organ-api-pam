@@ -39,6 +39,8 @@ const constant_1 = require("../constant");
 const apps_service_1 = require("./apps.service");
 const building_service_1 = require("./building.service");
 const apis_service_1 = require("./apis.service");
+const adminProfile_service_1 = require("./adminProfile.service");
+const adminProfileInstance = adminProfile_service_1.AdminProfileService.getInstance();
 class PortofolioService {
     constructor() { }
     static getInstance() {
@@ -61,6 +63,7 @@ class PortofolioService {
             const apps = yield this.addAppToPortofolio(node, appsIds);
             const apis = yield this.addApiToPortofolio(node, apisIds);
             // const buildings = await this.addBuildingToPortofolio(node, buildingsIds);
+            adminProfileInstance.syncAdminProfile();
             return {
                 node,
                 apps,
@@ -157,7 +160,7 @@ class PortofolioService {
                 throw new Error(`No portofolio found for ${portofolio}`);
             if (!Array.isArray(applicationId))
                 applicationId = [applicationId];
-            return applicationId.reduce((prom, appId) => __awaiter(this, void 0, void 0, function* () {
+            const data = yield applicationId.reduce((prom, appId) => __awaiter(this, void 0, void 0, function* () {
                 const liste = yield prom;
                 const appNode = yield apps_service_1.AppService.getInstance().getPortofolioApp(appId);
                 if (!(appNode instanceof spinal_env_viewer_graph_service_1.SpinalNode))
@@ -169,6 +172,8 @@ class PortofolioService {
                 liste.push(appNode);
                 return liste;
             }), Promise.resolve([]));
+            adminProfileInstance.syncAdminProfile();
+            return data;
         });
     }
     getPortofolioApps(portofolio) {
@@ -198,7 +203,7 @@ class PortofolioService {
                 throw new Error(`No portofolio found for ${portofolio}`);
             if (!Array.isArray(applicationId))
                 applicationId = [applicationId];
-            return applicationId.reduce((prom, appId) => __awaiter(this, void 0, void 0, function* () {
+            const data = yield applicationId.reduce((prom, appId) => __awaiter(this, void 0, void 0, function* () {
                 const liste = yield prom;
                 const appNode = yield this.getAppFromPortofolio(portofolio, appId);
                 if (!(appNode instanceof spinal_env_viewer_graph_service_1.SpinalNode))
@@ -210,6 +215,8 @@ class PortofolioService {
                 catch (error) { }
                 return liste;
             }), Promise.resolve([]));
+            adminProfileInstance.syncAdminProfile();
+            return data;
         });
     }
     portofolioHasApp(portofolio, appId) {
@@ -229,7 +236,7 @@ class PortofolioService {
                 throw new Error(`No portofolio found for ${portofolio}`);
             if (!Array.isArray(apisIds))
                 apisIds = [apisIds];
-            return apisIds.reduce((prom, apiId) => __awaiter(this, void 0, void 0, function* () {
+            const data = yield apisIds.reduce((prom, apiId) => __awaiter(this, void 0, void 0, function* () {
                 const liste = yield prom;
                 const apiNode = yield apis_service_1.APIService.getInstance().getApiRouteById(apiId, constant_1.PORTOFOLIO_API_GROUP_TYPE);
                 if (!(apiNode instanceof spinal_env_viewer_graph_service_1.SpinalNode))
@@ -241,6 +248,8 @@ class PortofolioService {
                 liste.push(apiNode);
                 return liste;
             }), Promise.resolve([]));
+            adminProfileInstance.syncAdminProfile();
+            return data;
         });
     }
     getPortofolioApis(portofolio) {
@@ -270,7 +279,7 @@ class PortofolioService {
                 throw new Error(`No portofolio found for ${portofolio}`);
             if (!Array.isArray(apisIds))
                 apisIds = [apisIds];
-            return apisIds.reduce((prom, apiId) => __awaiter(this, void 0, void 0, function* () {
+            const data = yield apisIds.reduce((prom, apiId) => __awaiter(this, void 0, void 0, function* () {
                 const liste = yield prom;
                 const appNode = yield this.getApiFromPortofolio(portofolio, apiId);
                 if (!(appNode instanceof spinal_env_viewer_graph_service_1.SpinalNode))
@@ -282,6 +291,8 @@ class PortofolioService {
                 catch (error) { }
                 return liste;
             }), Promise.resolve([]));
+            adminProfileInstance.removeFromAdminProfile({ portofolioId: portofolio.getId().get(), unauthorizeApisIds: apisIds });
+            return data;
         });
     }
     portofolioHasApi(portofolio, apiId) {
@@ -306,7 +317,8 @@ class PortofolioService {
                 throw new Error(`No portofolio found for ${portofolio}`);
             // if (!Array.isArray(buildingId)) buildingId = [buildingId];
             const structure = yield building_service_1.BuildingService.getInstance().createBuilding(buildingInfo);
-            portofolio.addChildInContext(structure.node, constant_1.BUILDING_RELATION_NAME, constant_1.PTR_LST_TYPE, this.context);
+            yield portofolio.addChildInContext(structure.node, constant_1.BUILDING_RELATION_NAME, constant_1.PTR_LST_TYPE, this.context);
+            adminProfileInstance.syncAdminProfile();
             return structure;
             // return buildingId.reduce(async (prom, id: string) => {
             //     const liste = await prom;
@@ -339,7 +351,7 @@ class PortofolioService {
                 throw new Error(`No portofolio found for ${portofolio}`);
             if (!Array.isArray(buildingId))
                 buildingId = [buildingId];
-            return buildingId.reduce((prom, id) => __awaiter(this, void 0, void 0, function* () {
+            const data = yield buildingId.reduce((prom, id) => __awaiter(this, void 0, void 0, function* () {
                 const liste = yield prom;
                 const buildingNode = yield this.getBuildingFromPortofolio(portofolio, id);
                 if (!(buildingNode instanceof spinal_env_viewer_graph_service_1.SpinalNode))
@@ -353,6 +365,7 @@ class PortofolioService {
                 //         const appNode = AppService.getInstance().getAppById(appId);
                 //         if (!(appNode instanceof SpinalNode)) throw new Error(`No application found for ${appId}`);
             }), Promise.resolve([]));
+            return data;
         });
     }
     getBuildingFromPortofolio(portofolio, buildingId) {

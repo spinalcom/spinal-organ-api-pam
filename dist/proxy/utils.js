@@ -32,12 +32,20 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
     });
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.proxyOptions = exports.canAccess = exports.formatUri = void 0;
+exports.proxyOptions = exports.canAccess = exports.formatUri = exports.getProfileBuildings = void 0;
 const constant_1 = require("../constant");
 const services_1 = require("../services");
 const utils_1 = require("../utils/pam_v1_utils/utils");
 const corrspondance_1 = require("./corrspondance");
 const apiServerEndpoint = "/api/v1/";
+function getProfileBuildings(profileId, isApp) {
+    return __awaiter(this, void 0, void 0, function* () {
+        const instance = isApp ? services_1.AppProfileService.getInstance() : services_1.UserProfileService.getInstance();
+        const buildings = yield instance.getAllAuthorizedBos(profileId);
+        return buildings.map(el => el.info.get());
+    });
+}
+exports.getProfileBuildings = getProfileBuildings;
 function formatUri(argUrl, uri) {
     const base = argUrl.replace(new RegExp(`^${uri}*/`), (el) => "");
     let url = base.split("/").slice(1).join("/");
@@ -47,18 +55,43 @@ function formatUri(argUrl, uri) {
 exports.formatUri = formatUri;
 function canAccess(buildingId, api, profileId, isAppProfile) {
     return __awaiter(this, void 0, void 0, function* () {
-        // const access = AuthorizationService.getInstance().profileHasAccess()
         const profile = isAppProfile ? yield services_1.AppProfileService.getInstance().getAppProfile(profileId) : yield services_1.UserProfileService.getInstance().getUserProfile(profileId);
-        const buildingAccess = hasAccessToBuilding(profile, buildingId);
+        const buildingAccess = _hasAccessToBuilding(profile, buildingId);
         if (!buildingAccess)
             return false;
-        const routeFound = hasAccessToApiRoute(buildingAccess, api);
+        const routeFound = _hasAccessToApiRoute(buildingAccess, api);
         if (!routeFound)
             return false;
         return true;
     });
 }
 exports.canAccess = canAccess;
+const proxyOptions = (useV1) => {
+    return {
+        memoizeHost: false,
+        proxyReqPathResolver: (req) => req["endpoint"],
+        userResDecorator: (proxyRes, proxyResData) => {
+            return new Promise((resolve, reject) => {
+                if (!useV1)
+                    return resolve(proxyResData);
+                if (proxyRes.statusCode == constant_1.HTTP_CODES.NOT_FOUND)
+                    return resolve(proxyResData);
+                try {
+                    const response = JSON.parse(proxyResData.toString());
+                    const data = utils_1.Utils.getReturnObj(null, response, _get_method(proxyRes.req.method));
+                    resolve(data);
+                }
+                catch (error) {
+                    resolve(proxyResData);
+                }
+            });
+        }
+    };
+};
+exports.proxyOptions = proxyOptions;
+///////////////////////////////////
+//            PRIVATES           //
+///////////////////////////////////
 function _getCorrespondance(url) {
     const found = Object.keys(corrspondance_1.correspondanceObj).find(el => {
         const t = el.replace(/\{(.*?)\}/g, (el) => '(.*?)');
@@ -82,7 +115,7 @@ function _getCorrespondance(url) {
     }
     return url;
 }
-function hasAccessToBuilding(profile, buildingId) {
+function _hasAccessToBuilding(profile, buildingId) {
     for (const { buildings } of profile.authorized) {
         const found = buildings.find(({ building }) => building.getId().get() === buildingId);
         if (found)
@@ -90,7 +123,7 @@ function hasAccessToBuilding(profile, buildingId) {
     }
     return;
 }
-function hasAccessToApiRoute(building, apiRoute) {
+function _hasAccessToApiRoute(building, apiRoute) {
     return building.apis.find(node => {
         const route = node.info.get();
         if (apiRoute.method.toUpperCase() !== route.method.toUpperCase())
@@ -100,30 +133,7 @@ function hasAccessToApiRoute(building, apiRoute) {
         return apiRoute.route.match(regex);
     });
 }
-const proxyOptions = (useV1) => {
-    return {
-        memoizeHost: false,
-        proxyReqPathResolver: (req) => req["endpoint"],
-        userResDecorator: (proxyRes, proxyResData) => {
-            return new Promise((resolve, reject) => {
-                if (!useV1)
-                    return resolve(proxyResData);
-                if (proxyRes.statusCode == constant_1.HTTP_CODES.NOT_FOUND)
-                    return resolve(proxyResData);
-                try {
-                    const response = JSON.parse(proxyResData.toString());
-                    const data = utils_1.Utils.getReturnObj(null, response, get_method(proxyRes.req.method));
-                    resolve(data);
-                }
-                catch (error) {
-                    resolve(proxyResData);
-                }
-            });
-        }
-    };
-};
-exports.proxyOptions = proxyOptions;
-function get_method(method) {
+function _get_method(method) {
     switch (method) {
         case "GET":
             return "READ";

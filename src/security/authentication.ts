@@ -25,27 +25,44 @@
 import * as express from "express";
 import { SECURITY_MESSAGES, SECURITY_NAME, USER_TYPES } from "../constant";
 import { AuthentificationService } from "../services";
-
+import { checkIfProfileHasAccess } from "./utils";
+import { AuthError } from "./AuthError";
 
 
 export async function expressAuthentication(request: express.Request, securityName: string, scopes?: string[]): Promise<any> {
 
-    // return;
+    if (securityName === SECURITY_NAME.all) return;
+
+    const token = getToken(request);
+    if (!token) throw new AuthError(SECURITY_MESSAGES.INVALID_TOKEN);
+
     const authInstance = AuthentificationService.getInstance();
-    const header = request.headers.authorization || request.headers.Authorization;
-
-    if (!header) throw new Error(SECURITY_MESSAGES.INVALID_TOKEN);
-
-    const [, token] = (<string>header).split(" ");
-    if (!token) throw new Error(SECURITY_MESSAGES.INVALID_TOKEN);
-
 
     const tokenInfo: any = await authInstance.tokenIsValid(token);
-    if (!tokenInfo) throw new Error(SECURITY_MESSAGES.INVALID_TOKEN);
+    if (!tokenInfo) throw new AuthError(SECURITY_MESSAGES.INVALID_TOKEN);
 
-    if (securityName == SECURITY_NAME.admin && !(tokenInfo.userInfo?.type == USER_TYPES.ADMIN)) {
-        throw new Error(SECURITY_MESSAGES.UNAUTHORIZED);
+    if (tokenInfo.userInfo?.type == USER_TYPES.ADMIN) {
+        return tokenInfo;
+    }
+
+
+    const profileId = tokenInfo.profile.profileId || tokenInfo.profile.appProfileBosConfigId || tokenInfo.profile.userProfileBosConfigId
+
+    if (securityName === SECURITY_NAME.profile) {
+        const hasAccess = await checkIfProfileHasAccess(request, profileId);
+        if (!hasAccess) throw new AuthError(SECURITY_MESSAGES.UNAUTHORIZED);
     }
 
     return tokenInfo;
+}
+
+
+function getToken(request: express.Request): string {
+    const header = request.headers.authorization || request.headers.Authorization;
+    if (header) {
+        const [, token] = (<string>header).split(" ");
+        if (token) return token;
+    }
+
+    return request.body.token || request.query.token || request.headers["x-access-token"];
 }

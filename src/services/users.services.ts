@@ -31,6 +31,7 @@ import * as bcrypt from 'bcrypt';
 import * as fileLog from "log-to-file";
 import * as path from "path";
 import { TokenService } from "./token.service";
+import { INTERNAL_ERR } from "../utils/pam_v1_utils/constants";
 
 export class UserService {
     private static instance: UserService;
@@ -63,7 +64,7 @@ export class UserService {
         const userExist = await this.getAdminUser(userName);
         if (userExist) return;
 
-        const password = (userInfo && userInfo.password) || this._generateString(10);
+        const password = (userInfo && userInfo.password) || this._generateString(15);
         fileLog(JSON.stringify({ userName, password }), path.resolve(__dirname, "../../.admin.log"));
 
         if (userInfo.password) delete userInfo.password;
@@ -89,7 +90,7 @@ export class UserService {
 
     public async loginAdmin(user: IUserCredential): Promise<{ code: number; message: any | string }> {
         const node = await this.getAdminUser(user.userName);
-        if (!node) return { code: HTTP_CODES.UNAUTHORIZED, message: "bad username and/or password" };
+        if (!node) return { code: HTTP_CODES.INTERNAL_ERROR, message: "bad username and/or password" };
 
         const element = await node.getElement(true);
         const success = await this._comparePassword(user.password, element.password.get());

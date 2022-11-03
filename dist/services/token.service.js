@@ -38,6 +38,7 @@ const constant_1 = require("../constant");
 const configFile_service_1 = require("./configFile.service");
 const jwt = require("jsonwebtoken");
 const spinal_core_connectorjs_type_1 = require("spinal-core-connectorjs_type");
+const adminProfile_service_1 = require("./adminProfile.service");
 class TokenService {
     constructor() { }
     static getInstance() {
@@ -59,14 +60,18 @@ class TokenService {
             const playload = {
                 userInfo: userNode.info.get()
             };
-            durationInMin = durationInMin || 60 * 60;
+            durationInMin = durationInMin || 7 * 24 * 60 * 60; // par default 7jrs
             const key = secret || this._generateString(15);
             const token = jwt.sign(playload, key, { expiresIn: durationInMin });
+            const adminProfile = yield adminProfile_service_1.AdminProfileService.getInstance().getAdminProfile();
             const now = Date.now();
             playload.createdToken = now;
             playload.expieredToken = now + (durationInMin * 60 * 1000);
             playload.userId = userNode.getId().get();
             playload.token = token;
+            playload.profile = {
+                profileId: adminProfile.getId().get()
+            };
             const tokenNode = yield this.addTokenToContext(token, playload);
             yield userNode.addChild(tokenNode, constant_1.TOKEN_RELATION_NAME, constant_1.PTR_LST_TYPE);
             return playload;

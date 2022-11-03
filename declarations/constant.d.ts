@@ -68,6 +68,8 @@ export declare const BUILDING_APP_TYPE = "BuildingApp";
 export declare const TOKEN_TYPE = "token";
 export declare const BUILDING_API_GROUP_TYPE = "BuildingApis";
 export declare const PORTOFOLIO_API_GROUP_TYPE = "PortofolioApis";
+export declare const ADMIN_PROFILE_TYPE = "AdminProfile";
+export declare const ADMIN_PROFILE_NAME = "AdminProfile";
 export declare const CONTEXT_TO_APPS_GROUP = "hasAppsGroups";
 export declare const CONTEXT_TO_USER_PROFILE_RELATION_NAME = "hasUserProfile";
 export declare const CONTEXT_TO_APP_PROFILE_RELATION_NAME = "hasAppProfile";
@@ -108,10 +110,11 @@ export declare enum HTTP_CODES {
     INTERNAL_ERROR = 500
 }
 export declare enum SECURITY_MESSAGES {
-    INVALID_TOKEN = "Invalid/expired token ! Please authenticate",
+    INVALID_TOKEN = "Invalid or expired token !",
     UNAUTHORIZED = "Unauthorized"
 }
 export declare enum SECURITY_NAME {
     admin = "admin",
-    simple = "simple"
+    profile = "profile",
+    all = "all"
 }

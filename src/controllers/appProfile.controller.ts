@@ -105,7 +105,7 @@ export class AppProfileController extends Controller {
         }
     }
 
-    @Security(SECURITY_NAME.admin)
+    @Security(SECURITY_NAME.profile)
     @Get("/get_profile/{id}")
     public async getAppProfile(@Path() id: string): Promise<IProfileData | { message: string }> {
         try {
@@ -174,7 +174,7 @@ export class AppProfileController extends Controller {
     //   PORTOFOLIO  //
     ///////////////////
 
-    @Security(SECURITY_NAME.admin)
+    @Security(SECURITY_NAME.profile)
     @Get("/get_authorized_portofolio/{profileId}")
     public async getAuthorizedPortofolio(@Path() profileId: string): Promise<IPortofolioData[] | { message: string }> {
         try {
@@ -217,7 +217,7 @@ export class AppProfileController extends Controller {
         }
     }
 
-    @Security(SECURITY_NAME.admin)
+    @Security(SECURITY_NAME.profile)
     @Get("/get_authorized_portofolio_apis/{profileId}/{portofolioId}")
     public async getAuthorizedPortofolioApis(@Path() profileId: string, @Path() portofolioId: string): Promise<IApiRoute[] | { message: string }> {
         try {
@@ -261,7 +261,7 @@ export class AppProfileController extends Controller {
     //   BOS  //
     ////////////
 
-    @Security(SECURITY_NAME.admin)
+    @Security(SECURITY_NAME.profile)
     @Get("/get_authorized_bos/{profileId}/{portofolioId}")
     public async getAuthorizedBos(@Path() profileId: string, @Path() portofolioId: string): Promise<IBosData | { message: string }> {
         try {
@@ -304,7 +304,7 @@ export class AppProfileController extends Controller {
         }
     }
 
-    @Security(SECURITY_NAME.admin)
+    @Security(SECURITY_NAME.profile)
     @Get("/get_authorized_bos_apis/{profileId}/{portofolioId}/{bosId}")
     public async getAuthorizedBosApis(@Path() profileId: string, @Path() portofolioId: string, @Path() bosId: string): Promise<IApiRoute[] | { message: string }> {
         try {

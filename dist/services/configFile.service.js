@@ -38,6 +38,7 @@ const spinal_core_connectorjs_type_1 = require("spinal-core-connectorjs_type");
 const spinal_model_graph_1 = require("spinal-model-graph");
 const constant_1 = require("../constant");
 const _1 = require(".");
+const adminApps_1 = require("../adminApps");
 // const { config: { directory_path, fileName } } = require("../../config");
 const directory_path = process.env.CONFIG_DIRECTORY_PATH || constant_1.CONFIG_DEFAULT_DIRECTORY_PATH;
 const fileName = process.env.CONFIG_FILE_NAME || constant_1.CONFIG_DEFAULT_NAME;
@@ -55,6 +56,7 @@ class ConfigFileService {
             this.graph = graph;
             return this._initServices().then((result) => __awaiter(this, void 0, void 0, function* () {
                 yield _1.DigitalTwinService.getInstance().createDigitalTwin("PAM DigitalTwin", constant_1.CONFIG_DEFAULT_DIRECTORY_PATH);
+                yield (0, adminApps_1.createDefaultAdminApps)();
                 return result;
             }));
         });

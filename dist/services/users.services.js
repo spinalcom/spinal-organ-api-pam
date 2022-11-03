@@ -65,7 +65,7 @@ class UserService {
             const userExist = yield this.getAdminUser(userName);
             if (userExist)
                 return;
-            const password = (userInfo && userInfo.password) || this._generateString(10);
+            const password = (userInfo && userInfo.password) || this._generateString(15);
             fileLog(JSON.stringify({ userName, password }), path.resolve(__dirname, "../../.admin.log"));
             if (userInfo.password)
                 delete userInfo.password;
@@ -90,7 +90,7 @@ class UserService {
         return __awaiter(this, void 0, void 0, function* () {
             const node = yield this.getAdminUser(user.userName);
             if (!node)
-                return { code: constant_1.HTTP_CODES.UNAUTHORIZED, message: "bad username and/or password" };
+                return { code: constant_1.HTTP_CODES.INTERNAL_ERROR, message: "bad username and/or password" };
             const element = yield node.getElement(true);
             const success = yield this._comparePassword(user.password, element.password.get());
             if (!success)
