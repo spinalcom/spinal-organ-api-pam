@@ -63,7 +63,7 @@ const ADMIN_APPS = [
         packageName: "spinal-env-pam-app-profile-manager"
     },
     {
-        name: "Applications",
+        name: "Gestion d'applications",
         icon: "mdi-apps",
         description: "Gestion de types d'applications",
         tags: ["APPLICATIONS"],
@@ -72,7 +72,7 @@ const ADMIN_APPS = [
         packageName: "spinal-env-pam-apps-manager"
     },
     {
-        name: "Routes d'apis",
+        name: "Gestion de Routes d'apis",
         icon: "mdi-api",
         description: "Gestion de routes d'api",
         tags: ["APIS"],
@@ -81,9 +81,9 @@ const ADMIN_APPS = [
         packageName: "spinal-env-pam-apis-routes-manager"
     },
     {
-        name: "GESTION de Portefeuilles",
+        name: "Gestion de Portefeuilles",
         icon: "mdi-office-building-cog",
-        description: "Gestion de routes d'api",
+        description: "Gestion de portefolio",
         tags: ["PORTOFOLIO", "BUILDINGS"],
         categoryName: "Administation",
         groupName: "Administration",

@@ -36,7 +36,7 @@ exports.proxyOptions = exports.canAccess = exports.formatUri = exports.getProfil
 const constant_1 = require("../constant");
 const services_1 = require("../services");
 const utils_1 = require("../utils/pam_v1_utils/utils");
-const corrspondance_1 = require("./corrspondance");
+const correspondance_1 = require("./correspondance");
 const apiServerEndpoint = "/api/v1/";
 function getProfileBuildings(profileId, isApp) {
     return __awaiter(this, void 0, void 0, function* () {
@@ -100,14 +100,14 @@ exports.proxyOptions = proxyOptions;
 //            PRIVATES           //
 ///////////////////////////////////
 function _getCorrespondance(url) {
-    const found = Object.keys(corrspondance_1.correspondanceObj).find(el => {
+    const found = Object.keys(correspondance_1.correspondanceObj).find(el => {
         const t = el.replace(/\{(.*?)\}/g, (el) => '(.*?)');
         const regex = new RegExp(`^${t}$`);
         return url.match(regex);
     });
     if (found) {
         const urls = url.split("/");
-        const list = corrspondance_1.correspondanceObj[found].split("/");
+        const list = correspondance_1.correspondanceObj[found].split("/");
         let final = "";
         for (let index = 0; index < list.length; index++) {
             const element = list[index];

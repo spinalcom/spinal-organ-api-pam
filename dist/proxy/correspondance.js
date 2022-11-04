@@ -34,4 +34,4 @@ exports.correspondanceObj = {
     "node/{idNode}/children_node": "relation/{id}/children_node",
     "node/{idNode}/parent_node": "relation/{id}/parent_node"
 };
-//# sourceMappingURL=corrspondance.js.map
+//# sourceMappingURL=correspondance.js.map
