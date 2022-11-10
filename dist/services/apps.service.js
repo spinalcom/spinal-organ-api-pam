@@ -70,7 +70,7 @@ class AppService {
             if (!groupNode)
                 return;
             const children = yield groupNode.getChildren([constant_1.APP_RELATION_NAME]);
-            const appExist = children.find(el => el.getName().get() === appInfo.name);
+            const appExist = children.find(el => el.getName().get().toLowerCase() === appInfo.name.toLowerCase());
             if (appExist)
                 return appExist;
             appInfo.type = constant_1.ADMIN_APP_TYPE;
@@ -86,7 +86,7 @@ class AppService {
             if (!groupNode)
                 return;
             const children = yield groupNode.getChildren([constant_1.APP_RELATION_NAME]);
-            const appExist = children.find(el => el.getName().get() === appInfo.name);
+            const appExist = children.find(el => el.getName().get().toLowerCase() === appInfo.name.toLowerCase());
             if (appExist)
                 return appExist;
             appInfo.type = constant_1.PORTOFOLIO_APP_TYPE;
@@ -101,7 +101,7 @@ class AppService {
             if (!groupNode)
                 return;
             const children = yield groupNode.getChildren([constant_1.APP_RELATION_NAME]);
-            const appExist = children.find(el => el.getName().get() === appInfo.name);
+            const appExist = children.find(el => el.getName().get().toLowerCase() === appInfo.name.toLowerCase());
             if (appExist)
                 return appExist;
             appInfo.type = constant_1.BUILDING_APP_TYPE;

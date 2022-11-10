@@ -24,7 +24,7 @@
  */
 Object.defineProperty(exports, "__esModule", { value: true });
 const path = require("path");
-require("dotenv").config(path.resolve(__dirname, "../.env"));
+require("dotenv").config({ path: path.resolve(__dirname, "../.env") });
 const spinal_core_connectorjs_type_1 = require("spinal-core-connectorjs_type");
 const configFile_service_1 = require("./services/configFile.service");
 const server_1 = require("./server");
