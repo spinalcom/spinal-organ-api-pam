@@ -41,6 +41,7 @@ const axios_1 = require("axios");
 const portofolio_service_1 = require("./portofolio.service");
 const _1 = require(".");
 const adminProfile_service_1 = require("./adminProfile.service");
+const utils_1 = require("../utils/utils");
 // const axiosInstance = axios.create({ baseURL: `http://localhost:${process.env.SERVER_PORT}` });
 // import * as NodeGeocoder from "node-geocoder";
 const adminProfileInstance = adminProfile_service_1.AdminProfileService.getInstance();
@@ -111,6 +112,7 @@ class BuildingService {
             const building = yield this.getBuildingById(id);
             if (building) {
                 yield building.removeFromGraph();
+                yield (0, utils_1.removeNodeReferences)(building);
                 return true;
             }
             return false;
@@ -258,7 +260,7 @@ class BuildingService {
                 liste.push(appNode);
                 return liste;
             }), Promise.resolve([]));
-            adminProfileInstance.syncAdminProfile();
+            yield adminProfileInstance.syncAdminProfile();
             return data;
         });
     }
@@ -328,7 +330,7 @@ class BuildingService {
                 liste.push(apiNode);
                 return liste;
             }), Promise.resolve([]));
-            adminProfileInstance.syncAdminProfile();
+            yield adminProfileInstance.syncAdminProfile();
             return data;
         });
     }

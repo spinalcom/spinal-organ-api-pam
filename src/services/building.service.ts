@@ -34,6 +34,7 @@ import axios from "axios";
 import { PortofolioService } from "./portofolio.service";
 import { APIService, AppService, configServiceInstance } from ".";
 import { AdminProfileService } from "./adminProfile.service";
+import { removeNodeReferences } from "../utils/utils";
 // const axiosInstance = axios.create({ baseURL: `http://localhost:${process.env.SERVER_PORT}` });
 
 // import * as NodeGeocoder from "node-geocoder";
@@ -114,6 +115,7 @@ export class BuildingService {
         const building = await this.getBuildingById(id);
         if (building) {
             await building.removeFromGraph();
+            await removeNodeReferences(building);
             return true
         }
 
@@ -269,7 +271,7 @@ export class BuildingService {
             return liste;
         }, Promise.resolve([]));
 
-        adminProfileInstance.syncAdminProfile();
+        await adminProfileInstance.syncAdminProfile();
         return data;
     }
 
@@ -336,7 +338,7 @@ export class BuildingService {
             return liste;
         }, Promise.resolve([]));
 
-        adminProfileInstance.syncAdminProfile();
+        await adminProfileInstance.syncAdminProfile();
         return data;
 
     }

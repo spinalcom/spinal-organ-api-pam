@@ -63,7 +63,7 @@ class PortofolioService {
             const apps = yield this.addAppToPortofolio(node, appsIds);
             const apis = yield this.addApiToPortofolio(node, apisIds);
             // const buildings = await this.addBuildingToPortofolio(node, buildingsIds);
-            adminProfileInstance.syncAdminProfile();
+            yield adminProfileInstance.syncAdminProfile();
             return {
                 node,
                 apps,
@@ -172,7 +172,7 @@ class PortofolioService {
                 liste.push(appNode);
                 return liste;
             }), Promise.resolve([]));
-            adminProfileInstance.syncAdminProfile();
+            yield adminProfileInstance.syncAdminProfile();
             return data;
         });
     }
@@ -215,7 +215,7 @@ class PortofolioService {
                 catch (error) { }
                 return liste;
             }), Promise.resolve([]));
-            adminProfileInstance.syncAdminProfile();
+            yield adminProfileInstance.syncAdminProfile();
             return data;
         });
     }
@@ -248,7 +248,7 @@ class PortofolioService {
                 liste.push(apiNode);
                 return liste;
             }), Promise.resolve([]));
-            adminProfileInstance.syncAdminProfile();
+            yield adminProfileInstance.syncAdminProfile();
             return data;
         });
     }
@@ -318,7 +318,7 @@ class PortofolioService {
             // if (!Array.isArray(buildingId)) buildingId = [buildingId];
             const structure = yield building_service_1.BuildingService.getInstance().createBuilding(buildingInfo);
             yield portofolio.addChildInContext(structure.node, constant_1.BUILDING_RELATION_NAME, constant_1.PTR_LST_TYPE, this.context);
-            adminProfileInstance.syncAdminProfile();
+            yield adminProfileInstance.syncAdminProfile();
             return structure;
             // return buildingId.reduce(async (prom, id: string) => {
             //     const liste = await prom;

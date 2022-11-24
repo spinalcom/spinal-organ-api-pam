@@ -36,6 +36,7 @@ exports.APIService = void 0;
 const constant_1 = require("../constant");
 const spinal_env_viewer_graph_service_1 = require("spinal-env-viewer-graph-service");
 const configFile_service_1 = require("./configFile.service");
+const utils_1 = require("../utils/utils");
 class APIService {
     constructor() { }
     static getInstance() {
@@ -114,6 +115,7 @@ class APIService {
             const route = yield this.getApiRouteById(routeId, parentType);
             if (!route)
                 throw new Error(`no api route Found for ${routeId}`);
+            yield (0, utils_1.removeNodeReferences)(route);
             yield route.removeFromGraph();
             return routeId;
         });

@@ -59,7 +59,7 @@ export class PortofolioService {
         const apis = await this.addApiToPortofolio(node, apisIds);
         // const buildings = await this.addBuildingToPortofolio(node, buildingsIds);
 
-        adminProfileInstance.syncAdminProfile();
+        await adminProfileInstance.syncAdminProfile();
 
         return {
             node,
@@ -165,7 +165,7 @@ export class PortofolioService {
 
         }, Promise.resolve([]))
 
-        adminProfileInstance.syncAdminProfile();
+        await adminProfileInstance.syncAdminProfile();
 
         return data;
     }
@@ -206,7 +206,7 @@ export class PortofolioService {
 
         }, Promise.resolve([]));
 
-        adminProfileInstance.syncAdminProfile();
+        await adminProfileInstance.syncAdminProfile();
         return data
 
     }
@@ -240,7 +240,7 @@ export class PortofolioService {
 
         }, Promise.resolve([]))
 
-        adminProfileInstance.syncAdminProfile();
+        await adminProfileInstance.syncAdminProfile();
 
         return data;
     }
@@ -309,7 +309,7 @@ export class PortofolioService {
         const structure = await BuildingService.getInstance().createBuilding(buildingInfo);
 
         await (<SpinalNode>portofolio).addChildInContext(structure.node, BUILDING_RELATION_NAME, PTR_LST_TYPE, this.context);
-        adminProfileInstance.syncAdminProfile();
+        await adminProfileInstance.syncAdminProfile();
 
         return structure;
         // return buildingId.reduce(async (prom, id: string) => {

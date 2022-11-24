@@ -64,6 +64,12 @@
 					},
 					"packageName": {
 						"type": "string"
+					},
+					"isExternalApp": {
+						"type": "boolean"
+					},
+					"link": {
+						"type": "string"
 					}
 				},
 				"required": [
@@ -318,6 +324,12 @@
 						"type": "string"
 					},
 					"groupName": {
+						"type": "string"
+					},
+					"isExternalApp": {
+						"type": "boolean"
+					},
+					"link": {
 						"type": "string"
 					}
 				},

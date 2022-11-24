@@ -40,6 +40,7 @@ const configFile_service_1 = require("./configFile.service");
 const portofolio_service_1 = require("./portofolio.service");
 const spinal_env_viewer_plugin_excel_manager_service_1 = require("spinal-env-viewer-plugin-excel-manager-service");
 const adminProfile_service_1 = require("./adminProfile.service");
+const utils_1 = require("../utils/utils");
 exports.AppsType = Object.freeze({
     admin: "admin",
     building: "building",
@@ -208,6 +209,7 @@ class AppService {
             const appNode = yield this.getAdminApp(appId);
             if (appNode) {
                 yield appNode.removeFromGraph();
+                yield (0, utils_1.removeNodeReferences)(appNode);
                 return true;
             }
             return false;
@@ -218,6 +220,7 @@ class AppService {
             const appNode = yield this.getPortofolioApp(appId);
             if (appNode) {
                 yield appNode.removeFromGraph();
+                yield (0, utils_1.removeNodeReferences)(appNode);
                 return true;
             }
             return false;
@@ -228,6 +231,7 @@ class AppService {
             const appNode = yield this.getBuildingApp(appId);
             if (appNode) {
                 yield appNode.removeFromGraph();
+                yield (0, utils_1.removeNodeReferences)(appNode);
                 return true;
             }
             return false;
@@ -315,11 +319,15 @@ class AppService {
     }
     _formatAppsJson(jsonData) {
         return jsonData.reduce((liste, app) => {
+            var _a;
             const requiredAttrs = ["name", "icon", "tags", "categoryName", "groupName"];
             const notValid = requiredAttrs.find(el => !app[el]);
             if (!notValid) {
                 app.hasViewer = app.hasViewer || false;
                 app.packageName = app.packageName || app.name;
+                app.isExternalApp = ((_a = app.isExternalApp) === null || _a === void 0 ? void 0 : _a.toString().toLocaleLowerCase()) == "false" ? false : Boolean(app.isExternalApp);
+                if (app.isExternalApp)
+                    app.link = app.link;
                 if (typeof app.tags === "string")
                     app.tags = app.tags.split(",");
                 liste.push(app);

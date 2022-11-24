@@ -30,6 +30,7 @@ import { configServiceInstance } from "./configFile.service";
 import { PortofolioService } from "./portofolio.service";
 import { SpinalExcelManager } from "spinal-env-viewer-plugin-excel-manager-service";
 import { AdminProfileService } from "./adminProfile.service";
+import { removeNodeReferences } from "../utils/utils";
 
 export const AppsType = Object.freeze({
   admin: "admin",
@@ -201,6 +202,7 @@ export class AppService {
     const appNode = await this.getAdminApp(appId);
     if (appNode) {
       await appNode.removeFromGraph();
+      await removeNodeReferences(appNode);
       return true;
     }
     return false;
@@ -210,6 +212,7 @@ export class AppService {
     const appNode = await this.getPortofolioApp(appId);
     if (appNode) {
       await appNode.removeFromGraph();
+      await removeNodeReferences(appNode);
       return true;
     }
     return false;
@@ -219,6 +222,7 @@ export class AppService {
     const appNode = await this.getBuildingApp(appId);
     if (appNode) {
       await appNode.removeFromGraph();
+      await removeNodeReferences(appNode);
       return true;
     }
     return false;
@@ -314,6 +318,9 @@ export class AppService {
       if (!notValid) {
         app.hasViewer = app.hasViewer || false;
         app.packageName = app.packageName || app.name;
+        app.isExternalApp = app.isExternalApp?.toString().toLocaleLowerCase() == "false" ? false : Boolean(app.isExternalApp)
+        if (app.isExternalApp) app.link = app.link;
+
         if (typeof app.tags === "string") app.tags = (<any>app.tags).split(",")
 
         liste.push(app);

@@ -22,33 +22,29 @@
  * <http://resources.spinalcom.com/licenses.pdf>.
  */
 
+import { SpinalNode } from "spinal-env-viewer-graph-service";
 
-// export interface IAppTags {
-//   name: string;
-// }
+export async function removeNodeReferences(node: SpinalNode): Promise<boolean> {
+    try {
+        const references = await getReferences(node);
 
-export interface IApp {
-  name: string;
-  icon: string;
-  description: string;
-  tags: string[];
-  categoryName: string;
-  groupName: string;
-  hasViewer?: boolean;
-  packageName?: string;
-  isExternalApp?: boolean;
-  link?: string;
-  [key: string]: any;
+        for (let i = 0; i < references.length; i++) {
+            const element = references[i];
+            if (element instanceof SpinalNode) await element.removeFromGraph()
+        }
+
+        return true;
+    } catch (error) {
+        return false;
+    }
 }
 
-export interface IEditApp {
-  name?: string;
-  icon?: string;
-  description?: string;
-  tags?: string[];
-  categoryName?: string;
-  groupName?: string;
-  isExternalApp?: boolean;
-  link?: string;
-  [key: string]: any;
+
+function getReferences(node: SpinalNode): Promise<spinal.Lst<SpinalNode> | SpinalNode[]> {
+    if (!node.info?.references || !(node.info.references instanceof spinal.Ptr)) return Promise.resolve([]);
+    return new Promise((resolve, reject) => {
+        node.info.references.load((references) => {
+            resolve(references);
+        })
+    });
 }

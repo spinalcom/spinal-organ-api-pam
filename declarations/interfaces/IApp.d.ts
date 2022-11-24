@@ -7,6 +7,8 @@ export interface IApp {
     groupName: string;
     hasViewer?: boolean;
     packageName?: string;
+    isExternalApp?: boolean;
+    link?: string;
     [key: string]: any;
 }
 export interface IEditApp {
@@ -16,5 +18,7 @@ export interface IEditApp {
     tags?: string[];
     categoryName?: string;
     groupName?: string;
+    isExternalApp?: boolean;
+    link?: string;
     [key: string]: any;
 }

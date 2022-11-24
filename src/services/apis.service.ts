@@ -26,6 +26,7 @@ import { API_ROUTES_CONTEXT_NAME, API_ROUTES_CONTEXT_TYPE, API_RELATION_NAME, AP
 import { SpinalContext, SpinalGraphService, SpinalNode } from "spinal-env-viewer-graph-service";
 import { configServiceInstance } from "./configFile.service";
 import { IApiRoute, ISwaggerFile, ISwaggerPath, ISwaggerPathData } from "../interfaces";
+import { removeNodeReferences } from "../utils/utils";
 
 export class APIService {
     private static instance: APIService;
@@ -105,7 +106,7 @@ export class APIService {
     public async deleteApiRoute(routeId: string, parentType): Promise<string> {
         const route = await this.getApiRouteById(routeId, parentType);
         if (!route) throw new Error(`no api route Found for ${routeId}`);
-
+        await removeNodeReferences(route)
         await route.removeFromGraph();
         return routeId;
     }
