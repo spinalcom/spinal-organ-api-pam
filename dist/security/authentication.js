@@ -35,7 +35,6 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.expressAuthentication = void 0;
 const constant_1 = require("../constant");
 const services_1 = require("../services");
-const utils_1 = require("./utils");
 const AuthError_1 = require("./AuthError");
 function expressAuthentication(request, securityName, scopes) {
     var _a;
@@ -54,9 +53,8 @@ function expressAuthentication(request, securityName, scopes) {
         }
         const profileId = tokenInfo.profile.profileId || tokenInfo.profile.appProfileBosConfigId || tokenInfo.profile.userProfileBosConfigId;
         if (securityName === constant_1.SECURITY_NAME.profile) {
-            const hasAccess = yield (0, utils_1.checkIfProfileHasAccess)(request, profileId);
-            if (!hasAccess)
-                throw new AuthError_1.AuthError(constant_1.SECURITY_MESSAGES.UNAUTHORIZED);
+            // const hasAccess = await checkIfProfileHasAccess(request, profileId);
+            // if (!hasAccess) throw new AuthError(SECURITY_MESSAGES.UNAUTHORIZED);
         }
         return tokenInfo;
     });

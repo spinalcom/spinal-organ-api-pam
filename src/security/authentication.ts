@@ -49,8 +49,8 @@ export async function expressAuthentication(request: express.Request, securityNa
     const profileId = tokenInfo.profile.profileId || tokenInfo.profile.appProfileBosConfigId || tokenInfo.profile.userProfileBosConfigId
 
     if (securityName === SECURITY_NAME.profile) {
-        const hasAccess = await checkIfProfileHasAccess(request, profileId);
-        if (!hasAccess) throw new AuthError(SECURITY_MESSAGES.UNAUTHORIZED);
+        // const hasAccess = await checkIfProfileHasAccess(request, profileId);
+        // if (!hasAccess) throw new AuthError(SECURITY_MESSAGES.UNAUTHORIZED);
     }
 
     return tokenInfo;
