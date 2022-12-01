@@ -32,17 +32,24 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
     });
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.removeNodeReferences = void 0;
-const spinal_env_viewer_graph_service_1 = require("spinal-env-viewer-graph-service");
-function removeNodeReferences(node) {
+exports.removeRelationFromReference = exports.removeNodeReferences = void 0;
+function removeNodeReferences(node, referenceNode) {
     return __awaiter(this, void 0, void 0, function* () {
         try {
             const references = yield getReferences(node);
             for (let i = 0; i < references.length; i++) {
                 const element = references[i];
-                if (element instanceof spinal_env_viewer_graph_service_1.SpinalNode)
+                if (!referenceNode) {
                     yield element.removeFromGraph();
+                }
+                else if (referenceNode.getId().get() === element.getId().get()) {
+                    yield element.removeFromGraph();
+                    references.splice(i);
+                    return true;
+                }
             }
+            if (!referenceNode)
+                node.info.rem_attr("references");
             return true;
         }
         catch (error) {
@@ -51,6 +58,30 @@ function removeNodeReferences(node) {
     });
 }
 exports.removeNodeReferences = removeNodeReferences;
+function removeRelationFromReference(parentNode, childNode, relationName, relationType) {
+    return __awaiter(this, void 0, void 0, function* () {
+        const parentReferences = yield getReferences(parentNode);
+        const childReferences = yield getReferences(childNode);
+        const obj = {};
+        for (let i = 0; i < childReferences.length; i++) {
+            const el = childReferences[i];
+            obj[el.getId().get()] = el;
+        }
+        for (let i = 0; i < parentReferences.length; i++) {
+            const item = parentReferences[i];
+            const children = yield item.getChildren(relationName);
+            for (const child of children) {
+                const node = obj[child.getId().get()];
+                if (node) {
+                    yield item.removeChild(node, relationName, relationType);
+                    yield removeNodeReferences(childNode, node);
+                    return;
+                }
+            }
+        }
+    });
+}
+exports.removeRelationFromReference = removeRelationFromReference;
 function getReferences(node) {
     var _a;
     if (!((_a = node.info) === null || _a === void 0 ? void 0 : _a.references) || !(node.info.references instanceof spinal.Ptr))

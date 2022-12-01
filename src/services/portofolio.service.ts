@@ -30,6 +30,7 @@ import { IEditProtofolio, IPortofolioData, IPortofolioDetails, IBuilding, IBuild
 import { BuildingService } from "./building.service";
 import { APIService } from "./apis.service";
 import { AdminProfileService } from "./adminProfile.service";
+import { removeNodeReferences, removeRelationFromReference } from "../utils/utils";
 
 
 const adminProfileInstance = AdminProfileService.getInstance();
@@ -134,6 +135,7 @@ export class PortofolioService {
             await Promise.all(buildings.map(el => BuildingService.getInstance().deleteBuilding(el.getId().get())))
 
             await this.context.removeChild(node, CONTEXT_TO_PORTOFOLIO_RELATION_NAME, PTR_LST_TYPE);
+            await removeNodeReferences(node);
             return true;
         } catch (error) {
             return false
@@ -199,6 +201,7 @@ export class PortofolioService {
 
             try {
                 await (<SpinalNode>portofolio).removeChild(appNode, APP_RELATION_NAME, PTR_LST_TYPE);
+                await removeRelationFromReference(<SpinalNode>portofolio, appNode, APP_RELATION_NAME, PTR_LST_TYPE);
                 liste.push(appId);
             } catch (error) { }
 
@@ -206,7 +209,7 @@ export class PortofolioService {
 
         }, Promise.resolve([]));
 
-        await adminProfileInstance.syncAdminProfile();
+        // await adminProfileInstance.syncAdminProfile();
         return data
 
     }
@@ -273,6 +276,8 @@ export class PortofolioService {
 
             try {
                 await (<SpinalNode>portofolio).removeChild(appNode, API_RELATION_NAME, PTR_LST_TYPE);
+                await removeRelationFromReference(<SpinalNode>portofolio, appNode, API_RELATION_NAME, PTR_LST_TYPE);
+
                 liste.push(apiId);
             } catch (error) { }
 
@@ -280,7 +285,7 @@ export class PortofolioService {
 
         }, Promise.resolve([]))
 
-        adminProfileInstance.removeFromAdminProfile({ portofolioId: portofolio.getId().get(), unauthorizeApisIds: apisIds });
+        // await adminProfileInstance.removeFromAdminProfile({ portofolioId: portofolio.getId().get(), unauthorizeApisIds: apisIds });
 
         return data;
     }
@@ -349,6 +354,7 @@ export class PortofolioService {
 
             try {
                 await (<SpinalNode>portofolio).removeChild(buildingNode, BUILDING_RELATION_NAME, PTR_LST_TYPE);
+                await removeRelationFromReference(<SpinalNode>portofolio, buildingNode, BUILDING_RELATION_NAME, PTR_LST_TYPE);
                 liste.push(id);
             } catch (error) { }
 
@@ -370,9 +376,9 @@ export class PortofolioService {
     public _formatDetails(data: IPortofolioDetails): IPortofolioData {
         return {
             ...(data.node.info.get()),
-            buildings: data.buildings.map(el => BuildingService.getInstance().formatBuildingStructure(el)),
-            apps: data.apps.map(el => el.info.get()),
-            apis: data.apis.map(el => el.info.get())
+            buildings: (data.buildings || []).map(el => BuildingService.getInstance().formatBuildingStructure(el)),
+            apps: (data.apps || []).map(el => el.info.get()),
+            apis: (data.apis || []).map(el => el.info.get())
         }
     }
 }

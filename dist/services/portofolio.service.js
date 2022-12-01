@@ -40,6 +40,7 @@ const apps_service_1 = require("./apps.service");
 const building_service_1 = require("./building.service");
 const apis_service_1 = require("./apis.service");
 const adminProfile_service_1 = require("./adminProfile.service");
+const utils_1 = require("../utils/utils");
 const adminProfileInstance = adminProfile_service_1.AdminProfileService.getInstance();
 class PortofolioService {
     constructor() { }
@@ -142,6 +143,7 @@ class PortofolioService {
                 const buildings = yield this.getPortofolioBuildings(node);
                 yield Promise.all(buildings.map(el => building_service_1.BuildingService.getInstance().deleteBuilding(el.getId().get())));
                 yield this.context.removeChild(node, constant_1.CONTEXT_TO_PORTOFOLIO_RELATION_NAME, constant_1.PTR_LST_TYPE);
+                yield (0, utils_1.removeNodeReferences)(node);
                 return true;
             }
             catch (error) {
@@ -210,12 +212,13 @@ class PortofolioService {
                     return liste;
                 try {
                     yield portofolio.removeChild(appNode, constant_1.APP_RELATION_NAME, constant_1.PTR_LST_TYPE);
+                    yield (0, utils_1.removeRelationFromReference)(portofolio, appNode, constant_1.APP_RELATION_NAME, constant_1.PTR_LST_TYPE);
                     liste.push(appId);
                 }
                 catch (error) { }
                 return liste;
             }), Promise.resolve([]));
-            yield adminProfileInstance.syncAdminProfile();
+            // await adminProfileInstance.syncAdminProfile();
             return data;
         });
     }
@@ -286,12 +289,13 @@ class PortofolioService {
                     return liste;
                 try {
                     yield portofolio.removeChild(appNode, constant_1.API_RELATION_NAME, constant_1.PTR_LST_TYPE);
+                    yield (0, utils_1.removeRelationFromReference)(portofolio, appNode, constant_1.API_RELATION_NAME, constant_1.PTR_LST_TYPE);
                     liste.push(apiId);
                 }
                 catch (error) { }
                 return liste;
             }), Promise.resolve([]));
-            adminProfileInstance.removeFromAdminProfile({ portofolioId: portofolio.getId().get(), unauthorizeApisIds: apisIds });
+            // await adminProfileInstance.removeFromAdminProfile({ portofolioId: portofolio.getId().get(), unauthorizeApisIds: apisIds });
             return data;
         });
     }
@@ -358,6 +362,7 @@ class PortofolioService {
                     return liste;
                 try {
                     yield portofolio.removeChild(buildingNode, constant_1.BUILDING_RELATION_NAME, constant_1.PTR_LST_TYPE);
+                    yield (0, utils_1.removeRelationFromReference)(portofolio, buildingNode, constant_1.BUILDING_RELATION_NAME, constant_1.PTR_LST_TYPE);
                     liste.push(id);
                 }
                 catch (error) { }
@@ -375,7 +380,7 @@ class PortofolioService {
         });
     }
     _formatDetails(data) {
-        return Object.assign(Object.assign({}, (data.node.info.get())), { buildings: data.buildings.map(el => building_service_1.BuildingService.getInstance().formatBuildingStructure(el)), apps: data.apps.map(el => el.info.get()), apis: data.apis.map(el => el.info.get()) });
+        return Object.assign(Object.assign({}, (data.node.info.get())), { buildings: (data.buildings || []).map(el => building_service_1.BuildingService.getInstance().formatBuildingStructure(el)), apps: (data.apps || []).map(el => el.info.get()), apis: (data.apis || []).map(el => el.info.get()) });
     }
 }
 exports.PortofolioService = PortofolioService;

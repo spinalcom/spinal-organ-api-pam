@@ -34,7 +34,7 @@ import axios from "axios";
 import { PortofolioService } from "./portofolio.service";
 import { APIService, AppService, configServiceInstance } from ".";
 import { AdminProfileService } from "./adminProfile.service";
-import { removeNodeReferences } from "../utils/utils";
+import { removeNodeReferences, removeRelationFromReference } from "../utils/utils";
 // const axiosInstance = axios.create({ baseURL: `http://localhost:${process.env.SERVER_PORT}` });
 
 // import * as NodeGeocoder from "node-geocoder";
@@ -300,6 +300,8 @@ export class BuildingService {
 
             try {
                 await (<SpinalNode>building).removeChild(appNode, APP_RELATION_NAME, PTR_LST_TYPE);
+                await removeRelationFromReference(<SpinalNode>building, appNode, APP_RELATION_NAME, PTR_LST_TYPE);
+
                 liste.push(appId);
             } catch (error) { }
 
@@ -368,6 +370,7 @@ export class BuildingService {
 
             try {
                 await (<SpinalNode>building).removeChild(apiNode, API_RELATION_NAME, PTR_LST_TYPE);
+                await removeRelationFromReference(<SpinalNode>building, apiNode, API_RELATION_NAME, PTR_LST_TYPE);
                 liste.push(apiId);
             } catch (error) { }
 

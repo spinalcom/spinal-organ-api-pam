@@ -24,19 +24,55 @@
 
 import { SpinalNode } from "spinal-env-viewer-graph-service";
 
-export async function removeNodeReferences(node: SpinalNode): Promise<boolean> {
+export async function removeNodeReferences(node: SpinalNode, referenceNode?: SpinalNode): Promise<boolean> {
     try {
+
         const references = await getReferences(node);
 
         for (let i = 0; i < references.length; i++) {
             const element = references[i];
-            if (element instanceof SpinalNode) await element.removeFromGraph()
+            if (!referenceNode) {
+                await element.removeFromGraph()
+            } else if (referenceNode.getId().get() === element.getId().get()) {
+                await element.removeFromGraph();
+                references.splice(i);
+                return true;
+            }
         }
 
+        if (!referenceNode) node.info.rem_attr("references");
         return true;
     } catch (error) {
         return false;
     }
+}
+
+
+export async function removeRelationFromReference(parentNode: SpinalNode, childNode: SpinalNode, relationName: string, relationType: string) {
+    const parentReferences = await getReferences(parentNode);
+    const childReferences = await getReferences(childNode);
+
+
+    const obj = {};
+
+    for (let i = 0; i < childReferences.length; i++) {
+        const el = childReferences[i];
+        obj[el.getId().get()] = el;
+    }
+
+    for (let i = 0; i < parentReferences.length; i++) {
+        const item = parentReferences[i];
+        const children = await item.getChildren(relationName);
+        for (const child of children) {
+            const node = obj[child.getId().get()]
+            if (node) {
+                await item.removeChild(node, relationName, relationType);
+                await removeNodeReferences(childNode, node);
+                return;
+            }
+        }
+    }
+
 }
 
 

@@ -294,6 +294,7 @@ class BuildingService {
                     return liste;
                 try {
                     yield building.removeChild(appNode, constant_1.APP_RELATION_NAME, constant_1.PTR_LST_TYPE);
+                    yield (0, utils_1.removeRelationFromReference)(building, appNode, constant_1.APP_RELATION_NAME, constant_1.PTR_LST_TYPE);
                     liste.push(appId);
                 }
                 catch (error) { }
@@ -364,6 +365,7 @@ class BuildingService {
                     return liste;
                 try {
                     yield building.removeChild(apiNode, constant_1.API_RELATION_NAME, constant_1.PTR_LST_TYPE);
+                    yield (0, utils_1.removeRelationFromReference)(building, apiNode, constant_1.API_RELATION_NAME, constant_1.PTR_LST_TYPE);
                     liste.push(apiId);
                 }
                 catch (error) { }
