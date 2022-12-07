@@ -32,10 +32,10 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
     });
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.proxyOptions = exports.canAccess = exports.formatUri = exports.getProfileBuildings = void 0;
-const constant_1 = require("../constant");
-const services_1 = require("../services");
-const utils_1 = require("../utils/pam_v1_utils/utils");
+exports.profileHasAccessToBuilding = exports.proxyOptions = exports.canAccess = exports.formatUri = exports.getProfileBuildings = void 0;
+const constant_1 = require("../../constant");
+const services_1 = require("../../services");
+const utils_1 = require("../../utils/pam_v1_utils/utils");
 const correspondance_1 = require("./correspondance");
 const apiServerEndpoint = "/api/v1/";
 function getProfileBuildings(profileId, isApp) {
@@ -60,8 +60,7 @@ function formatUri(argUrl, uri) {
 exports.formatUri = formatUri;
 function canAccess(buildingId, api, profileId, isAppProfile) {
     return __awaiter(this, void 0, void 0, function* () {
-        const profile = isAppProfile ? yield services_1.AppProfileService.getInstance().getAppProfile(profileId) : yield services_1.UserProfileService.getInstance().getUserProfile(profileId);
-        const buildingAccess = _hasAccessToBuilding(profile, buildingId);
+        const buildingAccess = yield profileHasAccessToBuilding(profileId, buildingId, isAppProfile);
         if (!buildingAccess)
             return false;
         if (api.route.includes("?"))
@@ -96,6 +95,13 @@ const proxyOptions = (useV1) => {
     };
 };
 exports.proxyOptions = proxyOptions;
+function profileHasAccessToBuilding(profileId, buildingId, isAppProfile) {
+    return __awaiter(this, void 0, void 0, function* () {
+        const profile = isAppProfile ? yield services_1.AppProfileService.getInstance().getAppProfile(profileId) : yield services_1.UserProfileService.getInstance().getUserProfile(profileId);
+        return _hasAccessToBuilding(profile, buildingId);
+    });
+}
+exports.profileHasAccessToBuilding = profileHasAccessToBuilding;
 ///////////////////////////////////
 //            PRIVATES           //
 ///////////////////////////////////

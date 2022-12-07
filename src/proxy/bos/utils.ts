@@ -25,11 +25,11 @@
 import * as express from "express";
 import { ProxyOptions } from "express-http-proxy";
 import { SpinalNode } from "spinal-env-viewer-graph-service";
-import { HTTP_CODES } from "../constant";
-import { IApiRoute, IBosAuthRes, IProfileRes } from "../interfaces";
-import { AppProfileService, UserProfileService } from "../services";
-import AuthorizationService from "../services/authorization.service";
-import { Utils } from "../utils/pam_v1_utils/utils";
+import { HTTP_CODES } from "../../constant";
+import { IApiRoute, IBosAuthRes, IProfileRes } from "../../interfaces";
+import { AppProfileService, UserProfileService } from "../../services";
+import AuthorizationService from "../../services/authorization.service";
+import { Utils } from "../../utils/pam_v1_utils/utils";
 import { correspondanceObj } from "./correspondance";
 
 const apiServerEndpoint = "/api/v1/";
@@ -56,10 +56,7 @@ export function formatUri(argUrl: string, uri: string): string {
 }
 
 export async function canAccess(buildingId: string, api: { method: string; route: string }, profileId: string, isAppProfile): Promise<boolean> {
-
-    const profile = isAppProfile ? await AppProfileService.getInstance().getAppProfile(profileId) : await UserProfileService.getInstance().getUserProfile(profileId)
-
-    const buildingAccess = _hasAccessToBuilding(profile, buildingId);
+    const buildingAccess = await profileHasAccessToBuilding(profileId, buildingId, isAppProfile);
     if (!buildingAccess) return false;
 
     if (api.route.includes("?")) api.route = api.route.substring(0, api.route.indexOf('?'));
@@ -90,6 +87,11 @@ export const proxyOptions = (useV1: boolean): ProxyOptions => {
             });
         }
     }
+}
+
+export async function profileHasAccessToBuilding(profileId: string, buildingId: string, isAppProfile: boolean) {
+    const profile = isAppProfile ? await AppProfileService.getInstance().getAppProfile(profileId) : await UserProfileService.getInstance().getUserProfile(profileId)
+    return _hasAccessToBuilding(profile, buildingId);
 }
 
 

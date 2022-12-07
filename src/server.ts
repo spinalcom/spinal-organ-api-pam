@@ -28,15 +28,17 @@ import * as express from 'express';
 import * as morgan from "morgan";
 import * as path from "path";
 import { HTTP_CODES, routesToProxy } from "./constant";
-import configureBosProxy from "./proxy";
+import configureBosProxy from "./proxy/bos";
 var proxy = require('express-http-proxy');
 import * as swaggerUi from "swagger-ui-express";
 import { ValidateError } from 'tsoa';
 import { RegisterRoutes } from './routes';
 import { AuthError } from './security/AuthError';
+import { WebSocketServer } from './proxy/websocket'
+// import { webSocketProxy } from './proxy/websocketProxy';
 
 
-export default function initExpress() {
+export default async function initExpress() {
 
   var app = express();
   app.use(morgan('dev'));
@@ -51,13 +53,20 @@ export default function initExpress() {
 
   RegisterRoutes(app);
 
-
   app.use(errorHandler);
-
 
   const server_port = process.env.SERVER_PORT || 2022;
   const server = app.listen(server_port, () => console.log(`api server listening on port ${server_port}!`));
+  const ws = new WebSocketServer(server);
+
+  await ws.init()
+  // const wsProxy = webSocketProxy(app)
+
+  // server.on("upgrade", (req: any, socket: any, head) => {
+  //   wsProxy.upgrade(req, socket, head)
+  // });
   return { server, app }
+
 }
 
 /////////////////////////////////////

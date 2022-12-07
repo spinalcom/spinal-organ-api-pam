@@ -32,12 +32,12 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
     });
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-const constant_1 = require("../constant");
-const services_1 = require("../services");
+const constant_1 = require("../../constant");
+const services_1 = require("../../services");
 const proxy = require("express-http-proxy");
-const authentication_1 = require("../security/authentication");
+const authentication_1 = require("../../security/authentication");
 const utils_1 = require("./utils");
-const utils_2 = require("../utils/pam_v1_utils/utils");
+const utils_2 = require("../../utils/pam_v1_utils/utils");
 function configureProxy(app, useV1 = false) {
     let apiData = { url: "", clientId: "", secretId: "" };
     const uri = !useV1 ? constant_1.BOS_BASE_URI_V2 : `(${constant_1.BOS_BASE_URI_V1}|${constant_1.BOS_BASE_URI_V1_2})`;

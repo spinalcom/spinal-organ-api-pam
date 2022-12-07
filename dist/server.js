@@ -37,26 +37,36 @@ const express = require("express");
 const morgan = require("morgan");
 const path = require("path");
 const constant_1 = require("./constant");
-const proxy_1 = require("./proxy");
+const bos_1 = require("./proxy/bos");
 var proxy = require('express-http-proxy');
 const swaggerUi = require("swagger-ui-express");
 const tsoa_1 = require("tsoa");
 const routes_1 = require("./routes");
 const AuthError_1 = require("./security/AuthError");
+const websocket_1 = require("./proxy/websocket");
+// import { webSocketProxy } from './proxy/websocketProxy';
 function initExpress() {
-    var app = express();
-    app.use(morgan('dev'));
-    useApiMiddleWare(app);
-    useHubProxy(app);
-    useClientMiddleWare(app);
-    initSwagger(app);
-    (0, proxy_1.default)(app);
-    (0, proxy_1.default)(app, true);
-    (0, routes_1.RegisterRoutes)(app);
-    app.use(errorHandler);
-    const server_port = process.env.SERVER_PORT || 2022;
-    const server = app.listen(server_port, () => console.log(`api server listening on port ${server_port}!`));
-    return { server, app };
+    return __awaiter(this, void 0, void 0, function* () {
+        var app = express();
+        app.use(morgan('dev'));
+        useApiMiddleWare(app);
+        useHubProxy(app);
+        useClientMiddleWare(app);
+        initSwagger(app);
+        (0, bos_1.default)(app);
+        (0, bos_1.default)(app, true);
+        (0, routes_1.RegisterRoutes)(app);
+        app.use(errorHandler);
+        const server_port = process.env.SERVER_PORT || 2022;
+        const server = app.listen(server_port, () => console.log(`api server listening on port ${server_port}!`));
+        const ws = new websocket_1.WebSocketServer(server);
+        yield ws.init();
+        // const wsProxy = webSocketProxy(app)
+        // server.on("upgrade", (req: any, socket: any, head) => {
+        //   wsProxy.upgrade(req, socket, head)
+        // });
+        return { server, app };
+    });
 }
 exports.default = initExpress;
 /////////////////////////////////////

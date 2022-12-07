@@ -22,13 +22,13 @@
  * <http://resources.spinalcom.com/licenses.pdf>.
  */
 
-import { BOS_BASE_URI_V2, BOS_BASE_URI_V1, BOS_BASE_URI_V1_2, HTTP_CODES, SECURITY_NAME, USER_TYPES, SECURITY_MESSAGES, PAM_BASE_URI } from "../constant";
+import { BOS_BASE_URI_V2, BOS_BASE_URI_V1, BOS_BASE_URI_V1_2, HTTP_CODES, SECURITY_NAME, USER_TYPES, SECURITY_MESSAGES, PAM_BASE_URI } from "../../constant";
 import * as express from "express";
-import { BuildingService } from '../services'
+import { BuildingService } from '../../services'
 import * as proxy from "express-http-proxy";
-import { expressAuthentication } from "../security/authentication"
+import { expressAuthentication } from "../../security/authentication"
 import { canAccess, formatUri, getProfileBuildings, proxyOptions } from "./utils";
-import { Utils } from "../utils/pam_v1_utils/utils";
+import { Utils } from "../../utils/pam_v1_utils/utils";
 
 
 
