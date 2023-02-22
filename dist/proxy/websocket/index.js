@@ -37,17 +37,22 @@ const constant_1 = require("../../constant");
 const services_1 = require("../../services");
 const utils_1 = require("../bos/utils");
 const socket_io_1 = require("socket.io");
+const websocketLogs_1 = require("./websocketLogs");
+const lodash = require("lodash");
 const SocketClient = require('socket.io-client');
+const logInstance = websocketLogs_1.default.getInstance();
 class WebSocketServer {
     constructor(server) {
         this._clientToServer = new Map();
         this._serverToClient = new Map();
+        this._reInitLogData = lodash.debounce((restart) => logInstance.webSocketSendData(restart), 2000);
         this._io = new socket_io_1.Server(server);
     }
     init() {
         return __awaiter(this, void 0, void 0, function* () {
             this._initNameSpace();
             this._initMiddleware();
+            this._reInitLogData(true);
         });
     }
     _initNameSpace() {
@@ -118,50 +123,54 @@ class WebSocketServer {
             const client = SocketClient(api_url, { auth: { token, sessionId }, transports: ["websocket"] });
             client.on('session_created', (id) => {
                 socket.emit("session_created", id);
-                client["sessionID"] = id;
-                socket["sessionID"] = id;
+                client["sessionId"] = id;
+                socket["sessionId"] = id;
                 resolve(client);
             });
             client.on("connect_error", (err) => reject(err));
         });
     }
     _associateClientAndServer(pamToBosSocket, clientToPamSocket) {
-        this._serverToClient.set(clientToPamSocket.sessionID || clientToPamSocket.id, pamToBosSocket);
-        this._clientToServer.set(pamToBosSocket.sessionID || pamToBosSocket.id, clientToPamSocket);
+        this._serverToClient.set(clientToPamSocket.sessionId || clientToPamSocket.id, pamToBosSocket);
+        this._clientToServer.set(pamToBosSocket.sessionId || pamToBosSocket.id, clientToPamSocket);
         this._listenConnectionAndDisconnection(pamToBosSocket, clientToPamSocket);
         this._listenAllEvent(pamToBosSocket, clientToPamSocket);
     }
     _listenAllEvent(pamToBosSocket, clientToPamSocket) {
         pamToBosSocket.onAny((eventName, ...data) => {
-            const emitter = this._clientToServer.get(pamToBosSocket.sessionID || pamToBosSocket.id);
-            if (emitter)
+            const emitter = this._clientToServer.get(pamToBosSocket.sessionId || pamToBosSocket.id);
+            if (emitter) {
+                console.log(`receive request from bos and send it to client [${emitter.sessionId}]`);
+                this._reInitLogData();
                 emitter.emit(eventName, ...data);
+            }
         });
         clientToPamSocket.onAny((eventName, ...data) => {
-            const emitter = this._serverToClient.get(clientToPamSocket.sessionID || clientToPamSocket.id);
+            const emitter = this._serverToClient.get(clientToPamSocket.sessionId || clientToPamSocket.id);
+            console.log(`receive request from client [${emitter.sessionId}] and send it to bos`);
             if (emitter)
                 emitter.emit(eventName, ...data);
         });
     }
     _listenConnectionAndDisconnection(pamToBosSocket, clientToPamSocket) {
         pamToBosSocket.on("connect", () => {
-            console.log(pamToBosSocket.id, "is connected");
+            console.log(pamToBosSocket.sessionId, "is connected");
             // const emitter = this._clientToServer.get((<any>client).sessionID || client.id);
             // if (emitter) emitter.emit(eventName, ...data);
         });
         pamToBosSocket.on("disconnect", (reason) => {
-            console.log(pamToBosSocket.sessionID || pamToBosSocket.id, "is disconnected");
-            const emitter = this._clientToServer.get(pamToBosSocket.sessionID || pamToBosSocket.id);
+            // console.log((<any>pamToBosSocket).sessionId || pamToBosSocket.id, "is disconnected")
+            const emitter = this._clientToServer.get(pamToBosSocket.sessionId || pamToBosSocket.id);
             if (emitter)
                 emitter.disconnect();
         });
         clientToPamSocket.on("connect", () => {
-            console.log(clientToPamSocket.id, "is connected");
-            // const emitter = this._serverToClient.get((<any>server).sessionID || server.id);
+            console.log(clientToPamSocket.sessionId, "is connected");
+            // const emitter = this._serverToClient.get((<any>server).sessionId || server.id);
             // if (emitter) emitter.emit(eventName, ...data);
         });
         clientToPamSocket.on("disconnect", (reson) => {
-            const emitter = this._serverToClient.get(clientToPamSocket.sessionID || clientToPamSocket.id);
+            const emitter = this._serverToClient.get(clientToPamSocket.sessionId || clientToPamSocket.id);
             if (emitter)
                 emitter.disconnect();
         });

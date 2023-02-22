@@ -36,7 +36,7 @@ const conn = spinalCore.connect(`http://${process.env.USER_ID}:${process.env.USE
 
 configServiceInstance.init(conn).then(async () => {
 
-  const { app } = await expressServer();
+  const { app } = await expressServer(conn);
 
 }).catch((err: Error) => {
   console.error(err);

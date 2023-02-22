@@ -27,6 +27,8 @@ import * as cors from 'cors';
 import * as express from 'express';
 import * as morgan from "morgan";
 import * as path from "path";
+import * as bodyParser from "body-parser";
+
 import { HTTP_CODES, routesToProxy } from "./constant";
 import configureBosProxy from "./proxy/bos";
 var proxy = require('express-http-proxy');
@@ -35,21 +37,26 @@ import { ValidateError } from 'tsoa';
 import { RegisterRoutes } from './routes';
 import { AuthError } from './security/AuthError';
 import { WebSocketServer } from './proxy/websocket'
+import WebsocketLogs from './proxy/websocket/websocketLogs';
 // import { webSocketProxy } from './proxy/websocketProxy';
 
 
-export default async function initExpress() {
+export default async function initExpress(conn: spinal.FileSystem) {
 
   var app = express();
   app.use(morgan('dev'));
 
-  useApiMiddleWare(app);
-  useHubProxy(app);
-  useClientMiddleWare(app);
-  initSwagger(app);
 
   configureBosProxy(app);
   configureBosProxy(app, true);
+
+  useHubProxy(app);
+  useClientMiddleWare(app);
+  initSwagger(app);
+  useApiMiddleWare(app);
+
+
+
 
   RegisterRoutes(app);
 
@@ -57,6 +64,7 @@ export default async function initExpress() {
 
   const server_port = process.env.SERVER_PORT || 2022;
   const server = app.listen(server_port, () => console.log(`api server listening on port ${server_port}!`));
+  await WebsocketLogs.getInstance().init(conn)
   const ws = new WebSocketServer(server);
 
   await ws.init()
@@ -114,12 +122,22 @@ function initSwagger(app: express.Express) {
 
 function useApiMiddleWare(app: express.Express) {
   app.use(cors({ origin: '*' }));
-  app.use(express.json());
-  app.use(express.urlencoded({ extended: true }));
+  app.use(express.json({ limit: '500mb' }));
+  app.use(express.urlencoded({ extended: true, limit: '500mb' }));
+
+  // const bodyParserDefault = bodyParser.json();
+  // const bodyParserTicket = bodyParser.json({ limit: '500mb' });
+
+  // app.use((req, res, next) => {
+  //   if (req.originalUrl === '/api/v1/node/convert_base_64' || req.originalUrl === '/api/v1/ticket/create_ticket')
+  //     return bodyParserTicket(req, res, next);
+  //   return bodyParserDefault(req, res, next);
+  // });
 }
 
 
 function errorHandler(err: unknown, req: express.Request, res: express.Response, next: express.NextFunction): express.Response | void {
+  console.log(err)
   if (err instanceof ValidateError) {
     return res.status(HTTP_CODES.BAD_REQUEST).send(_formatValidationError(err))
   }

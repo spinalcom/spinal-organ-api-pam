@@ -29,7 +29,7 @@ import * as proxy from "express-http-proxy";
 import { expressAuthentication } from "../../security/authentication"
 import { canAccess, formatUri, getProfileBuildings, proxyOptions } from "./utils";
 import { Utils } from "../../utils/pam_v1_utils/utils";
-
+import { result } from "lodash";
 
 
 interface IApiData { url: string; clientId: string; secretId: string }
@@ -37,6 +37,7 @@ interface IApiData { url: string; clientId: string; secretId: string }
 export default function configureProxy(app: express.Express, useV1: boolean = false) {
     let apiData: IApiData = { url: "", clientId: "", secretId: "" };
     const uri = !useV1 ? BOS_BASE_URI_V2 : `(${BOS_BASE_URI_V1}|${BOS_BASE_URI_V1_2})`;
+
 
     app.all(`${uri}/:building_id/*`, async (req: express.Request, res: express.Response, next: express.NextFunction) => {
 
@@ -68,6 +69,11 @@ export default function configureProxy(app: express.Express, useV1: boolean = fa
     }, proxy((req: express.Request) => apiData.url, proxyOptions(useV1)))
 
 
+    buildingListMiddleware(app);
+}
+
+
+function buildingListMiddleware(app: express.Application, useV1: boolean = false) {
     if (useV1) {
         app.get("/v1/building_list", async (req: express.Request, res: express.Response) => {
             try {
@@ -95,8 +101,4 @@ export default function configureProxy(app: express.Express, useV1: boolean = fa
             res.redirect(307, `${PAM_BASE_URI}/auth`)
         })
     }
-
 }
-
-
-

@@ -179,7 +179,10 @@ class BuildingService {
         });
     }
     formatBuildingStructure(building) {
-        return Object.assign(Object.assign({}, (building.node.info.get())), { apps: building.apps.map(el => el.info.get()), apis: building.apis.map(el => el.info.get()) });
+        const details = building.node.info.get();
+        // delete details.bosUrl;
+        // delete details.apiUrl;
+        return Object.assign(Object.assign({}, (details)), { apps: building.apps.map(el => el.info.get()), apis: building.apis.map(el => el.info.get()) });
     }
     // public async deleteBuildingFromPortofolio(portofolioId: string, buildingId: string | string[]): Promise<string> {
     // const node = await this.getBuildingFromPortofolio(portofolioId, buildingId);
@@ -234,6 +237,8 @@ class BuildingService {
     formatBuilding(data) {
         return __awaiter(this, void 0, void 0, function* () {
             data.details = yield this.getBuildingDetails(data.id);
+            // delete data.bosUrl;
+            // delete data.apiUrl;
             return data;
         });
     }

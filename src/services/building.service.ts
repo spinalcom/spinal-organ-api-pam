@@ -183,8 +183,13 @@ export class BuildingService {
     }
 
     public formatBuildingStructure(building: IBuildingDetails) {
+        const details = building.node.info.get();
+
+        // delete details.bosUrl;
+        // delete details.apiUrl;
+
         return {
-            ...(building.node.info.get()),
+            ...(details),
             apps: building.apps.map(el => el.info.get()),
             apis: building.apis.map(el => el.info.get())
         }
@@ -243,7 +248,12 @@ export class BuildingService {
 
 
     public async formatBuilding(data: IBuilding): Promise<IBuilding> {
+
         data.details = await this.getBuildingDetails(data.id);
+
+        // delete data.bosUrl;
+        // delete data.apiUrl;
+
         return data;
     }
 

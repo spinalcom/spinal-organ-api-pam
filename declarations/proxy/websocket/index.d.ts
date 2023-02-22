@@ -4,6 +4,7 @@ export default class WebSocketServer {
     private _io;
     private _clientToServer;
     private _serverToClient;
+    private _reInitLogData;
     constructor(server: HttpServer);
     init(): Promise<void>;
     private _initNameSpace;

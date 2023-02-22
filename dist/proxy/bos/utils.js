@@ -76,6 +76,7 @@ const proxyOptions = (useV1) => {
     return {
         memoizeHost: false,
         proxyReqPathResolver: (req) => req["endpoint"],
+        limit: '500mb',
         userResDecorator: (proxyRes, proxyResData) => {
             return new Promise((resolve, reject) => {
                 if (!useV1)

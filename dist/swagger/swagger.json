@@ -6443,6 +6443,54 @@
                     }
                 }
             }
+        },
+        "/api/v1/pam/websocket/get_logs": {
+            "get": {
+                "operationId": "GetWebsocketLogs",
+                "responses": {
+                    "200": {
+                        "description": "Ok",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "anyOf": [
+                                        {
+                                            "properties": {
+                                                "logs": {},
+                                                "state": {
+                                                    "type": "string"
+                                                }
+                                            },
+                                            "required": [
+                                                "logs",
+                                                "state"
+                                            ],
+                                            "type": "object"
+                                        },
+                                        {
+                                            "properties": {
+                                                "message": {
+                                                    "type": "string"
+                                                }
+                                            },
+                                            "type": "object"
+                                        }
+                                    ]
+                                }
+                            }
+                        }
+                    }
+                },
+                "tags": [
+                    "Websocket"
+                ],
+                "security": [
+                    {
+                        "admin": []
+                    }
+                ],
+                "parameters": []
+            }
         }
     },
     "servers": [

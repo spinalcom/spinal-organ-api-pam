@@ -39,7 +39,7 @@ const configFile_service_1 = require("./services/configFile.service");
 const server_1 = require("./server");
 const conn = spinal_core_connectorjs_type_1.spinalCore.connect(`http://${process.env.USER_ID}:${process.env.USER_MDP}@${process.env.HUB_HOST}:${process.env.HUB_PORT}/`);
 configFile_service_1.configServiceInstance.init(conn).then(() => __awaiter(void 0, void 0, void 0, function* () {
-    const { app } = yield (0, server_1.default)();
+    const { app } = yield (0, server_1.default)(conn);
 })).catch((err) => {
     console.error(err);
 });

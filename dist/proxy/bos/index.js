@@ -64,6 +64,10 @@ function configureProxy(app, useV1 = false) {
             return res.status(constant_1.HTTP_CODES.UNAUTHORIZED).send(error.message);
         }
     }), proxy((req) => apiData.url, (0, utils_1.proxyOptions)(useV1)));
+    buildingListMiddleware(app);
+}
+exports.default = configureProxy;
+function buildingListMiddleware(app, useV1 = false) {
     if (useV1) {
         app.get("/v1/building_list", (req, res) => __awaiter(this, void 0, void 0, function* () {
             try {
@@ -91,5 +95,4 @@ function configureProxy(app, useV1 = false) {
         });
     }
 }
-exports.default = configureProxy;
 //# sourceMappingURL=index.js.map

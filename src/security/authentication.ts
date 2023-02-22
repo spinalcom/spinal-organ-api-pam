@@ -41,17 +41,17 @@ export async function expressAuthentication(request: express.Request, securityNa
     const tokenInfo: any = await authInstance.tokenIsValid(token);
     if (!tokenInfo) throw new AuthError(SECURITY_MESSAGES.INVALID_TOKEN);
 
-    if (tokenInfo.userInfo?.type == USER_TYPES.ADMIN) {
-        return tokenInfo;
-    }
+    // if (tokenInfo.userInfo?.type == USER_TYPES.ADMIN) {
+    //     return tokenInfo;
+    // }
 
 
     const profileId = tokenInfo.profile.profileId || tokenInfo.profile.appProfileBosConfigId || tokenInfo.profile.userProfileBosConfigId
 
-    if (securityName === SECURITY_NAME.profile) {
-        // const hasAccess = await checkIfProfileHasAccess(request, profileId);
-        // if (!hasAccess) throw new AuthError(SECURITY_MESSAGES.UNAUTHORIZED);
-    }
+    // if (securityName === SECURITY_NAME.profile) {
+    //     const hasAccess = await checkIfProfileHasAccess(request, profileId);
+    //     if (!hasAccess) throw new AuthError(SECURITY_MESSAGES.UNAUTHORIZED);
+    // }
 
     return tokenInfo;
 }

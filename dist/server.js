@@ -44,21 +44,23 @@ const tsoa_1 = require("tsoa");
 const routes_1 = require("./routes");
 const AuthError_1 = require("./security/AuthError");
 const websocket_1 = require("./proxy/websocket");
+const websocketLogs_1 = require("./proxy/websocket/websocketLogs");
 // import { webSocketProxy } from './proxy/websocketProxy';
-function initExpress() {
+function initExpress(conn) {
     return __awaiter(this, void 0, void 0, function* () {
         var app = express();
         app.use(morgan('dev'));
-        useApiMiddleWare(app);
+        (0, bos_1.default)(app);
+        (0, bos_1.default)(app, true);
         useHubProxy(app);
         useClientMiddleWare(app);
         initSwagger(app);
-        (0, bos_1.default)(app);
-        (0, bos_1.default)(app, true);
+        useApiMiddleWare(app);
         (0, routes_1.RegisterRoutes)(app);
         app.use(errorHandler);
         const server_port = process.env.SERVER_PORT || 2022;
         const server = app.listen(server_port, () => console.log(`api server listening on port ${server_port}!`));
+        yield websocketLogs_1.default.getInstance().init(conn);
         const ws = new websocket_1.WebSocketServer(server);
         yield ws.init();
         // const wsProxy = webSocketProxy(app)
@@ -103,10 +105,18 @@ function initSwagger(app) {
 }
 function useApiMiddleWare(app) {
     app.use(cors({ origin: '*' }));
-    app.use(express.json());
-    app.use(express.urlencoded({ extended: true }));
+    app.use(express.json({ limit: '500mb' }));
+    app.use(express.urlencoded({ extended: true, limit: '500mb' }));
+    // const bodyParserDefault = bodyParser.json();
+    // const bodyParserTicket = bodyParser.json({ limit: '500mb' });
+    // app.use((req, res, next) => {
+    //   if (req.originalUrl === '/api/v1/node/convert_base_64' || req.originalUrl === '/api/v1/ticket/create_ticket')
+    //     return bodyParserTicket(req, res, next);
+    //   return bodyParserDefault(req, res, next);
+    // });
 }
 function errorHandler(err, req, res, next) {
+    console.log(err);
     if (err instanceof tsoa_1.ValidateError) {
         return res.status(constant_1.HTTP_CODES.BAD_REQUEST).send(_formatValidationError(err));
     }

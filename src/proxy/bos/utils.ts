@@ -72,6 +72,7 @@ export const proxyOptions = (useV1: boolean): ProxyOptions => {
     return {
         memoizeHost: false,
         proxyReqPathResolver: (req: express.Request) => req["endpoint"],
+        limit: '500mb',
         userResDecorator: (proxyRes, proxyResData) => {
             return new Promise((resolve, reject) => {
                 if (!useV1) return resolve(proxyResData);
@@ -93,6 +94,10 @@ export async function profileHasAccessToBuilding(profileId: string, buildingId: 
     const profile = isAppProfile ? await AppProfileService.getInstance().getAppProfile(profileId) : await UserProfileService.getInstance().getUserProfile(profileId)
     return _hasAccessToBuilding(profile, buildingId);
 }
+
+
+
+
 
 
 ///////////////////////////////////

@@ -37,7 +37,6 @@ const constant_1 = require("../constant");
 const services_1 = require("../services");
 const AuthError_1 = require("./AuthError");
 function expressAuthentication(request, securityName, scopes) {
-    var _a;
     return __awaiter(this, void 0, void 0, function* () {
         if (securityName === constant_1.SECURITY_NAME.all)
             return;
@@ -48,14 +47,14 @@ function expressAuthentication(request, securityName, scopes) {
         const tokenInfo = yield authInstance.tokenIsValid(token);
         if (!tokenInfo)
             throw new AuthError_1.AuthError(constant_1.SECURITY_MESSAGES.INVALID_TOKEN);
-        if (((_a = tokenInfo.userInfo) === null || _a === void 0 ? void 0 : _a.type) == constant_1.USER_TYPES.ADMIN) {
-            return tokenInfo;
-        }
+        // if (tokenInfo.userInfo?.type == USER_TYPES.ADMIN) {
+        //     return tokenInfo;
+        // }
         const profileId = tokenInfo.profile.profileId || tokenInfo.profile.appProfileBosConfigId || tokenInfo.profile.userProfileBosConfigId;
-        if (securityName === constant_1.SECURITY_NAME.profile) {
-            // const hasAccess = await checkIfProfileHasAccess(request, profileId);
-            // if (!hasAccess) throw new AuthError(SECURITY_MESSAGES.UNAUTHORIZED);
-        }
+        // if (securityName === SECURITY_NAME.profile) {
+        //     const hasAccess = await checkIfProfileHasAccess(request, profileId);
+        //     if (!hasAccess) throw new AuthError(SECURITY_MESSAGES.UNAUTHORIZED);
+        // }
         return tokenInfo;
     });
 }

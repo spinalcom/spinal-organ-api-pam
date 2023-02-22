@@ -54,5 +54,4 @@ export async function checkIfProfileHasAccess(req: Request, profileId: string): 
     }
 
     return true;
-
 }

@@ -25,16 +25,20 @@
 import { NextFunction } from "express";
 import { Server as HttpServer } from "http";
 import { SpinalNode } from "spinal-env-viewer-graph-service";
-import { BOS_BASE_URI_V1, BOS_BASE_URI_V1_2, BOS_BASE_URI_V2, SECURITY_MESSAGES } from "../../constant";
+import { SECURITY_MESSAGES } from "../../constant";
 import { AuthentificationService, BuildingService } from "../../services";
 import { profileHasAccessToBuilding } from "../bos/utils";
 import { Server, Socket } from "socket.io";
+import WebsocketLogs from "./websocketLogs";
+import * as lodash from 'lodash';
 const SocketClient = require('socket.io-client');
+const logInstance = WebsocketLogs.getInstance();
 
 export default class WebSocketServer {
     private _io: Server;
     private _clientToServer: Map<string, Socket> = new Map();
     private _serverToClient: Map<string, Socket> = new Map();
+    private _reInitLogData = lodash.debounce((restart?) => logInstance.webSocketSendData(restart), 2000);
 
     constructor(server: HttpServer) {
         this._io = new Server(server);
@@ -44,8 +48,8 @@ export default class WebSocketServer {
     public async init(): Promise<void> {
         this._initNameSpace();
         this._initMiddleware();
+        this._reInitLogData(true);
     }
-
 
 
     private _initNameSpace() {
@@ -71,7 +75,6 @@ export default class WebSocketServer {
             next(err);
         })
     }
-
 
     private _initMiddleware() {
         this._io.use((socket: Socket, next: NextFunction) => {
@@ -118,8 +121,8 @@ export default class WebSocketServer {
             const client = SocketClient(api_url, { auth: { token, sessionId }, transports: ["websocket"] });
             client.on('session_created', (id) => {
                 socket.emit("session_created", id);
-                client["sessionID"] = id;
-                socket["sessionID"] = id;
+                client["sessionId"] = id;
+                socket["sessionId"] = id;
                 resolve(client);
             })
 
@@ -129,8 +132,8 @@ export default class WebSocketServer {
     }
 
     private _associateClientAndServer(pamToBosSocket: Socket, clientToPamSocket: Socket) {
-        this._serverToClient.set((<any>clientToPamSocket).sessionID || clientToPamSocket.id, pamToBosSocket);
-        this._clientToServer.set((<any>pamToBosSocket).sessionID || pamToBosSocket.id, clientToPamSocket);
+        this._serverToClient.set((<any>clientToPamSocket).sessionId || clientToPamSocket.id, pamToBosSocket);
+        this._clientToServer.set((<any>pamToBosSocket).sessionId || pamToBosSocket.id, clientToPamSocket);
 
         this._listenConnectionAndDisconnection(pamToBosSocket, clientToPamSocket);
         this._listenAllEvent(pamToBosSocket, clientToPamSocket);
@@ -139,39 +142,46 @@ export default class WebSocketServer {
 
     private _listenAllEvent(pamToBosSocket: Socket, clientToPamSocket: Socket) {
         pamToBosSocket.onAny((eventName, ...data) => {
-            const emitter = this._clientToServer.get((<any>pamToBosSocket).sessionID || pamToBosSocket.id);
-            if (emitter) emitter.emit(eventName, ...data);
+            const emitter: any = this._clientToServer.get((<any>pamToBosSocket).sessionId || pamToBosSocket.id);
+            if (emitter) {
+                console.log(`receive request from bos and send it to client [${emitter.sessionId}]`);
+                this._reInitLogData();
+                emitter.emit(eventName, ...data);
+            }
         })
 
         clientToPamSocket.onAny((eventName, ...data) => {
-            const emitter = this._serverToClient.get((<any>clientToPamSocket).sessionID || clientToPamSocket.id);
+            const emitter = this._serverToClient.get((<any>clientToPamSocket).sessionId || clientToPamSocket.id);
+            console.log(`receive request from client [${(<any>emitter).sessionId}] and send it to bos`);
             if (emitter) emitter.emit(eventName, ...data);
         })
     }
 
+
+
     private _listenConnectionAndDisconnection(pamToBosSocket: Socket, clientToPamSocket: Socket) {
         pamToBosSocket.on("connect", () => {
-            console.log(pamToBosSocket.id, "is connected")
+            console.log((<any>pamToBosSocket).sessionId, "is connected")
 
             // const emitter = this._clientToServer.get((<any>client).sessionID || client.id);
             // if (emitter) emitter.emit(eventName, ...data);
         })
 
         pamToBosSocket.on("disconnect", (reason) => {
-            console.log((<any>pamToBosSocket).sessionID || pamToBosSocket.id, "is disconnected")
-            const emitter = this._clientToServer.get((<any>pamToBosSocket).sessionID || pamToBosSocket.id);
+            // console.log((<any>pamToBosSocket).sessionId || pamToBosSocket.id, "is disconnected")
+            const emitter = this._clientToServer.get((<any>pamToBosSocket).sessionId || pamToBosSocket.id);
             if (emitter) emitter.disconnect()
         })
 
         clientToPamSocket.on("connect", () => {
-            console.log(clientToPamSocket.id, "is connected")
-            // const emitter = this._serverToClient.get((<any>server).sessionID || server.id);
+            console.log((<any>clientToPamSocket).sessionId, "is connected")
+            // const emitter = this._serverToClient.get((<any>server).sessionId || server.id);
             // if (emitter) emitter.emit(eventName, ...data);
         })
 
 
         clientToPamSocket.on("disconnect", (reson) => {
-            const emitter = this._serverToClient.get((<any>clientToPamSocket).sessionID || clientToPamSocket.id);
+            const emitter = this._serverToClient.get((<any>clientToPamSocket).sessionId || clientToPamSocket.id);
             if (emitter) emitter.disconnect()
         })
     }

@@ -78,8 +78,16 @@ const ADMIN_APPS = [
         categoryName: "Administation",
         groupName: "Administration",
         packageName: "spinal-env-pam-building-manager"
-    }
-
+    },
+    {
+        name: "Surveiller l'état du websocket",
+        icon: "mdi-monitor-eye",
+        description: "Surveiller l'etat et les logs du websocket",
+        tags: ["PAM", "WEB_SOCKET"],
+        categoryName: "Administation",
+        groupName: "Administration",
+        packageName: "spinal-env-pam-websocket-state"
+    },
 ]
 
 
