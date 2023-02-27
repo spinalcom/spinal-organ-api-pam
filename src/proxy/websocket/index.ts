@@ -64,7 +64,6 @@ export default class WebSocketServer {
                 const tokenInfo = await this._getToken(socket);
                 const building = await this._getBuilding(socket);
                 const access = await this._checkIfUserHasAccess(tokenInfo, building);
-                console.log("tokenInfo", tokenInfo);
                 const client = await this._createClient(building, socket, tokenInfo.token, tokenInfo.userInfo?.id);
                 this._associateClientAndServer(client, socket);
                 // }
@@ -158,8 +157,6 @@ export default class WebSocketServer {
             if (emitter) emitter.emit(eventName, ...data);
         })
     }
-
-
 
     private _listenConnectionAndDisconnection(pamToBosSocket: Socket, clientToPamSocket: Socket) {
         pamToBosSocket.on("connect", () => {
