@@ -144,7 +144,9 @@ export default class WebSocketServer {
         pamToBosSocket.onAny((eventName, ...data) => {
             const emitter: any = this._clientToServer.get((<any>pamToBosSocket).sessionId || pamToBosSocket.id);
             if (emitter) {
-                console.log(`receive request from bos and send it to client [${emitter.sessionId}]`);
+                console.log(`receive "${eventName}" request from bos and send it to client [${emitter.sessionId}]`, data);
+
+                // console.log(`receive request from bos and send it to client [${emitter.sessionId}]`);
                 this._reInitLogData();
                 emitter.emit(eventName, ...data);
             }
