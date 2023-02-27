@@ -57,6 +57,7 @@ class WebSocketServer {
     }
     _initNameSpace() {
         this._io.of(/.*/).use((socket, next) => __awaiter(this, void 0, void 0, function* () {
+            var _a;
             let err;
             try {
                 // let client = this._serverToClient.get((<any>socket).sessionID || socket.id);
@@ -66,7 +67,7 @@ class WebSocketServer {
                 const tokenInfo = yield this._getToken(socket);
                 const building = yield this._getBuilding(socket);
                 const access = yield this._checkIfUserHasAccess(tokenInfo, building);
-                const client = yield this._createClient(building, socket, tokenInfo.token, tokenInfo.userInfo.id);
+                const client = yield this._createClient(building, socket, tokenInfo.token, (_a = tokenInfo.userInfo) === null || _a === void 0 ? void 0 : _a.id);
                 this._associateClientAndServer(client, socket);
                 // }
             }
@@ -140,7 +141,8 @@ class WebSocketServer {
         pamToBosSocket.onAny((eventName, ...data) => {
             const emitter = this._clientToServer.get(pamToBosSocket.sessionId || pamToBosSocket.id);
             if (emitter) {
-                console.log(`receive request from bos and send it to client [${emitter.sessionId}]`);
+                console.log(`receive "${eventName}" request from bos and send it to client [${emitter.sessionId}]`, data);
+                // console.log(`receive request from bos and send it to client [${emitter.sessionId}]`);
                 this._reInitLogData();
                 emitter.emit(eventName, ...data);
             }
