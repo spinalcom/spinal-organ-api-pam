@@ -64,8 +64,8 @@ export default class WebSocketServer {
                 const tokenInfo = await this._getToken(socket);
                 const building = await this._getBuilding(socket);
                 const access = await this._checkIfUserHasAccess(tokenInfo, building);
-
-                const client = await this._createClient(building, socket, tokenInfo.token, tokenInfo.userInfo.id);
+                console.log("tokenInfo", tokenInfo);
+                const client = await this._createClient(building, socket, tokenInfo.token, tokenInfo.userInfo?.id);
                 this._associateClientAndServer(client, socket);
                 // }
             } catch (error) {
