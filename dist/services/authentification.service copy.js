@@ -40,6 +40,8 @@ const jwt = require('jsonwebtoken');
 const uuid_1 = require("uuid");
 const userProfile_service_1 = require("./userProfile.service");
 const appProfile_service_1 = require("./appProfile.service");
+const globalCache = require("global-cache");
+const token_service_1 = require("./token.service");
 const userList_services_1 = require("./userList.services");
 const appList_services_1 = require("./appList.services");
 const tokenKey = '9b1deb4d-3b7d-4bad-9bdd-2b0d7b3dcb6d';
@@ -60,6 +62,18 @@ class AuthentificationService {
             return appList_services_1.AppListService.getInstance().authenticateApplication(appInfo);
         });
     }
+    // public async authenticateAdmin(info: IUserCredential): Promise<{ code: number; message: any }> {
+    //     const data = await UserService.getInstance().loginAdmin(info);
+    //     if (data.code === HTTP_CODES.OK) this._saveUserToken(data.message, false);
+    //     return data;
+    // }
+    // public async tokenIsValid(token: string): Promise<IUserToken | IApplicationToken> {
+    //     const data = await this._getTokenData(token);
+    //     const expirationTime = data?.expieredToken;
+    //     const tokenExpired = expirationTime ? Date.now() >= expirationTime * 1000 : true;
+    //     if (!data || tokenExpired) return;
+    //     return data;
+    // }
     // PAM Credential
     registerToAdmin(pamInfo, adminInfo) {
         if (adminInfo.urlAdmin[adminInfo.urlAdmin.length - 1] === "/") {
@@ -189,6 +203,71 @@ class AuthentificationService {
             return contextInfo.get();
         });
     }
+    _sendLoginRequest(url, info, adminCredential, isUser = true) {
+        return axios_1.default.post(url, info).then((result) => __awaiter(this, void 0, void 0, function* () {
+            const data = result.data;
+            data.profile = yield this._getProfileInfo(data.token, adminCredential, isUser);
+            if (isUser)
+                data.userInfo = yield this._getUserInfo(data.userId, adminCredential, data.token);
+            else
+                data.userInfo = yield this._getApplicationInfo(data.applicationId, adminCredential, data.token);
+            yield this._saveUserToken(data);
+            return {
+                code: constant_1.HTTP_CODES.OK,
+                data
+            };
+        })).catch(err => {
+            console.error(err);
+            return {
+                code: constant_1.HTTP_CODES.UNAUTHORIZED,
+                data: "bad credential"
+            };
+        });
+    }
+    _getProfileInfo(userToken, adminCredential, isUser) {
+        let urlAdmin = adminCredential.urlAdmin;
+        let endpoint = isUser ? "/tokens/getUserProfileByToken" : "/tokens/getAppProfileByToken";
+        return axios_1.default.post(urlAdmin + endpoint, {
+            platformId: adminCredential.idPlateform,
+            token: userToken
+        }).then((result) => {
+            if (!result.data)
+                return;
+            const data = result.data;
+            delete data.password;
+            return data;
+        }).catch(err => {
+            return {};
+        });
+    }
+    _getUserInfo(userId, adminCredential, userToken) {
+        const config = {
+            headers: {
+                'Content-Type': 'application/json',
+                // "x-access-token": adminCredential.tokenBosAdmin
+                "x-access-token": userToken
+            },
+        };
+        return axios_1.default.get(`${adminCredential.urlAdmin}/users/${userId}`, config).then((result) => {
+            return result.data;
+        }).catch((err) => {
+            console.error(err);
+        });
+    }
+    _getApplicationInfo(applicationId, adminCredential, userToken) {
+        const config = {
+            headers: {
+                'Content-Type': 'application/json',
+                // "x-access-token": adminCredential.tokenBosAdmin
+                "x-access-token": userToken
+            },
+        };
+        return axios_1.default.get(`${adminCredential.urlAdmin}/application/${applicationId}`, config).then((result) => {
+            return result.data;
+        }).catch((err) => {
+            console.error(err);
+        });
+    }
     _formatUserProfiles() {
         return userProfile_service_1.UserProfileService.getInstance().getAllUserProfileNodes().then((nodes) => {
             return nodes.map(el => ({
@@ -213,6 +292,22 @@ class AuthentificationService {
             return context;
         });
     }
+    _saveUserToken(data, addToGraph = true) {
+        return __awaiter(this, void 0, void 0, function* () {
+            globalCache.set(data.token, data);
+            if (addToGraph)
+                yield token_service_1.TokenService.getInstance().addTokenToContext(data.token, data);
+        });
+    }
+    _getTokenData(token) {
+        return __awaiter(this, void 0, void 0, function* () {
+            const data = globalCache.get(token);
+            if (data)
+                return data;
+            const found = yield token_service_1.TokenService.getInstance().getTokenData(token);
+            return found === null || found === void 0 ? void 0 : found.get();
+        });
+    }
     _formatInfo(info) {
         if ("client_id" in info) {
             info["clientId"] = info["client_id"];
@@ -226,4 +321,4 @@ class AuthentificationService {
     }
 }
 exports.AuthentificationService = AuthentificationService;
-//# sourceMappingURL=authentification.service.js.map
+//# sourceMappingURL=authentification.service%20copy.js.map

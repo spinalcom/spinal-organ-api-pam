@@ -34,8 +34,9 @@ export const ADMIN_USERNAME = "admin";
 export const ADMIN_USER_TYPE = "admin";
 export const CONTEXT_TO_ADMIN_USER_RELATION = "hasAdminUser";
 export const USER_TYPES = Object.freeze({
-    ADMIN: "1",
-    USER: "2",
+    ADMIN: "ADMIN",
+    USER: "USER",
+    APP: "APP",
     1: "ADMIN",
     2: "USER"
 })
@@ -62,6 +63,7 @@ export const BUILDING_APPS_GROUP_NAME = "Building apps";
 export const TOKEN_LIST_CONTEXT_NAME = "Tokens"
 export const BUILDING_API_GROUP_NAME = "Building Apis Routes";
 export const PORTOFOLIO_API_GROUP_NAME = "Portofolio Apis Routes";
+export const LOG_CONTEXT_NAME = "Logs"
 
 //Contexts types
 export const USER_PROFILE_CONTEXT_TYPE = 'UserProfileList';
@@ -80,6 +82,7 @@ export const PAM_CREDENTIAL_CONTEXT_TYPE = "PamCredential";
 export const ADMIN_CREDENTIAL_CONTEXT_TYPE = "AdminCredential";
 export const PORTOFOLIO_CONTEXT_TYPE = "PortofolioContext";
 export const TOKEN_LIST_CONTEXT_TYPE = "TokenList";
+export const LOG_CONTEXT_TYPE = "LogsContext";
 
 
 // types
@@ -113,7 +116,7 @@ export const ADMIN_PROFILE_NAME = "AdminProfile";
 // export const CONTEXT_TO_APP_CATEGORY_RELATION_NAME = "hasAppCategory";
 // export const CATEGORY_TO_APP_GROUP_RELATION_NAME = 'hasAppGroup';
 // export const APP_GROUP_TO_APP_RELATION_NAME = 'groupHasApp';
-// export const CONTEXT_TO_APP_RELATION_NAME = 'hasApps';
+export const CONTEXT_TO_APP_RELATION_NAME = 'hasApps';
 export const CONTEXT_TO_APPS_GROUP = "hasAppsGroups";
 export const CONTEXT_TO_USER_PROFILE_RELATION_NAME = 'hasUserProfile';
 export const CONTEXT_TO_APP_PROFILE_RELATION_NAME = 'hasAppProfile';
@@ -133,6 +136,7 @@ export const BUILDING_RELATION_NAME = 'hasBuilding';
 
 export const PROFILE_TO_AUTHORIZED_PORTOFOLIO_RELATION = "hasAccessToPortofolio";
 export const PROFILE_TO_AUTHORIZED_BOS_RELATION = "hasAccessToBos";
+export const USER_TO_FAVORITE_APP_RELATION = "hasFavoriteApp";
 
 // Relation Type
 export const PTR_LST_TYPE = SPINAL_RELATION_PTR_LST_TYPE;

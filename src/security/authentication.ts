@@ -24,8 +24,8 @@
 
 import * as express from "express";
 import { SECURITY_MESSAGES, SECURITY_NAME, USER_TYPES } from "../constant";
-import { AuthentificationService } from "../services";
-import { checkIfProfileHasAccess } from "./utils";
+import { TokenService } from "../services";
+import { getToken } from "./utils";
 import { AuthError } from "./AuthError";
 
 
@@ -36,9 +36,9 @@ export async function expressAuthentication(request: express.Request, securityNa
     const token = getToken(request);
     if (!token) throw new AuthError(SECURITY_MESSAGES.INVALID_TOKEN);
 
-    const authInstance = AuthentificationService.getInstance();
+    const tokenInstance = TokenService.getInstance();
 
-    const tokenInfo: any = await authInstance.tokenIsValid(token);
+    const tokenInfo: any = await tokenInstance.tokenIsValid(token);
     if (!tokenInfo) throw new AuthError(SECURITY_MESSAGES.INVALID_TOKEN);
 
     // if (tokenInfo.userInfo?.type == USER_TYPES.ADMIN) {
@@ -57,12 +57,3 @@ export async function expressAuthentication(request: express.Request, securityNa
 }
 
 
-function getToken(request: express.Request): string {
-    const header = request.headers.authorization || request.headers.Authorization;
-    if (header) {
-        const [, token] = (<string>header).split(" ");
-        if (token) return token;
-    }
-
-    return request.body.token || request.query.token || request.headers["x-access-token"];
-}

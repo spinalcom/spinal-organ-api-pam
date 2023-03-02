@@ -32,10 +32,20 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
     });
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.checkIfProfileHasAccess = void 0;
+exports.checkIfProfileHasAccess = exports.getToken = void 0;
 const appProfile_service_1 = require("../services/appProfile.service");
 const authorization_service_1 = require("../services/authorization.service");
 const userProfile_service_1 = require("../services/userProfile.service");
+function getToken(request) {
+    const header = request.headers.authorization || request.headers.Authorization;
+    if (header) {
+        const [, token] = header.split(" ");
+        if (token)
+            return token;
+    }
+    return request.body.token || request.query.token || request.headers["x-access-token"];
+}
+exports.getToken = getToken;
 function getProfileNode(profileId) {
     return __awaiter(this, void 0, void 0, function* () {
         let profile = yield userProfile_service_1.UserProfileService.getInstance().getUserProfile(profileId);

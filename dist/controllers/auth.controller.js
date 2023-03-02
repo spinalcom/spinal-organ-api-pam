@@ -156,7 +156,7 @@ let AuthController = class AuthController extends tsoa_1.Controller {
     tokenIsValid(data) {
         return __awaiter(this, void 0, void 0, function* () {
             try {
-                const token = yield serviceInstance.tokenIsValid(data.token);
+                const token = yield services_1.TokenService.getInstance().tokenIsValid(data.token);
                 const code = token ? constant_1.HTTP_CODES.OK : constant_1.HTTP_CODES.UNAUTHORIZED;
                 this.setStatus(code);
                 return {

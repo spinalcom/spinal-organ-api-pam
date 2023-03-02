@@ -89,10 +89,12 @@ class ConfigFileService {
             _1.OrganListService,
             _1.RoleService,
             _1.UserProfileService,
-            _1.UserService,
+            _1.UserListService,
+            _1.AppListService,
             // DigitalTwinService,
             _1.PortofolioService,
-            _1.TokenService
+            _1.TokenService,
+            _1.LogService
         ];
         const promises = services.map(service => {
             try {

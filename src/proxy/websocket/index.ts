@@ -26,7 +26,7 @@ import { NextFunction } from "express";
 import { Server as HttpServer } from "http";
 import { SpinalNode } from "spinal-env-viewer-graph-service";
 import { SECURITY_MESSAGES } from "../../constant";
-import { AuthentificationService, BuildingService } from "../../services";
+import { AuthentificationService, BuildingService, TokenService } from "../../services";
 import { profileHasAccessToBuilding } from "../bos/utils";
 import { Server, Socket } from "socket.io";
 import WebsocketLogs from "./websocketLogs";
@@ -53,26 +53,27 @@ export default class WebSocketServer {
 
 
     private _initNameSpace() {
-        this._io.of(/.*/).use(async (socket: Socket, next: NextFunction) => {
-            let err;
+        -
+            this._io.of(/.*/).use(async (socket: Socket, next: NextFunction) => {
+                let err;
 
-            try {
-                // let client = this._serverToClient.get((<any>socket).sessionID || socket.id);
-                // if (client && client.connected) {
-                //     this._associateClientAndServer(client, socket);
-                // } else {
-                const tokenInfo = await this._getToken(socket);
-                const building = await this._getBuilding(socket);
-                const access = await this._checkIfUserHasAccess(tokenInfo, building);
-                const client = await this._createClient(building, socket, tokenInfo.token, tokenInfo.userInfo?.id);
-                this._associateClientAndServer(client, socket);
-                // }
-            } catch (error) {
-                err = error;
-            }
+                try {
+                    // let client = this._serverToClient.get((<any>socket).sessionID || socket.id);
+                    // if (client && client.connected) {
+                    //     this._associateClientAndServer(client, socket);
+                    // } else {
+                    const tokenInfo = await this._getToken(socket);
+                    const building = await this._getBuilding(socket);
+                    const access = await this._checkIfUserHasAccess(tokenInfo, building);
+                    const client = await this._createClient(building, socket, tokenInfo.token, tokenInfo.userInfo?.id);
+                    this._associateClientAndServer(client, socket);
+                    // }
+                } catch (error) {
+                    err = error;
+                }
 
-            next(err);
-        })
+                next(err);
+            })
     }
 
     private _initMiddleware() {
@@ -86,8 +87,7 @@ export default class WebSocketServer {
         const token = auth?.token || header?.token || query?.token
         if (!token) throw new Error(SECURITY_MESSAGES.INVALID_TOKEN);
 
-        const authInstance = AuthentificationService.getInstance();
-        const tokenInfo: any = await authInstance.tokenIsValid(token);
+        const tokenInfo: any = await TokenService.getInstance().tokenIsValid(token);
         if (!tokenInfo) throw new Error(SECURITY_MESSAGES.INVALID_TOKEN);
         return tokenInfo;
     }

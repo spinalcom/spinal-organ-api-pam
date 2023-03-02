@@ -32,6 +32,8 @@ import { v4 as uuidv4 } from 'uuid';
 import { UserProfileService } from "./userProfile.service";
 import { AppProfileService } from "./appProfile.service";
 
+import * as globalCache from 'global-cache';
+import { TokenService } from "./token.service";
 import { UserListService } from "./userList.services";
 import { AppListService } from "./appList.services";
 const tokenKey = '9b1deb4d-3b7d-4bad-9bdd-2b0d7b3dcb6d';
@@ -58,6 +60,20 @@ export class AuthentificationService {
         return AppListService.getInstance().authenticateApplication(appInfo)
     }
 
+    // public async authenticateAdmin(info: IUserCredential): Promise<{ code: number; message: any }> {
+    //     const data = await UserService.getInstance().loginAdmin(info);
+    //     if (data.code === HTTP_CODES.OK) this._saveUserToken(data.message, false);
+    //     return data;
+    // }
+
+    // public async tokenIsValid(token: string): Promise<IUserToken | IApplicationToken> {
+    //     const data = await this._getTokenData(token);
+    //     const expirationTime = data?.expieredToken;
+    //     const tokenExpired = expirationTime ? Date.now() >= expirationTime * 1000 : true;
+    //     if (!data || tokenExpired) return;
+    //     return data;
+    // }
+
 
     // PAM Credential
     public registerToAdmin(pamInfo: IPamInfo, adminInfo: IAdmin): Promise<IPamCredential> {
@@ -81,6 +97,8 @@ export class AuthentificationService {
 
         return context.info.get();
     }
+
+
 
     public async deleteCredentials() {
         let context = await configServiceInstance.getContext(PAM_CREDENTIAL_CONTEXT_NAME);
@@ -153,7 +171,6 @@ export class AuthentificationService {
     //                      PRIVATE                 //
     //////////////////////////////////////////////////
 
-
     private async _getOrCreateAdminCredential(createIfNotExist: boolean = false): Promise<IAdminCredential> {
         const credentials = await this.getAdminCredential();
         if (credentials) return credentials;
@@ -195,6 +212,74 @@ export class AuthentificationService {
         return contextInfo.get();
     }
 
+
+    private _sendLoginRequest(url: string, info: IUserCredential | IAppCredential | IOAuth2Credential, adminCredential: IPamCredential, isUser: boolean = true): Promise<{ code: number; data: string | IApplicationToken | IUserToken }> {
+
+        return axios.post(url, info).then(async (result) => {
+            const data = result.data;
+            data.profile = await this._getProfileInfo(data.token, adminCredential, isUser);
+            if (isUser) data.userInfo = await this._getUserInfo(data.userId, adminCredential, data.token);
+            else data.userInfo = await this._getApplicationInfo(data.applicationId, adminCredential, data.token);
+            await this._saveUserToken(data);
+            return {
+                code: HTTP_CODES.OK,
+                data
+            }
+        }).catch(err => {
+            console.error(err)
+            return {
+                code: HTTP_CODES.UNAUTHORIZED,
+                data: "bad credential"
+            }
+        })
+    }
+
+    private _getProfileInfo(userToken: string, adminCredential: IPamCredential, isUser: boolean) {
+        let urlAdmin = adminCredential.urlAdmin;
+        let endpoint = isUser ? "/tokens/getUserProfileByToken" : "/tokens/getAppProfileByToken";
+        return axios.post(urlAdmin + endpoint, {
+            platformId: adminCredential.idPlateform,
+            token: userToken
+        }).then((result) => {
+            if (!result.data) return;
+            const data = result.data;
+            delete data.password;
+            return data;
+        }).catch(err => {
+            return {};
+        })
+    }
+
+    private _getUserInfo(userId: string, adminCredential: IPamCredential, userToken: string) {
+        const config = {
+            headers: {
+                'Content-Type': 'application/json',
+                // "x-access-token": adminCredential.tokenBosAdmin
+                "x-access-token": userToken
+            },
+        }
+        return axios.get(`${adminCredential.urlAdmin}/users/${userId}`, config).then((result) => {
+            return result.data;
+        }).catch((err) => {
+            console.error(err);
+        })
+    }
+
+    private _getApplicationInfo(applicationId: string, adminCredential: IPamCredential, userToken: string) {
+        const config = {
+            headers: {
+                'Content-Type': 'application/json',
+                // "x-access-token": adminCredential.tokenBosAdmin
+                "x-access-token": userToken
+            },
+        }
+        return axios.get(`${adminCredential.urlAdmin}/application/${applicationId}`, config).then((result) => {
+            return result.data;
+        }).catch((err) => {
+            console.error(err);
+        })
+    }
+
     private _formatUserProfiles(): Promise<IAdminUserProfile[]> {
         return UserProfileService.getInstance().getAllUserProfileNodes().then((nodes) => {
             return nodes.map(el => ({
@@ -218,6 +303,21 @@ export class AuthentificationService {
         if (!context) context = await configServiceInstance.addContext(contextName, contextType);
         return context;
     }
+
+
+    private async _saveUserToken(data: IUserToken | IApplicationToken, addToGraph: boolean = true): Promise<void> {
+        globalCache.set(data.token, data);
+        if (addToGraph) await TokenService.getInstance().addTokenToContext(data.token, data);
+    }
+
+    public async _getTokenData(token: string): Promise<IApplicationToken | IUserToken> {
+        const data = globalCache.get(token);
+        if (data) return data;
+
+        const found = await TokenService.getInstance().getTokenData(token);
+        return found?.get();
+    }
+
 
     private _formatInfo(info: IAppCredential | IOAuth2Credential): IAppCredential {
         if ("client_id" in info) {

@@ -63,6 +63,8 @@ function canAccess(buildingId, api, profileId, isAppProfile) {
         const buildingAccess = yield profileHasAccessToBuilding(profileId, buildingId, isAppProfile);
         if (!buildingAccess)
             return false;
+        if (!isAppProfile)
+            return true;
         if (api.route.includes("?"))
             api.route = api.route.substring(0, api.route.indexOf('?'));
         const routeFound = _hasAccessToApiRoute(buildingAccess, api);

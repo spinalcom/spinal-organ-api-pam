@@ -22,7 +22,7 @@
  * <http://resources.spinalcom.com/licenses.pdf>.
  */
 
-import { AuthentificationService } from "../services";
+import { AuthentificationService, TokenService } from "../services";
 import * as express from "express";
 import { HTTP_CODES, SECURITY_NAME } from "../constant";
 import { Body, Route, Tags, Controller, Post, Get, Put, Delete, Security } from "tsoa";
@@ -147,7 +147,7 @@ export class AuthController extends Controller {
     @Post("/getTokenData")
     public async tokenIsValid(@Body() data: { token: string }) {
         try {
-            const token = await serviceInstance.tokenIsValid(data.token);
+            const token = await TokenService.getInstance().tokenIsValid(data.token);
             const code = token ? HTTP_CODES.OK : HTTP_CODES.UNAUTHORIZED;
             this.setStatus(code);
             return {

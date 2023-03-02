@@ -56,7 +56,7 @@ class WebSocketServer {
         });
     }
     _initNameSpace() {
-        this._io.of(/.*/).use((socket, next) => __awaiter(this, void 0, void 0, function* () {
+        -this._io.of(/.*/).use((socket, next) => __awaiter(this, void 0, void 0, function* () {
             var _a;
             let err;
             try {
@@ -88,8 +88,7 @@ class WebSocketServer {
             const token = (auth === null || auth === void 0 ? void 0 : auth.token) || (header === null || header === void 0 ? void 0 : header.token) || (query === null || query === void 0 ? void 0 : query.token);
             if (!token)
                 throw new Error(constant_1.SECURITY_MESSAGES.INVALID_TOKEN);
-            const authInstance = services_1.AuthentificationService.getInstance();
-            const tokenInfo = yield authInstance.tokenIsValid(token);
+            const tokenInfo = yield services_1.TokenService.getInstance().tokenIsValid(token);
             if (!tokenInfo)
                 throw new Error(constant_1.SECURITY_MESSAGES.INVALID_TOKEN);
             return tokenInfo;

@@ -36,9 +36,10 @@ exports.TokenService = void 0;
 const spinal_env_viewer_graph_service_1 = require("spinal-env-viewer-graph-service");
 const constant_1 = require("../constant");
 const configFile_service_1 = require("./configFile.service");
-const jwt = require("jsonwebtoken");
 const spinal_core_connectorjs_type_1 = require("spinal-core-connectorjs_type");
 const adminProfile_service_1 = require("./adminProfile.service");
+const jwt = require("jsonwebtoken");
+const globalCache = require("global-cache");
 class TokenService {
     constructor() { }
     static getInstance() {
@@ -55,7 +56,14 @@ class TokenService {
             return this.context;
         });
     }
-    addUserToken(userNode, secret, durationInMin) {
+    addUserToken(userNode, token, playload) {
+        return __awaiter(this, void 0, void 0, function* () {
+            const tokenNode = yield this.addTokenToContext(token, playload);
+            yield userNode.addChild(tokenNode, constant_1.TOKEN_RELATION_NAME, constant_1.PTR_LST_TYPE);
+            return playload;
+        });
+    }
+    getAdminPlayLoad(userNode, secret, durationInMin) {
         return __awaiter(this, void 0, void 0, function* () {
             const playload = {
                 userInfo: userNode.info.get()
@@ -72,21 +80,30 @@ class TokenService {
             playload.profile = {
                 profileId: adminProfile.getId().get()
             };
-            const tokenNode = yield this.addTokenToContext(token, playload);
-            yield userNode.addChild(tokenNode, constant_1.TOKEN_RELATION_NAME, constant_1.PTR_LST_TYPE);
             return playload;
         });
     }
     addTokenToContext(token, data) {
-        const node = new spinal_env_viewer_graph_service_1.SpinalNode(token, constant_1.TOKEN_TYPE, new spinal_core_connectorjs_type_1.Model(data));
-        return this.context.addChildInContext(node, constant_1.TOKEN_RELATION_NAME, constant_1.PTR_LST_TYPE);
+        return __awaiter(this, void 0, void 0, function* () {
+            const node = new spinal_env_viewer_graph_service_1.SpinalNode(token, constant_1.TOKEN_TYPE, new spinal_core_connectorjs_type_1.Model(data));
+            const child = yield this.context.addChildInContext(node, constant_1.TOKEN_RELATION_NAME, constant_1.PTR_LST_TYPE);
+            globalCache.set(data.token, data);
+            return child;
+        });
     }
     getTokenData(token) {
         return __awaiter(this, void 0, void 0, function* () {
+            const data = globalCache.get(token);
+            if (data)
+                return data;
             const found = yield this.context.getChild((node) => node.getName().get() === token, constant_1.TOKEN_RELATION_NAME, constant_1.PTR_LST_TYPE);
             if (!found)
                 return;
-            return found.getElement(true);
+            const element = yield found.getElement(true);
+            if (element) {
+                globalCache.set(token, element.get());
+                return element.get();
+            }
         });
     }
     deleteToken(token) {
@@ -101,6 +118,16 @@ class TokenService {
             catch (error) {
                 return false;
             }
+        });
+    }
+    tokenIsValid(token) {
+        return __awaiter(this, void 0, void 0, function* () {
+            const data = yield this.getTokenData(token);
+            const expirationTime = data === null || data === void 0 ? void 0 : data.expieredToken;
+            const tokenExpired = expirationTime ? Date.now() >= expirationTime * 1000 : true;
+            if (!data || tokenExpired)
+                return;
+            return data;
         });
     }
     //////////////////////////////////////////////////

@@ -20,8 +20,14 @@ export declare class AuthentificationService {
     private getJsonData;
     private _getRequestBody;
     private _editPamCredential;
+    private _sendLoginRequest;
+    private _getProfileInfo;
+    private _getUserInfo;
+    private _getApplicationInfo;
     private _formatUserProfiles;
     private _formatAppProfiles;
     private _getOrCreateContext;
+    private _saveUserToken;
+    _getTokenData(token: string): Promise<IApplicationToken | IUserToken>;
     private _formatInfo;
 }

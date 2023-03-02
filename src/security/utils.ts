@@ -27,6 +27,19 @@ import { SpinalNode } from 'spinal-env-viewer-graph-service';
 import { AppProfileService } from "../services/appProfile.service";
 import { authorizationInstance } from '../services/authorization.service';
 import { UserProfileService } from "../services/userProfile.service";
+import * as express from "express";
+
+
+export function getToken(request: express.Request): string {
+    const header = request.headers.authorization || request.headers.Authorization;
+    if (header) {
+        const [, token] = (<string>header).split(" ");
+        if (token) return token;
+    }
+
+    return request.body.token || request.query.token || request.headers["x-access-token"];
+}
+
 
 async function getProfileNode(profileId: string): Promise<SpinalNode> {
     let profile = await UserProfileService.getInstance().getUserProfile(profileId);

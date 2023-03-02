@@ -25,9 +25,11 @@
 import { SpinalContext, SpinalNode } from "spinal-env-viewer-graph-service";
 import { TOKEN_LIST_CONTEXT_TYPE, TOKEN_LIST_CONTEXT_NAME, TOKEN_TYPE, PTR_LST_TYPE, TOKEN_RELATION_NAME } from "../constant";
 import { configServiceInstance } from "./configFile.service";
-import * as jwt from "jsonwebtoken";
 import { Model } from 'spinal-core-connectorjs_type';
 import { AdminProfileService } from "./adminProfile.service";
+import * as jwt from "jsonwebtoken";
+import * as globalCache from 'global-cache';
+import { IApplicationToken, IUserToken } from "../interfaces";
 
 
 export class TokenService {
@@ -50,12 +52,17 @@ export class TokenService {
         return this.context;
     }
 
+    public async addUserToken(userNode: SpinalNode, token: string, playload: any): Promise<any> {
+        const tokenNode = await this.addTokenToContext(token, playload);
+        await userNode.addChild(tokenNode, TOKEN_RELATION_NAME, PTR_LST_TYPE);
+        return playload;
+    }
 
-
-    public async addUserToken(userNode: SpinalNode, secret?: string, durationInMin?: number): Promise<any> {
+    public async getAdminPlayLoad(userNode: SpinalNode, secret?: string, durationInMin?: number): Promise<any> {
         const playload: any = {
             userInfo: userNode.info.get()
         };
+
         durationInMin = durationInMin || 7 * 24 * 60 * 60; // par default 7jrs
         const key = secret || this._generateString(15);
         const token = jwt.sign(playload, key, { expiresIn: durationInMin });
@@ -70,22 +77,28 @@ export class TokenService {
             profileId: adminProfile.getId().get()
         }
 
-        const tokenNode = await this.addTokenToContext(token, playload);
-        await userNode.addChild(tokenNode, TOKEN_RELATION_NAME, PTR_LST_TYPE);
         return playload;
     }
 
-
-    public addTokenToContext(token: string, data: any): Promise<SpinalNode> {
+    public async addTokenToContext(token: string, data: any): Promise<SpinalNode> {
         const node = new SpinalNode(token, TOKEN_TYPE, new Model(data));
-        return this.context.addChildInContext(node, TOKEN_RELATION_NAME, PTR_LST_TYPE)
+        const child = await this.context.addChildInContext(node, TOKEN_RELATION_NAME, PTR_LST_TYPE)
+        globalCache.set(data.token, data);
+        return child;
     }
 
     public async getTokenData(token: string): Promise<any> {
+        const data = globalCache.get(token);
+        if (data) return data;
+
         const found = await this.context.getChild((node) => node.getName().get() === token, TOKEN_RELATION_NAME, PTR_LST_TYPE);
         if (!found) return;
 
-        return found.getElement(true);
+        const element = await found.getElement(true);
+        if (element) {
+            globalCache.set(token, element.get())
+            return element.get();
+        }
     }
 
     public async deleteToken(token: SpinalNode | string): Promise<boolean> {
@@ -98,6 +111,14 @@ export class TokenService {
         } catch (error) {
             return false;
         }
+    }
+
+    public async tokenIsValid(token: string): Promise<IUserToken | IApplicationToken> {
+        const data = await this.getTokenData(token);
+        const expirationTime = data?.expieredToken;
+        const tokenExpired = expirationTime ? Date.now() >= expirationTime * 1000 : true;
+        if (!data || tokenExpired) return;
+        return data;
     }
 
     //////////////////////////////////////////////////

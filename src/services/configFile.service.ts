@@ -32,7 +32,8 @@ import {
     AppService, BuildingService,
     OrganListService, RoleService,
     UserProfileService, PortofolioService,
-    DigitalTwinService, TokenService, UserService
+    DigitalTwinService, TokenService, UserListService,
+    AppListService, LogService
 } from ".";
 import { createDefaultAdminApps } from '../adminApps';
 
@@ -103,10 +104,12 @@ export default class ConfigFileService {
             OrganListService,
             RoleService,
             UserProfileService,
-            UserService,
+            UserListService,
+            AppListService,
             // DigitalTwinService,
             PortofolioService,
-            TokenService
+            TokenService,
+            LogService
         ];
 
         const promises = services.map(service => {

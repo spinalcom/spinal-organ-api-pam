@@ -57,7 +57,9 @@ export function formatUri(argUrl: string, uri: string): string {
 
 export async function canAccess(buildingId: string, api: { method: string; route: string }, profileId: string, isAppProfile): Promise<boolean> {
     const buildingAccess = await profileHasAccessToBuilding(profileId, buildingId, isAppProfile);
+
     if (!buildingAccess) return false;
+    if (!isAppProfile) return true;
 
     if (api.route.includes("?")) api.route = api.route.substring(0, api.route.indexOf('?'));
 

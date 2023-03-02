@@ -1,6 +1,6 @@
 "use strict";
 /*
- * Copyright 2022 SpinalCom - www.spinalcom.com
+ * Copyright 2023 SpinalCom - www.spinalcom.com
  *
  * This file is part of SpinalCore.
  *
@@ -32,32 +32,25 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
     });
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.expressAuthentication = void 0;
+exports.LogService = void 0;
+const configFile_service_1 = require("./configFile.service");
 const constant_1 = require("../constant");
-const services_1 = require("../services");
-const utils_1 = require("./utils");
-const AuthError_1 = require("./AuthError");
-function expressAuthentication(request, securityName, scopes) {
-    return __awaiter(this, void 0, void 0, function* () {
-        if (securityName === constant_1.SECURITY_NAME.all)
-            return;
-        const token = (0, utils_1.getToken)(request);
-        if (!token)
-            throw new AuthError_1.AuthError(constant_1.SECURITY_MESSAGES.INVALID_TOKEN);
-        const tokenInstance = services_1.TokenService.getInstance();
-        const tokenInfo = yield tokenInstance.tokenIsValid(token);
-        if (!tokenInfo)
-            throw new AuthError_1.AuthError(constant_1.SECURITY_MESSAGES.INVALID_TOKEN);
-        // if (tokenInfo.userInfo?.type == USER_TYPES.ADMIN) {
-        //     return tokenInfo;
-        // }
-        const profileId = tokenInfo.profile.profileId || tokenInfo.profile.appProfileBosConfigId || tokenInfo.profile.userProfileBosConfigId;
-        // if (securityName === SECURITY_NAME.profile) {
-        //     const hasAccess = await checkIfProfileHasAccess(request, profileId);
-        //     if (!hasAccess) throw new AuthError(SECURITY_MESSAGES.UNAUTHORIZED);
-        // }
-        return tokenInfo;
-    });
+class LogService {
+    constructor() { }
+    static getInstance() {
+        if (!this.instance) {
+            this.instance = new LogService();
+        }
+        return this.instance;
+    }
+    init() {
+        return __awaiter(this, void 0, void 0, function* () {
+            this.context = yield configFile_service_1.configServiceInstance.getContext(constant_1.LOG_CONTEXT_NAME);
+            if (!this.context)
+                this.context = yield configFile_service_1.configServiceInstance.addContext(constant_1.LOG_CONTEXT_NAME, constant_1.LOG_CONTEXT_TYPE);
+            return this.context;
+        });
+    }
 }
-exports.expressAuthentication = expressAuthentication;
-//# sourceMappingURL=authentication.js.map
+exports.LogService = LogService;
+//# sourceMappingURL=log.service.js.map
