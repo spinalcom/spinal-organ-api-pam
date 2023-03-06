@@ -126,7 +126,7 @@ export class AppListService {
                 "x-access-token": userToken
             },
         }
-        return axios.get(`${adminCredential.urlAdmin}/application/${applicationId}`, config).then((result) => {
+        return axios.get(`${adminCredential.urlAdmin}/applications/${applicationId}`, config).then((result) => {
             return result.data;
         }).catch((err) => {
             console.error(err);
