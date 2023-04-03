@@ -17,6 +17,7 @@ export declare const APP_PROFILE_CONTEXT_NAME = "AppProfileList";
 export declare const USER_LIST_CONTEXT_NAME = "UserList";
 export declare const ROLES_CONTEXT_NAME = "RoleList";
 export declare const APP_LIST_CONTEXT_NAME = "AppList";
+export declare const APP_CONNECTED_LIST_CONTEXT_NAME = "AppConnectedList";
 export declare const BUILDING_CONTEXT_NAME = "Buildings";
 export declare const DIGITALTWIN_CONTEXT_NAME = "DigitalTwins";
 export declare const API_ROUTES_CONTEXT_NAME = "ApiListContext";
@@ -39,6 +40,7 @@ export declare const APP_PROFILE_CONTEXT_TYPE = "AppProfileList";
 export declare const USER_LIST_CONTEXT_TYPE = "UserList";
 export declare const ROLES_CONTEXT_TYPE = "RoleList";
 export declare const APP_LIST_CONTEXT_TYPE = "AppList";
+export declare const APP_CONNECTED_LIST_CONTEXT_TYPE = "AppConnectedList";
 export declare const BUILDING_CONTEXT_TYPE = "BuildingContextList";
 export declare const DIGITALTWIN_CONTEXT_TYPE = "DigitalTwinContext";
 export declare const API_ROUTES_CONTEXT_TYPE = "ApiListContext";
@@ -116,7 +118,8 @@ export declare enum HTTP_CODES {
 }
 export declare enum SECURITY_MESSAGES {
     INVALID_TOKEN = "Invalid or expired token !",
-    UNAUTHORIZED = "Unauthorized"
+    UNAUTHORIZED = "Unauthorized",
+    NO_PROFILE_FOUND = "No Profile found for this token"
 }
 export declare enum SECURITY_NAME {
     admin = "admin",

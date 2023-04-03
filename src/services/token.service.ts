@@ -121,6 +121,13 @@ export class TokenService {
         return data;
     }
 
+    public async getProfileIdByToken(token: string): Promise<string> {
+        const data: any = await this.tokenIsValid(token);
+        if (data) return data.profile.profileId || data.profile.userProfileBosConfigId || data.profile.appProfileBosConfigId;
+
+        return;
+    }
+
     //////////////////////////////////////////////////
     //                        PRIVATE               //
     //////////////////////////////////////////////////

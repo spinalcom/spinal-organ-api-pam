@@ -24,13 +24,9 @@
 
 import axios from "axios";
 import { SpinalContext, SpinalGraphService, SpinalNode } from "spinal-env-viewer-graph-service";
-import { USER_LIST_CONTEXT_TYPE, USER_LIST_CONTEXT_NAME, ADMIN_USERNAME, ADMIN_USER_TYPE, PTR_LST_TYPE, CONTEXT_TO_ADMIN_USER_RELATION, USER_TYPES, HTTP_CODES, TOKEN_TYPE, TOKEN_RELATION_NAME, APP_LIST_CONTEXT_NAME, APP_CATEGORY_TYPE, APP_LIST_CONTEXT_TYPE, CONTEXT_TO_USER_RELATION_NAME, CONTEXT_TO_APP_RELATION_NAME } from "../constant";
-import { IAppCredential, IApplicationToken, IOAuth2Credential, IPamCredential, IUserCredential, IUserInfo, IUserToken } from "../interfaces";
+import { PTR_LST_TYPE, USER_TYPES, HTTP_CODES, APP_CONNECTED_LIST_CONTEXT_TYPE, APP_CONNECTED_LIST_CONTEXT_NAME, CONTEXT_TO_APP_RELATION_NAME } from "../constant";
+import { IAppCredential, IApplicationToken, IOAuth2Credential, IPamCredential } from "../interfaces";
 import { configServiceInstance } from "./configFile.service";
-import { Model } from 'spinal-core-connectorjs_type';
-import * as bcrypt from 'bcrypt';
-import * as fileLog from "log-to-file";
-import * as path from "path";
 import { TokenService } from "./token.service";
 import { AuthentificationService } from './authentification.service'
 
@@ -47,9 +43,9 @@ export class AppListService {
     }
 
     public async init(): Promise<SpinalContext> {
-        this.context = await configServiceInstance.getContext(APP_LIST_CONTEXT_NAME);
+        this.context = await configServiceInstance.getContext(APP_CONNECTED_LIST_CONTEXT_NAME);
         if (!this.context) {
-            this.context = await configServiceInstance.addContext(APP_LIST_CONTEXT_NAME, APP_LIST_CONTEXT_TYPE);
+            this.context = await configServiceInstance.addContext(APP_CONNECTED_LIST_CONTEXT_NAME, APP_CONNECTED_LIST_CONTEXT_TYPE);
         }
 
         return this.context;

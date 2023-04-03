@@ -1,50 +1,51 @@
+import * as express from 'express';
 import { IBosAuth, IBosData, IPortofolioData, IProfile, IProfileData, IProfileEdit } from "../interfaces";
 import { Controller } from "tsoa";
 export declare class UserProfileController extends Controller {
     constructor();
-    createUserProfile(data: IProfile): Promise<IProfileData | {
+    createUserProfile(req: express.Request, data: IProfile): Promise<IProfileData | {
         message: string;
     }>;
-    getUserProfile(id: string): Promise<IProfileData | {
+    getUserProfile(req: express.Request, id: string): Promise<IProfileData | {
         message: string;
     }>;
-    getAllUserProfile(): Promise<IProfileData[] | {
+    getAllUserProfile(req: express.Request): Promise<IProfileData[] | {
         message: string;
     }>;
-    updateUserProfile(id: string, data: IProfileEdit): Promise<IProfileData | {
+    updateUserProfile(req: express.Request, id: string, data: IProfileEdit): Promise<IProfileData | {
         message: string;
     }>;
-    deleteUserProfile(id: string): Promise<{
+    deleteUserProfile(req: express.Request, id: string): Promise<{
         message: string;
     }>;
-    getAuthorizedPortofolioApps(profileId: string): Promise<IPortofolioData[] | {
+    getAuthorizedPortofolioApps(req: express.Request, profileId: string): Promise<IPortofolioData[] | {
         message: string;
     }>;
-    authorizeToAccessPortofolioApps(profileId: string, data: {
+    authorizeToAccessPortofolioApps(req: express.Request, profileId: string, data: {
         appsIds: string[];
         portofolioId: string;
     }[]): Promise<IPortofolioData[] | {
         message: string;
     }>;
-    getAuthorizedPortofolioApis(profileId: string, portofolioId: string): Promise<any | {
+    getAuthorizedPortofolioApis(req: express.Request, profileId: string, portofolioId: string): Promise<any | {
         message: string;
     }>;
-    unauthorizeToAccessPortofolioApps(profileId: string, data: {
+    unauthorizeToAccessPortofolioApps(req: express.Request, profileId: string, data: {
         appsIds: string[];
         portofolioId: string;
     }[]): Promise<any | {
         message: string;
     }>;
-    getAuthorizedBos(profileId: string, portofolioId: string): Promise<any | {
+    getAuthorizedBos(req: express.Request, profileId: string, portofolioId: string): Promise<any | {
         message: string;
     }>;
-    authorizeToAccessBosApps(profileId: string, portofolioId: string, data: IBosAuth[]): Promise<IBosData[] | {
+    authorizeToAccessBosApps(req: express.Request, profileId: string, portofolioId: string, data: IBosAuth[]): Promise<IBosData[] | {
         message: string;
     }>;
-    getAuthorizedBosApis(profileId: string, portofolioId: string, bosId: string): Promise<any | {
+    getAuthorizedBosApis(req: express.Request, profileId: string, portofolioId: string, bosId: string): Promise<any | {
         message: string;
     }>;
-    unauthorizeToAccessBosApp(profileId: string, portofolioId: string, data: {
+    unauthorizeToAccessBosApp(req: express.Request, profileId: string, portofolioId: string, data: {
         appsIds: string[];
         buildingId: string;
     }[]): Promise<any | {

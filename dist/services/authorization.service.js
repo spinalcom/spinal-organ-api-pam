@@ -45,12 +45,12 @@ class AuthorizationService {
             this.instance = new AuthorizationService();
         return this.instance;
     }
-    profileHasAccess(profile, node) {
+    profileHasAccess(profile, argNode) {
         return __awaiter(this, void 0, void 0, function* () {
             const context = yield this._getAuthorizedPortofolioContext(profile, true);
             if (!context)
-                return false;
-            const id = typeof node === "string" ? node : node.getId().get();
+                return;
+            const id = typeof argNode === "string" ? argNode : argNode.getId().get();
             const found = yield context.findInContextAsyncPredicate(context, ((node, stop) => __awaiter(this, void 0, void 0, function* () {
                 const element = yield node.getElement(true);
                 if (element && element.getId().get() === id) {
@@ -59,7 +59,7 @@ class AuthorizationService {
                 }
                 return false;
             })));
-            return found && found.length > 0 ? true : false;
+            return found && found[0].getElement();
         });
     }
     // public async removePortofolioReferences(profile: SpinalNode, portofolioId: string): Promise<void> {

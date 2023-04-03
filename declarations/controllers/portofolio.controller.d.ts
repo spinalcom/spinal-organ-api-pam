@@ -1,86 +1,87 @@
 import { IApiRoute, IApp, IBuilding, IBuildingCreation, IEditProtofolio, IPortofolioData, IPortofolioInfo } from "../interfaces";
 import { Controller } from "tsoa";
+import * as express from 'express';
 export declare class PortofolioController extends Controller {
     constructor();
-    addPortofolio(data: IPortofolioInfo): Promise<IPortofolioData | {
+    addPortofolio(req: express.Request, data: IPortofolioInfo): Promise<IPortofolioData | {
         message: string;
     }>;
-    updatePortofolio(portofolioId: string, data: IEditProtofolio): Promise<IPortofolioData | {
+    updatePortofolio(req: express.Request, portofolioId: string, data: IEditProtofolio): Promise<IPortofolioData | {
         message: string;
     }>;
-    renamePortofolio(id: string, data: {
+    renamePortofolio(req: express.Request, id: string, data: {
         name: string;
     }): Promise<{
         message?: string;
     }>;
-    getAllPortofolio(): Promise<any[] | {
+    getAllPortofolio(req: express.Request): Promise<any[] | {
         message: string;
     }>;
-    getPortofolio(id: string): Promise<any | {
+    getPortofolio(req: express.Request, id: string): Promise<any | {
         message: string;
     }>;
-    getPortofolioDetails(id: string): Promise<IPortofolioData | {
+    getPortofolioDetails(req: express.Request, id: string): Promise<IPortofolioData | {
         message: string;
     }>;
-    getAllPortofoliosDetails(): Promise<any[] | {
+    getAllPortofoliosDetails(req: express.Request): Promise<any[] | {
         message: string;
     }>;
-    removePortofolio(id: string): Promise<{
+    removePortofolio(req: express.Request, id: string): Promise<{
         message: string;
     }>;
-    addBuilding(portofolioId: string, body: IBuildingCreation): Promise<IBuilding[] | {
+    addBuilding(req: express.Request, portofolioId: string, body: IBuildingCreation): Promise<IBuilding[] | {
         message: string;
     }>;
-    getBuilding(portofolioId: string, buildingId: string): Promise<IBuilding | {
+    getBuilding(req: express.Request, portofolioId: string, buildingId: string): Promise<IBuilding | {
         message: string;
     }>;
-    getAllBuilding(portofolioId: string): Promise<IBuilding[] | {
+    getAllBuilding(req: express.Request, portofolioId: string): Promise<IBuilding[] | {
         message: string;
     }>;
-    deleteBuildingFromPortofolio(portofolioId: string, data: {
+    deleteBuildingFromPortofolio(req: express.Request, portofolioId: string, data: {
         buildingIds: string[];
     }): Promise<{
         message: string;
         ids?: string[];
     }>;
-    addAppToPortofolio(portofolioId: string, data: {
+    addAppToPortofolio(req: express.Request, portofolioId: string, data: {
         applicationsIds: string[];
     }): Promise<IApp[] | {
         message: string;
     }>;
-    getPortofolioApps(portofolioId: string): Promise<IApp[] | {
+    getPortofolioApps(req: express.Request, portofolioId: string): Promise<IApp[] | {
         message: string;
     }>;
-    getAppFromPortofolio(portofolioId: string, applicationId: string): Promise<IApp | {
+    getAppFromPortofolio(req: express.Request, portofolioId: string, applicationId: string): Promise<IApp | {
         message: string;
     }>;
-    removeAppFromPortofolio(portofolioId: string, data: {
+    removeAppFromPortofolio(req: express.Request, portofolioId: string, data: {
         applicationId: string[];
     }): Promise<{
         message: string;
         ids?: string[];
     }>;
-    portofolioHasApp(portofolioId: string, applicationId: string): Promise<boolean | {
+    portofolioHasApp(req: express.Request, portofolioId: string, applicationId: string): Promise<boolean | {
         message: string;
     }>;
-    addApiToPortofolio(portofolioId: string, data: {
+    addApiToPortofolio(req: express.Request, portofolioId: string, data: {
         apisIds: string[];
     }): Promise<IApiRoute[] | {
         message: string;
     }>;
-    getPortofolioApis(portofolioId: string): Promise<IApiRoute[] | {
+    getPortofolioApis(req: express.Request, portofolioId: string): Promise<IApiRoute[] | {
         message: string;
     }>;
-    getApiFromPortofolio(portofolioId: string, apiId: string): Promise<IApiRoute | {
+    getApiFromPortofolio(req: express.Request, portofolioId: string, apiId: string): Promise<IApiRoute | {
         message: string;
     }>;
-    removeApiFromPortofolio(portofolioId: string, data: {
+    removeApiFromPortofolio(req: express.Request, portofolioId: string, data: {
         apisIds: string[];
     }): Promise<{
         message: string;
         ids?: string[];
     }>;
-    portofolioHasApi(portofolioId: string, apiId: string): Promise<boolean | {
+    portofolioHasApi(req: express.Request, portofolioId: string, apiId: string): Promise<boolean | {
         message: string;
     }>;
 }

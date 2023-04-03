@@ -48,15 +48,23 @@ exports.PortofolioController = void 0;
 const services_1 = require("../services");
 const tsoa_1 = require("tsoa");
 const constant_1 = require("../constant");
+const express = require("express");
+const authentication_1 = require("../security/authentication");
+const AuthError_1 = require("../security/AuthError");
+const authorization_service_1 = require("../services/authorization.service");
 const serviceInstance = services_1.BuildingService.getInstance();
 const portofolioInstance = services_1.PortofolioService.getInstance();
 let PortofolioController = class PortofolioController extends tsoa_1.Controller {
     constructor() {
         super();
     }
-    addPortofolio(data) {
+    // @Security(SECURITY_NAME.admin)
+    addPortofolio(req, data) {
         return __awaiter(this, void 0, void 0, function* () {
             try {
+                const isAdmin = yield (0, authentication_1.checkIfItIsAdmin)(req);
+                if (!isAdmin)
+                    throw new AuthError_1.AuthError(constant_1.SECURITY_MESSAGES.UNAUTHORIZED);
                 const { name, appIds, apiIds } = data;
                 const res = yield portofolioInstance.addPortofolio(name, appIds, apiIds);
                 const details = portofolioInstance._formatDetails(res);
@@ -64,28 +72,36 @@ let PortofolioController = class PortofolioController extends tsoa_1.Controller 
                 return details;
             }
             catch (error) {
-                this.setStatus(constant_1.HTTP_CODES.INTERNAL_ERROR);
+                this.setStatus(error.code || constant_1.HTTP_CODES.INTERNAL_ERROR);
                 return { message: error.message };
             }
         });
     }
-    updatePortofolio(portofolioId, data) {
+    // @Security(SECURITY_NAME.admin)
+    updatePortofolio(req, portofolioId, data) {
         return __awaiter(this, void 0, void 0, function* () {
             try {
+                const isAdmin = yield (0, authentication_1.checkIfItIsAdmin)(req);
+                if (!isAdmin)
+                    throw new AuthError_1.AuthError(constant_1.SECURITY_MESSAGES.UNAUTHORIZED);
                 const res = yield portofolioInstance.updateProtofolio(portofolioId, data);
                 const details = portofolioInstance._formatDetails(res);
                 this.setStatus(constant_1.HTTP_CODES.OK);
                 return details;
             }
             catch (error) {
-                this.setStatus(constant_1.HTTP_CODES.INTERNAL_ERROR);
+                this.setStatus(error.code || constant_1.HTTP_CODES.INTERNAL_ERROR);
                 return { message: error.message };
             }
         });
     }
-    renamePortofolio(id, data) {
+    // @Security(SECURITY_NAME.admin)
+    renamePortofolio(req, id, data) {
         return __awaiter(this, void 0, void 0, function* () {
             try {
+                const isAdmin = yield (0, authentication_1.checkIfItIsAdmin)(req);
+                if (!isAdmin)
+                    throw new AuthError_1.AuthError(constant_1.SECURITY_MESSAGES.UNAUTHORIZED);
                 const success = yield services_1.PortofolioService.getInstance().renamePortofolio(id, data.name);
                 const status = success ? constant_1.HTTP_CODES.OK : constant_1.HTTP_CODES.BAD_REQUEST;
                 const message = success ? "renamed with success" : "Something went wrong, please check your input data";
@@ -93,68 +109,89 @@ let PortofolioController = class PortofolioController extends tsoa_1.Controller 
                 return { message };
             }
             catch (error) {
-                this.setStatus(constant_1.HTTP_CODES.INTERNAL_ERROR);
+                this.setStatus(error.code || constant_1.HTTP_CODES.INTERNAL_ERROR);
                 return { message: error.message };
             }
         });
     }
-    getAllPortofolio() {
+    // @Security(SECURITY_NAME.admin)
+    getAllPortofolio(req) {
         return __awaiter(this, void 0, void 0, function* () {
             try {
+                const isAdmin = yield (0, authentication_1.checkIfItIsAdmin)(req);
+                if (!isAdmin)
+                    throw new AuthError_1.AuthError(constant_1.SECURITY_MESSAGES.UNAUTHORIZED);
                 const portofolios = yield portofolioInstance.getAllPortofolio();
                 this.setStatus(constant_1.HTTP_CODES.OK);
                 return portofolios.map(el => el.info.get());
             }
             catch (error) {
-                this.setStatus(constant_1.HTTP_CODES.INTERNAL_ERROR);
+                this.setStatus(error.code || constant_1.HTTP_CODES.INTERNAL_ERROR);
                 return { message: error.message };
             }
         });
     }
-    getPortofolio(id) {
+    // @Security(SECURITY_NAME.profile)
+    getPortofolio(req, id) {
         return __awaiter(this, void 0, void 0, function* () {
             try {
-                const portofolio = yield portofolioInstance.getPortofolio(id);
+                const profile = yield (0, authentication_1.getProfileNode)(req);
+                const portofolio = yield authorization_service_1.default.getInstance().profileHasAccess(profile, id);
+                if (!portofolio)
+                    throw new AuthError_1.AuthError(constant_1.SECURITY_MESSAGES.UNAUTHORIZED);
+                // const portofolio = await portofolioInstance.getPortofolio(id);
                 this.setStatus(constant_1.HTTP_CODES.OK);
                 return portofolio.info.get();
             }
             catch (error) {
-                this.setStatus(constant_1.HTTP_CODES.INTERNAL_ERROR);
+                this.setStatus(error.code || constant_1.HTTP_CODES.INTERNAL_ERROR);
                 return { message: error.message };
             }
         });
     }
-    getPortofolioDetails(id) {
+    // @Security(SECURITY_NAME.admin)
+    getPortofolioDetails(req, id) {
         return __awaiter(this, void 0, void 0, function* () {
             try {
+                const isAdmin = yield (0, authentication_1.checkIfItIsAdmin)(req);
+                if (!isAdmin)
+                    throw new AuthError_1.AuthError(constant_1.SECURITY_MESSAGES.UNAUTHORIZED);
                 const res = yield portofolioInstance.getPortofolioDetails(id);
                 const details = portofolioInstance._formatDetails(res);
                 this.setStatus(constant_1.HTTP_CODES.OK);
                 return details;
             }
             catch (error) {
-                this.setStatus(constant_1.HTTP_CODES.INTERNAL_ERROR);
+                this.setStatus(error.code || constant_1.HTTP_CODES.INTERNAL_ERROR);
                 return { message: error.message };
             }
         });
     }
-    getAllPortofoliosDetails() {
+    // @Security(SECURITY_NAME.admin)
+    getAllPortofoliosDetails(req) {
         return __awaiter(this, void 0, void 0, function* () {
             try {
+                const isAdmin = yield (0, authentication_1.checkIfItIsAdmin)(req);
+                if (!isAdmin)
+                    throw new AuthError_1.AuthError(constant_1.SECURITY_MESSAGES.UNAUTHORIZED);
                 const portofolios = yield portofolioInstance.getAllPortofoliosDetails();
                 const details = portofolios.map((res) => portofolioInstance._formatDetails(res));
                 this.setStatus(constant_1.HTTP_CODES.OK);
                 return details;
             }
             catch (error) {
-                this.setStatus(constant_1.HTTP_CODES.INTERNAL_ERROR);
+                this.setStatus(error.code || constant_1.HTTP_CODES.INTERNAL_ERROR);
                 return { message: error.message };
             }
         });
     }
-    removePortofolio(id) {
+    // @Security(SECURITY_NAME.admin)
+    removePortofolio(req, id) {
         return __awaiter(this, void 0, void 0, function* () {
             try {
+                const isAdmin = yield (0, authentication_1.checkIfItIsAdmin)(req);
+                if (!isAdmin)
+                    throw new AuthError_1.AuthError(constant_1.SECURITY_MESSAGES.UNAUTHORIZED);
                 const success = yield portofolioInstance.removePortofolio(id);
                 const status = success ? constant_1.HTTP_CODES.OK : constant_1.HTTP_CODES.BAD_REQUEST;
                 const message = success ? "deleted with success" : "Something went wrong, please check your input data";
@@ -162,14 +199,18 @@ let PortofolioController = class PortofolioController extends tsoa_1.Controller 
                 return { message };
             }
             catch (error) {
-                this.setStatus(constant_1.HTTP_CODES.INTERNAL_ERROR);
+                this.setStatus(error.code || constant_1.HTTP_CODES.INTERNAL_ERROR);
                 return { message: error.message };
             }
         });
     }
-    addBuilding(portofolioId, body) {
+    // @Security(SECURITY_NAME.admin)
+    addBuilding(req, portofolioId, body) {
         return __awaiter(this, void 0, void 0, function* () {
             try {
+                const isAdmin = yield (0, authentication_1.checkIfItIsAdmin)(req);
+                if (!isAdmin)
+                    throw new AuthError_1.AuthError(constant_1.SECURITY_MESSAGES.UNAUTHORIZED);
                 const node = yield serviceInstance.addBuildingToPortofolio(portofolioId, body);
                 if (!node) {
                     this.setStatus(constant_1.HTTP_CODES.BAD_REQUEST);
@@ -179,16 +220,21 @@ let PortofolioController = class PortofolioController extends tsoa_1.Controller 
                 return services_1.BuildingService.getInstance().formatBuildingStructure(node);
             }
             catch (error) {
-                this.setStatus(constant_1.HTTP_CODES.INTERNAL_ERROR);
+                this.setStatus(error.code || constant_1.HTTP_CODES.INTERNAL_ERROR);
                 return { message: error.message };
             }
         });
     }
-    getBuilding(portofolioId, buildingId) {
+    // @Security(SECURITY_NAME.profile)
+    getBuilding(req, portofolioId, buildingId) {
         return __awaiter(this, void 0, void 0, function* () {
             try {
+                const profile = yield (0, authentication_1.getProfileNode)(req);
                 const node = yield serviceInstance.getBuildingFromPortofolio(portofolioId, buildingId);
                 if (node) {
+                    const hasAccess = yield authorization_service_1.default.getInstance().profileHasAccess(profile, node);
+                    if (!hasAccess)
+                        throw new AuthError_1.AuthError(constant_1.SECURITY_MESSAGES.UNAUTHORIZED);
                     const data = yield serviceInstance.formatBuilding(node.info.get());
                     this.setStatus(constant_1.HTTP_CODES.OK);
                     return data;
@@ -198,14 +244,18 @@ let PortofolioController = class PortofolioController extends tsoa_1.Controller 
                 return { message: `no Building found for ${buildingId}` };
             }
             catch (error) {
-                this.setStatus(constant_1.HTTP_CODES.INTERNAL_ERROR);
+                this.setStatus(error.code || constant_1.HTTP_CODES.INTERNAL_ERROR);
                 return { message: error.message };
             }
         });
     }
-    getAllBuilding(portofolioId) {
+    // @Security(SECURITY_NAME.admin)
+    getAllBuilding(req, portofolioId) {
         return __awaiter(this, void 0, void 0, function* () {
             try {
+                const isAdmin = yield (0, authentication_1.checkIfItIsAdmin)(req);
+                if (!isAdmin)
+                    throw new AuthError_1.AuthError(constant_1.SECURITY_MESSAGES.UNAUTHORIZED);
                 const nodes = (yield serviceInstance.getAllBuildingsFromPortofolio(portofolioId)) || [];
                 const promises = nodes.map(el => serviceInstance.formatBuilding(el.info.get()));
                 const data = yield Promise.all(promises);
@@ -213,14 +263,18 @@ let PortofolioController = class PortofolioController extends tsoa_1.Controller 
                 return data;
             }
             catch (error) {
-                this.setStatus(constant_1.HTTP_CODES.INTERNAL_ERROR);
+                this.setStatus(error.code || constant_1.HTTP_CODES.INTERNAL_ERROR);
                 return { message: error.message };
             }
         });
     }
-    deleteBuildingFromPortofolio(portofolioId, data) {
+    // @Security(SECURITY_NAME.admin)
+    deleteBuildingFromPortofolio(req, portofolioId, data) {
         return __awaiter(this, void 0, void 0, function* () {
             try {
+                const isAdmin = yield (0, authentication_1.checkIfItIsAdmin)(req);
+                if (!isAdmin)
+                    throw new AuthError_1.AuthError(constant_1.SECURITY_MESSAGES.UNAUTHORIZED);
                 const ids = yield portofolioInstance.removeBuildingFromPortofolio(portofolioId, data.buildingIds);
                 if (!ids || ids.length === 0) {
                     this.setStatus(constant_1.HTTP_CODES.BAD_REQUEST);
@@ -230,14 +284,18 @@ let PortofolioController = class PortofolioController extends tsoa_1.Controller 
                 return { message: "building deleted", ids };
             }
             catch (error) {
-                this.setStatus(constant_1.HTTP_CODES.INTERNAL_ERROR);
+                this.setStatus(error.code || constant_1.HTTP_CODES.INTERNAL_ERROR);
                 return { message: error.message };
             }
         });
     }
-    addAppToPortofolio(portofolioId, data) {
+    // @Security(SECURITY_NAME.admin)
+    addAppToPortofolio(req, portofolioId, data) {
         return __awaiter(this, void 0, void 0, function* () {
             try {
+                const isAdmin = yield (0, authentication_1.checkIfItIsAdmin)(req);
+                if (!isAdmin)
+                    throw new AuthError_1.AuthError(constant_1.SECURITY_MESSAGES.UNAUTHORIZED);
                 const nodes = yield portofolioInstance.addAppToPortofolio(portofolioId, data.applicationsIds);
                 if (!nodes || nodes.length === 0) {
                     this.setStatus(constant_1.HTTP_CODES.BAD_REQUEST);
@@ -247,14 +305,19 @@ let PortofolioController = class PortofolioController extends tsoa_1.Controller 
                 return nodes.map(el => el.info.get());
             }
             catch (error) {
-                this.setStatus(constant_1.HTTP_CODES.INTERNAL_ERROR);
+                this.setStatus(error.code || constant_1.HTTP_CODES.INTERNAL_ERROR);
+                ;
                 return { message: error.message };
             }
         });
     }
-    getPortofolioApps(portofolioId) {
+    // @Security(SECURITY_NAME.admin)
+    getPortofolioApps(req, portofolioId) {
         return __awaiter(this, void 0, void 0, function* () {
             try {
+                const isAdmin = yield (0, authentication_1.checkIfItIsAdmin)(req);
+                if (!isAdmin)
+                    throw new AuthError_1.AuthError(constant_1.SECURITY_MESSAGES.UNAUTHORIZED);
                 const node = yield portofolioInstance.getPortofolioApps(portofolioId);
                 if (!node) {
                     this.setStatus(constant_1.HTTP_CODES.BAD_REQUEST);
@@ -264,15 +327,19 @@ let PortofolioController = class PortofolioController extends tsoa_1.Controller 
                 return node.map(el => el.info.get());
             }
             catch (error) {
-                this.setStatus(constant_1.HTTP_CODES.INTERNAL_ERROR);
+                this.setStatus(error.code || constant_1.HTTP_CODES.INTERNAL_ERROR);
+                ;
                 return { message: error.message };
             }
         });
     }
-    getAppFromPortofolio(portofolioId, applicationId) {
+    // @Security(SECURITY_NAME.profile)
+    getAppFromPortofolio(req, portofolioId, applicationId) {
         return __awaiter(this, void 0, void 0, function* () {
             try {
-                const node = yield portofolioInstance.getAppFromPortofolio(portofolioId, applicationId);
+                const profile = yield (0, authentication_1.getProfileNode)(req);
+                const node = yield authorization_service_1.default.getInstance().profileHasAccess(profile, applicationId);
+                // const node = await portofolioInstance.getAppFromPortofolio(portofolioId, applicationId);
                 if (!node) {
                     this.setStatus(constant_1.HTTP_CODES.BAD_REQUEST);
                     return { message: "Something wen wrong, please check your input data" };
@@ -281,14 +348,19 @@ let PortofolioController = class PortofolioController extends tsoa_1.Controller 
                 return node.info.get();
             }
             catch (error) {
-                this.setStatus(constant_1.HTTP_CODES.INTERNAL_ERROR);
+                this.setStatus(error.code || constant_1.HTTP_CODES.INTERNAL_ERROR);
+                ;
                 return { message: error.message };
             }
         });
     }
-    removeAppFromPortofolio(portofolioId, data) {
+    // @Security(SECURITY_NAME.admin)
+    removeAppFromPortofolio(req, portofolioId, data) {
         return __awaiter(this, void 0, void 0, function* () {
             try {
+                const isAdmin = yield (0, authentication_1.checkIfItIsAdmin)(req);
+                if (!isAdmin)
+                    throw new AuthError_1.AuthError(constant_1.SECURITY_MESSAGES.UNAUTHORIZED);
                 const ids = yield portofolioInstance.removeAppFromPortofolio(portofolioId, data.applicationId);
                 if (!ids || ids.length === 0) {
                     this.setStatus(constant_1.HTTP_CODES.BAD_REQUEST);
@@ -298,27 +370,37 @@ let PortofolioController = class PortofolioController extends tsoa_1.Controller 
                 return { message: "application removed from portofolio !", ids };
             }
             catch (error) {
-                this.setStatus(constant_1.HTTP_CODES.INTERNAL_ERROR);
+                this.setStatus(error.code || constant_1.HTTP_CODES.INTERNAL_ERROR);
+                ;
                 return { message: error.message };
             }
         });
     }
-    portofolioHasApp(portofolioId, applicationId) {
+    // @Security(SECURITY_NAME.admin)
+    portofolioHasApp(req, portofolioId, applicationId) {
         return __awaiter(this, void 0, void 0, function* () {
             try {
+                const isAdmin = yield (0, authentication_1.checkIfItIsAdmin)(req);
+                if (!isAdmin)
+                    throw new AuthError_1.AuthError(constant_1.SECURITY_MESSAGES.UNAUTHORIZED);
                 const exist = yield portofolioInstance.portofolioHasApp(portofolioId, applicationId);
                 this.setStatus(constant_1.HTTP_CODES.OK);
                 return exist ? true : false;
             }
             catch (error) {
-                this.setStatus(constant_1.HTTP_CODES.INTERNAL_ERROR);
+                this.setStatus(error.code || constant_1.HTTP_CODES.INTERNAL_ERROR);
+                ;
                 return { message: error.message };
             }
         });
     }
-    addApiToPortofolio(portofolioId, data) {
+    // @Security(SECURITY_NAME.admin)
+    addApiToPortofolio(req, portofolioId, data) {
         return __awaiter(this, void 0, void 0, function* () {
             try {
+                const isAdmin = yield (0, authentication_1.checkIfItIsAdmin)(req);
+                if (!isAdmin)
+                    throw new AuthError_1.AuthError(constant_1.SECURITY_MESSAGES.UNAUTHORIZED);
                 const nodes = yield portofolioInstance.addApiToPortofolio(portofolioId, data.apisIds);
                 if (!nodes || nodes.length === 0) {
                     this.setStatus(constant_1.HTTP_CODES.BAD_REQUEST);
@@ -328,14 +410,19 @@ let PortofolioController = class PortofolioController extends tsoa_1.Controller 
                 return nodes.map(el => el.info.get());
             }
             catch (error) {
-                this.setStatus(constant_1.HTTP_CODES.INTERNAL_ERROR);
+                this.setStatus(error.code || constant_1.HTTP_CODES.INTERNAL_ERROR);
+                ;
                 return { message: error.message };
             }
         });
     }
-    getPortofolioApis(portofolioId) {
+    // @Security(SECURITY_NAME.admin)
+    getPortofolioApis(req, portofolioId) {
         return __awaiter(this, void 0, void 0, function* () {
             try {
+                const isAdmin = yield (0, authentication_1.checkIfItIsAdmin)(req);
+                if (!isAdmin)
+                    throw new AuthError_1.AuthError(constant_1.SECURITY_MESSAGES.UNAUTHORIZED);
                 const node = yield portofolioInstance.getPortofolioApis(portofolioId);
                 if (!node) {
                     this.setStatus(constant_1.HTTP_CODES.BAD_REQUEST);
@@ -345,14 +432,19 @@ let PortofolioController = class PortofolioController extends tsoa_1.Controller 
                 return node.map(el => el.info.get());
             }
             catch (error) {
-                this.setStatus(constant_1.HTTP_CODES.INTERNAL_ERROR);
+                this.setStatus(error.code || constant_1.HTTP_CODES.INTERNAL_ERROR);
+                ;
                 return { message: error.message };
             }
         });
     }
-    getApiFromPortofolio(portofolioId, apiId) {
+    // @Security(SECURITY_NAME.admin)
+    getApiFromPortofolio(req, portofolioId, apiId) {
         return __awaiter(this, void 0, void 0, function* () {
             try {
+                const isAdmin = yield (0, authentication_1.checkIfItIsAdmin)(req);
+                if (!isAdmin)
+                    throw new AuthError_1.AuthError(constant_1.SECURITY_MESSAGES.UNAUTHORIZED);
                 const node = yield portofolioInstance.getApiFromPortofolio(portofolioId, apiId);
                 if (!node) {
                     this.setStatus(constant_1.HTTP_CODES.BAD_REQUEST);
@@ -362,14 +454,19 @@ let PortofolioController = class PortofolioController extends tsoa_1.Controller 
                 return node.info.get();
             }
             catch (error) {
-                this.setStatus(constant_1.HTTP_CODES.INTERNAL_ERROR);
+                this.setStatus(error.code || constant_1.HTTP_CODES.INTERNAL_ERROR);
+                ;
                 return { message: error.message };
             }
         });
     }
-    removeApiFromPortofolio(portofolioId, data) {
+    // @Security(SECURITY_NAME.admin)
+    removeApiFromPortofolio(req, portofolioId, data) {
         return __awaiter(this, void 0, void 0, function* () {
             try {
+                const isAdmin = yield (0, authentication_1.checkIfItIsAdmin)(req);
+                if (!isAdmin)
+                    throw new AuthError_1.AuthError(constant_1.SECURITY_MESSAGES.UNAUTHORIZED);
                 const ids = yield portofolioInstance.removeApiFromPortofolio(portofolioId, data.apisIds);
                 if (!ids || ids.length === 0) {
                     this.setStatus(constant_1.HTTP_CODES.BAD_REQUEST);
@@ -379,210 +476,216 @@ let PortofolioController = class PortofolioController extends tsoa_1.Controller 
                 return { message: "route removed from portofolio !", ids };
             }
             catch (error) {
-                this.setStatus(constant_1.HTTP_CODES.INTERNAL_ERROR);
+                this.setStatus(error.code || constant_1.HTTP_CODES.INTERNAL_ERROR);
+                ;
                 return { message: error.message };
             }
         });
     }
-    portofolioHasApi(portofolioId, apiId) {
+    // @Security(SECURITY_NAME.admin)
+    portofolioHasApi(req, portofolioId, apiId) {
         return __awaiter(this, void 0, void 0, function* () {
             try {
+                const isAdmin = yield (0, authentication_1.checkIfItIsAdmin)(req);
+                if (!isAdmin)
+                    throw new AuthError_1.AuthError(constant_1.SECURITY_MESSAGES.UNAUTHORIZED);
                 const exist = yield portofolioInstance.portofolioHasApi(portofolioId, apiId);
                 this.setStatus(constant_1.HTTP_CODES.OK);
                 return exist ? true : false;
             }
             catch (error) {
-                this.setStatus(constant_1.HTTP_CODES.INTERNAL_ERROR);
+                this.setStatus(error.code || constant_1.HTTP_CODES.INTERNAL_ERROR);
+                ;
                 return { message: error.message };
             }
         });
     }
 };
 __decorate([
-    (0, tsoa_1.Security)(constant_1.SECURITY_NAME.admin),
     (0, tsoa_1.Post)("/add_portofolio"),
-    __param(0, (0, tsoa_1.Body)()),
+    __param(0, (0, tsoa_1.Request)()),
+    __param(1, (0, tsoa_1.Body)()),
     __metadata("design:type", Function),
-    __metadata("design:paramtypes", [Object]),
+    __metadata("design:paramtypes", [Object, Object]),
     __metadata("design:returntype", Promise)
 ], PortofolioController.prototype, "addPortofolio", null);
 __decorate([
-    (0, tsoa_1.Security)(constant_1.SECURITY_NAME.admin),
     (0, tsoa_1.Put)("/update_portofolio/{portofolioId}"),
-    __param(0, (0, tsoa_1.Path)()),
-    __param(1, (0, tsoa_1.Body)()),
+    __param(0, (0, tsoa_1.Request)()),
+    __param(1, (0, tsoa_1.Path)()),
+    __param(2, (0, tsoa_1.Body)()),
     __metadata("design:type", Function),
-    __metadata("design:paramtypes", [String, Object]),
+    __metadata("design:paramtypes", [Object, String, Object]),
     __metadata("design:returntype", Promise)
 ], PortofolioController.prototype, "updatePortofolio", null);
 __decorate([
-    (0, tsoa_1.Security)(constant_1.SECURITY_NAME.admin),
     (0, tsoa_1.Put)("/rename_portofolio/{id}"),
-    __param(0, (0, tsoa_1.Path)()),
-    __param(1, (0, tsoa_1.Body)()),
+    __param(0, (0, tsoa_1.Request)()),
+    __param(1, (0, tsoa_1.Path)()),
+    __param(2, (0, tsoa_1.Body)()),
     __metadata("design:type", Function),
-    __metadata("design:paramtypes", [String, Object]),
+    __metadata("design:paramtypes", [Object, String, Object]),
     __metadata("design:returntype", Promise)
 ], PortofolioController.prototype, "renamePortofolio", null);
 __decorate([
-    (0, tsoa_1.Security)(constant_1.SECURITY_NAME.admin),
     (0, tsoa_1.Get)("/get_all_portofolio"),
+    __param(0, (0, tsoa_1.Request)()),
     __metadata("design:type", Function),
-    __metadata("design:paramtypes", []),
+    __metadata("design:paramtypes", [Object]),
     __metadata("design:returntype", Promise)
 ], PortofolioController.prototype, "getAllPortofolio", null);
 __decorate([
-    (0, tsoa_1.Security)(constant_1.SECURITY_NAME.profile),
     (0, tsoa_1.Get)("/get_portofolio/{id}"),
-    __param(0, (0, tsoa_1.Path)()),
+    __param(0, (0, tsoa_1.Request)()),
+    __param(1, (0, tsoa_1.Path)()),
     __metadata("design:type", Function),
-    __metadata("design:paramtypes", [String]),
+    __metadata("design:paramtypes", [Object, String]),
     __metadata("design:returntype", Promise)
 ], PortofolioController.prototype, "getPortofolio", null);
 __decorate([
-    (0, tsoa_1.Security)(constant_1.SECURITY_NAME.profile),
     (0, tsoa_1.Get)("/get_portofolio_details/{id}"),
-    __param(0, (0, tsoa_1.Path)()),
+    __param(0, (0, tsoa_1.Request)()),
+    __param(1, (0, tsoa_1.Path)()),
     __metadata("design:type", Function),
-    __metadata("design:paramtypes", [String]),
+    __metadata("design:paramtypes", [Object, String]),
     __metadata("design:returntype", Promise)
 ], PortofolioController.prototype, "getPortofolioDetails", null);
 __decorate([
-    (0, tsoa_1.Security)(constant_1.SECURITY_NAME.admin),
     (0, tsoa_1.Get)("/get_all_portofolios_details"),
+    __param(0, (0, tsoa_1.Request)()),
     __metadata("design:type", Function),
-    __metadata("design:paramtypes", []),
+    __metadata("design:paramtypes", [Object]),
     __metadata("design:returntype", Promise)
 ], PortofolioController.prototype, "getAllPortofoliosDetails", null);
 __decorate([
-    (0, tsoa_1.Security)(constant_1.SECURITY_NAME.admin),
     (0, tsoa_1.Delete)("/remove_portofolio/{id}"),
-    __param(0, (0, tsoa_1.Path)()),
+    __param(0, (0, tsoa_1.Request)()),
+    __param(1, (0, tsoa_1.Path)()),
     __metadata("design:type", Function),
-    __metadata("design:paramtypes", [String]),
+    __metadata("design:paramtypes", [Object, String]),
     __metadata("design:returntype", Promise)
 ], PortofolioController.prototype, "removePortofolio", null);
 __decorate([
-    (0, tsoa_1.Security)(constant_1.SECURITY_NAME.admin),
     (0, tsoa_1.Post)("/add_building_to_portofolio/{portofolioId}"),
-    __param(0, (0, tsoa_1.Path)()),
-    __param(1, (0, tsoa_1.Body)()),
+    __param(0, (0, tsoa_1.Request)()),
+    __param(1, (0, tsoa_1.Path)()),
+    __param(2, (0, tsoa_1.Body)()),
     __metadata("design:type", Function),
-    __metadata("design:paramtypes", [String, Object]),
+    __metadata("design:paramtypes", [Object, String, Object]),
     __metadata("design:returntype", Promise)
 ], PortofolioController.prototype, "addBuilding", null);
 __decorate([
-    (0, tsoa_1.Security)(constant_1.SECURITY_NAME.profile),
     (0, tsoa_1.Get)("/get_building_from_portofolio/{portofolioId}/{buildingId}"),
-    __param(0, (0, tsoa_1.Path)()),
+    __param(0, (0, tsoa_1.Request)()),
     __param(1, (0, tsoa_1.Path)()),
+    __param(2, (0, tsoa_1.Path)()),
     __metadata("design:type", Function),
-    __metadata("design:paramtypes", [String, String]),
+    __metadata("design:paramtypes", [Object, String, String]),
     __metadata("design:returntype", Promise)
 ], PortofolioController.prototype, "getBuilding", null);
 __decorate([
-    (0, tsoa_1.Security)(constant_1.SECURITY_NAME.profile),
     (0, tsoa_1.Get)("/get_all_buildings_from_portofolio/{portofolioId}"),
-    __param(0, (0, tsoa_1.Path)()),
+    __param(0, (0, tsoa_1.Request)()),
+    __param(1, (0, tsoa_1.Path)()),
     __metadata("design:type", Function),
-    __metadata("design:paramtypes", [String]),
+    __metadata("design:paramtypes", [Object, String]),
     __metadata("design:returntype", Promise)
 ], PortofolioController.prototype, "getAllBuilding", null);
 __decorate([
-    (0, tsoa_1.Security)(constant_1.SECURITY_NAME.admin),
     (0, tsoa_1.Delete)("/remove_building_from_portofolio/{portofolioId}"),
-    __param(0, (0, tsoa_1.Path)()),
-    __param(1, (0, tsoa_1.Body)()),
+    __param(0, (0, tsoa_1.Request)()),
+    __param(1, (0, tsoa_1.Path)()),
+    __param(2, (0, tsoa_1.Body)()),
     __metadata("design:type", Function),
-    __metadata("design:paramtypes", [String, Object]),
+    __metadata("design:paramtypes", [Object, String, Object]),
     __metadata("design:returntype", Promise)
 ], PortofolioController.prototype, "deleteBuildingFromPortofolio", null);
 __decorate([
-    (0, tsoa_1.Security)(constant_1.SECURITY_NAME.admin),
     (0, tsoa_1.Post)("/add_app_to_portofolio/{portofolioId}"),
-    __param(0, (0, tsoa_1.Path)()),
-    __param(1, (0, tsoa_1.Body)()),
+    __param(0, (0, tsoa_1.Request)()),
+    __param(1, (0, tsoa_1.Path)()),
+    __param(2, (0, tsoa_1.Body)()),
     __metadata("design:type", Function),
-    __metadata("design:paramtypes", [String, Object]),
+    __metadata("design:paramtypes", [Object, String, Object]),
     __metadata("design:returntype", Promise)
 ], PortofolioController.prototype, "addAppToPortofolio", null);
 __decorate([
-    (0, tsoa_1.Security)(constant_1.SECURITY_NAME.profile),
     (0, tsoa_1.Get)("/get_apps_from_portofolio/{portofolioId}"),
-    __param(0, (0, tsoa_1.Path)()),
+    __param(0, (0, tsoa_1.Request)()),
+    __param(1, (0, tsoa_1.Path)()),
     __metadata("design:type", Function),
-    __metadata("design:paramtypes", [String]),
+    __metadata("design:paramtypes", [Object, String]),
     __metadata("design:returntype", Promise)
 ], PortofolioController.prototype, "getPortofolioApps", null);
 __decorate([
-    (0, tsoa_1.Security)(constant_1.SECURITY_NAME.profile),
     (0, tsoa_1.Get)("/get_app_from_portofolio/{portofolioId}/{applicationId}"),
-    __param(0, (0, tsoa_1.Path)()),
+    __param(0, (0, tsoa_1.Request)()),
     __param(1, (0, tsoa_1.Path)()),
+    __param(2, (0, tsoa_1.Path)()),
     __metadata("design:type", Function),
-    __metadata("design:paramtypes", [String, String]),
+    __metadata("design:paramtypes", [Object, String, String]),
     __metadata("design:returntype", Promise)
 ], PortofolioController.prototype, "getAppFromPortofolio", null);
 __decorate([
-    (0, tsoa_1.Security)(constant_1.SECURITY_NAME.admin),
     (0, tsoa_1.Delete)("/remove_app_from_portofolio/{portofolioId}"),
-    __param(0, (0, tsoa_1.Path)()),
-    __param(1, (0, tsoa_1.Body)()),
+    __param(0, (0, tsoa_1.Request)()),
+    __param(1, (0, tsoa_1.Path)()),
+    __param(2, (0, tsoa_1.Body)()),
     __metadata("design:type", Function),
-    __metadata("design:paramtypes", [String, Object]),
+    __metadata("design:paramtypes", [Object, String, Object]),
     __metadata("design:returntype", Promise)
 ], PortofolioController.prototype, "removeAppFromPortofolio", null);
 __decorate([
-    (0, tsoa_1.Security)(constant_1.SECURITY_NAME.profile),
     (0, tsoa_1.Get)("/portofolio_has_app/{portofolioId}//{applicationId}"),
-    __param(0, (0, tsoa_1.Path)()),
+    __param(0, (0, tsoa_1.Request)()),
     __param(1, (0, tsoa_1.Path)()),
+    __param(2, (0, tsoa_1.Path)()),
     __metadata("design:type", Function),
-    __metadata("design:paramtypes", [String, String]),
+    __metadata("design:paramtypes", [Object, String, String]),
     __metadata("design:returntype", Promise)
 ], PortofolioController.prototype, "portofolioHasApp", null);
 __decorate([
-    (0, tsoa_1.Security)(constant_1.SECURITY_NAME.admin),
     (0, tsoa_1.Post)("/add_apiRoute_to_portofolio/{portofolioId}"),
-    __param(0, (0, tsoa_1.Path)()),
-    __param(1, (0, tsoa_1.Body)()),
+    __param(0, (0, tsoa_1.Request)()),
+    __param(1, (0, tsoa_1.Path)()),
+    __param(2, (0, tsoa_1.Body)()),
     __metadata("design:type", Function),
-    __metadata("design:paramtypes", [String, Object]),
+    __metadata("design:paramtypes", [Object, String, Object]),
     __metadata("design:returntype", Promise)
 ], PortofolioController.prototype, "addApiToPortofolio", null);
 __decorate([
-    (0, tsoa_1.Security)(constant_1.SECURITY_NAME.profile),
     (0, tsoa_1.Get)("/get_apisRoute_from_portofolio/{portofolioId}"),
-    __param(0, (0, tsoa_1.Path)()),
+    __param(0, (0, tsoa_1.Request)()),
+    __param(1, (0, tsoa_1.Path)()),
     __metadata("design:type", Function),
-    __metadata("design:paramtypes", [String]),
+    __metadata("design:paramtypes", [Object, String]),
     __metadata("design:returntype", Promise)
 ], PortofolioController.prototype, "getPortofolioApis", null);
 __decorate([
-    (0, tsoa_1.Security)(constant_1.SECURITY_NAME.profile),
     (0, tsoa_1.Get)("/get_apiRoute_from_portofolio/{portofolioId}/{apiId}"),
-    __param(0, (0, tsoa_1.Path)()),
+    __param(0, (0, tsoa_1.Request)()),
     __param(1, (0, tsoa_1.Path)()),
+    __param(2, (0, tsoa_1.Path)()),
     __metadata("design:type", Function),
-    __metadata("design:paramtypes", [String, String]),
+    __metadata("design:paramtypes", [Object, String, String]),
     __metadata("design:returntype", Promise)
 ], PortofolioController.prototype, "getApiFromPortofolio", null);
 __decorate([
-    (0, tsoa_1.Security)(constant_1.SECURITY_NAME.admin),
     (0, tsoa_1.Delete)("/remove_apiRoute_from_portofolio/{portofolioId}"),
-    __param(0, (0, tsoa_1.Path)()),
-    __param(1, (0, tsoa_1.Body)()),
+    __param(0, (0, tsoa_1.Request)()),
+    __param(1, (0, tsoa_1.Path)()),
+    __param(2, (0, tsoa_1.Body)()),
     __metadata("design:type", Function),
-    __metadata("design:paramtypes", [String, Object]),
+    __metadata("design:paramtypes", [Object, String, Object]),
     __metadata("design:returntype", Promise)
 ], PortofolioController.prototype, "removeApiFromPortofolio", null);
 __decorate([
-    (0, tsoa_1.Security)(constant_1.SECURITY_NAME.profile),
     (0, tsoa_1.Get)("/portofolio_has_apiRoute/{portofolioId}/{apiId}"),
-    __param(0, (0, tsoa_1.Path)()),
+    __param(0, (0, tsoa_1.Request)()),
     __param(1, (0, tsoa_1.Path)()),
+    __param(2, (0, tsoa_1.Path)()),
     __metadata("design:type", Function),
-    __metadata("design:paramtypes", [String, String]),
+    __metadata("design:paramtypes", [Object, String, String]),
     __metadata("design:returntype", Promise)
 ], PortofolioController.prototype, "portofolioHasApi", null);
 PortofolioController = __decorate([

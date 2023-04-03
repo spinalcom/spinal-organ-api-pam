@@ -83,8 +83,8 @@ const ADMIN_APPS = [
     {
         name: "Gestion de Portefeuilles",
         icon: "mdi-office-building-cog",
-        description: "Gestion de portefolio",
-        tags: ["PORTOFOLIO", "BUILDINGS"],
+        description: "Gestion de portefeuille de bâtiments",
+        tags: ["PORTEFEUILLES", "BÂTIMENTS"],
         categoryName: "Administation",
         groupName: "Administration",
         packageName: "spinal-env-pam-building-manager"
@@ -93,7 +93,7 @@ const ADMIN_APPS = [
         name: "Surveiller l'état du websocket",
         icon: "mdi-monitor-eye",
         description: "Surveiller l'etat et les logs du websocket",
-        tags: ["PAM", "WEB_SOCKET"],
+        tags: ["PAM", "WEB_SOCKET", "LOGS"],
         categoryName: "Administation",
         groupName: "Administration",
         packageName: "spinal-env-pam-websocket-state"

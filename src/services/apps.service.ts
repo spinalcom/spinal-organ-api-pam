@@ -24,7 +24,7 @@
 
 import { SpinalContext, SpinalGraphService, SpinalNode } from "spinal-env-viewer-graph-service";
 import { APP_LIST_CONTEXT_NAME, APP_LIST_CONTEXT_TYPE, APP_CATEGORY_TYPE, PTR_LST_TYPE, APP_GROUP_TYPE, APP_TYPE, CONTEXT_TO_APPS_GROUP, ADMIN_APPS_GROUP_NAME, ADMIN_APPS_GROUP_TYPE, APP_RELATION_NAME, ADMIN_APP_TYPE, PORTOFOLIO_APPS_GROUP_NAME, PORTOFOLIO_APPS_GROUP_TYPE, PORTOFOLIO_APP_TYPE, BUILDING_APPS_GROUP_NAME, BUILDING_APPS_GROUP_TYPE, BUILDING_APP_TYPE } from "../constant";
-import { IApp, IEditApp, IGroup } from "../interfaces";
+import { IApp } from "../interfaces";
 import { BuildingService } from "./building.service";
 import { configServiceInstance } from "./configFile.service";
 import { PortofolioService } from "./portofolio.service";
@@ -147,14 +147,15 @@ export class AppService {
   //////////////////////////////////
   //              UPDATES         //
   //////////////////////////////////
-  public async updateAdminApp(appId: string, newInfo: IEditApp): Promise<SpinalNode> {
+  public async updateAdminApp(appId: string, newInfo: IApp): Promise<SpinalNode> {
     const appNode = await this.getAdminApp(appId);
 
     if (appNode) {
       for (const key in newInfo) {
-        if (Object.prototype.hasOwnProperty.call(newInfo, key) && appNode.info[key]) {
+        if (Object.prototype.hasOwnProperty.call(newInfo, key) && appNode.info[key] || key === "documentationLink") {
           const element = newInfo[key];
-          appNode.info[key].set(element);
+          if (appNode.info[key]) appNode.info[key].set(element);
+          else appNode.info.add_attr({ [key]: element });
         }
       }
 
@@ -163,14 +164,15 @@ export class AppService {
 
   }
 
-  public async updatePortofolioApp(appId: string, newInfo: IEditApp): Promise<SpinalNode> {
+  public async updatePortofolioApp(appId: string, newInfo: IApp): Promise<SpinalNode> {
     const appNode = await this.getPortofolioApp(appId);
 
     if (appNode) {
       for (const key in newInfo) {
-        if (Object.prototype.hasOwnProperty.call(newInfo, key) && appNode.info[key]) {
+        if (Object.prototype.hasOwnProperty.call(newInfo, key) && appNode.info[key] || key === "documentationLink") {
           const element = newInfo[key];
-          appNode.info[key].set(element);
+          if (appNode.info[key]) appNode.info[key].set(element);
+          else appNode.info.add_attr({ [key]: element });
         }
       }
 
@@ -178,14 +180,15 @@ export class AppService {
     }
   }
 
-  public async updateBuildingApp(appId: string, newInfo: IEditApp): Promise<SpinalNode> {
+  public async updateBuildingApp(appId: string, newInfo: IApp): Promise<SpinalNode> {
     const appNode = await this.getBuildingApp(appId);
 
     if (appNode) {
       for (const key in newInfo) {
-        if (Object.prototype.hasOwnProperty.call(newInfo, key) && appNode.info[key]) {
+        if (Object.prototype.hasOwnProperty.call(newInfo, key) && appNode.info[key] || key === "documentationLink") {
           const element = newInfo[key];
-          appNode.info[key].set(element);
+          if (appNode.info[key]) appNode.info[key].set(element);
+          else appNode.info.add_attr({ [key]: element });
         }
       }
 

@@ -1,59 +1,60 @@
 import { IApiRoute, IApp, IBuilding, IEditBuilding } from "../interfaces";
 import { Controller } from "tsoa";
+import * as express from 'express';
 export declare class BuildingController extends Controller {
     constructor();
-    getBuildingById(id: string): Promise<IBuilding | {
+    getBuildingById(req: express.Request, id: string): Promise<IBuilding | {
         message: string;
     }>;
-    getAllBuildingsApps(): Promise<(IBuilding & {
+    getAllBuildingsApps(req: express.Request): Promise<(IBuilding & {
         apps: IApp;
     })[] | {
         message: string;
     }>;
-    deleteBuilding(id: string): Promise<any | {
+    deleteBuilding(req: express.Request, id: string): Promise<any | {
         message: string;
     }>;
-    editBuilding(id: string, data: IEditBuilding): Promise<IBuilding | {
+    editBuilding(req: express.Request, id: string, data: IEditBuilding): Promise<IBuilding | {
         message: string;
     }>;
-    addAppToBuilding(buildingId: string, data: {
+    addAppToBuilding(req: express.Request, buildingId: string, data: {
         applicationId: string[];
     }): Promise<IApp[] | {
         message: string;
     }>;
-    getAppsFromBuilding(buildingId: string): Promise<IApp[] | {
+    getAppsFromBuilding(req: express.Request, buildingId: string): Promise<IApp[] | {
         message: string;
     }>;
-    getAppFromBuilding(buildingId: string, appId: string): Promise<IApp | {
+    getAppFromBuilding(req: express.Request, buildingId: string, appId: string): Promise<IApp | {
         message: string;
     }>;
-    removeAppFromBuilding(buildingId: string, data: {
+    removeAppFromBuilding(req: express.Request, buildingId: string, data: {
         applicationId: string[];
     }): Promise<{
         message: string;
         ids?: string[];
     }>;
-    buildingHasApp(buildingId: string, appId: string): Promise<boolean | {
+    buildingHasApp(req: express.Request, buildingId: string, appId: string): Promise<boolean | {
         message: string;
     }>;
-    addApiToBuilding(buildingId: string, data: {
+    addApiToBuilding(req: express.Request, buildingId: string, data: {
         apisIds: string[];
     }): Promise<IApiRoute[] | {
         message: string;
     }>;
-    getApisFromBuilding(buildingId: string): Promise<IApiRoute[] | {
+    getApisFromBuilding(req: express.Request, buildingId: string): Promise<IApiRoute[] | {
         message: string;
     }>;
-    getApiFromBuilding(buildingId: string, apiId: string): Promise<IApiRoute | {
+    getApiFromBuilding(req: express.Request, buildingId: string, apiId: string): Promise<IApiRoute | {
         message: string;
     }>;
-    removeApisFromBuilding(buildingId: string, data: {
+    removeApisFromBuilding(req: express.Request, buildingId: string, data: {
         apisIds: string[];
     }): Promise<{
         message: string;
         ids?: string[];
     }>;
-    buildingHasApi(buildingId: string, apiId: string): Promise<boolean | {
+    buildingHasApi(req: express.Request, buildingId: string, apiId: string): Promise<boolean | {
         message: string;
     }>;
 }

@@ -50,14 +50,22 @@ function initExpress(conn) {
     return __awaiter(this, void 0, void 0, function* () {
         var app = express();
         app.use(morgan('dev'));
+        useApiMiddleWare(app);
         (0, bos_1.default)(app);
         (0, bos_1.default)(app, true);
         useHubProxy(app);
         useClientMiddleWare(app);
         initSwagger(app);
-        useApiMiddleWare(app);
         (0, routes_1.RegisterRoutes)(app);
         app.use(errorHandler);
+        // configureBosProxy(app);
+        // configureBosProxy(app, true);
+        // useHubProxy(app);
+        // useClientMiddleWare(app);
+        // initSwagger(app);
+        // useApiMiddleWare(app);
+        // RegisterRoutes(app);
+        // app.use(errorHandler);
         const server_port = process.env.SERVER_PORT || 2022;
         const server = app.listen(server_port, () => console.log(`api server listening on port ${server_port}!`));
         yield websocketLogs_1.default.getInstance().init(conn);
@@ -116,7 +124,6 @@ function useApiMiddleWare(app) {
     // });
 }
 function errorHandler(err, req, res, next) {
-    console.log(err);
     if (err instanceof tsoa_1.ValidateError) {
         return res.status(constant_1.HTTP_CODES.BAD_REQUEST).send(_formatValidationError(err));
     }

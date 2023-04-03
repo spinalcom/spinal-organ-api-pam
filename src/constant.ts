@@ -47,6 +47,7 @@ export const APP_PROFILE_CONTEXT_NAME = 'AppProfileList';
 export const USER_LIST_CONTEXT_NAME = 'UserList';
 export const ROLES_CONTEXT_NAME = 'RoleList';
 export const APP_LIST_CONTEXT_NAME = 'AppList';
+export const APP_CONNECTED_LIST_CONTEXT_NAME = 'AppConnectedList';
 export const BUILDING_CONTEXT_NAME = 'Buildings';
 export const DIGITALTWIN_CONTEXT_NAME = 'DigitalTwins';
 export const API_ROUTES_CONTEXT_NAME = 'ApiListContext';
@@ -71,6 +72,7 @@ export const APP_PROFILE_CONTEXT_TYPE = 'AppProfileList';
 export const USER_LIST_CONTEXT_TYPE = 'UserList';
 export const ROLES_CONTEXT_TYPE = 'RoleList';
 export const APP_LIST_CONTEXT_TYPE = 'AppList';
+export const APP_CONNECTED_LIST_CONTEXT_TYPE = 'AppConnectedList';
 export const BUILDING_CONTEXT_TYPE = 'BuildingContextList';
 export const DIGITALTWIN_CONTEXT_TYPE = 'DigitalTwinContext';
 export const API_ROUTES_CONTEXT_TYPE = 'ApiListContext';
@@ -196,7 +198,8 @@ export enum HTTP_CODES {
 
 export enum SECURITY_MESSAGES {
     INVALID_TOKEN = "Invalid or expired token !",
-    UNAUTHORIZED = "Unauthorized"
+    UNAUTHORIZED = "Unauthorized",
+    NO_PROFILE_FOUND = "No Profile found for this token"
 }
 
 

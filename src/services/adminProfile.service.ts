@@ -44,17 +44,19 @@ export class AdminProfileService {
         return this.instance;
     }
 
+    public get adminNode() {
+        return this._adminNode;
+    }
+
     public async init(context: SpinalContext): Promise<SpinalNode> {
         let node = await this.getAdminProfile(context);
 
-        if (node) {
-            this._adminNode = node;
-            return node;
+        if (!node) {
+            node = this._createAdminProfile();
+            await context.addChildInContext(node, CONTEXT_TO_USER_PROFILE_RELATION_NAME, PTR_LST_TYPE, context);
         }
 
-        node = this._createAdminProfile();
         this._adminNode = node;
-        await context.addChildInContext(node, CONTEXT_TO_USER_PROFILE_RELATION_NAME, PTR_LST_TYPE, context);
 
         await this.syncAdminProfile();
         return node;

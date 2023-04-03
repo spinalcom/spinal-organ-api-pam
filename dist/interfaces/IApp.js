@@ -23,4 +23,15 @@
  * <http://resources.spinalcom.com/licenses.pdf>.
  */
 Object.defineProperty(exports, "__esModule", { value: true });
+// export interface IEditApp {
+//   name?: string;
+//   icon?: string;
+//   description?: string;
+//   tags?: string[];
+//   categoryName?: string;
+//   groupName?: string;
+//   isExternalApp?: boolean;
+//   link?: string;
+//   [key: string]: any;
+// }
 //# sourceMappingURL=IApp.js.map

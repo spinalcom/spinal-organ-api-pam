@@ -22,7 +22,7 @@
  * <http://resources.spinalcom.com/licenses.pdf>.
  */
 
-import { Lst, Choice, spinalCore } from "spinal-core-connectorjs";
+import { Lst, Choice, spinalCore, Model } from "spinal-core-connectorjs";
 import * as path from "path";
 
 const fileName = "logs_websocket"
@@ -32,12 +32,19 @@ export enum logTypes {
     Normal = "Normal"
 }
 
+interface IBuilding {
+    name: string;
+    id: string;
+    [key: string]: any;
+}
+
 export default class WebsocketLogs {
     private static _instance: WebsocketLogs;
     private _websocket: WebSocketState;
     private _lastSendTime: number = Date.now();
     private _alertTime: number = 60 * 1000;
-    private timeoutId: any;
+    private timeoutIds: { [key: string]: any } = {};
+    private
 
     private constructor() { }
 
@@ -54,48 +61,62 @@ export default class WebsocketLogs {
     }
 
 
-    public getSocketLogs() {
-        return {
-            state: this._websocket.state.get(),
-            logs: this._websocket.logs?.get() || []
+    public getSocketLogs(buildingId?: string) {
+        if (buildingId) return this._getLogInfo(this._websocket[buildingId])
+
+        const res = [];
+
+        for (const key in this._websocket) {
+            const element = this._websocket[key];
+            res.push(this._getLogInfo(element));
         }
+
+        return res;
     }
 
 
-    public webSocketSendData(serverRestart: boolean = false) {
+    public webSocketSendData(building: IBuilding, serverRestart: boolean = false) {
         this._lastSendTime = Date.now();
-        clearTimeout(this.timeoutId);
-        if (this._websocket.state.get() === logTypes.Alarm) {
-            const message = `websocket is now online [${serverRestart ? "restart server" : "websocket send data"}]`;
-            console.log(message)
-            this._websocket.state.set(logTypes.Normal);
-            this._addLogs(message, logTypes.Normal);
+        clearTimeout(this.timeoutIds[building.id]);
+
+        if (!this._websocket[building.id]) {
+            this._websocket.add_attr({ [building.id]: new WebSocketState(building) });
         }
-        this._startTimer();
+
+        const data = this._websocket[building.id];
+
+        if (this._websocket[building.id].state.get() === logTypes.Alarm) {
+            const message = `websocket is now online [${serverRestart ? "restart server" : "websocket sends data"}]`;
+            console.log([building.name], message);
+            data.state.set(logTypes.Normal);
+            this._addLogs(building.id, message, logTypes.Normal);
+        }
+
+        this._startTimer(building.id, building.name);
     }
 
 
-    private _startTimer() {
-        this.timeoutId = setTimeout(() => {
-            this._createAlert();
-            this._startTimer();
+    private _startTimer(buildingId: string, buildingName: string) {
+        this.timeoutIds[buildingId] = setTimeout(() => {
+            this._createAlert(buildingId, buildingName);
+            this._startTimer(buildingId, buildingName);
         }, this._alertTime);
     }
 
-    private _createAlert() {
+    private _createAlert(buildingId: string, buildingName: string) {
 
-        if (this._websocket.state.get() === logTypes.Normal) {
-            const message = `websocket don't send data since ${new Date(this._lastSendTime).toString()}`
-            console.log(message)
-            this._websocket.state.set(logTypes.Alarm);
-            this._addLogs(message, logTypes.Alarm);
+        if (this._websocket[buildingId].state.get() === logTypes.Normal) {
+            const message = `websocket doesn't send data since ${new Date(this._lastSendTime).toString()}`
+            console.log([buildingName], message)
+            this._websocket[buildingId].state.set(logTypes.Alarm);
+            this._addLogs(buildingId, message, logTypes.Alarm);
         }
     }
 
 
-    private _addLogs(message: string, logType: logTypes) {
+    private _addLogs(buildingId: string, message: string, logType: logTypes) {
         const newLog = new LogModel(message, logType);
-        this._websocket.logs.push(newLog);
+        this._websocket[buildingId].logs.push(newLog);
     }
 
 
@@ -110,10 +131,18 @@ export default class WebsocketLogs {
         });
     }
 
-    private _createFile(directory: spinal.Directory, fileName: string): WebSocketState {
-        const data = new WebSocketState();
+    private _createFile(directory: spinal.Directory, fileName: string): spinal.Model {
+        const data = new Model();
         directory.force_add_file(fileName, data, { model_type: "logs" });
         return data;
+    }
+
+    private _getLogInfo(websocketState: WebSocketState) {
+        return {
+            building: websocketState.building?.get(),
+            state: websocketState.state?.get(),
+            logs: websocketState.logs?.get() || []
+        }
     }
 
 
@@ -122,11 +151,14 @@ export default class WebsocketLogs {
 export { WebsocketLogs }
 
 
-class WebSocketState extends spinal.Model {
-    constructor() {
+
+
+class WebSocketState extends Model {
+    constructor(building: IBuilding) {
         super();
         this.add_attr({
             id: Date.now(),
+            building: building,
             state: new Choice(0, [logTypes.Normal, logTypes.Alarm]),
             logs: new Lst()
         })
@@ -134,7 +166,7 @@ class WebSocketState extends spinal.Model {
 }
 
 
-class LogModel extends spinal.Model {
+class LogModel extends Model {
     constructor(message: string, type: string = logTypes.Alarm) {
         super();
         this.add_attr({

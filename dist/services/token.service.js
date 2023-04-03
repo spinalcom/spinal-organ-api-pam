@@ -130,6 +130,14 @@ class TokenService {
             return data;
         });
     }
+    getProfileIdByToken(token) {
+        return __awaiter(this, void 0, void 0, function* () {
+            const data = yield this.tokenIsValid(token);
+            if (data)
+                return data.profile.profileId || data.profile.userProfileBosConfigId || data.profile.appProfileBosConfigId;
+            return;
+        });
+    }
     //////////////////////////////////////////////////
     //                        PRIVATE               //
     //////////////////////////////////////////////////

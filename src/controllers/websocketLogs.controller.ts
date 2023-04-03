@@ -21,10 +21,12 @@
  * with this file. If not, see
  * <http://resources.spinalcom.com/licenses.pdf>.
  */
-import { Route, Get, Post, Delete, Body, Controller, Tags, Put, Path, UploadedFile, Security } from "tsoa";
-import { HTTP_CODES, SECURITY_NAME } from "../constant";
+import { Route, Get, Post, Delete, Body, Controller, Tags, Put, Path, UploadedFile, Security, Request } from "tsoa";
+import { HTTP_CODES, SECURITY_MESSAGES, SECURITY_NAME } from "../constant";
 import WebsocketLogs from "../proxy/websocket/websocketLogs";
-
+import * as express from "express";
+import { checkIfItIsAdmin } from "../security/authentication";
+import { AuthError } from "../security/AuthError";
 @Route("/api/v1/pam")
 @Tags("Websocket")
 export class WebsocketLogsController extends Controller {
@@ -34,13 +36,31 @@ export class WebsocketLogsController extends Controller {
     }
 
     @Security(SECURITY_NAME.admin)
-    @Get("/websocket/get_logs")
-    public async getWebsocketLogs(): Promise<{ state: string; logs: any; } | { message?: string }> {
+    @Get("/websocket/get_logs/{buildingId}")
+    public async getWebsocketLogs(@Request() req: express.Request, @Path() buildingId: string): Promise<{ state: string; logs: any; } | { state: string; logs: any; }[] | { message?: string }> {
         try {
+            const isAdmin = await checkIfItIsAdmin(req);
+            if (!isAdmin) throw new AuthError(SECURITY_MESSAGES.UNAUTHORIZED);
+
+            this.setStatus(HTTP_CODES.OK);
+            return WebsocketLogs.getInstance().getSocketLogs(buildingId);
+        } catch (error) {
+            this.setStatus(error.code || HTTP_CODES.INTERNAL_ERROR);
+            return { message: error.message };
+        }
+    }
+
+    @Security(SECURITY_NAME.admin)
+    @Get("/websocket/get_logs")
+    public async getAllWebsocketLogs(@Request() req: express.Request): Promise<{ state: string; logs: any; } | { state: string; logs: any; }[] | { message?: string }> {
+        try {
+            const isAdmin = await checkIfItIsAdmin(req);
+            if (!isAdmin) throw new AuthError(SECURITY_MESSAGES.UNAUTHORIZED);
+
             this.setStatus(HTTP_CODES.OK);
             return WebsocketLogs.getInstance().getSocketLogs();
         } catch (error) {
-            this.setStatus(HTTP_CODES.INTERNAL_ERROR);
+            this.setStatus(error.code || HTTP_CODES.INTERNAL_ERROR);
             return { message: error.message };
         }
     }

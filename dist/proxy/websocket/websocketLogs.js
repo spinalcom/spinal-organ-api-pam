@@ -36,6 +36,7 @@ class WebsocketLogs {
     constructor() {
         this._lastSendTime = Date.now();
         this._alertTime = 60 * 1000;
+        this.timeoutIds = {};
     }
     static getInstance() {
         if (!this._instance)
@@ -48,41 +49,48 @@ class WebsocketLogs {
             return this._websocket;
         });
     }
-    getSocketLogs() {
-        var _a;
-        return {
-            state: this._websocket.state.get(),
-            logs: ((_a = this._websocket.logs) === null || _a === void 0 ? void 0 : _a.get()) || []
-        };
-    }
-    webSocketSendData(serverRestart = false) {
-        this._lastSendTime = Date.now();
-        clearTimeout(this.timeoutId);
-        if (this._websocket.state.get() === logTypes.Alarm) {
-            const message = `websocket is now online [${serverRestart ? "restart server" : "websocket send data"}]`;
-            console.log(message);
-            this._websocket.state.set(logTypes.Normal);
-            this._addLogs(message, logTypes.Normal);
+    getSocketLogs(buildingId) {
+        if (buildingId)
+            return this._getLogInfo(this._websocket[buildingId]);
+        const res = [];
+        for (const key in this._websocket) {
+            const element = this._websocket[key];
+            res.push(this._getLogInfo(element));
         }
-        this._startTimer();
+        return res;
     }
-    _startTimer() {
-        this.timeoutId = setTimeout(() => {
-            this._createAlert();
-            this._startTimer();
+    webSocketSendData(building, serverRestart = false) {
+        this._lastSendTime = Date.now();
+        clearTimeout(this.timeoutIds[building.id]);
+        if (!this._websocket[building.id]) {
+            this._websocket.add_attr({ [building.id]: new WebSocketState(building) });
+        }
+        const data = this._websocket[building.id];
+        if (this._websocket[building.id].state.get() === logTypes.Alarm) {
+            const message = `websocket is now online [${serverRestart ? "restart server" : "websocket sends data"}]`;
+            console.log([building.name], message);
+            data.state.set(logTypes.Normal);
+            this._addLogs(building.id, message, logTypes.Normal);
+        }
+        this._startTimer(building.id, building.name);
+    }
+    _startTimer(buildingId, buildingName) {
+        this.timeoutIds[buildingId] = setTimeout(() => {
+            this._createAlert(buildingId, buildingName);
+            this._startTimer(buildingId, buildingName);
         }, this._alertTime);
     }
-    _createAlert() {
-        if (this._websocket.state.get() === logTypes.Normal) {
-            const message = `websocket don't send data since ${new Date(this._lastSendTime).toString()}`;
-            console.log(message);
-            this._websocket.state.set(logTypes.Alarm);
-            this._addLogs(message, logTypes.Alarm);
+    _createAlert(buildingId, buildingName) {
+        if (this._websocket[buildingId].state.get() === logTypes.Normal) {
+            const message = `websocket doesn't send data since ${new Date(this._lastSendTime).toString()}`;
+            console.log([buildingName], message);
+            this._websocket[buildingId].state.set(logTypes.Alarm);
+            this._addLogs(buildingId, message, logTypes.Alarm);
         }
     }
-    _addLogs(message, logType) {
+    _addLogs(buildingId, message, logType) {
         const newLog = new LogModel(message, logType);
-        this._websocket.logs.push(newLog);
+        this._websocket[buildingId].logs.push(newLog);
     }
     _loadOrMakeConfigFile(connect) {
         return new Promise((resolve, reject) => {
@@ -92,24 +100,33 @@ class WebsocketLogs {
         });
     }
     _createFile(directory, fileName) {
-        const data = new WebSocketState();
+        const data = new spinal_core_connectorjs_1.Model();
         directory.force_add_file(fileName, data, { model_type: "logs" });
         return data;
+    }
+    _getLogInfo(websocketState) {
+        var _a, _b, _c;
+        return {
+            building: (_a = websocketState.building) === null || _a === void 0 ? void 0 : _a.get(),
+            state: (_b = websocketState.state) === null || _b === void 0 ? void 0 : _b.get(),
+            logs: ((_c = websocketState.logs) === null || _c === void 0 ? void 0 : _c.get()) || []
+        };
     }
 }
 exports.default = WebsocketLogs;
 exports.WebsocketLogs = WebsocketLogs;
-class WebSocketState extends spinal.Model {
-    constructor() {
+class WebSocketState extends spinal_core_connectorjs_1.Model {
+    constructor(building) {
         super();
         this.add_attr({
             id: Date.now(),
+            building: building,
             state: new spinal_core_connectorjs_1.Choice(0, [logTypes.Normal, logTypes.Alarm]),
             logs: new spinal_core_connectorjs_1.Lst()
         });
     }
 }
-class LogModel extends spinal.Model {
+class LogModel extends spinal_core_connectorjs_1.Model {
     constructor(message, type = logTypes.Alarm) {
         super();
         this.add_attr({

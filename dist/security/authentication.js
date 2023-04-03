@@ -32,15 +32,66 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
     });
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.expressAuthentication = void 0;
+exports.checkAndGetTokenInfo = exports.getProfileNode = exports.getProfileId = exports.checkIfItIsAdmin = exports.expressAuthentication = void 0;
 const constant_1 = require("../constant");
 const services_1 = require("../services");
 const utils_1 = require("./utils");
 const AuthError_1 = require("./AuthError");
+const adminProfile_service_1 = require("../services/adminProfile.service");
 function expressAuthentication(request, securityName, scopes) {
     return __awaiter(this, void 0, void 0, function* () {
         if (securityName === constant_1.SECURITY_NAME.all)
             return;
+        const tokenInfo = yield checkAndGetTokenInfo(request);
+        // get profile Node
+        let profileId = tokenInfo.profile.profileId || tokenInfo.profile.userProfileBosConfigId || tokenInfo.profile.appProfileBosConfigId;
+        if (!profileId)
+            throw new AuthError_1.AuthError(constant_1.SECURITY_MESSAGES.NO_PROFILE_FOUND);
+        let profileNode = (yield services_1.AppProfileService.getInstance()._getAppProfileNode(profileId)) || (yield services_1.UserProfileService.getInstance()._getUserProfileNode(profileId));
+        if (!profileNode)
+            throw new AuthError_1.AuthError(constant_1.SECURITY_MESSAGES.NO_PROFILE_FOUND);
+        // Check if profile has access to api route
+        if (profileNode.info.type.get() === constant_1.APP_PROFILE_TYPE) {
+            const apiUrl = request.url;
+            const method = request.method;
+            const isAuthorized = yield (0, utils_1.profileHasAccessToApi)(profileNode, apiUrl, method);
+            if (!isAuthorized)
+                throw new AuthError_1.AuthError(constant_1.SECURITY_MESSAGES.UNAUTHORIZED);
+        }
+        request.profileId = profileId;
+        return tokenInfo;
+    });
+}
+exports.expressAuthentication = expressAuthentication;
+function checkIfItIsAdmin(request) {
+    return __awaiter(this, void 0, void 0, function* () {
+        let profileId = yield getProfileId(request);
+        return adminProfile_service_1.AdminProfileService.getInstance().adminNode.getId().get() === profileId;
+    });
+}
+exports.checkIfItIsAdmin = checkIfItIsAdmin;
+function getProfileId(request) {
+    return __awaiter(this, void 0, void 0, function* () {
+        const tokenInfo = yield checkAndGetTokenInfo(request);
+        let profileId = tokenInfo.profile.profileId || tokenInfo.profile.userProfileBosConfigId || tokenInfo.profile.appProfileBosConfigId;
+        if (!profileId)
+            throw new AuthError_1.AuthError(constant_1.SECURITY_MESSAGES.NO_PROFILE_FOUND);
+        return profileId;
+    });
+}
+exports.getProfileId = getProfileId;
+function getProfileNode(req) {
+    return __awaiter(this, void 0, void 0, function* () {
+        const tokenInfo = yield checkAndGetTokenInfo(req);
+        const profileId = tokenInfo.profile.profileId || tokenInfo.profile.userProfileBosConfigId;
+        const isApp = tokenInfo.profile.profileId || tokenInfo.profile.userProfileBosConfigId ? false : true;
+        return isApp ? services_1.AppProfileService.getInstance()._getAppProfileNode(profileId) : services_1.UserProfileService.getInstance()._getUserProfileNode(profileId);
+    });
+}
+exports.getProfileNode = getProfileNode;
+function checkAndGetTokenInfo(request) {
+    return __awaiter(this, void 0, void 0, function* () {
+        // check token validity
         const token = (0, utils_1.getToken)(request);
         if (!token)
             throw new AuthError_1.AuthError(constant_1.SECURITY_MESSAGES.INVALID_TOKEN);
@@ -48,16 +99,8 @@ function expressAuthentication(request, securityName, scopes) {
         const tokenInfo = yield tokenInstance.tokenIsValid(token);
         if (!tokenInfo)
             throw new AuthError_1.AuthError(constant_1.SECURITY_MESSAGES.INVALID_TOKEN);
-        // if (tokenInfo.userInfo?.type == USER_TYPES.ADMIN) {
-        //     return tokenInfo;
-        // }
-        const profileId = tokenInfo.profile.profileId || tokenInfo.profile.appProfileBosConfigId || tokenInfo.profile.userProfileBosConfigId;
-        // if (securityName === SECURITY_NAME.profile) {
-        //     const hasAccess = await checkIfProfileHasAccess(request, profileId);
-        //     if (!hasAccess) throw new AuthError(SECURITY_MESSAGES.UNAUTHORIZED);
-        // }
         return tokenInfo;
     });
 }
-exports.expressAuthentication = expressAuthentication;
+exports.checkAndGetTokenInfo = checkAndGetTokenInfo;
 //# sourceMappingURL=authentication.js.map

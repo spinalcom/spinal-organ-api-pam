@@ -418,6 +418,11 @@ export class AppProfileService {
     })
   }
 
+  public async profileHasAccessToApi(appProfile: string | SpinalNode, apiId: SpinalNode): Promise<SpinalNode> {
+    const profile = appProfile instanceof SpinalNode ? appProfile : await this._getAppProfileNode(appProfile);
+    return authorizationInstance.profileHasAccess(profile, apiId);
+  }
+
   ///////////////////////////////////////////////////////////
   ///                       PRIVATES                      //
   //////////////////////////////////////////////////////////
@@ -489,7 +494,7 @@ export class AppProfileService {
     return node;
   }
 
-  private async _getAppProfileNode(appProfileId: string): Promise<SpinalNode> {
+  public async _getAppProfileNode(appProfileId: string): Promise<SpinalNode> {
     const node = SpinalGraphService.getRealNode(appProfileId);
     if (node) return node;
 

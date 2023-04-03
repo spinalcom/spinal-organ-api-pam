@@ -45,14 +45,13 @@ class WebSocketServer {
     constructor(server) {
         this._clientToServer = new Map();
         this._serverToClient = new Map();
-        this._reInitLogData = lodash.debounce((restart) => logInstance.webSocketSendData(restart), 2000);
+        this._reInitLogData = lodash.debounce((building, restart) => logInstance.webSocketSendData(building, restart), 2000);
         this._io = new socket_io_1.Server(server);
     }
     init() {
         return __awaiter(this, void 0, void 0, function* () {
             this._initNameSpace();
             this._initMiddleware();
-            this._reInitLogData(true);
         });
     }
     _initNameSpace() {
@@ -119,8 +118,9 @@ class WebSocketServer {
     }
     _createClient(building, socket, token, sessionId) {
         return new Promise((resolve, reject) => {
+            var _a;
             const api_url = building.info.apiUrl.get();
-            const client = SocketClient(api_url, { auth: { token, sessionId }, transports: ["websocket"] });
+            const client = SocketClient(api_url, { auth: { token, sessionId, building: (_a = building === null || building === void 0 ? void 0 : building.info) === null || _a === void 0 ? void 0 : _a.get() }, transports: ["websocket"] });
             client.on('session_created', (id) => {
                 socket.emit("session_created", id);
                 client["sessionId"] = id;
@@ -142,7 +142,7 @@ class WebSocketServer {
             if (emitter) {
                 console.log(`receive "${eventName}" request from bos and send it to client [${emitter.sessionId}]`, data);
                 // console.log(`receive request from bos and send it to client [${emitter.sessionId}]`);
-                this._reInitLogData();
+                this._reInitLogData(pamToBosSocket.auth.building);
                 emitter.emit(eventName, ...data);
             }
         });

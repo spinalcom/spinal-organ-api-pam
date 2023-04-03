@@ -33,6 +33,7 @@ export declare class AppProfileService {
     getAuthorizedBosApis(profile: SpinalNode | string, portofolioId: string, bosId: string): Promise<SpinalNode[]>;
     getBosAuthStructure(profile: string | SpinalNode, portofolioId: string): Promise<IBosAuthRes[]>;
     getAllAuthorizedBos(profile: string | SpinalNode): Promise<SpinalNode[]>;
+    profileHasAccessToApi(appProfile: string | SpinalNode, apiId: SpinalNode): Promise<SpinalNode>;
     private _authorizeIPortofolioAuth;
     private _unauthorizeIPortofolioAuth;
     private _authorizeIBosAuth;
@@ -40,6 +41,6 @@ export declare class AppProfileService {
     _getAppProfileNodeGraph(profileId: string): Promise<SpinalGraph | void>;
     private _findChildInContext;
     private _createAppProfileNode;
-    private _getAppProfileNode;
+    _getAppProfileNode(appProfileId: string): Promise<SpinalNode>;
     private _renameProfile;
 }

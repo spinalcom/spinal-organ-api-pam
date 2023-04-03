@@ -1,3 +1,4 @@
+import * as express from "express";
 import { HTTP_CODES } from "../constant";
 import { Controller } from "tsoa";
 import { IAdmin, IAdminCredential, IAppCredential, IApplicationToken, IOAuth2Credential, IPamCredential, IPamInfo, IUserCredential, IUserToken } from "../interfaces";
@@ -6,22 +7,22 @@ export declare class AuthController extends Controller {
     authenticate(credential: IUserCredential | IAppCredential | IOAuth2Credential): Promise<string | IApplicationToken | IUserToken | {
         message: string;
     }>;
-    registerToAdmin(data: {
+    registerToAdmin(req: express.Request, data: {
         pamInfo: IPamInfo;
         adminInfo: IAdmin;
     }): Promise<IPamCredential | {
         message: string;
     }>;
-    getBosToAdminCredential(): Promise<IPamCredential | {
+    getBosToAdminCredential(req: express.Request): Promise<IPamCredential | {
         message: string;
     }>;
-    deleteAdmin(): Promise<{
+    deleteAdmin(req: express.Request): Promise<{
         message: string;
     }>;
-    getAdminCredential(): Promise<IAdminCredential | {
+    getAdminCredential(req: express.Request): Promise<IAdminCredential | {
         message: string;
     }>;
-    syncDataToAdmin(): Promise<{
+    syncDataToAdmin(req: express.Request): Promise<{
         message: string;
     }>;
     tokenIsValid(data: {

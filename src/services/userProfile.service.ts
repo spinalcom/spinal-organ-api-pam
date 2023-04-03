@@ -503,7 +503,7 @@ export class UserProfileService {
     return node;
   }
 
-  private async _getUserProfileNode(userProfileId: string): Promise<SpinalNode> {
+  public async _getUserProfileNode(userProfileId: string): Promise<SpinalNode> {
     const node = SpinalGraphService.getRealNode(userProfileId);
     if (node) return node;
 

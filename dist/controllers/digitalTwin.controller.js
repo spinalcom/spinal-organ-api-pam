@@ -45,17 +45,24 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.DigitaltwinController = void 0;
+const express = require("express");
 const services_1 = require("../services");
 const constant_1 = require("../constant");
 const tsoa_1 = require("tsoa");
+const authentication_1 = require("../security/authentication");
+const AuthError_1 = require("../security/AuthError");
 const serviceInstance = services_1.DigitalTwinService.getInstance();
 let DigitaltwinController = class DigitaltwinController extends tsoa_1.Controller {
     constructor() {
         super();
     }
-    createDigitalTwin(data) {
+    // @Security(SECURITY_NAME.admin)
+    createDigitalTwin(req, data) {
         return __awaiter(this, void 0, void 0, function* () {
             try {
+                const isAdmin = yield (0, authentication_1.checkIfItIsAdmin)(req);
+                if (!isAdmin)
+                    throw new AuthError_1.AuthError(constant_1.SECURITY_MESSAGES.UNAUTHORIZED);
                 if (!data.name || !data.name.trim()) {
                     this.setStatus(constant_1.HTTP_CODES.BAD_REQUEST);
                     return { message: "The file name is mandatory" };
@@ -65,18 +72,18 @@ let DigitaltwinController = class DigitaltwinController extends tsoa_1.Controlle
                 return graph.getId().get();
             }
             catch (error) {
-                this.setStatus(constant_1.HTTP_CODES.INTERNAL_ERROR);
+                this.setStatus(error.code || constant_1.HTTP_CODES.INTERNAL_ERROR);
                 return { message: error.message };
             }
         });
     }
 };
 __decorate([
-    (0, tsoa_1.Security)(constant_1.SECURITY_NAME.admin),
     (0, tsoa_1.Post)("/create_digitaltwin"),
-    __param(0, (0, tsoa_1.Body)()),
+    __param(0, (0, tsoa_1.Request)()),
+    __param(1, (0, tsoa_1.Body)()),
     __metadata("design:type", Function),
-    __metadata("design:paramtypes", [Object]),
+    __metadata("design:paramtypes", [Object, Object]),
     __metadata("design:returntype", Promise)
 ], DigitaltwinController.prototype, "createDigitalTwin", null);
 DigitaltwinController = __decorate([

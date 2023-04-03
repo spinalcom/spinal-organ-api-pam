@@ -32,48 +32,54 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
     });
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.checkIfProfileHasAccess = exports.getToken = void 0;
+exports.profileHasAccessToApi = exports.getToken = void 0;
 const appProfile_service_1 = require("../services/appProfile.service");
-const authorization_service_1 = require("../services/authorization.service");
-const userProfile_service_1 = require("../services/userProfile.service");
+const services_1 = require("../services");
+const constant_1 = require("../constant");
 function getToken(request) {
+    var _a, _b;
     const header = request.headers.authorization || request.headers.Authorization;
     if (header) {
         const [, token] = header.split(" ");
         if (token)
             return token;
     }
-    return request.body.token || request.query.token || request.headers["x-access-token"];
+    return ((_a = request.body) === null || _a === void 0 ? void 0 : _a.token) || ((_b = request.query) === null || _b === void 0 ? void 0 : _b.token) || request.headers["x-access-token"];
 }
 exports.getToken = getToken;
-function getProfileNode(profileId) {
+function profileHasAccessToApi(profile, apiUrl, method) {
     return __awaiter(this, void 0, void 0, function* () {
-        let profile = yield userProfile_service_1.UserProfileService.getInstance().getUserProfile(profileId);
-        if (profile)
-            return profile.node;
-        profile = yield appProfile_service_1.AppProfileService.getInstance().getAppProfile(profileId);
-        if (profile)
-            return profile.node;
+        let parentType = constant_1.PORTOFOLIO_API_GROUP_TYPE;
+        if (apiUrl.match(`(${constant_1.BOS_BASE_URI_V1}|${constant_1.BOS_BASE_URI_V1_2}|${constant_1.BOS_BASE_URI_V2})`))
+            parentType = constant_1.BUILDING_API_GROUP_TYPE;
+        const api = yield services_1.APIService.getInstance().getApiRouteByRoute({ route: apiUrl, method }, parentType);
+        ;
+        if (!api)
+            return;
+        const hasAccess = yield appProfile_service_1.AppProfileService.getInstance().profileHasAccessToApi(profile, api);
+        if (hasAccess)
+            return api;
     });
 }
-function checkIfProfileHasAccess(req, profileId) {
-    return __awaiter(this, void 0, void 0, function* () {
-        const params = req.params;
-        const profile = yield getProfileNode(profileId);
-        if (!profile)
-            return false;
-        for (const key in params) {
-            if (Object.prototype.hasOwnProperty.call(params, key)) {
-                const element = params[key];
-                if (element === profileId)
-                    continue;
-                const access = yield authorization_service_1.authorizationInstance.profileHasAccess(profile, element);
-                if (!access)
-                    return false;
-            }
-        }
-        return true;
-    });
-}
-exports.checkIfProfileHasAccess = checkIfProfileHasAccess;
+exports.profileHasAccessToApi = profileHasAccessToApi;
+// async function getProfileNode(profileId: string): Promise<SpinalNode> {
+//     let profile = await UserProfileService.getInstance().getUserProfile(profileId);
+//     if (profile) return profile.node;
+//     profile = await AppProfileService.getInstance().getAppProfile(profileId);
+//     if (profile) return profile.node;
+// }
+// export async function checkIfProfileHasAccess(req: Request, profileId: string): Promise<boolean> {
+//     // const params = (<any>req).params;
+//     // const profile = await getProfileNode(profileId);
+//     // if (!profile) return false;
+//     // for (const key in params) {
+//     //     if (Object.prototype.hasOwnProperty.call(params, key)) {
+//     //         const element = params[key];
+//     //         if (element === profileId) continue;
+//     //         const access = await authorizationInstance.profileHasAccess(profile, element);
+//     //         if (!access) return false
+//     //     }
+//     // }
+//     return true;
+// }
 //# sourceMappingURL=utils.js.map

@@ -12,5 +12,6 @@ export declare class TokenService {
     getTokenData(token: string): Promise<any>;
     deleteToken(token: SpinalNode | string): Promise<boolean>;
     tokenIsValid(token: string): Promise<IUserToken | IApplicationToken>;
+    getProfileIdByToken(token: string): Promise<string>;
     private _generateString;
 }

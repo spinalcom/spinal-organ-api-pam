@@ -21,12 +21,15 @@
  * with this file. If not, see
  * <http://resources.spinalcom.com/licenses.pdf>.
  */
-
-import { HTTP_CODES, SECURITY_NAME } from "../constant";
+import * as express from 'express';
+import { HTTP_CODES, SECURITY_MESSAGES, SECURITY_NAME } from "../constant";
 import { IBosAuth, IBosData, IPortofolioData, IProfile, IProfileData, IProfileEdit } from "../interfaces";
 import { UserProfileService } from "../services";
-import { Route, Tags, Controller, Post, Get, Put, Delete, Body, Path, Security } from "tsoa";
+import { Route, Tags, Controller, Post, Get, Put, Delete, Body, Path, Security, Request } from "tsoa";
 import { _formatProfile, _getNodeListInfo, _formatProfileKeys, _formatAuthorizationData, _formatPortofolioAuthRes, _formatBosAuthRes } from '../utils/profileUtils'
+import { AuthError } from '../security/AuthError';
+import { checkIfItIsAdmin, getProfileId } from '../security/authentication';
+import { AdminProfileService } from '../services/adminProfile.service';
 const serviceInstance = UserProfileService.getInstance();
 
 @Route("/api/v1/pam/user_profile")
@@ -37,10 +40,12 @@ export class UserProfileController extends Controller {
         super();
     }
 
-    @Security(SECURITY_NAME.admin)
+    // @Security(SECURITY_NAME.admin)
     @Post("/create_profile")
-    public async createUserProfile(@Body() data: IProfile): Promise<IProfileData | { message: string }> {
+    public async createUserProfile(@Request() req: express.Request, @Body() data: IProfile): Promise<IProfileData | { message: string }> {
         try {
+            const isAdmin = await checkIfItIsAdmin(req);
+            if (!isAdmin) throw new AuthError(SECURITY_MESSAGES.UNAUTHORIZED);
 
             if (!data.name) {
                 this.setStatus(HTTP_CODES.BAD_REQUEST)
@@ -52,15 +57,20 @@ export class UserProfileController extends Controller {
             return _formatProfile(profile);
 
         } catch (error) {
-            this.setStatus(HTTP_CODES.INTERNAL_ERROR);
+            this.setStatus(error.code || HTTP_CODES.INTERNAL_ERROR);
             return { message: error.message };
         }
     }
 
-    @Security(SECURITY_NAME.profile)
+    // @Security(SECURITY_NAME.profile)
     @Get("/get_profile/{id}")
-    public async getUserProfile(@Path() id: string): Promise<IProfileData | { message: string }> {
+    public async getUserProfile(@Request() req: express.Request, @Path() id: string): Promise<IProfileData | { message: string }> {
         try {
+            const profileId = await getProfileId(req);
+            const isAdmin = AdminProfileService.getInstance().adminNode.getId().get() === profileId;
+
+            if (!isAdmin && profileId !== id) throw new AuthError(SECURITY_MESSAGES.UNAUTHORIZED);
+
             const data = await serviceInstance.getUserProfile(id);
             if (data) {
                 this.setStatus(HTTP_CODES.OK)
@@ -70,28 +80,34 @@ export class UserProfileController extends Controller {
             this.setStatus(HTTP_CODES.NOT_FOUND)
             return { message: `no profile found for ${id}` };
         } catch (error) {
-            this.setStatus(HTTP_CODES.INTERNAL_ERROR);
+            this.setStatus(error.code || HTTP_CODES.INTERNAL_ERROR);
             return { message: error.message };
         }
     }
 
-    @Security(SECURITY_NAME.admin)
+    // @Security(SECURITY_NAME.admin)
     @Get("/get_all_profile")
-    public async getAllUserProfile(): Promise<IProfileData[] | { message: string }> {
+    public async getAllUserProfile(@Request() req: express.Request,): Promise<IProfileData[] | { message: string }> {
         try {
+            const isAdmin = await checkIfItIsAdmin(req);
+            if (!isAdmin) throw new AuthError(SECURITY_MESSAGES.UNAUTHORIZED);
+
             const nodes = await serviceInstance.getAllUserProfile() || [];
             this.setStatus(HTTP_CODES.OK);
             return nodes.map(el => _formatProfile(el));
         } catch (error) {
-            this.setStatus(HTTP_CODES.INTERNAL_ERROR);
+            this.setStatus(error.code || HTTP_CODES.INTERNAL_ERROR);
             return { message: error.message };
         }
     }
 
-    @Security(SECURITY_NAME.admin)
+    // @Security(SECURITY_NAME.admin)
     @Put("/edit_profile/{id}")
-    public async updateUserProfile(@Path() id: string, @Body() data: IProfileEdit): Promise<IProfileData | { message: string }> {
+    public async updateUserProfile(@Request() req: express.Request, @Path() id: string, @Body() data: IProfileEdit): Promise<IProfileData | { message: string }> {
         try {
+            const isAdmin = await checkIfItIsAdmin(req);
+            if (!isAdmin) throw new AuthError(SECURITY_MESSAGES.UNAUTHORIZED);
+
             const node = await serviceInstance.updateUserProfile(id, data);
             if (node) {
                 this.setStatus(HTTP_CODES.OK);
@@ -102,22 +118,25 @@ export class UserProfileController extends Controller {
             return { message: `no profile found for ${id}` };
 
         } catch (error) {
-            this.setStatus(HTTP_CODES.INTERNAL_ERROR);
+            this.setStatus(error.code || HTTP_CODES.INTERNAL_ERROR);
             return { message: error.message };
         }
     }
 
-    @Security(SECURITY_NAME.admin)
+    // @Security(SECURITY_NAME.admin)
     @Delete("/delete_profile/{id}")
-    public async deleteUserProfile(@Path() id: string): Promise<{ message: string }> {
+    public async deleteUserProfile(@Request() req: express.Request, @Path() id: string): Promise<{ message: string }> {
         try {
+            const isAdmin = await checkIfItIsAdmin(req);
+            if (!isAdmin) throw new AuthError(SECURITY_MESSAGES.UNAUTHORIZED);
+
 
             await serviceInstance.deleteUserProfile(id);
             this.setStatus(HTTP_CODES.OK);
             return { message: "user profile deleted" };
 
         } catch (error) {
-            this.setStatus(HTTP_CODES.INTERNAL_ERROR);
+            this.setStatus(error.code || HTTP_CODES.INTERNAL_ERROR);
             return { message: error.message };
         }
     }
@@ -126,10 +145,15 @@ export class UserProfileController extends Controller {
     //   PORTOFOLIO  //
     ///////////////////
 
-    @Security(SECURITY_NAME.profile)
+    // @Security(SECURITY_NAME.profile)
     @Get("/get_authorized_portofolio/{profileId}")
-    public async getAuthorizedPortofolioApps(@Path() profileId: string): Promise<IPortofolioData[] | { message: string }> {
+    public async getAuthorizedPortofolioApps(@Request() req: express.Request, @Path() profileId: string): Promise<IPortofolioData[] | { message: string }> {
         try {
+            const id = await getProfileId(req);
+            const isAdmin = AdminProfileService.getInstance().adminNode.getId().get() === id;
+
+            if (!isAdmin && profileId !== id) throw new AuthError(SECURITY_MESSAGES.UNAUTHORIZED);
+
             const nodes = await serviceInstance.getPortofolioAuthStructure(profileId);
             if (nodes) {
                 this.setStatus(HTTP_CODES.OK)
@@ -139,15 +163,17 @@ export class UserProfileController extends Controller {
             this.setStatus(HTTP_CODES.NOT_FOUND);
             return { message: `no profile found for ${profileId}` };
         } catch (error) {
-            this.setStatus(HTTP_CODES.INTERNAL_ERROR);
+            this.setStatus(error.code || HTTP_CODES.INTERNAL_ERROR);
             return { message: error.message };
         }
     }
 
-    @Security(SECURITY_NAME.admin)
+    // @Security(SECURITY_NAME.admin)
     @Post("/authorize_portofolio_apps/{profileId}")
-    public async authorizeToAccessPortofolioApps(@Path() profileId: string, @Body() data: { appsIds: string[], portofolioId: string }[]): Promise<IPortofolioData[] | { message: string }> {
+    public async authorizeToAccessPortofolioApps(@Request() req: express.Request, @Path() profileId: string, @Body() data: { appsIds: string[], portofolioId: string }[]): Promise<IPortofolioData[] | { message: string }> {
         try {
+            const isAdmin = await checkIfItIsAdmin(req);
+            if (!isAdmin) throw new AuthError(SECURITY_MESSAGES.UNAUTHORIZED);
 
             const nodes = await serviceInstance.authorizeToAccessPortofolioApp(profileId, data);
             if (nodes) {
@@ -159,15 +185,20 @@ export class UserProfileController extends Controller {
             return { message: `no profile found for ${profileId}` };
 
         } catch (error) {
-            this.setStatus(HTTP_CODES.INTERNAL_ERROR);
+            this.setStatus(error.code || HTTP_CODES.INTERNAL_ERROR);
             return { message: error.message };
         }
     }
 
-    @Security(SECURITY_NAME.profile)
+    // @Security(SECURITY_NAME.profile)
     @Get("/get_authorized_portofolio_apps/{profileId}/{portofolioId}")
-    public async getAuthorizedPortofolioApis(@Path() profileId: string, @Path() portofolioId: string): Promise<any | { message: string }> {
+    public async getAuthorizedPortofolioApis(@Request() req: express.Request, @Path() profileId: string, @Path() portofolioId: string): Promise<any | { message: string }> {
         try {
+            const id = await getProfileId(req);
+            const isAdmin = AdminProfileService.getInstance().adminNode.getId().get() === id;
+
+            if (!isAdmin && profileId !== id) throw new AuthError(SECURITY_MESSAGES.UNAUTHORIZED);
+
             const nodes = await serviceInstance.getAuthorizedPortofolioApp(profileId, portofolioId);
             if (nodes) {
                 this.setStatus(HTTP_CODES.OK)
@@ -177,15 +208,17 @@ export class UserProfileController extends Controller {
             this.setStatus(HTTP_CODES.NOT_FOUND)
             return { message: `no profile found for ${profileId}` };
         } catch (error) {
-            this.setStatus(HTTP_CODES.INTERNAL_ERROR);
+            this.setStatus(error.code || HTTP_CODES.INTERNAL_ERROR);
             return { message: error.message };
         }
     }
 
-    @Security(SECURITY_NAME.admin)
+    // @Security(SECURITY_NAME.admin)
     @Post("/unauthorize_portofolio_apps/{profileId}")
-    public async unauthorizeToAccessPortofolioApps(@Path() profileId: string, @Body() data: { appsIds: string[], portofolioId: string }[]): Promise<any | { message: string }> {
+    public async unauthorizeToAccessPortofolioApps(@Request() req: express.Request, @Path() profileId: string, @Body() data: { appsIds: string[], portofolioId: string }[]): Promise<any | { message: string }> {
         try {
+            const isAdmin = await checkIfItIsAdmin(req);
+            if (!isAdmin) throw new AuthError(SECURITY_MESSAGES.UNAUTHORIZED);
 
             const nodes = await serviceInstance.unauthorizeToAccessPortofolioApp(profileId, data);
             if (nodes) {
@@ -200,7 +233,7 @@ export class UserProfileController extends Controller {
             this.setStatus(HTTP_CODES.NOT_FOUND);
             return { message: `no profile found for ${profileId}` };
         } catch (error) {
-            this.setStatus(HTTP_CODES.INTERNAL_ERROR);
+            this.setStatus(error.code || HTTP_CODES.INTERNAL_ERROR);
             return { message: error.message };
         }
     }
@@ -211,10 +244,15 @@ export class UserProfileController extends Controller {
     ////////////
 
 
-    @Security(SECURITY_NAME.profile)
+    // @Security(SECURITY_NAME.profile)
     @Get("/get_authorized_bos/{profileId}/{portofolioId}")
-    public async getAuthorizedBos(@Path() profileId: string, @Path() portofolioId: string): Promise<any | { message: string }> {
+    public async getAuthorizedBos(@Request() req: express.Request, @Path() profileId: string, @Path() portofolioId: string): Promise<any | { message: string }> {
         try {
+            const id = await getProfileId(req);
+            const isAdmin = AdminProfileService.getInstance().adminNode.getId().get() === id;
+
+            if (!isAdmin && profileId !== id) throw new AuthError(SECURITY_MESSAGES.UNAUTHORIZED);
+
             const nodes = await serviceInstance.getBosAuthStructure(profileId, portofolioId);
             if (nodes) {
                 this.setStatus(HTTP_CODES.OK)
@@ -224,15 +262,18 @@ export class UserProfileController extends Controller {
             this.setStatus(HTTP_CODES.NOT_FOUND)
             return { message: `no profile found for ${profileId}` };
         } catch (error) {
-            this.setStatus(HTTP_CODES.INTERNAL_ERROR);
+            this.setStatus(error.code || HTTP_CODES.INTERNAL_ERROR);
             return { message: error.message };
         }
     }
 
-    @Security(SECURITY_NAME.admin)
+    // @Security(SECURITY_NAME.admin)
     @Post("/authorize_bos_apps/{profileId}/{portofolioId}")
-    public async authorizeToAccessBosApps(@Path() profileId: string, @Path() portofolioId: string, @Body() data: IBosAuth[]): Promise<IBosData[] | { message: string }> {
+    public async authorizeToAccessBosApps(@Request() req: express.Request, @Path() profileId: string, @Path() portofolioId: string, @Body() data: IBosAuth[]): Promise<IBosData[] | { message: string }> {
         try {
+            const isAdmin = await checkIfItIsAdmin(req);
+            if (!isAdmin) throw new AuthError(SECURITY_MESSAGES.UNAUTHORIZED);
+
             const nodes = await serviceInstance.authorizeToAccessBosApp(profileId, portofolioId, data);
             if (nodes) {
                 this.setStatus(HTTP_CODES.OK)
@@ -242,16 +283,21 @@ export class UserProfileController extends Controller {
             this.setStatus(HTTP_CODES.NOT_FOUND)
             return { message: `no profile found for ${profileId}` };
         } catch (error) {
-            this.setStatus(HTTP_CODES.INTERNAL_ERROR);
+            this.setStatus(error.code || HTTP_CODES.INTERNAL_ERROR);
             return { message: error.message };
         }
     }
 
 
-    @Security(SECURITY_NAME.profile)
+    // @Security(SECURITY_NAME.profile)
     @Get("/get_authorized_bos_apps/{profileId}/{portofolioId}/{bosId}")
-    public async getAuthorizedBosApis(@Path() profileId: string, @Path() portofolioId: string, @Path() bosId: string): Promise<any | { message: string }> {
+    public async getAuthorizedBosApis(@Request() req: express.Request, @Path() profileId: string, @Path() portofolioId: string, @Path() bosId: string): Promise<any | { message: string }> {
         try {
+            const id = await getProfileId(req);
+            const isAdmin = AdminProfileService.getInstance().adminNode.getId().get() === id;
+
+            if (!isAdmin && profileId !== id) throw new AuthError(SECURITY_MESSAGES.UNAUTHORIZED);
+
             const nodes = await serviceInstance.getAuthorizedBosApp(profileId, portofolioId, bosId);
 
             if (nodes) {
@@ -262,15 +308,18 @@ export class UserProfileController extends Controller {
             this.setStatus(HTTP_CODES.NOT_FOUND)
             return { message: `no profile found for ${profileId}` };
         } catch (error) {
-            this.setStatus(HTTP_CODES.INTERNAL_ERROR);
+            this.setStatus(error.code || HTTP_CODES.INTERNAL_ERROR);
             return { message: error.message };
         }
     }
 
-    @Security(SECURITY_NAME.admin)
+    // @Security(SECURITY_NAME.admin)
     @Post("/unauthorize_bos_apps/{profileId}/{portofolioId}")
-    public async unauthorizeToAccessBosApp(@Path() profileId: string, @Path() portofolioId: string, @Body() data: { appsIds: string[], buildingId: string }[]): Promise<any | { message: string }> {
+    public async unauthorizeToAccessBosApp(@Request() req: express.Request, @Path() profileId: string, @Path() portofolioId: string, @Body() data: { appsIds: string[], buildingId: string }[]): Promise<any | { message: string }> {
         try {
+            const isAdmin = await checkIfItIsAdmin(req);
+            if (!isAdmin) throw new AuthError(SECURITY_MESSAGES.UNAUTHORIZED);
+
             const nodes = await serviceInstance.unauthorizeToAccessBosApp(profileId, portofolioId, data);
             if (nodes) {
                 this.setStatus(HTTP_CODES.OK)
@@ -283,71 +332,11 @@ export class UserProfileController extends Controller {
             this.setStatus(HTTP_CODES.NOT_FOUND)
             return { message: `no profile found for ${profileId}` };
         } catch (error) {
-            this.setStatus(HTTP_CODES.INTERNAL_ERROR);
+            this.setStatus(error.code || HTTP_CODES.INTERNAL_ERROR);
             return { message: error.message };
         }
     }
 
-
-
-
-
-    // @Security(SECURITY_NAME.admin)
-    // @Post("/authorize_apis/{profileId}")
-    // public async authorizeToAccessApis(@Path() profileId: string, @Body() data: { authorizeApis: string[] }): Promise<any | { message: string }> {
-    //   try {
-    //     const nodes = await serviceInstance.authorizeToAccessApis(profileId, data.authorizeApis);
-    //     if (nodes) {
-
-    //       this.setStatus(HTTP_CODES.OK)
-    //       return _getNodeListInfo(nodes);
-    //     }
-
-    //     this.setStatus(HTTP_CODES.NOT_FOUND)
-    //     return { message: `no profile found for ${profileId}` };
-    //   } catch (error) {
-    //     this.setStatus(HTTP_CODES.INTERNAL_ERROR);
-    //     return { message: error.message };
-    //   }
-    // }
-
-    // @Security(SECURITY_NAME.admin)
-    // @Post("/unauthorize_apis/{profileId}")
-    // public async unauthorizeToAccessApis(@Path() profileId: string, @Body() data: { unauthorizeApis: string[] }): Promise<any | { message: string }> {
-    //   try {
-    //     const nodes = await serviceInstance.unauthorizeToAccessApis(profileId, data.unauthorizeApis);
-    //     if (nodes) {
-    //       this.setStatus(HTTP_CODES.OK)
-    //       return nodes.filter(el => el);
-    //     }
-
-
-    //     this.setStatus(HTTP_CODES.NOT_FOUND)
-    //     return { message: `no profile found for ${profileId}` };
-
-    //   } catch (error) {
-    //     this.setStatus(HTTP_CODES.INTERNAL_ERROR);
-    //     return { message: error.message };
-    //   }
-    // }
-
-    // @Security(SECURITY_NAME.admin)
-    // @Get("/get_authorized_apis/{profileId}")
-    // public async getAuthorizedApis(@Path() profileId: string): Promise<any | { message: string }> {
-    //   try {
-    //     const nodes = await serviceInstance.getAuthorizedApis(profileId);
-    //     if (nodes) {
-    //       this.setStatus(HTTP_CODES.OK)
-    //       return _getNodeListInfo(nodes);
-    //     }
-
-    //     this.setStatus(HTTP_CODES.NOT_FOUND)
-    //     return { message: `no profile found for ${profileId}` };
-    //   } catch (error) {
-    //     this.setStatus(HTTP_CODES.INTERNAL_ERROR);
-    //     return { message: error.message };
-    //   }
-    // }
 }
 
 

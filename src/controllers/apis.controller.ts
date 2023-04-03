@@ -22,10 +22,15 @@
  * <http://resources.spinalcom.com/licenses.pdf>.
  */
 
-import { Route, Get, Post, Delete, Body, Controller, Tags, Put, Path, UploadedFile, Security } from "tsoa";
-import { APIService, BuildingService, PortofolioService } from "../services";
-import { BUILDING_API_GROUP_TYPE, HTTP_CODES, PORTOFOLIO_API_GROUP_TYPE, SECURITY_NAME } from "../constant";
+import { Route, Get, Post, Delete, Body, Controller, Tags, Put, Path, UploadedFile, Security, Request } from "tsoa";
+import { APIService, AppProfileService, BuildingService, PortofolioService, UserProfileService } from "../services";
+import { BUILDING_API_GROUP_TYPE, HTTP_CODES, PORTOFOLIO_API_GROUP_TYPE, SECURITY_MESSAGES, SECURITY_NAME } from "../constant";
 import { IApiRoute } from "../interfaces";
+import { checkAndGetTokenInfo, checkIfItIsAdmin, getProfileId, getProfileNode } from "../security/authentication";
+import { AuthError } from "../security/AuthError";
+
+import * as express from "express";
+import AuthorizationService from "../services/authorization.service";
 
 const apiService = APIService.getInstance();
 
@@ -42,84 +47,99 @@ export class APIController extends Controller {
     //              PORTOFOLIO              //
     //////////////////////////////////////////
 
-    @Security(SECURITY_NAME.admin)
+    // @Security(SECURITY_NAME.admin)
     @Post("/create_portofolio_api_route")
-    public async createPortofolioApiRoute(@Body() data: IApiRoute): Promise<IApiRoute | { message: string }> {
+    public async createPortofolioApiRoute(@Request() req: express.Request, @Body() data: IApiRoute): Promise<IApiRoute | { message: string }> {
         try {
+            const isAdmin = await checkIfItIsAdmin(req);
+            if (!isAdmin) throw new AuthError(SECURITY_MESSAGES.UNAUTHORIZED);
+
             // const data = req.body;
             const node = await apiService.createApiRoute(data, PORTOFOLIO_API_GROUP_TYPE);
             this.setStatus(HTTP_CODES.CREATED);
             return node.info.get();
         } catch (error) {
-            this.setStatus(HTTP_CODES.INTERNAL_ERROR);
+            this.setStatus(error.code || HTTP_CODES.INTERNAL_ERROR);
             return { message: error.message };
         }
     }
 
-    @Security(SECURITY_NAME.admin)
+    // @Security(SECURITY_NAME.admin)
     @Put("/update_portofolio_api_route/{id}")
-    public async updatePortofolioApiRoute(@Body() data: IApiRoute, @Path() id: string): Promise<IApiRoute | { message: string }> {
+    public async updatePortofolioApiRoute(@Request() req: express.Request, @Body() data: IApiRoute, @Path() id: string): Promise<IApiRoute | { message: string }> {
         try {
+            const isAdmin = await checkIfItIsAdmin(req);
+            if (!isAdmin) throw new AuthError(SECURITY_MESSAGES.UNAUTHORIZED);
 
             const node = await apiService.updateApiRoute(id, data, PORTOFOLIO_API_GROUP_TYPE);
             this.setStatus(HTTP_CODES.ACCEPTED)
             return node.info.get();
         } catch (error) {
-            this.setStatus(HTTP_CODES.INTERNAL_ERROR)
+            this.setStatus(error.code || HTTP_CODES.INTERNAL_ERROR);
             return { message: error.message };
         }
     }
 
 
-    @Security(SECURITY_NAME.profile)
+    // @Security(SECURITY_NAME.profile)
     @Get("/get_portofolio_api_route/{id}")
-    public async getPortofolioApiRouteById(@Path() id: string): Promise<IApiRoute | { message: string }> {
+    public async getPortofolioApiRouteById(@Request() req: express.Request, @Path() id: string): Promise<IApiRoute | { message: string }> {
         try {
-            const node = await apiService.getApiRouteById(id, PORTOFOLIO_API_GROUP_TYPE);
+            const profile = await getProfileNode(req);
+
+            const node = await AuthorizationService.getInstance().profileHasAccess(profile, id);
             if (node) {
                 this.setStatus(HTTP_CODES.OK)
                 return node.info.get();
             }
 
-            this.setStatus(HTTP_CODES.NOT_FOUND)
-            return { message: `No api route found for ${id}` };
+            this.setStatus(HTTP_CODES.UNAUTHORIZED)
+            return { message: SECURITY_MESSAGES.UNAUTHORIZED };
         } catch (error) {
-            this.setStatus(HTTP_CODES.INTERNAL_ERROR)
+            this.setStatus(error.code || HTTP_CODES.INTERNAL_ERROR);
             return { message: error.message };
         }
     }
 
-    @Security(SECURITY_NAME.admin)
+    // @Security(SECURITY_NAME.admin)
     @Get("/get_all_portofolio_api_route")
-    public async getAllPortofolioApiRoute(): Promise<IApiRoute[] | { message: string }> {
+    public async getAllPortofolioApiRoute(@Request() req: express.Request,): Promise<IApiRoute[] | { message: string }> {
         try {
+            const isAdmin = await checkIfItIsAdmin(req);
+            if (!isAdmin) throw new AuthError(SECURITY_MESSAGES.UNAUTHORIZED);
+
             const routes = await apiService.getAllApiRoute(PORTOFOLIO_API_GROUP_TYPE);
             this.setStatus(HTTP_CODES.OK)
             return routes.map(el => el.info.get());
         } catch (error) {
-            this.setStatus(HTTP_CODES.INTERNAL_ERROR)
+            this.setStatus(error.code || HTTP_CODES.INTERNAL_ERROR);
             return { message: error.message };
         }
     }
 
-    @Security(SECURITY_NAME.admin)
+    // @Security(SECURITY_NAME.admin)
     @Delete("/delete_portofolio_api_route/{id}")
-    public async deletePortofolioApiRoute(@Path() id): Promise<{ message: string }> {
+    public async deletePortofolioApiRoute(@Request() req: express.Request, @Path() id): Promise<{ message: string }> {
         try {
+            const isAdmin = await checkIfItIsAdmin(req);
+            if (!isAdmin) throw new AuthError(SECURITY_MESSAGES.UNAUTHORIZED);
 
             await apiService.deleteApiRoute(id, PORTOFOLIO_API_GROUP_TYPE);
             this.setStatus(HTTP_CODES.OK)
             return { message: `${id} api route has been deleted` };
         } catch (error) {
-            this.setStatus(HTTP_CODES.INTERNAL_ERROR)
+            this.setStatus(error.code || HTTP_CODES.INTERNAL_ERROR);
             return { message: error.message };
         }
     }
 
-    @Security(SECURITY_NAME.admin)
+    // @Security(SECURITY_NAME.admin)
     @Post("/upload_portofolio_apis_routes")
-    public async uploadPortofolioSwaggerFile(@UploadedFile() file): Promise<IApiRoute[] | { message: string }> {
+    public async uploadPortofolioSwaggerFile(@Request() req: express.Request, @UploadedFile() file): Promise<IApiRoute[] | { message: string }> {
         try {
+            const isAdmin = await checkIfItIsAdmin(req);
+            if (!isAdmin) throw new AuthError(SECURITY_MESSAGES.UNAUTHORIZED);
+
             if (!file) {
                 this.setStatus(HTTP_CODES.BAD_REQUEST);
                 return { message: "No file uploaded" }
@@ -141,7 +161,7 @@ export class APIController extends Controller {
             this.setStatus(HTTP_CODES.BAD_REQUEST)
             return { message: "No file uploaded" };
         } catch (error) {
-            this.setStatus(HTTP_CODES.INTERNAL_ERROR)
+            this.setStatus(error.code || HTTP_CODES.INTERNAL_ERROR);
             return { message: error.message };
         }
     }
@@ -152,39 +172,51 @@ export class APIController extends Controller {
     //////////////////////////////////////////
 
 
-    @Security(SECURITY_NAME.admin)
+    // @Security(SECURITY_NAME.admin)
     @Post("/create_bos_api_route")
-    public async createBosApiRoute(@Body() data: IApiRoute): Promise<IApiRoute | { message: string }> {
+    public async createBosApiRoute(@Request() req: express.Request, @Body() data: IApiRoute): Promise<IApiRoute | { message: string }> {
         try {
+            const isAdmin = await checkIfItIsAdmin(req);
+            if (!isAdmin) throw new AuthError(SECURITY_MESSAGES.UNAUTHORIZED);
+
             // const data = req.body;
             const node = await apiService.createApiRoute(data, BUILDING_API_GROUP_TYPE);
             this.setStatus(HTTP_CODES.CREATED);
             return node.info.get();
         } catch (error) {
-            this.setStatus(HTTP_CODES.INTERNAL_ERROR);
+            this.setStatus(error.code || HTTP_CODES.INTERNAL_ERROR);
             return { message: error.message };
         }
     }
 
-    @Security(SECURITY_NAME.admin)
+    // @Security(SECURITY_NAME.admin)
     @Put("/update_bos_api_route/{id}")
-    public async updateBosApiRoute(@Body() data: IApiRoute, @Path() id: string): Promise<IApiRoute | { message: string }> {
+    public async updateBosApiRoute(@Request() req: express.Request, @Body() data: IApiRoute, @Path() id: string): Promise<IApiRoute | { message: string }> {
         try {
+            const isAdmin = await checkIfItIsAdmin(req);
+            if (!isAdmin) throw new AuthError(SECURITY_MESSAGES.UNAUTHORIZED);
 
             const node = await apiService.updateApiRoute(id, data, BUILDING_API_GROUP_TYPE);
             this.setStatus(HTTP_CODES.ACCEPTED)
             return node.info.get();
         } catch (error) {
-            this.setStatus(HTTP_CODES.INTERNAL_ERROR)
+            this.setStatus(error.code || HTTP_CODES.INTERNAL_ERROR);
             return { message: error.message };
         }
     }
 
-    @Security(SECURITY_NAME.profile)
+    // @Security(SECURITY_NAME.profile)
     @Get("/get_bos_api_route/{id}")
-    public async getBosApiRouteById(@Path() id: string): Promise<IApiRoute | { message: string }> {
+    public async getBosApiRouteById(@Request() req: express.Request, @Path() id: string): Promise<IApiRoute | { message: string }> {
         try {
-            const node = await apiService.getApiRouteById(id, BUILDING_API_GROUP_TYPE);
+            const tokenInfo = await checkAndGetTokenInfo(req);
+            const profileId = tokenInfo.profile.profileId || tokenInfo.profile.userProfileBosConfigId;
+            const isApp = tokenInfo.profile.profileId || tokenInfo.profile.userProfileBosConfigId ? false : true;
+
+            let profile = await (isApp ? AppProfileService.getInstance()._getAppProfileNode(profileId) : UserProfileService.getInstance()._getUserProfileNode(profileId))
+
+            const node = await AuthorizationService.getInstance().profileHasAccess(profile, id);
+
             if (node) {
                 this.setStatus(HTTP_CODES.OK)
                 return node.info.get();
@@ -193,42 +225,50 @@ export class APIController extends Controller {
             this.setStatus(HTTP_CODES.NOT_FOUND)
             return { message: `No api route found for ${id}` };
         } catch (error) {
-            this.setStatus(HTTP_CODES.INTERNAL_ERROR)
+            this.setStatus(error.code || HTTP_CODES.INTERNAL_ERROR);
             return { message: error.message };
         }
     }
 
-    @Security(SECURITY_NAME.admin)
+    // @Security(SECURITY_NAME.admin)
     @Get("/get_all_bos_api_route")
-    public async getAllBosApiRoute(): Promise<IApiRoute[] | { message: string }> {
+    public async getAllBosApiRoute(@Request() req: express.Request,): Promise<IApiRoute[] | { message: string }> {
         try {
+            const isAdmin = await checkIfItIsAdmin(req);
+            if (!isAdmin) throw new AuthError(SECURITY_MESSAGES.UNAUTHORIZED);
+
             const routes = await apiService.getAllApiRoute(BUILDING_API_GROUP_TYPE);
             this.setStatus(HTTP_CODES.OK)
             return routes.map(el => el.info.get());
         } catch (error) {
-            this.setStatus(HTTP_CODES.INTERNAL_ERROR)
+            this.setStatus(error.code || HTTP_CODES.INTERNAL_ERROR);
             return { message: error.message };
         }
     }
 
-    @Security(SECURITY_NAME.admin)
+    // @Security(SECURITY_NAME.admin)
     @Delete("/delete_bos_api_route/{id}")
-    public async deleteBosApiRoute(@Path() id): Promise<{ message: string }> {
+    public async deleteBosApiRoute(@Request() req: express.Request, @Path() id): Promise<{ message: string }> {
         try {
+            const isAdmin = await checkIfItIsAdmin(req);
+            if (!isAdmin) throw new AuthError(SECURITY_MESSAGES.UNAUTHORIZED);
 
             await apiService.deleteApiRoute(id, BUILDING_API_GROUP_TYPE);
             this.setStatus(HTTP_CODES.OK)
             return { message: `${id} api route has been deleted` };
         } catch (error) {
-            this.setStatus(HTTP_CODES.INTERNAL_ERROR)
+            this.setStatus(error.code || HTTP_CODES.INTERNAL_ERROR);
             return { message: error.message };
         }
     }
 
-    @Security(SECURITY_NAME.admin)
+    // @Security(SECURITY_NAME.admin)
     @Post("/upload_bos_apis_routes")
-    public async uploadBosSwaggerFile(@UploadedFile() file): Promise<IApiRoute[] | { message: string }> {
+    public async uploadBosSwaggerFile(@Request() req: express.Request, @UploadedFile() file): Promise<IApiRoute[] | { message: string }> {
         try {
+            const isAdmin = await checkIfItIsAdmin(req);
+            if (!isAdmin) throw new AuthError(SECURITY_MESSAGES.UNAUTHORIZED);
+
             if (!file) {
                 this.setStatus(HTTP_CODES.BAD_REQUEST);
                 return { message: "No file uploaded" }
@@ -250,7 +290,7 @@ export class APIController extends Controller {
             this.setStatus(HTTP_CODES.BAD_REQUEST)
             return { message: "No file uploaded" };
         } catch (error) {
-            this.setStatus(HTTP_CODES.INTERNAL_ERROR)
+            this.setStatus(error.code || HTTP_CODES.INTERNAL_ERROR);
             return { message: error.message };
         }
     }

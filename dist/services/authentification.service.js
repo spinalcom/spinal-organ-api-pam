@@ -41,7 +41,7 @@ const uuid_1 = require("uuid");
 const userProfile_service_1 = require("./userProfile.service");
 const appProfile_service_1 = require("./appProfile.service");
 const userList_services_1 = require("./userList.services");
-const appList_services_1 = require("./appList.services");
+const appConnectedList_services_1 = require("./appConnectedList.services");
 const tokenKey = '9b1deb4d-3b7d-4bad-9bdd-2b0d7b3dcb6d';
 class AuthentificationService {
     constructor() { }
@@ -57,7 +57,7 @@ class AuthentificationService {
                 return userList_services_1.UserListService.getInstance().authenticateUser(info);
             }
             const appInfo = this._formatInfo(info);
-            return appList_services_1.AppListService.getInstance().authenticateApplication(appInfo);
+            return appConnectedList_services_1.AppListService.getInstance().authenticateApplication(appInfo);
         });
     }
     // PAM Credential

@@ -408,6 +408,12 @@ class AppProfileService {
             });
         });
     }
+    profileHasAccessToApi(appProfile, apiId) {
+        return __awaiter(this, void 0, void 0, function* () {
+            const profile = appProfile instanceof spinal_env_viewer_graph_service_1.SpinalNode ? appProfile : yield this._getAppProfileNode(appProfile);
+            return authorization_service_1.authorizationInstance.profileHasAccess(profile, apiId);
+        });
+    }
     ///////////////////////////////////////////////////////////
     ///                       PRIVATES                      //
     //////////////////////////////////////////////////////////

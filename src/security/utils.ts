@@ -22,12 +22,12 @@
  * <http://resources.spinalcom.com/licenses.pdf>.
  */
 
-import { Request } from 'express'
+import * as express from "express";
 import { SpinalNode } from 'spinal-env-viewer-graph-service';
 import { AppProfileService } from "../services/appProfile.service";
-import { authorizationInstance } from '../services/authorization.service';
-import { UserProfileService } from "../services/userProfile.service";
-import * as express from "express";
+import { APIService } from "../services";
+import { BOS_BASE_URI_V1, BOS_BASE_URI_V1_2, BOS_BASE_URI_V2, BUILDING_API_GROUP_TYPE, PORTOFOLIO_API_GROUP_TYPE } from "../constant";
+
 
 
 export function getToken(request: express.Request): string {
@@ -37,34 +37,50 @@ export function getToken(request: express.Request): string {
         if (token) return token;
     }
 
-    return request.body.token || request.query.token || request.headers["x-access-token"];
+    return request.body?.token || request.query?.token || request.headers["x-access-token"];
 }
 
 
-async function getProfileNode(profileId: string): Promise<SpinalNode> {
-    let profile = await UserProfileService.getInstance().getUserProfile(profileId);
-    if (profile) return profile.node;
+export async function profileHasAccessToApi(profile: SpinalNode, apiUrl: string, method: string): Promise<SpinalNode> {
+    let parentType = PORTOFOLIO_API_GROUP_TYPE;
 
-    profile = await AppProfileService.getInstance().getAppProfile(profileId);
-    if (profile) return profile.node;
+    if (apiUrl.match(`(${BOS_BASE_URI_V1}|${BOS_BASE_URI_V1_2}|${BOS_BASE_URI_V2})`))
+        parentType = BUILDING_API_GROUP_TYPE;
+
+    const api = await APIService.getInstance().getApiRouteByRoute(<any>{ route: apiUrl, method }, parentType);;
+    if (!api) return;
+
+    const hasAccess = await AppProfileService.getInstance().profileHasAccessToApi(profile, api);
+    if (hasAccess) return api;
 }
 
-export async function checkIfProfileHasAccess(req: Request, profileId: string): Promise<boolean> {
-    const params = (<any>req).params;
-    const profile = await getProfileNode(profileId);
 
-    if (!profile) return false;
 
-    for (const key in params) {
-        if (Object.prototype.hasOwnProperty.call(params, key)) {
-            const element = params[key];
-            if (element === profileId) continue;
 
-            const access = await authorizationInstance.profileHasAccess(profile, element);
-            if (!access) return false
+// async function getProfileNode(profileId: string): Promise<SpinalNode> {
+//     let profile = await UserProfileService.getInstance().getUserProfile(profileId);
+//     if (profile) return profile.node;
 
-        }
-    }
+//     profile = await AppProfileService.getInstance().getAppProfile(profileId);
+//     if (profile) return profile.node;
+// }
 
-    return true;
-}
+// export async function checkIfProfileHasAccess(req: Request, profileId: string): Promise<boolean> {
+//     // const params = (<any>req).params;
+//     // const profile = await getProfileNode(profileId);
+
+//     // if (!profile) return false;
+
+//     // for (const key in params) {
+//     //     if (Object.prototype.hasOwnProperty.call(params, key)) {
+//     //         const element = params[key];
+//     //         if (element === profileId) continue;
+
+//     //         const access = await authorizationInstance.profileHasAccess(profile, element);
+//     //         if (!access) return false
+
+//     //     }
+//     // }
+
+//     return true;
+// }

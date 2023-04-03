@@ -24,8 +24,10 @@
 
 import * as express from "express";
 import { DigitalTwinService } from "../services";
-import { HTTP_CODES, SECURITY_NAME } from "../constant";
-import { Body, Controller, Post, Route, Security, Tags } from "tsoa";
+import { HTTP_CODES, SECURITY_MESSAGES, SECURITY_NAME } from "../constant";
+import { Body, Controller, Post, Request, Route, Security, Tags } from "tsoa";
+import { checkIfItIsAdmin } from "../security/authentication";
+import { AuthError } from "../security/AuthError";
 
 const serviceInstance = DigitalTwinService.getInstance();
 
@@ -37,10 +39,13 @@ export class DigitaltwinController extends Controller {
         super();
     }
 
-    @Security(SECURITY_NAME.admin)
+    // @Security(SECURITY_NAME.admin)
     @Post("/create_digitaltwin")
-    public async createDigitalTwin(@Body() data: { name: string; folderPath: string }) {
+    public async createDigitalTwin(@Request() req: express.Request, @Body() data: { name: string; folderPath: string }) {
         try {
+            const isAdmin = await checkIfItIsAdmin(req);
+            if (!isAdmin) throw new AuthError(SECURITY_MESSAGES.UNAUTHORIZED);
+
 
             if (!data.name || !data.name.trim()) {
                 this.setStatus(HTTP_CODES.BAD_REQUEST);
@@ -51,7 +56,7 @@ export class DigitaltwinController extends Controller {
             this.setStatus(HTTP_CODES.CREATED);
             return graph.getId().get();
         } catch (error) {
-            this.setStatus(HTTP_CODES.INTERNAL_ERROR);
+            this.setStatus(error.code || HTTP_CODES.INTERNAL_ERROR);
             return { message: error.message };
         }
     }

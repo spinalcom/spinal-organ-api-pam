@@ -46,16 +46,17 @@ class AdminProfileService {
         }
         return this.instance;
     }
+    get adminNode() {
+        return this._adminNode;
+    }
     init(context) {
         return __awaiter(this, void 0, void 0, function* () {
             let node = yield this.getAdminProfile(context);
-            if (node) {
-                this._adminNode = node;
-                return node;
+            if (!node) {
+                node = this._createAdminProfile();
+                yield context.addChildInContext(node, constant_1.CONTEXT_TO_USER_PROFILE_RELATION_NAME, constant_1.PTR_LST_TYPE, context);
             }
-            node = this._createAdminProfile();
             this._adminNode = node;
-            yield context.addChildInContext(node, constant_1.CONTEXT_TO_USER_PROFILE_RELATION_NAME, constant_1.PTR_LST_TYPE, context);
             yield this.syncAdminProfile();
             return node;
         });

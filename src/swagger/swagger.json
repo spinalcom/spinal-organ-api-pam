@@ -62,6 +62,9 @@
 					"hasViewer": {
 						"type": "boolean"
 					},
+					"documentationLink": {
+						"type": "string"
+					},
 					"packageName": {
 						"type": "string"
 					},
@@ -302,39 +305,6 @@
 				},
 				"type": "object",
 				"additionalProperties": false
-			},
-			"IEditApp": {
-				"properties": {
-					"name": {
-						"type": "string"
-					},
-					"icon": {
-						"type": "string"
-					},
-					"description": {
-						"type": "string"
-					},
-					"tags": {
-						"items": {
-							"type": "string"
-						},
-						"type": "array"
-					},
-					"categoryName": {
-						"type": "string"
-					},
-					"groupName": {
-						"type": "string"
-					},
-					"isExternalApp": {
-						"type": "boolean"
-					},
-					"link": {
-						"type": "string"
-					}
-				},
-				"type": "object",
-				"additionalProperties": {}
 			},
 			"IApplicationToken": {
 				"properties": {
@@ -805,11 +775,7 @@
 				"tags": [
 					"Apis"
 				],
-				"security": [
-					{
-						"admin": []
-					}
-				],
+				"security": [],
 				"parameters": [],
 				"requestBody": {
 					"required": true,
@@ -856,11 +822,7 @@
 				"tags": [
 					"Apis"
 				],
-				"security": [
-					{
-						"admin": []
-					}
-				],
+				"security": [],
 				"parameters": [
 					{
 						"in": "path",
@@ -916,11 +878,7 @@
 				"tags": [
 					"Apis"
 				],
-				"security": [
-					{
-						"profile": []
-					}
-				],
+				"security": [],
 				"parameters": [
 					{
 						"in": "path",
@@ -969,11 +927,7 @@
 				"tags": [
 					"Apis"
 				],
-				"security": [
-					{
-						"admin": []
-					}
-				],
+				"security": [],
 				"parameters": []
 			}
 		},
@@ -1003,11 +957,7 @@
 				"tags": [
 					"Apis"
 				],
-				"security": [
-					{
-						"admin": []
-					}
-				],
+				"security": [],
 				"parameters": [
 					{
 						"in": "path",
@@ -1056,11 +1006,7 @@
 				"tags": [
 					"Apis"
 				],
-				"security": [
-					{
-						"admin": []
-					}
-				],
+				"security": [],
 				"parameters": [],
 				"requestBody": {
 					"required": true,
@@ -1116,11 +1062,7 @@
 				"tags": [
 					"Apis"
 				],
-				"security": [
-					{
-						"admin": []
-					}
-				],
+				"security": [],
 				"parameters": [],
 				"requestBody": {
 					"required": true,
@@ -1167,11 +1109,7 @@
 				"tags": [
 					"Apis"
 				],
-				"security": [
-					{
-						"admin": []
-					}
-				],
+				"security": [],
 				"parameters": [
 					{
 						"in": "path",
@@ -1227,11 +1165,7 @@
 				"tags": [
 					"Apis"
 				],
-				"security": [
-					{
-						"profile": []
-					}
-				],
+				"security": [],
 				"parameters": [
 					{
 						"in": "path",
@@ -1280,11 +1214,7 @@
 				"tags": [
 					"Apis"
 				],
-				"security": [
-					{
-						"admin": []
-					}
-				],
+				"security": [],
 				"parameters": []
 			}
 		},
@@ -1314,11 +1244,7 @@
 				"tags": [
 					"Apis"
 				],
-				"security": [
-					{
-						"admin": []
-					}
-				],
+				"security": [],
 				"parameters": [
 					{
 						"in": "path",
@@ -1367,11 +1293,7 @@
 				"tags": [
 					"Apis"
 				],
-				"security": [
-					{
-						"admin": []
-					}
-				],
+				"security": [],
 				"parameters": [],
 				"requestBody": {
 					"required": true,
@@ -1427,11 +1349,7 @@
 				"tags": [
 					"App Profiles"
 				],
-				"security": [
-					{
-						"admin": []
-					}
-				],
+				"security": [],
 				"parameters": [],
 				"requestBody": {
 					"required": true,
@@ -1478,11 +1396,7 @@
 				"tags": [
 					"App Profiles"
 				],
-				"security": [
-					{
-						"profile": []
-					}
-				],
+				"security": [],
 				"parameters": [
 					{
 						"in": "path",
@@ -1531,11 +1445,7 @@
 				"tags": [
 					"App Profiles"
 				],
-				"security": [
-					{
-						"admin": []
-					}
-				],
+				"security": [],
 				"parameters": []
 			}
 		},
@@ -1572,11 +1482,7 @@
 				"tags": [
 					"App Profiles"
 				],
-				"security": [
-					{
-						"admin": []
-					}
-				],
+				"security": [],
 				"parameters": [
 					{
 						"in": "path",
@@ -1625,11 +1531,7 @@
 				"tags": [
 					"App Profiles"
 				],
-				"security": [
-					{
-						"admin": []
-					}
-				],
+				"security": [],
 				"parameters": [
 					{
 						"in": "path",
@@ -1678,11 +1580,7 @@
 				"tags": [
 					"App Profiles"
 				],
-				"security": [
-					{
-						"profile": []
-					}
-				],
+				"security": [],
 				"parameters": [
 					{
 						"in": "path",
@@ -1731,11 +1629,7 @@
 				"tags": [
 					"App Profiles"
 				],
-				"security": [
-					{
-						"admin": []
-					}
-				],
+				"security": [],
 				"parameters": [
 					{
 						"in": "path",
@@ -1794,11 +1688,7 @@
 				"tags": [
 					"App Profiles"
 				],
-				"security": [
-					{
-						"profile": []
-					}
-				],
+				"security": [],
 				"parameters": [
 					{
 						"in": "path",
@@ -1855,11 +1745,7 @@
 				"tags": [
 					"App Profiles"
 				],
-				"security": [
-					{
-						"admin": []
-					}
-				],
+				"security": [],
 				"parameters": [
 					{
 						"in": "path",
@@ -1933,11 +1819,7 @@
 				"tags": [
 					"App Profiles"
 				],
-				"security": [
-					{
-						"profile": []
-					}
-				],
+				"security": [],
 				"parameters": [
 					{
 						"in": "path",
@@ -1994,11 +1876,7 @@
 				"tags": [
 					"App Profiles"
 				],
-				"security": [
-					{
-						"admin": []
-					}
-				],
+				"security": [],
 				"parameters": [
 					{
 						"in": "path",
@@ -2065,11 +1943,7 @@
 				"tags": [
 					"App Profiles"
 				],
-				"security": [
-					{
-						"profile": []
-					}
-				],
+				"security": [],
 				"parameters": [
 					{
 						"in": "path",
@@ -2134,11 +2008,7 @@
 				"tags": [
 					"App Profiles"
 				],
-				"security": [
-					{
-						"admin": []
-					}
-				],
+				"security": [],
 				"parameters": [
 					{
 						"in": "path",
@@ -2220,11 +2090,7 @@
 				"tags": [
 					"Applications"
 				],
-				"security": [
-					{
-						"admin": []
-					}
-				],
+				"security": [],
 				"parameters": [],
 				"requestBody": {
 					"required": true,
@@ -2271,11 +2137,7 @@
 				"tags": [
 					"Applications"
 				],
-				"security": [
-					{
-						"admin": []
-					}
-				],
+				"security": [],
 				"parameters": [],
 				"requestBody": {
 					"required": true,
@@ -2322,11 +2184,7 @@
 				"tags": [
 					"Applications"
 				],
-				"security": [
-					{
-						"admin": []
-					}
-				],
+				"security": [],
 				"parameters": [],
 				"requestBody": {
 					"required": true,
@@ -2376,11 +2234,7 @@
 				"tags": [
 					"Applications"
 				],
-				"security": [
-					{
-						"admin": []
-					}
-				],
+				"security": [],
 				"parameters": []
 			}
 		},
@@ -2420,11 +2274,7 @@
 				"tags": [
 					"Applications"
 				],
-				"security": [
-					{
-						"admin": []
-					}
-				],
+				"security": [],
 				"parameters": []
 			}
 		},
@@ -2464,11 +2314,7 @@
 				"tags": [
 					"Applications"
 				],
-				"security": [
-					{
-						"admin": []
-					}
-				],
+				"security": [],
 				"parameters": []
 			}
 		},
@@ -2505,11 +2351,7 @@
 				"tags": [
 					"Applications"
 				],
-				"security": [
-					{
-						"admin": []
-					}
-				],
+				"security": [],
 				"parameters": [
 					{
 						"in": "path",
@@ -2555,11 +2397,7 @@
 				"tags": [
 					"Applications"
 				],
-				"security": [
-					{
-						"profile": []
-					}
-				],
+				"security": [],
 				"parameters": [
 					{
 						"in": "path",
@@ -2605,11 +2443,7 @@
 				"tags": [
 					"Applications"
 				],
-				"security": [
-					{
-						"profile": []
-					}
-				],
+				"security": [],
 				"parameters": [
 					{
 						"in": "path",
@@ -2655,11 +2489,7 @@
 				"tags": [
 					"Applications"
 				],
-				"security": [
-					{
-						"admin": []
-					}
-				],
+				"security": [],
 				"parameters": [
 					{
 						"in": "path",
@@ -2675,7 +2505,7 @@
 					"content": {
 						"application/json": {
 							"schema": {
-								"$ref": "#/components/schemas/IEditApp"
+								"$ref": "#/components/schemas/IApp"
 							}
 						}
 					}
@@ -2715,11 +2545,7 @@
 				"tags": [
 					"Applications"
 				],
-				"security": [
-					{
-						"admin": []
-					}
-				],
+				"security": [],
 				"parameters": [
 					{
 						"in": "path",
@@ -2735,7 +2561,7 @@
 					"content": {
 						"application/json": {
 							"schema": {
-								"$ref": "#/components/schemas/IEditApp"
+								"$ref": "#/components/schemas/IApp"
 							}
 						}
 					}
@@ -2775,11 +2601,7 @@
 				"tags": [
 					"Applications"
 				],
-				"security": [
-					{
-						"admin": []
-					}
-				],
+				"security": [],
 				"parameters": [
 					{
 						"in": "path",
@@ -2795,7 +2617,7 @@
 					"content": {
 						"application/json": {
 							"schema": {
-								"$ref": "#/components/schemas/IEditApp"
+								"$ref": "#/components/schemas/IApp"
 							}
 						}
 					}
@@ -2828,11 +2650,7 @@
 				"tags": [
 					"Applications"
 				],
-				"security": [
-					{
-						"admin": []
-					}
-				],
+				"security": [],
 				"parameters": [
 					{
 						"in": "path",
@@ -2871,11 +2689,7 @@
 				"tags": [
 					"Applications"
 				],
-				"security": [
-					{
-						"admin": []
-					}
-				],
+				"security": [],
 				"parameters": [
 					{
 						"in": "path",
@@ -2914,11 +2728,7 @@
 				"tags": [
 					"Applications"
 				],
-				"security": [
-					{
-						"admin": []
-					}
-				],
+				"security": [],
 				"parameters": [
 					{
 						"in": "path",
@@ -2967,11 +2777,7 @@
 				"tags": [
 					"Applications"
 				],
-				"security": [
-					{
-						"admin": []
-					}
-				],
+				"security": [],
 				"parameters": [],
 				"requestBody": {
 					"required": true,
@@ -3030,11 +2836,7 @@
 				"tags": [
 					"Applications"
 				],
-				"security": [
-					{
-						"admin": []
-					}
-				],
+				"security": [],
 				"parameters": [],
 				"requestBody": {
 					"required": true,
@@ -3093,11 +2895,7 @@
 				"tags": [
 					"Applications"
 				],
-				"security": [
-					{
-						"admin": []
-					}
-				],
+				"security": [],
 				"parameters": [],
 				"requestBody": {
 					"required": true,
@@ -3159,11 +2957,7 @@
 				"tags": [
 					"Auth"
 				],
-				"security": [
-					{
-						"all": []
-					}
-				],
+				"security": [],
 				"parameters": [],
 				"requestBody": {
 					"required": true,
@@ -3220,11 +3014,7 @@
 				"tags": [
 					"Auth"
 				],
-				"security": [
-					{
-						"admin": []
-					}
-				],
+				"security": [],
 				"parameters": [],
 				"requestBody": {
 					"required": true,
@@ -3283,11 +3073,7 @@
 				"tags": [
 					"Auth"
 				],
-				"security": [
-					{
-						"admin": []
-					}
-				],
+				"security": [],
 				"parameters": []
 			}
 		},
@@ -3317,11 +3103,7 @@
 				"tags": [
 					"Auth"
 				],
-				"security": [
-					{
-						"admin": []
-					}
-				],
+				"security": [],
 				"parameters": []
 			}
 		},
@@ -3358,11 +3140,7 @@
 				"tags": [
 					"Auth"
 				],
-				"security": [
-					{
-						"admin": []
-					}
-				],
+				"security": [],
 				"parameters": []
 			}
 		},
@@ -3392,11 +3170,7 @@
 				"tags": [
 					"Auth"
 				],
-				"security": [
-					{
-						"admin": []
-					}
-				],
+				"security": [],
 				"parameters": []
 			}
 		},
@@ -3458,11 +3232,7 @@
 				"tags": [
 					"Auth"
 				],
-				"security": [
-					{
-						"all": []
-					}
-				],
+				"security": [],
 				"parameters": [],
 				"requestBody": {
 					"required": true,
@@ -3517,11 +3287,7 @@
 				"tags": [
 					"Building"
 				],
-				"security": [
-					{
-						"profile": []
-					}
-				],
+				"security": [],
 				"parameters": [
 					{
 						"in": "path",
@@ -3585,11 +3351,7 @@
 				"tags": [
 					"Building"
 				],
-				"security": [
-					{
-						"admin": []
-					}
-				],
+				"security": [],
 				"parameters": []
 			}
 		},
@@ -3624,11 +3386,7 @@
 				"tags": [
 					"Building"
 				],
-				"security": [
-					{
-						"admin": []
-					}
-				],
+				"security": [],
 				"parameters": [
 					{
 						"in": "path",
@@ -3674,11 +3432,7 @@
 				"tags": [
 					"Building"
 				],
-				"security": [
-					{
-						"admin": []
-					}
-				],
+				"security": [],
 				"parameters": [
 					{
 						"in": "path",
@@ -3737,11 +3491,7 @@
 				"tags": [
 					"Building"
 				],
-				"security": [
-					{
-						"admin": []
-					}
-				],
+				"security": [],
 				"parameters": [
 					{
 						"in": "path",
@@ -3811,11 +3561,7 @@
 				"tags": [
 					"Building"
 				],
-				"security": [
-					{
-						"profile": []
-					}
-				],
+				"security": [],
 				"parameters": [
 					{
 						"in": "path",
@@ -3861,11 +3607,7 @@
 				"tags": [
 					"Building"
 				],
-				"security": [
-					{
-						"profile": []
-					}
-				],
+				"security": [],
 				"parameters": [
 					{
 						"in": "path",
@@ -3918,11 +3660,7 @@
 				"tags": [
 					"Building"
 				],
-				"security": [
-					{
-						"admin": []
-					}
-				],
+				"security": [],
 				"parameters": [
 					{
 						"in": "path",
@@ -3989,11 +3727,7 @@
 				"tags": [
 					"Building"
 				],
-				"security": [
-					{
-						"profile": []
-					}
-				],
+				"security": [],
 				"parameters": [
 					{
 						"in": "path",
@@ -4050,11 +3784,7 @@
 				"tags": [
 					"Building"
 				],
-				"security": [
-					{
-						"admin": []
-					}
-				],
+				"security": [],
 				"parameters": [
 					{
 						"in": "path",
@@ -4124,11 +3854,7 @@
 				"tags": [
 					"Building"
 				],
-				"security": [
-					{
-						"profile": []
-					}
-				],
+				"security": [],
 				"parameters": [
 					{
 						"in": "path",
@@ -4174,11 +3900,7 @@
 				"tags": [
 					"Building"
 				],
-				"security": [
-					{
-						"profile": []
-					}
-				],
+				"security": [],
 				"parameters": [
 					{
 						"in": "path",
@@ -4231,11 +3953,7 @@
 				"tags": [
 					"Building"
 				],
-				"security": [
-					{
-						"admin": []
-					}
-				],
+				"security": [],
 				"parameters": [
 					{
 						"in": "path",
@@ -4302,11 +4020,7 @@
 				"tags": [
 					"Building"
 				],
-				"security": [
-					{
-						"profile": []
-					}
-				],
+				"security": [],
 				"parameters": [
 					{
 						"in": "path",
@@ -4358,11 +4072,7 @@
 				"tags": [
 					"DigitalTwin"
 				],
-				"security": [
-					{
-						"admin": []
-					}
-				],
+				"security": [],
 				"parameters": [],
 				"requestBody": {
 					"required": true,
@@ -4421,11 +4131,7 @@
 				"tags": [
 					"Portofolio"
 				],
-				"security": [
-					{
-						"admin": []
-					}
-				],
+				"security": [],
 				"parameters": [],
 				"requestBody": {
 					"required": true,
@@ -4472,11 +4178,7 @@
 				"tags": [
 					"Portofolio"
 				],
-				"security": [
-					{
-						"admin": []
-					}
-				],
+				"security": [],
 				"parameters": [
 					{
 						"in": "path",
@@ -4522,11 +4224,7 @@
 				"tags": [
 					"Portofolio"
 				],
-				"security": [
-					{
-						"admin": []
-					}
-				],
+				"security": [],
 				"parameters": [
 					{
 						"in": "path",
@@ -4591,11 +4289,7 @@
 				"tags": [
 					"Portofolio"
 				],
-				"security": [
-					{
-						"admin": []
-					}
-				],
+				"security": [],
 				"parameters": []
 			}
 		},
@@ -4630,11 +4324,7 @@
 				"tags": [
 					"Portofolio"
 				],
-				"security": [
-					{
-						"profile": []
-					}
-				],
+				"security": [],
 				"parameters": [
 					{
 						"in": "path",
@@ -4680,11 +4370,7 @@
 				"tags": [
 					"Portofolio"
 				],
-				"security": [
-					{
-						"profile": []
-					}
-				],
+				"security": [],
 				"parameters": [
 					{
 						"in": "path",
@@ -4731,11 +4417,7 @@
 				"tags": [
 					"Portofolio"
 				],
-				"security": [
-					{
-						"admin": []
-					}
-				],
+				"security": [],
 				"parameters": []
 			}
 		},
@@ -4765,11 +4447,7 @@
 				"tags": [
 					"Portofolio"
 				],
-				"security": [
-					{
-						"admin": []
-					}
-				],
+				"security": [],
 				"parameters": [
 					{
 						"in": "path",
@@ -4818,11 +4496,7 @@
 				"tags": [
 					"Portofolio"
 				],
-				"security": [
-					{
-						"admin": []
-					}
-				],
+				"security": [],
 				"parameters": [
 					{
 						"in": "path",
@@ -4878,11 +4552,7 @@
 				"tags": [
 					"Portofolio"
 				],
-				"security": [
-					{
-						"profile": []
-					}
-				],
+				"security": [],
 				"parameters": [
 					{
 						"in": "path",
@@ -4939,11 +4609,7 @@
 				"tags": [
 					"Portofolio"
 				],
-				"security": [
-					{
-						"profile": []
-					}
-				],
+				"security": [],
 				"parameters": [
 					{
 						"in": "path",
@@ -4988,11 +4654,7 @@
 				"tags": [
 					"Portofolio"
 				],
-				"security": [
-					{
-						"admin": []
-					}
-				],
+				"security": [],
 				"parameters": [
 					{
 						"in": "path",
@@ -5062,11 +4724,7 @@
 				"tags": [
 					"Portofolio"
 				],
-				"security": [
-					{
-						"admin": []
-					}
-				],
+				"security": [],
 				"parameters": [
 					{
 						"in": "path",
@@ -5136,11 +4794,7 @@
 				"tags": [
 					"Portofolio"
 				],
-				"security": [
-					{
-						"profile": []
-					}
-				],
+				"security": [],
 				"parameters": [
 					{
 						"in": "path",
@@ -5186,11 +4840,7 @@
 				"tags": [
 					"Portofolio"
 				],
-				"security": [
-					{
-						"profile": []
-					}
-				],
+				"security": [],
 				"parameters": [
 					{
 						"in": "path",
@@ -5243,11 +4893,7 @@
 				"tags": [
 					"Portofolio"
 				],
-				"security": [
-					{
-						"admin": []
-					}
-				],
+				"security": [],
 				"parameters": [
 					{
 						"in": "path",
@@ -5314,11 +4960,7 @@
 				"tags": [
 					"Portofolio"
 				],
-				"security": [
-					{
-						"profile": []
-					}
-				],
+				"security": [],
 				"parameters": [
 					{
 						"in": "path",
@@ -5375,11 +5017,7 @@
 				"tags": [
 					"Portofolio"
 				],
-				"security": [
-					{
-						"admin": []
-					}
-				],
+				"security": [],
 				"parameters": [
 					{
 						"in": "path",
@@ -5449,11 +5087,7 @@
 				"tags": [
 					"Portofolio"
 				],
-				"security": [
-					{
-						"profile": []
-					}
-				],
+				"security": [],
 				"parameters": [
 					{
 						"in": "path",
@@ -5499,11 +5133,7 @@
 				"tags": [
 					"Portofolio"
 				],
-				"security": [
-					{
-						"profile": []
-					}
-				],
+				"security": [],
 				"parameters": [
 					{
 						"in": "path",
@@ -5556,11 +5186,7 @@
 				"tags": [
 					"Portofolio"
 				],
-				"security": [
-					{
-						"admin": []
-					}
-				],
+				"security": [],
 				"parameters": [
 					{
 						"in": "path",
@@ -5627,11 +5253,7 @@
 				"tags": [
 					"Portofolio"
 				],
-				"security": [
-					{
-						"profile": []
-					}
-				],
+				"security": [],
 				"parameters": [
 					{
 						"in": "path",
@@ -5685,11 +5307,7 @@
 				"tags": [
 					"user Profiles"
 				],
-				"security": [
-					{
-						"admin": []
-					}
-				],
+				"security": [],
 				"parameters": [],
 				"requestBody": {
 					"required": true,
@@ -5736,11 +5354,7 @@
 				"tags": [
 					"user Profiles"
 				],
-				"security": [
-					{
-						"profile": []
-					}
-				],
+				"security": [],
 				"parameters": [
 					{
 						"in": "path",
@@ -5789,11 +5403,7 @@
 				"tags": [
 					"user Profiles"
 				],
-				"security": [
-					{
-						"admin": []
-					}
-				],
+				"security": [],
 				"parameters": []
 			}
 		},
@@ -5830,11 +5440,7 @@
 				"tags": [
 					"user Profiles"
 				],
-				"security": [
-					{
-						"admin": []
-					}
-				],
+				"security": [],
 				"parameters": [
 					{
 						"in": "path",
@@ -5883,11 +5489,7 @@
 				"tags": [
 					"user Profiles"
 				],
-				"security": [
-					{
-						"admin": []
-					}
-				],
+				"security": [],
 				"parameters": [
 					{
 						"in": "path",
@@ -5936,11 +5538,7 @@
 				"tags": [
 					"user Profiles"
 				],
-				"security": [
-					{
-						"profile": []
-					}
-				],
+				"security": [],
 				"parameters": [
 					{
 						"in": "path",
@@ -5989,11 +5587,7 @@
 				"tags": [
 					"user Profiles"
 				],
-				"security": [
-					{
-						"admin": []
-					}
-				],
+				"security": [],
 				"parameters": [
 					{
 						"in": "path",
@@ -6065,11 +5659,7 @@
 				"tags": [
 					"user Profiles"
 				],
-				"security": [
-					{
-						"profile": []
-					}
-				],
+				"security": [],
 				"parameters": [
 					{
 						"in": "path",
@@ -6121,11 +5711,7 @@
 				"tags": [
 					"user Profiles"
 				],
-				"security": [
-					{
-						"admin": []
-					}
-				],
+				"security": [],
 				"parameters": [
 					{
 						"in": "path",
@@ -6197,11 +5783,7 @@
 				"tags": [
 					"user Profiles"
 				],
-				"security": [
-					{
-						"profile": []
-					}
-				],
+				"security": [],
 				"parameters": [
 					{
 						"in": "path",
@@ -6258,11 +5840,7 @@
 				"tags": [
 					"user Profiles"
 				],
-				"security": [
-					{
-						"admin": []
-					}
-				],
+				"security": [],
 				"parameters": [
 					{
 						"in": "path",
@@ -6327,11 +5905,7 @@
 				"tags": [
 					"user Profiles"
 				],
-				"security": [
-					{
-						"profile": []
-					}
-				],
+				"security": [],
 				"parameters": [
 					{
 						"in": "path",
@@ -6391,11 +5965,7 @@
 				"tags": [
 					"user Profiles"
 				],
-				"security": [
-					{
-						"admin": []
-					}
-				],
+				"security": [],
 				"parameters": [
 					{
 						"in": "path",
@@ -6444,7 +6014,7 @@
 				}
 			}
 		},
-		"/api/v1/pam/websocket/get_logs": {
+		"/api/v1/pam/websocket/get_logs/{buildingId}": {
 			"get": {
 				"operationId": "GetWebsocketLogs",
 				"responses": {
@@ -6466,6 +6036,95 @@
 												"state"
 											],
 											"type": "object"
+										},
+										{
+											"items": {
+												"properties": {
+													"logs": {},
+													"state": {
+														"type": "string"
+													}
+												},
+												"required": [
+													"logs",
+													"state"
+												],
+												"type": "object"
+											},
+											"type": "array"
+										},
+										{
+											"properties": {
+												"message": {
+													"type": "string"
+												}
+											},
+											"type": "object"
+										}
+									]
+								}
+							}
+						}
+					}
+				},
+				"tags": [
+					"Websocket"
+				],
+				"security": [
+					{
+						"admin": []
+					}
+				],
+				"parameters": [
+					{
+						"in": "path",
+						"name": "buildingId",
+						"required": true,
+						"schema": {
+							"type": "string"
+						}
+					}
+				]
+			}
+		},
+		"/api/v1/pam/websocket/get_logs": {
+			"get": {
+				"operationId": "GetAllWebsocketLogs",
+				"responses": {
+					"200": {
+						"description": "Ok",
+						"content": {
+							"application/json": {
+								"schema": {
+									"anyOf": [
+										{
+											"properties": {
+												"logs": {},
+												"state": {
+													"type": "string"
+												}
+											},
+											"required": [
+												"logs",
+												"state"
+											],
+											"type": "object"
+										},
+										{
+											"items": {
+												"properties": {
+													"logs": {},
+													"state": {
+														"type": "string"
+													}
+												},
+												"required": [
+													"logs",
+													"state"
+												],
+												"type": "object"
+											},
+											"type": "array"
 										},
 										{
 											"properties": {

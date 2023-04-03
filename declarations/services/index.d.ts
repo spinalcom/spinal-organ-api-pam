@@ -10,6 +10,6 @@ export * from "./digitalTwin.service";
 export * from "./authentification.service";
 export * from "./portofolio.service";
 export * from "./userList.services";
-export * from "./appList.services";
+export * from "./appConnectedList.services";
 export * from "./token.service";
 export * from "./log.service";

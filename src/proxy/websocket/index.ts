@@ -38,7 +38,7 @@ export default class WebSocketServer {
     private _io: Server;
     private _clientToServer: Map<string, Socket> = new Map();
     private _serverToClient: Map<string, Socket> = new Map();
-    private _reInitLogData = lodash.debounce((restart?) => logInstance.webSocketSendData(restart), 2000);
+    private _reInitLogData = lodash.debounce((building: any, restart?) => logInstance.webSocketSendData(building, restart), 2000);
 
     constructor(server: HttpServer) {
         this._io = new Server(server);
@@ -48,7 +48,6 @@ export default class WebSocketServer {
     public async init(): Promise<void> {
         this._initNameSpace();
         this._initMiddleware();
-        this._reInitLogData(true);
     }
 
 
@@ -117,7 +116,7 @@ export default class WebSocketServer {
     private _createClient(building: SpinalNode, socket: Socket, token: string, sessionId: string): Promise<Socket> {
         return new Promise((resolve, reject) => {
             const api_url = building.info.apiUrl.get();
-            const client = SocketClient(api_url, { auth: { token, sessionId }, transports: ["websocket"] });
+            const client = SocketClient(api_url, { auth: { token, sessionId, building: building?.info?.get() }, transports: ["websocket"] });
             client.on('session_created', (id) => {
                 socket.emit("session_created", id);
                 client["sessionId"] = id;
@@ -127,7 +126,6 @@ export default class WebSocketServer {
 
             client.on("connect_error", (err) => reject(err))
         });
-
     }
 
     private _associateClientAndServer(pamToBosSocket: Socket, clientToPamSocket: Socket) {
@@ -146,7 +144,7 @@ export default class WebSocketServer {
                 console.log(`receive "${eventName}" request from bos and send it to client [${emitter.sessionId}]`, data);
 
                 // console.log(`receive request from bos and send it to client [${emitter.sessionId}]`);
-                this._reInitLogData();
+                this._reInitLogData((pamToBosSocket as any).auth.building);
                 emitter.emit(eventName, ...data);
             }
         })

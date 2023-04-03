@@ -1,7 +1,8 @@
+import * as express from "express";
 import { Controller } from "tsoa";
 export declare class DigitaltwinController extends Controller {
     constructor();
-    createDigitalTwin(data: {
+    createDigitalTwin(req: express.Request, data: {
         name: string;
         folderPath: string;
     }): Promise<string | {

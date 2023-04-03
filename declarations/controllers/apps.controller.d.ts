@@ -1,59 +1,60 @@
+import * as express from 'express';
 import { Controller } from "tsoa";
-import { IApp, IEditApp } from "../interfaces";
+import { IApp } from "../interfaces";
 export declare class AppsController extends Controller {
     constructor();
-    createAdminApp(appInfo: IApp): Promise<IApp | {
+    createAdminApp(req: express.Request, appInfo: IApp): Promise<IApp | {
         message: string;
     }>;
-    createPortofolioApp(appInfo: IApp): Promise<IApp | {
+    createPortofolioApp(req: express.Request, appInfo: IApp): Promise<IApp | {
         message: string;
     }>;
-    createBuildingApp(appInfo: IApp): Promise<IApp | {
+    createBuildingApp(req: express.Request, appInfo: IApp): Promise<IApp | {
         message: string;
     }>;
-    getAllAdminApps(): Promise<IApp[] | {
+    getAllAdminApps(req: express.Request): Promise<IApp[] | {
         message: string;
     }>;
-    getAllPortofolioApps(): Promise<IApp[] | {
+    getAllPortofolioApps(req: express.Request): Promise<IApp[] | {
         message: string;
     }>;
-    getAllBuildingApps(): Promise<IApp[] | {
+    getAllBuildingApps(req: express.Request): Promise<IApp[] | {
         message: string;
     }>;
-    getAdminApp(appId: string): Promise<IApp | {
+    getAdminApp(req: express.Request, appId: string): Promise<IApp | {
         message: string;
     }>;
-    getPortofolioApp(appId: string): Promise<IApp | {
+    getPortofolioApp(req: express.Request, appId: string): Promise<IApp | {
         message: string;
     }>;
-    getBuildingApp(appId: string): Promise<IApp | {
+    getBuildingApp(req: express.Request, appId: string): Promise<IApp | {
         message: string;
     }>;
-    updateAdminApp(appId: string, newInfo: IEditApp): Promise<IApp | {
+    updateAdminApp(req: express.Request, appId: string, newInfo: IApp): Promise<IApp | {
         message: string;
     }>;
-    updatePortofolioApp(appId: string, newInfo: IEditApp): Promise<IApp | {
+    updatePortofolioApp(req: express.Request, appId: string, newInfo: IApp): Promise<IApp | {
         message: string;
     }>;
-    updateBuildingApp(appId: string, newInfo: IEditApp): Promise<IApp | {
+    updateBuildingApp(req: express.Request, appId: string, newInfo: IApp): Promise<IApp | {
         message: string;
     }>;
-    deleteAdminApp(appId: string): Promise<{
+    deleteAdminApp(req: express.Request, appId: string): Promise<{
         message: string;
     }>;
-    deletePortofolioApp(appId: string): Promise<{
+    deletePortofolioApp(req: express.Request, appId: string): Promise<{
         message: string;
     }>;
-    deleteBuildingApp(appId: string): Promise<{
+    deleteBuildingApp(req: express.Request, appId: string): Promise<{
         message: string;
     }>;
-    uploadAdminApp(file: any): Promise<IApp[] | {
+    uploadAdminApp(req: express.Request, file: any): Promise<IApp[] | {
         message: string;
     }>;
-    uploadPortofolioApp(file: any): Promise<IApp[] | {
+    uploadPortofolioApp(req: express.Request, file: any): Promise<IApp[] | {
         message: string;
     }>;
-    uploadBuildingApp(file: any): Promise<IApp[] | {
+    uploadBuildingApp(req: express.Request, file: any): Promise<IApp[] | {
         message: string;
     }>;
 }

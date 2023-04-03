@@ -51,12 +51,12 @@ export default class AuthorizationService {
         return this.instance;
     }
 
-    public async profileHasAccess(profile: SpinalNode, node: SpinalNode | string): Promise<boolean> {
+    public async profileHasAccess(profile: SpinalNode, argNode: SpinalNode | string): Promise<SpinalNode> {
 
         const context = await this._getAuthorizedPortofolioContext(profile, true);
-        if (!context) return false;
+        if (!context) return;
 
-        const id = typeof node === "string" ? node : node.getId().get();
+        const id = typeof argNode === "string" ? argNode : argNode.getId().get();
 
         const found = await context.findInContextAsyncPredicate(context, (async (node, stop) => {
             const element = await node.getElement(true);
@@ -68,7 +68,7 @@ export default class AuthorizationService {
             return false;
         }))
 
-        return found && found.length > 0 ? true : false;
+        return found && found[0].getElement();
 
     }
 

@@ -47,20 +47,27 @@ export default async function initExpress(conn: spinal.FileSystem) {
   app.use(morgan('dev'));
 
 
+  useApiMiddleWare(app);
   configureBosProxy(app);
   configureBosProxy(app, true);
-
   useHubProxy(app);
   useClientMiddleWare(app);
   initSwagger(app);
-  useApiMiddleWare(app);
-
-
-
 
   RegisterRoutes(app);
 
   app.use(errorHandler);
+
+  // configureBosProxy(app);
+  // configureBosProxy(app, true);
+
+  // useHubProxy(app);
+  // useClientMiddleWare(app);
+  // initSwagger(app);
+  // useApiMiddleWare(app);
+  // RegisterRoutes(app);
+
+  // app.use(errorHandler);
 
   const server_port = process.env.SERVER_PORT || 2022;
   const server = app.listen(server_port, () => console.log(`api server listening on port ${server_port}!`));
@@ -137,7 +144,6 @@ function useApiMiddleWare(app: express.Express) {
 
 
 function errorHandler(err: unknown, req: express.Request, res: express.Response, next: express.NextFunction): express.Response | void {
-  console.log(err)
   if (err instanceof ValidateError) {
     return res.status(HTTP_CODES.BAD_REQUEST).send(_formatValidationError(err))
   }

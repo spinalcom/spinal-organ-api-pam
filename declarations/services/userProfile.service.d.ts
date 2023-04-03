@@ -41,6 +41,6 @@ export declare class UserProfileService {
     _getUserProfileNodeGraph(profileId: string): Promise<SpinalGraph | void>;
     private _findChildInContext;
     private _createUserProfileNode;
-    private _getUserProfileNode;
+    _getUserProfileNode(userProfileId: string): Promise<SpinalNode>;
     private _renameProfile;
 }

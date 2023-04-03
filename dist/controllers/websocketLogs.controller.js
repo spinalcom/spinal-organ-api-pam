@@ -8,6 +8,9 @@ var __decorate = (this && this.__decorate) || function (decorators, target, key,
 var __metadata = (this && this.__metadata) || function (k, v) {
     if (typeof Reflect === "object" && typeof Reflect.metadata === "function") return Reflect.metadata(k, v);
 };
+var __param = (this && this.__param) || function (paramIndex, decorator) {
+    return function (target, key) { decorator(target, key, paramIndex); }
+};
 var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
     function adopt(value) { return value instanceof P ? value : new P(function (resolve) { resolve(value); }); }
     return new (P || (P = Promise))(function (resolve, reject) {
@@ -45,18 +48,39 @@ exports.WebsocketLogsController = void 0;
 const tsoa_1 = require("tsoa");
 const constant_1 = require("../constant");
 const websocketLogs_1 = require("../proxy/websocket/websocketLogs");
+const express = require("express");
+const authentication_1 = require("../security/authentication");
+const AuthError_1 = require("../security/AuthError");
 let WebsocketLogsController = class WebsocketLogsController extends tsoa_1.Controller {
     constructor() {
         super();
     }
-    getWebsocketLogs() {
+    getWebsocketLogs(req, buildingId) {
         return __awaiter(this, void 0, void 0, function* () {
             try {
+                const isAdmin = yield (0, authentication_1.checkIfItIsAdmin)(req);
+                if (!isAdmin)
+                    throw new AuthError_1.AuthError(constant_1.SECURITY_MESSAGES.UNAUTHORIZED);
+                this.setStatus(constant_1.HTTP_CODES.OK);
+                return websocketLogs_1.default.getInstance().getSocketLogs(buildingId);
+            }
+            catch (error) {
+                this.setStatus(error.code || constant_1.HTTP_CODES.INTERNAL_ERROR);
+                return { message: error.message };
+            }
+        });
+    }
+    getAllWebsocketLogs(req) {
+        return __awaiter(this, void 0, void 0, function* () {
+            try {
+                const isAdmin = yield (0, authentication_1.checkIfItIsAdmin)(req);
+                if (!isAdmin)
+                    throw new AuthError_1.AuthError(constant_1.SECURITY_MESSAGES.UNAUTHORIZED);
                 this.setStatus(constant_1.HTTP_CODES.OK);
                 return websocketLogs_1.default.getInstance().getSocketLogs();
             }
             catch (error) {
-                this.setStatus(constant_1.HTTP_CODES.INTERNAL_ERROR);
+                this.setStatus(error.code || constant_1.HTTP_CODES.INTERNAL_ERROR);
                 return { message: error.message };
             }
         });
@@ -64,11 +88,21 @@ let WebsocketLogsController = class WebsocketLogsController extends tsoa_1.Contr
 };
 __decorate([
     (0, tsoa_1.Security)(constant_1.SECURITY_NAME.admin),
-    (0, tsoa_1.Get)("/websocket/get_logs"),
+    (0, tsoa_1.Get)("/websocket/get_logs/{buildingId}"),
+    __param(0, (0, tsoa_1.Request)()),
+    __param(1, (0, tsoa_1.Path)()),
     __metadata("design:type", Function),
-    __metadata("design:paramtypes", []),
+    __metadata("design:paramtypes", [Object, String]),
     __metadata("design:returntype", Promise)
 ], WebsocketLogsController.prototype, "getWebsocketLogs", null);
+__decorate([
+    (0, tsoa_1.Security)(constant_1.SECURITY_NAME.admin),
+    (0, tsoa_1.Get)("/websocket/get_logs"),
+    __param(0, (0, tsoa_1.Request)()),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [Object]),
+    __metadata("design:returntype", Promise)
+], WebsocketLogsController.prototype, "getAllWebsocketLogs", null);
 WebsocketLogsController = __decorate([
     (0, tsoa_1.Route)("/api/v1/pam"),
     (0, tsoa_1.Tags)("Websocket"),

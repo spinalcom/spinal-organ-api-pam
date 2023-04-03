@@ -48,9 +48,9 @@ class AppListService {
     }
     init() {
         return __awaiter(this, void 0, void 0, function* () {
-            this.context = yield configFile_service_1.configServiceInstance.getContext(constant_1.APP_LIST_CONTEXT_NAME);
+            this.context = yield configFile_service_1.configServiceInstance.getContext(constant_1.APP_CONNECTED_LIST_CONTEXT_NAME);
             if (!this.context) {
-                this.context = yield configFile_service_1.configServiceInstance.addContext(constant_1.APP_LIST_CONTEXT_NAME, constant_1.APP_LIST_CONTEXT_TYPE);
+                this.context = yield configFile_service_1.configServiceInstance.addContext(constant_1.APP_CONNECTED_LIST_CONTEXT_NAME, constant_1.APP_CONNECTED_LIST_CONTEXT_TYPE);
             }
             return this.context;
         });
@@ -118,7 +118,7 @@ class AppListService {
                 "x-access-token": userToken
             },
         };
-        return axios_1.default.get(`${adminCredential.urlAdmin}/application/${applicationId}`, config).then((result) => {
+        return axios_1.default.get(`${adminCredential.urlAdmin}/applications/${applicationId}`, config).then((result) => {
             return result.data;
         }).catch((err) => {
             console.error(err);
@@ -134,4 +134,4 @@ class AppListService {
     }
 }
 exports.AppListService = AppListService;
-//# sourceMappingURL=appList.services.js.map
+//# sourceMappingURL=appConnectedList.services.js.map

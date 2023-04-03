@@ -5,6 +5,7 @@ export declare class AdminProfileService {
     private _adminNode;
     private constructor();
     static getInstance(): AdminProfileService;
+    get adminNode(): SpinalNode<any>;
     init(context: SpinalContext): Promise<SpinalNode>;
     addAppToProfil(app: SpinalNode): Promise<void>;
     addToAdminProfile(data: IPortofolioAuth): Promise<IPortofolioAuthRes>;
