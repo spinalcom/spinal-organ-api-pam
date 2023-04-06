@@ -514,7 +514,7 @@ class AuthorizationService {
         return __awaiter(this, void 0, void 0, function* () {
             const refNode = new spinal_env_viewer_graph_service_1.SpinalNode(node.getName().get(), node.getType().get(), node);
             refNode.info.name.set(node.info.name);
-            this._addRefToNode(node, refNode);
+            yield this._addRefToNode(node, refNode);
             return refNode;
         });
     }

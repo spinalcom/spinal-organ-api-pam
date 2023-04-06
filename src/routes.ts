@@ -1460,6 +1460,169 @@ export function RegisterRoutes(app: express.Router) {
             }
         });
         // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
+        app.post('/api/v1/pam/add_app_to_favoris/:portofolioId',
+            ...(fetchMiddlewares<RequestHandler>(AppsController)),
+            ...(fetchMiddlewares<RequestHandler>(AppsController.prototype.addPortofolioAppToFavoris)),
+
+            function AppsController_addPortofolioAppToFavoris(request: any, response: any, next: any) {
+            const args = {
+                    request: {"in":"request","name":"request","required":true,"dataType":"object"},
+                    portofolioId: {"in":"path","name":"portofolioId","required":true,"dataType":"string"},
+                    data: {"in":"body","name":"data","required":true,"dataType":"nestedObjectLiteral","nestedProperties":{"appIds":{"dataType":"array","array":{"dataType":"string"},"required":true}}},
+            };
+
+            // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
+
+            let validatedArgs: any[] = [];
+            try {
+                validatedArgs = getValidatedArgs(args, request, response);
+
+                const controller = new AppsController();
+
+
+              const promise = controller.addPortofolioAppToFavoris.apply(controller, validatedArgs as any);
+              promiseHandler(controller, promise, response, undefined, next);
+            } catch (err) {
+                return next(err);
+            }
+        });
+        // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
+        app.post('/api/v1/pam/add_app_to_favoris/:portofolioId/:bosId',
+            ...(fetchMiddlewares<RequestHandler>(AppsController)),
+            ...(fetchMiddlewares<RequestHandler>(AppsController.prototype.addBuildingAppToFavoris)),
+
+            function AppsController_addBuildingAppToFavoris(request: any, response: any, next: any) {
+            const args = {
+                    request: {"in":"request","name":"request","required":true,"dataType":"object"},
+                    portofolioId: {"in":"path","name":"portofolioId","required":true,"dataType":"string"},
+                    bosId: {"in":"path","name":"bosId","required":true,"dataType":"string"},
+                    data: {"in":"body","name":"data","required":true,"dataType":"nestedObjectLiteral","nestedProperties":{"appIds":{"dataType":"array","array":{"dataType":"string"},"required":true}}},
+            };
+
+            // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
+
+            let validatedArgs: any[] = [];
+            try {
+                validatedArgs = getValidatedArgs(args, request, response);
+
+                const controller = new AppsController();
+
+
+              const promise = controller.addBuildingAppToFavoris.apply(controller, validatedArgs as any);
+              promiseHandler(controller, promise, response, undefined, next);
+            } catch (err) {
+                return next(err);
+            }
+        });
+        // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
+        app.post('/api/v1/pam/remove_app_from_favoris/:portofolioId',
+            ...(fetchMiddlewares<RequestHandler>(AppsController)),
+            ...(fetchMiddlewares<RequestHandler>(AppsController.prototype.removePortofolioAppFromFavoris)),
+
+            function AppsController_removePortofolioAppFromFavoris(request: any, response: any, next: any) {
+            const args = {
+                    request: {"in":"request","name":"request","required":true,"dataType":"object"},
+                    portofolioId: {"in":"path","name":"portofolioId","required":true,"dataType":"string"},
+                    data: {"in":"body","name":"data","required":true,"dataType":"nestedObjectLiteral","nestedProperties":{"appIds":{"dataType":"array","array":{"dataType":"string"},"required":true}}},
+            };
+
+            // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
+
+            let validatedArgs: any[] = [];
+            try {
+                validatedArgs = getValidatedArgs(args, request, response);
+
+                const controller = new AppsController();
+
+
+              const promise = controller.removePortofolioAppFromFavoris.apply(controller, validatedArgs as any);
+              promiseHandler(controller, promise, response, undefined, next);
+            } catch (err) {
+                return next(err);
+            }
+        });
+        // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
+        app.post('/api/v1/pam/remove_app_from_favoris/:portofolioId/:bosId',
+            ...(fetchMiddlewares<RequestHandler>(AppsController)),
+            ...(fetchMiddlewares<RequestHandler>(AppsController.prototype.removeBuildingAppFromFavoris)),
+
+            function AppsController_removeBuildingAppFromFavoris(request: any, response: any, next: any) {
+            const args = {
+                    request: {"in":"request","name":"request","required":true,"dataType":"object"},
+                    portofolioId: {"in":"path","name":"portofolioId","required":true,"dataType":"string"},
+                    bosId: {"in":"path","name":"bosId","required":true,"dataType":"string"},
+                    data: {"in":"body","name":"data","required":true,"dataType":"nestedObjectLiteral","nestedProperties":{"appIds":{"dataType":"array","array":{"dataType":"string"},"required":true}}},
+            };
+
+            // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
+
+            let validatedArgs: any[] = [];
+            try {
+                validatedArgs = getValidatedArgs(args, request, response);
+
+                const controller = new AppsController();
+
+
+              const promise = controller.removeBuildingAppFromFavoris.apply(controller, validatedArgs as any);
+              promiseHandler(controller, promise, response, undefined, next);
+            } catch (err) {
+                return next(err);
+            }
+        });
+        // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
+        app.get('/api/v1/pam/get_favorite_apps/:portofolioId',
+            ...(fetchMiddlewares<RequestHandler>(AppsController)),
+            ...(fetchMiddlewares<RequestHandler>(AppsController.prototype.getPortofolioFavoriteApps)),
+
+            function AppsController_getPortofolioFavoriteApps(request: any, response: any, next: any) {
+            const args = {
+                    request: {"in":"request","name":"request","required":true,"dataType":"object"},
+                    portofolioId: {"in":"path","name":"portofolioId","required":true,"dataType":"string"},
+            };
+
+            // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
+
+            let validatedArgs: any[] = [];
+            try {
+                validatedArgs = getValidatedArgs(args, request, response);
+
+                const controller = new AppsController();
+
+
+              const promise = controller.getPortofolioFavoriteApps.apply(controller, validatedArgs as any);
+              promiseHandler(controller, promise, response, undefined, next);
+            } catch (err) {
+                return next(err);
+            }
+        });
+        // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
+        app.get('/api/v1/pam/get_favorite_apps/:portofolioId/:bosId',
+            ...(fetchMiddlewares<RequestHandler>(AppsController)),
+            ...(fetchMiddlewares<RequestHandler>(AppsController.prototype.getBuildingFavoriteApps)),
+
+            function AppsController_getBuildingFavoriteApps(request: any, response: any, next: any) {
+            const args = {
+                    request: {"in":"request","name":"request","required":true,"dataType":"object"},
+                    portofolioId: {"in":"path","name":"portofolioId","required":true,"dataType":"string"},
+                    bosId: {"in":"path","name":"bosId","required":true,"dataType":"string"},
+            };
+
+            // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
+
+            let validatedArgs: any[] = [];
+            try {
+                validatedArgs = getValidatedArgs(args, request, response);
+
+                const controller = new AppsController();
+
+
+              const promise = controller.getBuildingFavoriteApps.apply(controller, validatedArgs as any);
+              promiseHandler(controller, promise, response, undefined, next);
+            } catch (err) {
+                return next(err);
+            }
+        });
+        // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
         app.post('/api/v1/pam/auth',
             ...(fetchMiddlewares<RequestHandler>(AuthController)),
             ...(fetchMiddlewares<RequestHandler>(AuthController.prototype.authenticate)),

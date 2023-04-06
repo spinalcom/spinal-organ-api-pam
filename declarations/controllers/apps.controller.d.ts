@@ -57,6 +57,32 @@ export declare class AppsController extends Controller {
     uploadBuildingApp(req: express.Request, file: any): Promise<IApp[] | {
         message: string;
     }>;
+    addPortofolioAppToFavoris(request: express.Request, portofolioId: string, data: {
+        appIds: string[];
+    }): Promise<any[] | {
+        message: any;
+    }>;
+    addBuildingAppToFavoris(request: express.Request, portofolioId: string, bosId: string, data: {
+        appIds: string[];
+    }): Promise<any[] | {
+        message: any;
+    }>;
+    removePortofolioAppFromFavoris(request: express.Request, portofolioId: string, data: {
+        appIds: string[];
+    }): Promise<any[] | {
+        message: any;
+    }>;
+    removeBuildingAppFromFavoris(request: express.Request, portofolioId: string, bosId: string, data: {
+        appIds: string[];
+    }): Promise<any[] | {
+        message: any;
+    }>;
+    getPortofolioFavoriteApps(request: express.Request, portofolioId: string): Promise<any[] | {
+        message: any;
+    }>;
+    getBuildingFavoriteApps(request: express.Request, portofolioId: string, bosId: string): Promise<any[] | {
+        message: any;
+    }>;
 }
 declare const _default: AppsController;
 export default _default;

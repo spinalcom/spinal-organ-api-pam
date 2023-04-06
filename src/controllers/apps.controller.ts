@@ -22,7 +22,7 @@
  * <http://resources.spinalcom.com/licenses.pdf>.
  */
 import * as express from 'express';
-import { AppProfileService, AppService, AppsType, UserProfileService } from "../services";
+import { AppProfileService, AppService, AppsType, UserListService, UserProfileService } from "../services";
 import { Body, Controller, Delete, Get, Path, Post, Put, Request, Route, Security, Tags, UploadedFile } from "tsoa";
 import { HTTP_CODES, SECURITY_MESSAGES, SECURITY_NAME } from "../constant";
 import { IApp } from "../interfaces";
@@ -39,8 +39,6 @@ export class AppsController extends Controller {
     public constructor() {
         super();
     }
-
-
 
     // @Security(SECURITY_NAME.admin)
     @Post("/create_admin_app")
@@ -436,6 +434,121 @@ export class AppsController extends Controller {
             }
             this.setStatus(HTTP_CODES.BAD_REQUEST);
             return { message: "oops, something went wrong, please check your input data" };
+        } catch (error) {
+            this.setStatus(error.code || HTTP_CODES.INTERNAL_ERROR);
+            return { message: error.message };
+        }
+    }
+
+    /////////////////////////////////////////////////////////
+    //                      FAVORIS                        //
+    /////////////////////////////////////////////////////////
+
+
+
+    // @Security(SECURITY_NAME.profile)
+    @Post("/add_app_to_favoris/{portofolioId}")
+    public async addPortofolioAppToFavoris(@Request() request: express.Request, @Path() portofolioId: string, @Body() data: { appIds: string[] }) {
+        try {
+            const tokenInfo: any = await checkAndGetTokenInfo(request);
+
+            let profileId = tokenInfo.profile.profileId || tokenInfo.profile.userProfileBosConfigId;
+            let userName = tokenInfo.userInfo.userName;
+
+            const nodes = await UserListService.getInstance().addFavoriteApp(userName, profileId, data.appIds, portofolioId);
+            this.setStatus(HTTP_CODES.OK);
+            return nodes.map(node => node.info.get());
+
+        } catch (error) {
+            this.setStatus(error.code || HTTP_CODES.INTERNAL_ERROR);
+            return { message: error.message };
+        }
+    }
+
+    // @Security(SECURITY_NAME.profile)
+    @Post("/add_app_to_favoris/{portofolioId}/{bosId}")
+    public async addBuildingAppToFavoris(@Request() request: express.Request, @Path() portofolioId: string, @Path() bosId: string, @Body() data: { appIds: string[] }) {
+        try {
+            const tokenInfo: any = await checkAndGetTokenInfo(request);
+
+            let profileId = tokenInfo.profile.profileId || tokenInfo.profile.userProfileBosConfigId;
+            let userName = tokenInfo.userInfo.userName;
+
+            const nodes = await UserListService.getInstance().addFavoriteApp(userName, profileId, data.appIds, portofolioId, bosId);
+            this.setStatus(HTTP_CODES.OK);
+            return nodes.map(node => node.info.get());
+
+        } catch (error) {
+            this.setStatus(error.code || HTTP_CODES.INTERNAL_ERROR);
+            return { message: error.message };
+        }
+    }
+
+    @Post("/remove_app_from_favoris/{portofolioId}")
+    public async removePortofolioAppFromFavoris(@Request() request: express.Request, @Path() portofolioId: string, @Body() data: { appIds: string[] }) {
+        try {
+            const tokenInfo: any = await checkAndGetTokenInfo(request);
+
+            let profileId = tokenInfo.profile.profileId || tokenInfo.profile.userProfileBosConfigId;
+            let userName = tokenInfo.userInfo.userName;
+
+            const nodes = await UserListService.getInstance().removeFavoriteApp(userName, profileId, data.appIds, portofolioId);
+            this.setStatus(HTTP_CODES.OK);
+            return nodes.map(node => node.info.get());
+
+        } catch (error) {
+            this.setStatus(error.code || HTTP_CODES.INTERNAL_ERROR);
+            return { message: error.message };
+        }
+    }
+
+    // @Security(SECURITY_NAME.profile)
+    @Post("/remove_app_from_favoris/{portofolioId}/{bosId}")
+    public async removeBuildingAppFromFavoris(@Request() request: express.Request, @Path() portofolioId: string, @Path() bosId: string, @Body() data: { appIds: string[] }) {
+        try {
+            const tokenInfo: any = await checkAndGetTokenInfo(request);
+
+            let profileId = tokenInfo.profile.profileId || tokenInfo.profile.userProfileBosConfigId;
+            let userName = tokenInfo.userInfo.userName;
+
+            const nodes = await UserListService.getInstance().removeFavoriteApp(userName, profileId, data.appIds, portofolioId, bosId);
+            this.setStatus(HTTP_CODES.OK);
+            return nodes.map(node => node.info.get());
+
+        } catch (error) {
+            this.setStatus(error.code || HTTP_CODES.INTERNAL_ERROR);
+            return { message: error.message };
+        }
+    }
+
+    @Get("/get_favorite_apps/{portofolioId}")
+    public async getPortofolioFavoriteApps(@Request() request: express.Request, @Path() portofolioId: string) {
+        try {
+            const tokenInfo: any = await checkAndGetTokenInfo(request);
+
+            let userName = tokenInfo.userInfo.userName;
+
+            const nodes = await UserListService.getInstance().getFavoriteApps(userName, portofolioId);
+            this.setStatus(HTTP_CODES.OK);
+            return nodes.map(node => node.info.get());
+
+        } catch (error) {
+            this.setStatus(error.code || HTTP_CODES.INTERNAL_ERROR);
+            return { message: error.message };
+        }
+    }
+
+    @Get("/get_favorite_apps/{portofolioId}/{bosId}")
+    public async getBuildingFavoriteApps(@Request() request: express.Request, @Path() portofolioId: string, @Path() bosId: string) {
+        try {
+            const tokenInfo: any = await checkAndGetTokenInfo(request);
+
+            let userName = tokenInfo.userInfo.userName;
+
+            const nodes = await UserListService.getInstance().getFavoriteApps(userName, portofolioId, bosId);
+            this.setStatus(HTTP_CODES.OK);
+            return nodes.map(node => node.info.get());
+
         } catch (error) {
             this.setStatus(error.code || HTTP_CODES.INTERNAL_ERROR);
             return { message: error.message };

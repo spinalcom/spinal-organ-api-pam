@@ -568,7 +568,7 @@ export default class AuthorizationService {
     private async _createNodeReference(node: SpinalNode): Promise<SpinalNode> {
         const refNode = new SpinalNode(node.getName().get(), node.getType().get(), node);
         refNode.info.name.set(node.info.name);
-        this._addRefToNode(node, refNode);
+        await this._addRefToNode(node, refNode);
         return refNode;
     }
 

@@ -442,6 +442,106 @@ let AppsController = class AppsController extends tsoa_1.Controller {
             }
         });
     }
+    /////////////////////////////////////////////////////////
+    //                      FAVORIS                        //
+    /////////////////////////////////////////////////////////
+    // @Security(SECURITY_NAME.profile)
+    addPortofolioAppToFavoris(request, portofolioId, data) {
+        return __awaiter(this, void 0, void 0, function* () {
+            try {
+                const tokenInfo = yield (0, authentication_1.checkAndGetTokenInfo)(request);
+                let profileId = tokenInfo.profile.profileId || tokenInfo.profile.userProfileBosConfigId;
+                let userName = tokenInfo.userInfo.userName;
+                const nodes = yield services_1.UserListService.getInstance().addFavoriteApp(userName, profileId, data.appIds, portofolioId);
+                this.setStatus(constant_1.HTTP_CODES.OK);
+                return nodes.map(node => node.info.get());
+            }
+            catch (error) {
+                this.setStatus(error.code || constant_1.HTTP_CODES.INTERNAL_ERROR);
+                return { message: error.message };
+            }
+        });
+    }
+    // @Security(SECURITY_NAME.profile)
+    addBuildingAppToFavoris(request, portofolioId, bosId, data) {
+        return __awaiter(this, void 0, void 0, function* () {
+            try {
+                const tokenInfo = yield (0, authentication_1.checkAndGetTokenInfo)(request);
+                let profileId = tokenInfo.profile.profileId || tokenInfo.profile.userProfileBosConfigId;
+                let userName = tokenInfo.userInfo.userName;
+                const nodes = yield services_1.UserListService.getInstance().addFavoriteApp(userName, profileId, data.appIds, portofolioId, bosId);
+                this.setStatus(constant_1.HTTP_CODES.OK);
+                return nodes.map(node => node.info.get());
+            }
+            catch (error) {
+                this.setStatus(error.code || constant_1.HTTP_CODES.INTERNAL_ERROR);
+                return { message: error.message };
+            }
+        });
+    }
+    removePortofolioAppFromFavoris(request, portofolioId, data) {
+        return __awaiter(this, void 0, void 0, function* () {
+            try {
+                const tokenInfo = yield (0, authentication_1.checkAndGetTokenInfo)(request);
+                let profileId = tokenInfo.profile.profileId || tokenInfo.profile.userProfileBosConfigId;
+                let userName = tokenInfo.userInfo.userName;
+                const nodes = yield services_1.UserListService.getInstance().removeFavoriteApp(userName, profileId, data.appIds, portofolioId);
+                this.setStatus(constant_1.HTTP_CODES.OK);
+                return nodes.map(node => node.info.get());
+            }
+            catch (error) {
+                this.setStatus(error.code || constant_1.HTTP_CODES.INTERNAL_ERROR);
+                return { message: error.message };
+            }
+        });
+    }
+    // @Security(SECURITY_NAME.profile)
+    removeBuildingAppFromFavoris(request, portofolioId, bosId, data) {
+        return __awaiter(this, void 0, void 0, function* () {
+            try {
+                const tokenInfo = yield (0, authentication_1.checkAndGetTokenInfo)(request);
+                let profileId = tokenInfo.profile.profileId || tokenInfo.profile.userProfileBosConfigId;
+                let userName = tokenInfo.userInfo.userName;
+                const nodes = yield services_1.UserListService.getInstance().removeFavoriteApp(userName, profileId, data.appIds, portofolioId, bosId);
+                this.setStatus(constant_1.HTTP_CODES.OK);
+                return nodes.map(node => node.info.get());
+            }
+            catch (error) {
+                this.setStatus(error.code || constant_1.HTTP_CODES.INTERNAL_ERROR);
+                return { message: error.message };
+            }
+        });
+    }
+    getPortofolioFavoriteApps(request, portofolioId) {
+        return __awaiter(this, void 0, void 0, function* () {
+            try {
+                const tokenInfo = yield (0, authentication_1.checkAndGetTokenInfo)(request);
+                let userName = tokenInfo.userInfo.userName;
+                const nodes = yield services_1.UserListService.getInstance().getFavoriteApps(userName, portofolioId);
+                this.setStatus(constant_1.HTTP_CODES.OK);
+                return nodes.map(node => node.info.get());
+            }
+            catch (error) {
+                this.setStatus(error.code || constant_1.HTTP_CODES.INTERNAL_ERROR);
+                return { message: error.message };
+            }
+        });
+    }
+    getBuildingFavoriteApps(request, portofolioId, bosId) {
+        return __awaiter(this, void 0, void 0, function* () {
+            try {
+                const tokenInfo = yield (0, authentication_1.checkAndGetTokenInfo)(request);
+                let userName = tokenInfo.userInfo.userName;
+                const nodes = yield services_1.UserListService.getInstance().getFavoriteApps(userName, portofolioId, bosId);
+                this.setStatus(constant_1.HTTP_CODES.OK);
+                return nodes.map(node => node.info.get());
+            }
+            catch (error) {
+                this.setStatus(error.code || constant_1.HTTP_CODES.INTERNAL_ERROR);
+                return { message: error.message };
+            }
+        });
+    }
 };
 __decorate([
     (0, tsoa_1.Post)("/create_admin_app"),
@@ -587,6 +687,61 @@ __decorate([
     __metadata("design:paramtypes", [Object, Object]),
     __metadata("design:returntype", Promise)
 ], AppsController.prototype, "uploadBuildingApp", null);
+__decorate([
+    (0, tsoa_1.Post)("/add_app_to_favoris/{portofolioId}"),
+    __param(0, (0, tsoa_1.Request)()),
+    __param(1, (0, tsoa_1.Path)()),
+    __param(2, (0, tsoa_1.Body)()),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [Object, String, Object]),
+    __metadata("design:returntype", Promise)
+], AppsController.prototype, "addPortofolioAppToFavoris", null);
+__decorate([
+    (0, tsoa_1.Post)("/add_app_to_favoris/{portofolioId}/{bosId}"),
+    __param(0, (0, tsoa_1.Request)()),
+    __param(1, (0, tsoa_1.Path)()),
+    __param(2, (0, tsoa_1.Path)()),
+    __param(3, (0, tsoa_1.Body)()),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [Object, String, String, Object]),
+    __metadata("design:returntype", Promise)
+], AppsController.prototype, "addBuildingAppToFavoris", null);
+__decorate([
+    (0, tsoa_1.Post)("/remove_app_from_favoris/{portofolioId}"),
+    __param(0, (0, tsoa_1.Request)()),
+    __param(1, (0, tsoa_1.Path)()),
+    __param(2, (0, tsoa_1.Body)()),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [Object, String, Object]),
+    __metadata("design:returntype", Promise)
+], AppsController.prototype, "removePortofolioAppFromFavoris", null);
+__decorate([
+    (0, tsoa_1.Post)("/remove_app_from_favoris/{portofolioId}/{bosId}"),
+    __param(0, (0, tsoa_1.Request)()),
+    __param(1, (0, tsoa_1.Path)()),
+    __param(2, (0, tsoa_1.Path)()),
+    __param(3, (0, tsoa_1.Body)()),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [Object, String, String, Object]),
+    __metadata("design:returntype", Promise)
+], AppsController.prototype, "removeBuildingAppFromFavoris", null);
+__decorate([
+    (0, tsoa_1.Get)("/get_favorite_apps/{portofolioId}"),
+    __param(0, (0, tsoa_1.Request)()),
+    __param(1, (0, tsoa_1.Path)()),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [Object, String]),
+    __metadata("design:returntype", Promise)
+], AppsController.prototype, "getPortofolioFavoriteApps", null);
+__decorate([
+    (0, tsoa_1.Get)("/get_favorite_apps/{portofolioId}/{bosId}"),
+    __param(0, (0, tsoa_1.Request)()),
+    __param(1, (0, tsoa_1.Path)()),
+    __param(2, (0, tsoa_1.Path)()),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [Object, String, String]),
+    __metadata("design:returntype", Promise)
+], AppsController.prototype, "getBuildingFavoriteApps", null);
 AppsController = __decorate([
     (0, tsoa_1.Route)("/api/v1/pam"),
     (0, tsoa_1.Tags)("Applications"),

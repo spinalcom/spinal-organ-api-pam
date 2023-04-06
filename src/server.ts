@@ -123,8 +123,7 @@ function initSwagger(app: express.Express) {
     return res.send(
       swaggerUi.generateHTML(await import("./swagger/swagger.json"))
     )
-  }
-  );
+  });
 }
 
 function useApiMiddleWare(app: express.Express) {

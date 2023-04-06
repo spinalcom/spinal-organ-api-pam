@@ -43,6 +43,8 @@ const fileLog = require("log-to-file");
 const path = require("path");
 const token_service_1 = require("./token.service");
 const authentification_service_1 = require("./authentification.service");
+const userProfile_service_1 = require("./userProfile.service");
+const authorization_service_1 = require("./authorization.service");
 class UserListService {
     constructor() { }
     static getInstance() {
@@ -87,48 +89,72 @@ class UserListService {
             return users.find(el => { var _a, _b; return ((_a = el.info.userName) === null || _a === void 0 ? void 0 : _a.get()) === username || ((_b = el.info.userId) === null || _b === void 0 ? void 0 : _b.get()) === username; });
         });
     }
-    getFavoriteApps(userId) {
+    ///////////////////////////////////////////////
+    //              Favorite Apps                //
+    ///////////////////////////////////////////////
+    addFavoriteApp(userId, userProfileId, appIds, portofolioId, buildingId) {
+        return __awaiter(this, void 0, void 0, function* () {
+            const user = yield this.getUser(userId);
+            if (!Array.isArray(appIds))
+                appIds = [appIds];
+            const authorizedApps = yield this._getAuthorizedApps(userProfileId, portofolioId, buildingId);
+            const favoriteApp = yield this.getFavoriteApps(userId, portofolioId, buildingId);
+            const authorizedAppsObj = this._convertListToObj(authorizedApps);
+            const favoriteAppsObj = this._convertListToObj(favoriteApp);
+            return appIds.reduce((prom, appId) => __awaiter(this, void 0, void 0, function* () {
+                const list = yield prom;
+                const app = authorizedAppsObj[appId];
+                if (!app || favoriteAppsObj[appId])
+                    return list;
+                const reference = yield authorization_service_1.authorizationInstance._createNodeReference(app);
+                reference.info.add_attr({ appId, portofolioId });
+                if (buildingId)
+                    reference.info.add_attr({ buildingId });
+                yield user.addChild(reference, constant_1.USER_TO_FAVORITE_APP_RELATION, constant_1.PTR_LST_TYPE);
+                list.push(app);
+                return list;
+            }), Promise.resolve([]));
+        });
+    }
+    removeFavoriteApp(userId, userProfileId, appIds, portofolioId, buildingId) {
+        return __awaiter(this, void 0, void 0, function* () {
+            if (!Array.isArray(appIds))
+                appIds = [appIds];
+            const user = yield this.getUser(userId);
+            const favoriteApps = yield user.getChildren(constant_1.USER_TO_FAVORITE_APP_RELATION);
+            const favoriteAppObj = this._convertListToObj(favoriteApps, "appId");
+            return appIds.reduce((prom, appId) => __awaiter(this, void 0, void 0, function* () {
+                const list = yield prom;
+                try {
+                    const app = favoriteAppObj[appId];
+                    const element = yield app.getElement();
+                    yield app.removeFromGraph();
+                    list.push(element);
+                }
+                catch (error) { }
+                return list;
+            }), Promise.resolve([]));
+        });
+    }
+    getFavoriteApps(userId, portofolioId, buildingId) {
         return __awaiter(this, void 0, void 0, function* () {
             const user = yield this.getUser(userId);
             if (!user)
                 return [];
-            return user.getChildren(constant_1.USER_TO_FAVORITE_APP_RELATION);
+            const children = yield user.getChildren(constant_1.USER_TO_FAVORITE_APP_RELATION);
+            return children.reduce((prom, el) => __awaiter(this, void 0, void 0, function* () {
+                const list = yield prom;
+                const portId = el.info.portofolioId ? el.info.portofolioId.get() : undefined;
+                const buildId = el.info.buildingId ? el.info.buildingId.get() : undefined;
+                if (portofolioId === portId && buildId == buildingId) {
+                    const element = yield el.getElement(true);
+                    if (element)
+                        list.push(element);
+                }
+                return list;
+            }), Promise.resolve([]));
         });
     }
-    // public async addFavoriteApp(userId: string, userProfileId: string, appIds: string | string[]): Promise<SpinalNode[]> {
-    //     if (!Array.isArray(appIds)) appIds = [appIds];
-    //     return appIds.reduce(async (prom, appId) => {
-    //         const list = await prom;
-    //         try {
-    //             const hasAccess = await UserProfileService.getInstance().profileHasAccessToApp(userProfileId, appId);
-    //             if (!hasAccess) throw { code: HTTP_CODES.UNAUTHORIZED, message: "unauthorized" };;
-    //             const [user, app] = await Promise.all([this.getUser(userId), AppService.getInstance().getApps(appId)]);
-    //             if (!user) throw { code: HTTP_CODES.BAD_REQUEST, message: `No user found for ${userId}` };
-    //             if (!app) throw { code: HTTP_CODES.BAD_REQUEST, message: `No app found for ${appId}` };
-    //             await user.addChild(app, USER_TO_FAVORITE_APP_RELATION, PTR_LST_TYPE);
-    //             list.push(app);
-    //         } catch (error) {
-    //         }
-    //         return list
-    //     }, Promise.resolve([]))
-    // }
-    // public async removeFavoriteApp(userId: string, userProfileId: string, appIds: string | string[]): Promise<SpinalNode[]> {
-    //     if (!Array.isArray(appIds)) appIds = [appIds];
-    //     return appIds.reduce(async (prom, appId) => {
-    //         const list = await prom;
-    //         try {
-    //             const hasAccess = await UserProfileService.getInstance().profileHasAccessToApp(userProfileId, appId);
-    //             if (!hasAccess) throw { code: HTTP_CODES.UNAUTHORIZED, message: "unauthorized" };;
-    //             const [user, app] = await Promise.all([this.getUser(userId), AppService.getInstance().getApps(appId)]);
-    //             if (!user) throw { code: HTTP_CODES.BAD_REQUEST, message: `No user found for ${userId}` };
-    //             if (!app) throw { code: HTTP_CODES.BAD_REQUEST, message: `No app found for ${appId}` };
-    //             await user.removeChild(app, USER_TO_FAVORITE_APP_RELATION, PTR_LST_TYPE);
-    //             list.push(app);
-    //         } catch (error) {
-    //         }
-    //         return list
-    //     }, Promise.resolve([]))
-    // }
     /////////////////////////////////////////////
     //                  ADMIN                  //
     /////////////////////////////////////////////
@@ -205,8 +231,6 @@ class UserListService {
     _comparePassword(password, hash) {
         return bcrypt.compare(password, hash);
     }
-    _linkUserToken() {
-    }
     _generateString(length = 10) {
         const charset = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789*/-_@#&";
         let text = "";
@@ -221,6 +245,12 @@ class UserListService {
             const promises = tokens.map(token => token_service_1.TokenService.getInstance().deleteToken(token));
             return Promise.all(promises);
         });
+    }
+    _getAuthorizedApps(userProfileId, portofolioId, buildingId) {
+        const userProfileInstance = userProfile_service_1.UserProfileService.getInstance();
+        return buildingId
+            ? userProfileInstance.getAuthorizedBosApp(userProfileId, portofolioId, buildingId)
+            : userProfileInstance.getAuthorizedPortofolioApp(userProfileId, portofolioId);
     }
     _getProfileInfo(userToken, adminCredential, isUser = true) {
         let urlAdmin = adminCredential.urlAdmin;
@@ -259,6 +289,15 @@ class UserListService {
                 throw new Error("No authentication platform is registered");
             return adminCredential;
         });
+    }
+    _convertListToObj(liste, key = "id") {
+        return liste.reduce((obj, item) => {
+            var _a;
+            const id = (_a = item.info[key]) === null || _a === void 0 ? void 0 : _a.get();
+            if (id)
+                obj[id] = item;
+            return obj;
+        }, {});
     }
 }
 exports.UserListService = UserListService;

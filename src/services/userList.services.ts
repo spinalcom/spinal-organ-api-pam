@@ -35,6 +35,7 @@ import { TokenService } from "./token.service";
 import { AuthentificationService } from './authentification.service'
 import { UserProfileService } from "./userProfile.service";
 import { AppService } from "./apps.service";
+import { authorizationInstance } from "./authorization.service";
 
 
 export class UserListService {
@@ -87,66 +88,75 @@ export class UserListService {
         return users.find(el => el.info.userName?.get() === username || el.info.userId?.get() === username);
     }
 
+    ///////////////////////////////////////////////
+    //              Favorite Apps                //
+    ///////////////////////////////////////////////
 
-
-    public async getFavoriteApps(userId: string): Promise<SpinalNode[]> {
+    public async addFavoriteApp(userId: string, userProfileId: string, appIds: string | string[], portofolioId: string, buildingId?: string): Promise<SpinalNode[]> {
         const user = await this.getUser(userId);
-        if (!user) return [];
-        return user.getChildren(USER_TO_FAVORITE_APP_RELATION);
+
+        if (!Array.isArray(appIds)) appIds = [appIds];
+        const authorizedApps = await this._getAuthorizedApps(userProfileId, portofolioId, buildingId);
+        const favoriteApp = await this.getFavoriteApps(userId, portofolioId, buildingId);
+
+        const authorizedAppsObj = this._convertListToObj(authorizedApps);
+        const favoriteAppsObj = this._convertListToObj(favoriteApp);
+
+        return appIds.reduce(async (prom, appId) => {
+            const list = await prom;
+            const app = authorizedAppsObj[appId];
+            if (!app || favoriteAppsObj[appId]) return list;
+
+            const reference = await (authorizationInstance as any)._createNodeReference(app);
+            reference.info.add_attr({ appId, portofolioId });
+            if (buildingId) reference.info.add_attr({ buildingId });
+
+            await user.addChild(reference, USER_TO_FAVORITE_APP_RELATION, PTR_LST_TYPE);
+            list.push(app);
+
+            return list;
+        }, Promise.resolve([]));
+
     }
 
-    // public async addFavoriteApp(userId: string, userProfileId: string, appIds: string | string[]): Promise<SpinalNode[]> {
-    //     if (!Array.isArray(appIds)) appIds = [appIds];
+    public async removeFavoriteApp(userId: string, userProfileId: string, appIds: string | string[], portofolioId: string, buildingId?: string): Promise<SpinalNode[]> {
+        if (!Array.isArray(appIds)) appIds = [appIds];
 
-    //     return appIds.reduce(async (prom, appId) => {
-    //         const list = await prom;
+        const user = await this.getUser(userId);
+        const favoriteApps = await user.getChildren(USER_TO_FAVORITE_APP_RELATION);
+        const favoriteAppObj = this._convertListToObj(favoriteApps, "appId");
 
-    //         try {
-    //             const hasAccess = await UserProfileService.getInstance().profileHasAccessToApp(userProfileId, appId);
-    //             if (!hasAccess) throw { code: HTTP_CODES.UNAUTHORIZED, message: "unauthorized" };;
+        return appIds.reduce(async (prom, appId) => {
+            const list = await prom;
 
-    //             const [user, app] = await Promise.all([this.getUser(userId), AppService.getInstance().getApps(appId)]);
-    //             if (!user) throw { code: HTTP_CODES.BAD_REQUEST, message: `No user found for ${userId}` };
-    //             if (!app) throw { code: HTTP_CODES.BAD_REQUEST, message: `No app found for ${appId}` };
+            try {
+                const app = favoriteAppObj[appId];
+                const element = await app.getElement();
+                await app.removeFromGraph();
 
-    //             await user.addChild(app, USER_TO_FAVORITE_APP_RELATION, PTR_LST_TYPE);
-    //             list.push(app);
-    //         } catch (error) {
+                list.push(element);
+            } catch (error) { }
 
-    //         }
+            return list
+        }, Promise.resolve([]))
 
-    //         return list
+    }
 
-    //     }, Promise.resolve([]))
-
-    // }
-
-    // public async removeFavoriteApp(userId: string, userProfileId: string, appIds: string | string[]): Promise<SpinalNode[]> {
-    //     if (!Array.isArray(appIds)) appIds = [appIds];
-
-    //     return appIds.reduce(async (prom, appId) => {
-    //         const list = await prom;
-
-    //         try {
-    //             const hasAccess = await UserProfileService.getInstance().profileHasAccessToApp(userProfileId, appId);
-    //             if (!hasAccess) throw { code: HTTP_CODES.UNAUTHORIZED, message: "unauthorized" };;
-
-    //             const [user, app] = await Promise.all([this.getUser(userId), AppService.getInstance().getApps(appId)]);
-    //             if (!user) throw { code: HTTP_CODES.BAD_REQUEST, message: `No user found for ${userId}` };
-    //             if (!app) throw { code: HTTP_CODES.BAD_REQUEST, message: `No app found for ${appId}` };
-
-    //             await user.removeChild(app, USER_TO_FAVORITE_APP_RELATION, PTR_LST_TYPE);
-    //             list.push(app);
-    //         } catch (error) {
-
-    //         }
-
-    //         return list
-
-    //     }, Promise.resolve([]))
-
-    // }
-
+    public async getFavoriteApps(userId: string, portofolioId: string, buildingId?: string): Promise<SpinalNode[]> {
+        const user = await this.getUser(userId);
+        if (!user) return [];
+        const children = await user.getChildren(USER_TO_FAVORITE_APP_RELATION);
+        return children.reduce(async (prom, el) => {
+            const list = await prom;
+            const portId = el.info.portofolioId ? el.info.portofolioId.get() : undefined;
+            const buildId = el.info.buildingId ? el.info.buildingId.get() : undefined;
+            if (portofolioId === portId && buildId == buildingId) {
+                const element = await el.getElement(true);
+                if (element) list.push(element);
+            }
+            return list
+        }, Promise.resolve([]));
+    }
 
     /////////////////////////////////////////////
     //                  ADMIN                  //
@@ -230,10 +240,6 @@ export class UserListService {
         return bcrypt.compare(password, hash);
     }
 
-    private _linkUserToken() {
-
-    }
-
     private _generateString(length = 10): string {
         const charset = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789*/-_@#&";
         let text = "";
@@ -249,6 +255,13 @@ export class UserListService {
         return Promise.all(promises);
     }
 
+    private _getAuthorizedApps(userProfileId: string, portofolioId: string, buildingId: string): Promise<SpinalNode[]> {
+        const userProfileInstance = UserProfileService.getInstance();
+
+        return buildingId
+            ? userProfileInstance.getAuthorizedBosApp(userProfileId, portofolioId, buildingId)
+            : userProfileInstance.getAuthorizedPortofolioApp(userProfileId, portofolioId)
+    }
 
     private _getProfileInfo(userToken: string, adminCredential: IPamCredential, isUser: boolean = true) {
         let urlAdmin = adminCredential.urlAdmin;
@@ -286,4 +299,13 @@ export class UserListService {
         if (!adminCredential) throw new Error("No authentication platform is registered");
         return adminCredential;
     }
+
+    private _convertListToObj(liste: SpinalNode[], key: string = "id"): { [key: string]: SpinalNode } {
+        return liste.reduce((obj, item) => {
+            const id = item.info[key]?.get();
+            if (id) obj[id] = item;
+            return obj;
+        }, {})
+    }
+
 }
