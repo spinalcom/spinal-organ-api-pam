@@ -30,7 +30,7 @@ import { AdminProfileService } from "./adminProfile.service";
 import * as jwt from "jsonwebtoken";
 import * as globalCache from 'global-cache';
 import { IApplicationToken, IUserToken } from "../interfaces";
-
+import * as cron from 'node-cron';
 
 export class TokenService {
     private static instance: TokenService;
@@ -45,11 +45,19 @@ export class TokenService {
 
     public async init(): Promise<SpinalContext> {
         this.context = await configServiceInstance.getContext(TOKEN_LIST_CONTEXT_NAME);
-        if (this.context) return this.context;
+        if (!this.context) {
+            this.context = await configServiceInstance.addContext(TOKEN_LIST_CONTEXT_NAME, TOKEN_LIST_CONTEXT_TYPE);
+        }
 
-        this.context = await configServiceInstance.addContext(TOKEN_LIST_CONTEXT_NAME, TOKEN_LIST_CONTEXT_TYPE);
-
+        await this._scheduleTokenPurge();
         return this.context;
+    }
+
+
+    public async purgeToken(): Promise<(IUserToken | IApplicationToken)[]> {
+        const tokens = await this._getAllTokens();
+        const promises = tokens.map(token => this.tokenIsValid(token, true));
+        return Promise.all(promises);
     }
 
     public async addUserToken(userNode: SpinalNode, token: string, playload: any): Promise<any> {
@@ -106,18 +114,28 @@ export class TokenService {
         if (!found) return true;
 
         try {
-            await this.context.removeChild(found, TOKEN_RELATION_NAME, PTR_LST_TYPE);
+            const parents = await found.getParents(TOKEN_RELATION_NAME);
+            for (const parent of parents) {
+                await parent.removeChild(found, TOKEN_RELATION_NAME, PTR_LST_TYPE);
+            }
             return true;
         } catch (error) {
             return false;
         }
     }
 
-    public async tokenIsValid(token: string): Promise<IUserToken | IApplicationToken> {
+    public async tokenIsValid(token: string, deleteIfExpired: boolean = false): Promise<IUserToken | IApplicationToken> {
         const data = await this.getTokenData(token);
-        const expirationTime = data?.expieredToken;
+        if (!data) return;
+
+        const expirationTime = data.expieredToken;
         const tokenExpired = expirationTime ? Date.now() >= expirationTime * 1000 : true;
-        if (!data || tokenExpired) return;
+
+        if (tokenExpired) {
+            if (deleteIfExpired) await this.deleteToken(token);
+            return;
+        }
+
         return data;
     }
 
@@ -142,4 +160,16 @@ export class TokenService {
         return text;
     }
 
+    private async _getAllTokens(): Promise<string[]> {
+        const tokens = await this.context.getChildren(TOKEN_RELATION_NAME);
+        return tokens.map(el => el.getName().get())
+    }
+
+    private _scheduleTokenPurge() {
+        // cron.schedule('0 0 23 * * *', async () => {
+        cron.schedule('30 */1 * * *', async () => {
+            console.log(new Date().toUTCString(), "purge invalid tokens");
+            await this.purgeToken();
+        })
+    }
 }

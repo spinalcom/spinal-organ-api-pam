@@ -40,6 +40,7 @@ const spinal_core_connectorjs_type_1 = require("spinal-core-connectorjs_type");
 const adminProfile_service_1 = require("./adminProfile.service");
 const jwt = require("jsonwebtoken");
 const globalCache = require("global-cache");
+const cron = require("node-cron");
 class TokenService {
     constructor() { }
     static getInstance() {
@@ -50,10 +51,18 @@ class TokenService {
     init() {
         return __awaiter(this, void 0, void 0, function* () {
             this.context = yield configFile_service_1.configServiceInstance.getContext(constant_1.TOKEN_LIST_CONTEXT_NAME);
-            if (this.context)
-                return this.context;
-            this.context = yield configFile_service_1.configServiceInstance.addContext(constant_1.TOKEN_LIST_CONTEXT_NAME, constant_1.TOKEN_LIST_CONTEXT_TYPE);
+            if (!this.context) {
+                this.context = yield configFile_service_1.configServiceInstance.addContext(constant_1.TOKEN_LIST_CONTEXT_NAME, constant_1.TOKEN_LIST_CONTEXT_TYPE);
+            }
+            yield this._scheduleTokenPurge();
             return this.context;
+        });
+    }
+    purgeToken() {
+        return __awaiter(this, void 0, void 0, function* () {
+            const tokens = yield this._getAllTokens();
+            const promises = tokens.map(token => this.tokenIsValid(token, true));
+            return Promise.all(promises);
         });
     }
     addUserToken(userNode, token, playload) {
@@ -112,7 +121,10 @@ class TokenService {
             if (!found)
                 return true;
             try {
-                yield this.context.removeChild(found, constant_1.TOKEN_RELATION_NAME, constant_1.PTR_LST_TYPE);
+                const parents = yield found.getParents(constant_1.TOKEN_RELATION_NAME);
+                for (const parent of parents) {
+                    yield parent.removeChild(found, constant_1.TOKEN_RELATION_NAME, constant_1.PTR_LST_TYPE);
+                }
                 return true;
             }
             catch (error) {
@@ -120,13 +132,18 @@ class TokenService {
             }
         });
     }
-    tokenIsValid(token) {
+    tokenIsValid(token, deleteIfExpired = false) {
         return __awaiter(this, void 0, void 0, function* () {
             const data = yield this.getTokenData(token);
-            const expirationTime = data === null || data === void 0 ? void 0 : data.expieredToken;
-            const tokenExpired = expirationTime ? Date.now() >= expirationTime * 1000 : true;
-            if (!data || tokenExpired)
+            if (!data)
                 return;
+            const expirationTime = data.expieredToken;
+            const tokenExpired = expirationTime ? Date.now() >= expirationTime * 1000 : true;
+            if (tokenExpired) {
+                if (deleteIfExpired)
+                    yield this.deleteToken(token);
+                return;
+            }
             return data;
         });
     }
@@ -148,6 +165,19 @@ class TokenService {
             text += charset.charAt(Math.floor(Math.random() * n));
         }
         return text;
+    }
+    _getAllTokens() {
+        return __awaiter(this, void 0, void 0, function* () {
+            const tokens = yield this.context.getChildren(constant_1.TOKEN_RELATION_NAME);
+            return tokens.map(el => el.getName().get());
+        });
+    }
+    _scheduleTokenPurge() {
+        // cron.schedule('0 0 23 * * *', async () => {
+        cron.schedule('30 */1 * * *', () => __awaiter(this, void 0, void 0, function* () {
+            console.log(new Date().toUTCString(), "purge invalid tokens");
+            yield this.purgeToken();
+        }));
     }
 }
 exports.TokenService = TokenService;

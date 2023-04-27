@@ -60,11 +60,12 @@ class AppListService {
             const adminCredential = yield this._getAuthPlateformInfo();
             const url = `${adminCredential.urlAdmin}/applications/login`;
             return axios_1.default.post(url, application).then((result) => __awaiter(this, void 0, void 0, function* () {
+                var _a;
                 const data = result.data;
                 data.profile = yield this._getProfileInfo(data.token, adminCredential);
-                data.userInfo = yield this._getApplicationInfo(data.userId, adminCredential, data.token);
+                data.userInfo = yield this._getApplicationInfo(data.applicationId, adminCredential, data.token);
                 const type = constant_1.USER_TYPES.APP;
-                const info = { clientId: application.clientId, type, userType: type };
+                const info = { name: ((_a = data.userInfo) === null || _a === void 0 ? void 0 : _a.name) || application.clientId, applicationId: data.applicationId, clientId: application.clientId, type, userType: type };
                 const node = yield this._addUserToContext(info);
                 yield token_service_1.TokenService.getInstance().addUserToken(node, data.token, data);
                 return {
@@ -87,8 +88,18 @@ class AppListService {
         return __awaiter(this, void 0, void 0, function* () {
             const users = yield this.context.getChildrenInContext();
             const found = users.find(el => { var _a; return ((_a = el.info.clientId) === null || _a === void 0 ? void 0 : _a.get()) === info.clientId; });
-            if (found)
+            if (found) {
+                for (const key in info) {
+                    if (Object.prototype.hasOwnProperty.call(info, key)) {
+                        const value = info[key];
+                        if (found.info[key] && found.info[key].get() != value)
+                            found.info[key].set(value);
+                        else
+                            found.info.add_attr({ [key]: value });
+                    }
+                }
                 return found;
+            }
             const nodeId = spinal_env_viewer_graph_service_1.SpinalGraphService.createNode(info, element);
             const node = spinal_env_viewer_graph_service_1.SpinalGraphService.getRealNode(nodeId);
             return this.context.addChildInContext(node, constant_1.CONTEXT_TO_APP_RELATION_NAME, constant_1.PTR_LST_TYPE, this.context);

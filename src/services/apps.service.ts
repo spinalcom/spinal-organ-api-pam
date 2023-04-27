@@ -315,12 +315,12 @@ export class AppService {
 
   private _formatAppsJson(jsonData: IApp[]): IApp[] {
     return jsonData.reduce((liste, app) => {
-      const requiredAttrs = ["name", "icon", "tags", "categoryName", "groupName"];
+      const requiredAttrs = ["name", "categoryName", "groupName"];
 
       const notValid = requiredAttrs.find(el => !app[el]);
       if (!notValid) {
         app.hasViewer = app.hasViewer || false;
-        app.packageName = app.packageName || app.name;
+        app.packageName = app.packageName;
         app.isExternalApp = app.isExternalApp?.toString().toLocaleLowerCase() == "false" ? false : Boolean(app.isExternalApp)
         if (app.isExternalApp) app.link = app.link;
 

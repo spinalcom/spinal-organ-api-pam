@@ -46,12 +46,12 @@ export async function expressAuthentication(request: express.Request, securityNa
 
 
     // Check if profile has access to api route
-    if (profileNode.info.type.get() === APP_PROFILE_TYPE) {
-        const apiUrl = request.url;
-        const method = request.method;
-        const isAuthorized = await profileHasAccessToApi(profileNode, apiUrl, method);
-        if (!isAuthorized) throw new AuthError(SECURITY_MESSAGES.UNAUTHORIZED);
-    }
+    // if (profileNode.info.type.get() === APP_PROFILE_TYPE) {
+    //     const apiUrl = request.url;
+    //     const method = request.method;
+    //     const isAuthorized = await profileHasAccessToApi(profileNode, apiUrl, method);
+    //     if (!isAuthorized) throw new AuthError(SECURITY_MESSAGES.UNAUTHORIZED);
+    // }
 
     (<any>request).profileId = profileId;
 

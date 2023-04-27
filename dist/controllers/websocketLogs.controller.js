@@ -47,7 +47,7 @@ exports.WebsocketLogsController = void 0;
  */
 const tsoa_1 = require("tsoa");
 const constant_1 = require("../constant");
-const websocketLogs_1 = require("../proxy/websocket/websocketLogs");
+const websocketLogs_1 = require("../proxy/websocket/logs/websocketLogs");
 const express = require("express");
 const authentication_1 = require("../security/authentication");
 const AuthError_1 = require("../security/AuthError");

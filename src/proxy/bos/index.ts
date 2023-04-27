@@ -29,7 +29,6 @@ import * as proxy from "express-http-proxy";
 import { expressAuthentication } from "../../security/authentication"
 import { canAccess, formatUri, getProfileBuildings, proxyOptions } from "./utils";
 import { Utils } from "../../utils/pam_v1_utils/utils";
-import { result } from "lodash";
 
 
 interface IApiData { url: string; clientId: string; secretId: string }
@@ -48,7 +47,6 @@ export default function configureProxy(app: express.Express, useV1: boolean = fa
 
             const building = await BuildingService.getInstance().getBuildingById(building_id);
             if (!building) return res.status(HTTP_CODES.NOT_FOUND).send(`No building found for ${building_id}`);
-
 
             if (tokenInfo.userInfo?.type != USER_TYPES.ADMIN) {
 

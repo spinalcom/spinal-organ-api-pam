@@ -329,11 +329,11 @@ class AppService {
     _formatAppsJson(jsonData) {
         return jsonData.reduce((liste, app) => {
             var _a;
-            const requiredAttrs = ["name", "icon", "tags", "categoryName", "groupName"];
+            const requiredAttrs = ["name", "categoryName", "groupName"];
             const notValid = requiredAttrs.find(el => !app[el]);
             if (!notValid) {
                 app.hasViewer = app.hasViewer || false;
-                app.packageName = app.packageName || app.name;
+                app.packageName = app.packageName;
                 app.isExternalApp = ((_a = app.isExternalApp) === null || _a === void 0 ? void 0 : _a.toString().toLocaleLowerCase()) == "false" ? false : Boolean(app.isExternalApp);
                 if (app.isExternalApp)
                     app.link = app.link;

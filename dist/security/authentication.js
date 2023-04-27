@@ -51,13 +51,12 @@ function expressAuthentication(request, securityName, scopes) {
         if (!profileNode)
             throw new AuthError_1.AuthError(constant_1.SECURITY_MESSAGES.NO_PROFILE_FOUND);
         // Check if profile has access to api route
-        if (profileNode.info.type.get() === constant_1.APP_PROFILE_TYPE) {
-            const apiUrl = request.url;
-            const method = request.method;
-            const isAuthorized = yield (0, utils_1.profileHasAccessToApi)(profileNode, apiUrl, method);
-            if (!isAuthorized)
-                throw new AuthError_1.AuthError(constant_1.SECURITY_MESSAGES.UNAUTHORIZED);
-        }
+        // if (profileNode.info.type.get() === APP_PROFILE_TYPE) {
+        //     const apiUrl = request.url;
+        //     const method = request.method;
+        //     const isAuthorized = await profileHasAccessToApi(profileNode, apiUrl, method);
+        //     if (!isAuthorized) throw new AuthError(SECURITY_MESSAGES.UNAUTHORIZED);
+        // }
         request.profileId = profileId;
         return tokenInfo;
     });

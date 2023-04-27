@@ -60,10 +60,10 @@ export class AppListService {
         return axios.post(url, application).then(async (result) => {
             const data = result.data;
             data.profile = await this._getProfileInfo(data.token, adminCredential);
-            data.userInfo = await this._getApplicationInfo(data.userId, adminCredential, data.token);
+            data.userInfo = await this._getApplicationInfo(data.applicationId, adminCredential, data.token);
 
             const type = USER_TYPES.APP;
-            const info = { clientId: application.clientId, type, userType: type }
+            const info = { name: data.userInfo?.name || application.clientId, applicationId: data.applicationId, clientId: application.clientId, type, userType: type }
 
             const node = await this._addUserToContext(info);
             await TokenService.getInstance().addUserToken(node, data.token, data);
@@ -91,7 +91,16 @@ export class AppListService {
         const users = await this.context.getChildrenInContext();
 
         const found = users.find(el => el.info.clientId?.get() === info.clientId);
-        if (found) return found;
+        if (found) {
+            for (const key in info) {
+                if (Object.prototype.hasOwnProperty.call(info, key)) {
+                    const value = info[key];
+                    if (found.info[key] && found.info[key].get() != value) found.info[key].set(value);
+                    else found.info.add_attr({ [key]: value });
+                }
+            }
+            return found;
+        }
 
         const nodeId = SpinalGraphService.createNode(info, element);
         const node = SpinalGraphService.getRealNode(nodeId);

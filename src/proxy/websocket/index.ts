@@ -29,7 +29,7 @@ import { SECURITY_MESSAGES } from "../../constant";
 import { AuthentificationService, BuildingService, TokenService } from "../../services";
 import { profileHasAccessToBuilding } from "../bos/utils";
 import { Server, Socket } from "socket.io";
-import WebsocketLogs from "./websocketLogs";
+import WebsocketLogs from "./logs/websocketLogs";
 import * as lodash from 'lodash';
 const SocketClient = require('socket.io-client');
 const logInstance = WebsocketLogs.getInstance();

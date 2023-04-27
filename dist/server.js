@@ -44,7 +44,7 @@ const tsoa_1 = require("tsoa");
 const routes_1 = require("./routes");
 const AuthError_1 = require("./security/AuthError");
 const websocket_1 = require("./proxy/websocket");
-const websocketLogs_1 = require("./proxy/websocket/websocketLogs");
+const websocketLogs_1 = require("./proxy/websocket/logs/websocketLogs");
 // import { webSocketProxy } from './proxy/websocketProxy';
 function initExpress(conn) {
     return __awaiter(this, void 0, void 0, function* () {

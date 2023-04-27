@@ -23,7 +23,7 @@
  */
 import { Route, Get, Post, Delete, Body, Controller, Tags, Put, Path, UploadedFile, Security, Request } from "tsoa";
 import { HTTP_CODES, SECURITY_MESSAGES, SECURITY_NAME } from "../constant";
-import WebsocketLogs from "../proxy/websocket/websocketLogs";
+import WebsocketLogs from "../proxy/websocket/logs/websocketLogs";
 import * as express from "express";
 import { checkIfItIsAdmin } from "../security/authentication";
 import { AuthError } from "../security/AuthError";

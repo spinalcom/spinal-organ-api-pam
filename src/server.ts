@@ -37,7 +37,7 @@ import { ValidateError } from 'tsoa';
 import { RegisterRoutes } from './routes';
 import { AuthError } from './security/AuthError';
 import { WebSocketServer } from './proxy/websocket'
-import WebsocketLogs from './proxy/websocket/websocketLogs';
+import WebsocketLogs from './proxy/websocket/logs/websocketLogs';
 // import { webSocketProxy } from './proxy/websocketProxy';
 
 
