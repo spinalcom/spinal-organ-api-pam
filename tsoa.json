@@ -8,12 +8,7 @@
         "outputDirectory": "./src/swagger",
         "specVersion": 3,
         "securityDefinitions": {
-            "admin": {
-                "type": "http",
-                "scheme": "bearer",
-                "bearerFormat": "JWT"
-            },
-            "all": {
+            "bearerAuth": {
                 "type": "http",
                 "scheme": "bearer",
                 "bearerFormat": "JWT"

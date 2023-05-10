@@ -35,7 +35,7 @@ export class WebsocketLogsController extends Controller {
         super();
     }
 
-    @Security(SECURITY_NAME.admin)
+    @Security(SECURITY_NAME.bearerAuth)
     @Get("/websocket/get_logs/{buildingId}")
     public async getWebsocketLogs(@Request() req: express.Request, @Path() buildingId: string): Promise<{ state: string; logs: any; } | { state: string; logs: any; }[] | { message?: string }> {
         try {
@@ -50,7 +50,7 @@ export class WebsocketLogsController extends Controller {
         }
     }
 
-    @Security(SECURITY_NAME.admin)
+    @Security(SECURITY_NAME.bearerAuth)
     @Get("/websocket/get_logs")
     public async getAllWebsocketLogs(@Request() req: express.Request): Promise<{ state: string; logs: any; } | { state: string; logs: any; }[] | { message?: string }> {
         try {

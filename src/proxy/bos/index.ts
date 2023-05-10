@@ -26,7 +26,7 @@ import { BOS_BASE_URI_V2, BOS_BASE_URI_V1, BOS_BASE_URI_V1_2, HTTP_CODES, SECURI
 import * as express from "express";
 import { BuildingService } from '../../services'
 import * as proxy from "express-http-proxy";
-import { expressAuthentication } from "../../security/authentication"
+import { checkAndGetTokenInfo } from "../../security/authentication"
 import { canAccess, formatUri, getProfileBuildings, proxyOptions } from "./utils";
 import { Utils } from "../../utils/pam_v1_utils/utils";
 
@@ -42,7 +42,7 @@ export default function configureProxy(app: express.Express, useV1: boolean = fa
 
         try {
             const { building_id } = req.params;
-            const tokenInfo = await expressAuthentication(req, SECURITY_NAME.profile);
+            const tokenInfo = await checkAndGetTokenInfo(req);
             req["endpoint"] = formatUri(req.url, uri);
 
             const building = await BuildingService.getInstance().getBuildingById(building_id);
@@ -75,7 +75,7 @@ function buildingListMiddleware(app: express.Application, useV1: boolean = false
     if (useV1) {
         app.get("/v1/building_list", async (req: express.Request, res: express.Response) => {
             try {
-                const tokenInfo = await expressAuthentication(req, SECURITY_NAME.profile);
+                const tokenInfo = await checkAndGetTokenInfo(req);
                 let isApp;
                 let profileId;
                 if (tokenInfo.profile.appProfileBosConfigId) {

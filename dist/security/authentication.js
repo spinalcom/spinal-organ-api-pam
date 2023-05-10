@@ -42,23 +42,10 @@ function expressAuthentication(request, securityName, scopes) {
     return __awaiter(this, void 0, void 0, function* () {
         if (securityName === constant_1.SECURITY_NAME.all)
             return;
-        const tokenInfo = yield checkAndGetTokenInfo(request);
-        // get profile Node
-        let profileId = tokenInfo.profile.profileId || tokenInfo.profile.userProfileBosConfigId || tokenInfo.profile.appProfileBosConfigId;
-        if (!profileId)
-            throw new AuthError_1.AuthError(constant_1.SECURITY_MESSAGES.NO_PROFILE_FOUND);
-        let profileNode = (yield services_1.AppProfileService.getInstance()._getAppProfileNode(profileId)) || (yield services_1.UserProfileService.getInstance()._getUserProfileNode(profileId));
-        if (!profileNode)
-            throw new AuthError_1.AuthError(constant_1.SECURITY_MESSAGES.NO_PROFILE_FOUND);
-        // Check if profile has access to api route
-        // if (profileNode.info.type.get() === APP_PROFILE_TYPE) {
-        //     const apiUrl = request.url;
-        //     const method = request.method;
-        //     const isAuthorized = await profileHasAccessToApi(profileNode, apiUrl, method);
-        //     if (!isAuthorized) throw new AuthError(SECURITY_MESSAGES.UNAUTHORIZED);
-        // }
-        request.profileId = profileId;
-        return tokenInfo;
+        const token = (0, utils_1.getToken)(request);
+        if (!token)
+            throw new AuthError_1.AuthError(constant_1.SECURITY_MESSAGES.INVALID_TOKEN);
+        return token;
     });
 }
 exports.expressAuthentication = expressAuthentication;
@@ -91,9 +78,7 @@ exports.getProfileNode = getProfileNode;
 function checkAndGetTokenInfo(request) {
     return __awaiter(this, void 0, void 0, function* () {
         // check token validity
-        const token = (0, utils_1.getToken)(request);
-        if (!token)
-            throw new AuthError_1.AuthError(constant_1.SECURITY_MESSAGES.INVALID_TOKEN);
+        const token = yield expressAuthentication(request);
         const tokenInstance = services_1.TokenService.getInstance();
         const tokenInfo = yield tokenInstance.tokenIsValid(token);
         if (!tokenInfo)
@@ -102,4 +87,31 @@ function checkAndGetTokenInfo(request) {
     });
 }
 exports.checkAndGetTokenInfo = checkAndGetTokenInfo;
+// export async function expressAuthentication(
+//   request: express.Request,
+//   securityName: string,
+//   scopes?: string[]
+// ): Promise<any> {
+//   if (securityName === SECURITY_NAME.all) return;
+//   const tokenInfo: any = await checkAndGetTokenInfo(request);
+//   // get profile Node
+//   let profileId =
+//     tokenInfo.profile.profileId ||
+//     tokenInfo.profile.userProfileBosConfigId ||
+//     tokenInfo.profile.appProfileBosConfigId;
+//   if (!profileId) throw new AuthError(SECURITY_MESSAGES.NO_PROFILE_FOUND);
+//   let profileNode =
+//     (await AppProfileService.getInstance()._getAppProfileNode(profileId)) ||
+//     (await UserProfileService.getInstance()._getUserProfileNode(profileId));
+//   if (!profileNode) throw new AuthError(SECURITY_MESSAGES.NO_PROFILE_FOUND);
+//   // Check if profile has access to api route
+//   // if (profileNode.info.type.get() === APP_PROFILE_TYPE) {
+//   //     const apiUrl = request.url;
+//   //     const method = request.method;
+//   //     const isAuthorized = await profileHasAccessToApi(profileNode, apiUrl, method);
+//   //     if (!isAuthorized) throw new AuthError(SECURITY_MESSAGES.UNAUTHORIZED);
+//   // }
+//   (<any>request).profileId = profileId;
+//   return tokenInfo;
+// }
 //# sourceMappingURL=authentication.js.map

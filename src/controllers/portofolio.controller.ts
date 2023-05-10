@@ -46,7 +46,7 @@ export class PortofolioController extends Controller {
         super();
     }
 
-    // @Security(SECURITY_NAME.admin)
+    @Security(SECURITY_NAME.bearerAuth)
     @Post("/add_portofolio")
     public async addPortofolio(@Request() req: express.Request, @Body() data: IPortofolioInfo): Promise<IPortofolioData | { message: string }> {
         try {
@@ -66,7 +66,7 @@ export class PortofolioController extends Controller {
         }
     }
 
-    // @Security(SECURITY_NAME.admin)
+    @Security(SECURITY_NAME.bearerAuth)
     @Put("/update_portofolio/{portofolioId}")
     public async updatePortofolio(@Request() req: express.Request, @Path() portofolioId: string, @Body() data: IEditProtofolio): Promise<IPortofolioData | { message: string }> {
         try {
@@ -83,7 +83,7 @@ export class PortofolioController extends Controller {
         }
     }
 
-    // @Security(SECURITY_NAME.admin)
+    @Security(SECURITY_NAME.bearerAuth)
     @Put("/rename_portofolio/{id}")
     public async renamePortofolio(@Request() req: express.Request, @Path() id: string, @Body() data: { name: string }): Promise<{ message?: string }> {
         try {
@@ -103,7 +103,7 @@ export class PortofolioController extends Controller {
         }
     }
 
-    // @Security(SECURITY_NAME.admin)
+    @Security(SECURITY_NAME.bearerAuth)
     @Get("/get_all_portofolio")
     public async getAllPortofolio(@Request() req: express.Request,): Promise<any[] | { message: string }> {
         try {
@@ -119,7 +119,7 @@ export class PortofolioController extends Controller {
         }
     }
 
-    // @Security(SECURITY_NAME.profile)
+    @Security(SECURITY_NAME.bearerAuth)
     @Get("/get_portofolio/{id}")
     public async getPortofolio(@Request() req: express.Request, @Path() id: string): Promise<any | { message: string }> {
         try {
@@ -136,7 +136,7 @@ export class PortofolioController extends Controller {
         }
     }
 
-    // @Security(SECURITY_NAME.admin)
+    @Security(SECURITY_NAME.bearerAuth)
     @Get("/get_portofolio_details/{id}")
     public async getPortofolioDetails(@Request() req: express.Request, @Path() id: string): Promise<IPortofolioData | { message: string }> {
         try {
@@ -153,7 +153,7 @@ export class PortofolioController extends Controller {
         }
     }
 
-    // @Security(SECURITY_NAME.admin)
+    @Security(SECURITY_NAME.bearerAuth)
     @Get("/get_all_portofolios_details")
     public async getAllPortofoliosDetails(@Request() req: express.Request,): Promise<any[] | { message: string }> {
         try {
@@ -171,7 +171,7 @@ export class PortofolioController extends Controller {
         }
     }
 
-    // @Security(SECURITY_NAME.admin)
+    @Security(SECURITY_NAME.bearerAuth)
     @Delete("/remove_portofolio/{id}")
     public async removePortofolio(@Request() req: express.Request, @Path() id: string): Promise<{ message: string }> {
         try {
@@ -190,7 +190,7 @@ export class PortofolioController extends Controller {
         }
     }
 
-    // @Security(SECURITY_NAME.admin)
+    @Security(SECURITY_NAME.bearerAuth)
     @Post("/add_building_to_portofolio/{portofolioId}")
     public async addBuilding(@Request() req: express.Request, @Path() portofolioId: string, @Body() body: IBuildingCreation): Promise<IBuilding[] | { message: string }> {
         try {
@@ -210,7 +210,7 @@ export class PortofolioController extends Controller {
         }
     }
 
-    // @Security(SECURITY_NAME.profile)
+    @Security(SECURITY_NAME.bearerAuth)
     @Get("/get_building_from_portofolio/{portofolioId}/{buildingId}")
     public async getBuilding(@Request() req: express.Request, @Path() portofolioId: string, @Path() buildingId: string): Promise<IBuilding | { message: string }> {
         try {
@@ -236,7 +236,7 @@ export class PortofolioController extends Controller {
         }
     }
 
-    // @Security(SECURITY_NAME.admin)
+    @Security(SECURITY_NAME.bearerAuth)
     @Get("/get_all_buildings_from_portofolio/{portofolioId}")
     public async getAllBuilding(@Request() req: express.Request, @Path() portofolioId: string): Promise<IBuilding[] | { message: string }> {
         try {
@@ -258,7 +258,7 @@ export class PortofolioController extends Controller {
     }
 
 
-    // @Security(SECURITY_NAME.admin)
+    @Security(SECURITY_NAME.bearerAuth)
     @Delete("/remove_building_from_portofolio/{portofolioId}")
     public async deleteBuildingFromPortofolio(@Request() req: express.Request, @Path() portofolioId: string, @Body() data: { buildingIds: string[] }): Promise<{ message: string, ids?: string[] }> {
         try {
@@ -279,7 +279,7 @@ export class PortofolioController extends Controller {
         }
     }
 
-    // @Security(SECURITY_NAME.admin)
+    @Security(SECURITY_NAME.bearerAuth)
     @Post("/add_app_to_portofolio/{portofolioId}")
     public async addAppToPortofolio(@Request() req: express.Request, @Path() portofolioId: string, @Body() data: { applicationsIds: string[] }): Promise<IApp[] | { message: string }> {
         try {
@@ -302,7 +302,7 @@ export class PortofolioController extends Controller {
     }
 
 
-    // @Security(SECURITY_NAME.admin)
+    @Security(SECURITY_NAME.bearerAuth)
     @Get("/get_apps_from_portofolio/{portofolioId}")
     public async getPortofolioApps(@Request() req: express.Request, @Path() portofolioId: string): Promise<IApp[] | { message: string }> {
         try {
@@ -326,7 +326,7 @@ export class PortofolioController extends Controller {
     }
 
 
-    // @Security(SECURITY_NAME.profile)
+    @Security(SECURITY_NAME.bearerAuth)
     @Get("/get_app_from_portofolio/{portofolioId}/{applicationId}")
     public async getAppFromPortofolio(@Request() req: express.Request, @Path() portofolioId: string, @Path() applicationId: string): Promise<IApp | { message: string }> {
         try {
@@ -349,7 +349,7 @@ export class PortofolioController extends Controller {
     }
 
 
-    // @Security(SECURITY_NAME.admin)
+    @Security(SECURITY_NAME.bearerAuth)
     @Delete("/remove_app_from_portofolio/{portofolioId}")
     public async removeAppFromPortofolio(@Request() req: express.Request, @Path() portofolioId: string, @Body() data: { applicationId: string[] }): Promise<{ message: string, ids?: string[] }> {
         try {
@@ -371,7 +371,7 @@ export class PortofolioController extends Controller {
     }
 
 
-    // @Security(SECURITY_NAME.admin)
+    @Security(SECURITY_NAME.bearerAuth)
     @Get("/portofolio_has_app/{portofolioId}//{applicationId}")
     public async portofolioHasApp(@Request() req: express.Request, @Path() portofolioId: string, @Path() applicationId: string): Promise<boolean | { message: string }> {
         try {
@@ -389,7 +389,7 @@ export class PortofolioController extends Controller {
     }
 
 
-    // @Security(SECURITY_NAME.admin)
+    @Security(SECURITY_NAME.bearerAuth)
     @Post("/add_apiRoute_to_portofolio/{portofolioId}")
     public async addApiToPortofolio(@Request() req: express.Request, @Path() portofolioId: string, @Body() data: { apisIds: string[] }): Promise<IApiRoute[] | { message: string }> {
         try {
@@ -412,7 +412,7 @@ export class PortofolioController extends Controller {
     }
 
 
-    // @Security(SECURITY_NAME.admin)
+    @Security(SECURITY_NAME.bearerAuth)
     @Get("/get_apisRoute_from_portofolio/{portofolioId}")
     public async getPortofolioApis(@Request() req: express.Request, @Path() portofolioId: string): Promise<IApiRoute[] | { message: string }> {
         try {
@@ -435,7 +435,7 @@ export class PortofolioController extends Controller {
     }
 
 
-    // @Security(SECURITY_NAME.admin)
+    @Security(SECURITY_NAME.bearerAuth)
     @Get("/get_apiRoute_from_portofolio/{portofolioId}/{apiId}")
     public async getApiFromPortofolio(@Request() req: express.Request, @Path() portofolioId: string, @Path() apiId: string): Promise<IApiRoute | { message: string }> {
         try {
@@ -458,7 +458,7 @@ export class PortofolioController extends Controller {
     }
 
 
-    // @Security(SECURITY_NAME.admin)
+    @Security(SECURITY_NAME.bearerAuth)
     @Delete("/remove_apiRoute_from_portofolio/{portofolioId}")
     public async removeApiFromPortofolio(@Request() req: express.Request, @Path() portofolioId: string, @Body() data: { apisIds: string[] }): Promise<{ message: string, ids?: string[] }> {
         try {
@@ -480,7 +480,7 @@ export class PortofolioController extends Controller {
     }
 
 
-    // @Security(SECURITY_NAME.admin)
+    @Security(SECURITY_NAME.bearerAuth)
     @Get("/portofolio_has_apiRoute/{portofolioId}/{apiId}")
     public async portofolioHasApi(@Request() req: express.Request, @Path() portofolioId: string, @Path() apiId: string): Promise<boolean | { message: string }> {
         try {

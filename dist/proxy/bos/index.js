@@ -45,7 +45,7 @@ function configureProxy(app, useV1 = false) {
         var _a;
         try {
             const { building_id } = req.params;
-            const tokenInfo = yield (0, authentication_1.expressAuthentication)(req, constant_1.SECURITY_NAME.profile);
+            const tokenInfo = yield (0, authentication_1.checkAndGetTokenInfo)(req);
             req["endpoint"] = (0, utils_1.formatUri)(req.url, uri);
             const building = yield services_1.BuildingService.getInstance().getBuildingById(building_id);
             if (!building)
@@ -71,7 +71,7 @@ function buildingListMiddleware(app, useV1 = false) {
     if (useV1) {
         app.get("/v1/building_list", (req, res) => __awaiter(this, void 0, void 0, function* () {
             try {
-                const tokenInfo = yield (0, authentication_1.expressAuthentication)(req, constant_1.SECURITY_NAME.profile);
+                const tokenInfo = yield (0, authentication_1.checkAndGetTokenInfo)(req);
                 let isApp;
                 let profileId;
                 if (tokenInfo.profile.appProfileBosConfigId) {

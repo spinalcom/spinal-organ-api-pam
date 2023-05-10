@@ -720,12 +720,7 @@
 			}
 		},
 		"securitySchemes": {
-			"admin": {
-				"type": "http",
-				"scheme": "bearer",
-				"bearerFormat": "JWT"
-			},
-			"all": {
+			"bearerAuth": {
 				"type": "http",
 				"scheme": "bearer",
 				"bearerFormat": "JWT"
@@ -775,7 +770,11 @@
 				"tags": [
 					"Apis"
 				],
-				"security": [],
+				"security": [
+					{
+						"bearerAuth": []
+					}
+				],
 				"parameters": [],
 				"requestBody": {
 					"required": true,
@@ -822,7 +821,11 @@
 				"tags": [
 					"Apis"
 				],
-				"security": [],
+				"security": [
+					{
+						"bearerAuth": []
+					}
+				],
 				"parameters": [
 					{
 						"in": "path",
@@ -878,7 +881,11 @@
 				"tags": [
 					"Apis"
 				],
-				"security": [],
+				"security": [
+					{
+						"bearerAuth": []
+					}
+				],
 				"parameters": [
 					{
 						"in": "path",
@@ -927,7 +934,11 @@
 				"tags": [
 					"Apis"
 				],
-				"security": [],
+				"security": [
+					{
+						"bearerAuth": []
+					}
+				],
 				"parameters": []
 			}
 		},
@@ -957,7 +968,11 @@
 				"tags": [
 					"Apis"
 				],
-				"security": [],
+				"security": [
+					{
+						"bearerAuth": []
+					}
+				],
 				"parameters": [
 					{
 						"in": "path",
@@ -1006,7 +1021,11 @@
 				"tags": [
 					"Apis"
 				],
-				"security": [],
+				"security": [
+					{
+						"bearerAuth": []
+					}
+				],
 				"parameters": [],
 				"requestBody": {
 					"required": true,
@@ -1062,7 +1081,11 @@
 				"tags": [
 					"Apis"
 				],
-				"security": [],
+				"security": [
+					{
+						"bearerAuth": []
+					}
+				],
 				"parameters": [],
 				"requestBody": {
 					"required": true,
@@ -1109,7 +1132,11 @@
 				"tags": [
 					"Apis"
 				],
-				"security": [],
+				"security": [
+					{
+						"bearerAuth": []
+					}
+				],
 				"parameters": [
 					{
 						"in": "path",
@@ -1165,7 +1192,11 @@
 				"tags": [
 					"Apis"
 				],
-				"security": [],
+				"security": [
+					{
+						"bearerAuth": []
+					}
+				],
 				"parameters": [
 					{
 						"in": "path",
@@ -1214,7 +1245,11 @@
 				"tags": [
 					"Apis"
 				],
-				"security": [],
+				"security": [
+					{
+						"bearerAuth": []
+					}
+				],
 				"parameters": []
 			}
 		},
@@ -1244,7 +1279,11 @@
 				"tags": [
 					"Apis"
 				],
-				"security": [],
+				"security": [
+					{
+						"bearerAuth": []
+					}
+				],
 				"parameters": [
 					{
 						"in": "path",
@@ -1293,7 +1332,11 @@
 				"tags": [
 					"Apis"
 				],
-				"security": [],
+				"security": [
+					{
+						"bearerAuth": []
+					}
+				],
 				"parameters": [],
 				"requestBody": {
 					"required": true,
@@ -1349,7 +1392,11 @@
 				"tags": [
 					"App Profiles"
 				],
-				"security": [],
+				"security": [
+					{
+						"bearerAuth": []
+					}
+				],
 				"parameters": [],
 				"requestBody": {
 					"required": true,
@@ -1396,7 +1443,11 @@
 				"tags": [
 					"App Profiles"
 				],
-				"security": [],
+				"security": [
+					{
+						"bearerAuth": []
+					}
+				],
 				"parameters": [
 					{
 						"in": "path",
@@ -1445,7 +1496,11 @@
 				"tags": [
 					"App Profiles"
 				],
-				"security": [],
+				"security": [
+					{
+						"bearerAuth": []
+					}
+				],
 				"parameters": []
 			}
 		},
@@ -1482,7 +1537,11 @@
 				"tags": [
 					"App Profiles"
 				],
-				"security": [],
+				"security": [
+					{
+						"bearerAuth": []
+					}
+				],
 				"parameters": [
 					{
 						"in": "path",
@@ -1531,7 +1590,11 @@
 				"tags": [
 					"App Profiles"
 				],
-				"security": [],
+				"security": [
+					{
+						"bearerAuth": []
+					}
+				],
 				"parameters": [
 					{
 						"in": "path",
@@ -1580,7 +1643,11 @@
 				"tags": [
 					"App Profiles"
 				],
-				"security": [],
+				"security": [
+					{
+						"bearerAuth": []
+					}
+				],
 				"parameters": [
 					{
 						"in": "path",
@@ -1629,7 +1696,11 @@
 				"tags": [
 					"App Profiles"
 				],
-				"security": [],
+				"security": [
+					{
+						"bearerAuth": []
+					}
+				],
 				"parameters": [
 					{
 						"in": "path",
@@ -1688,7 +1759,11 @@
 				"tags": [
 					"App Profiles"
 				],
-				"security": [],
+				"security": [
+					{
+						"bearerAuth": []
+					}
+				],
 				"parameters": [
 					{
 						"in": "path",
@@ -1745,7 +1820,11 @@
 				"tags": [
 					"App Profiles"
 				],
-				"security": [],
+				"security": [
+					{
+						"bearerAuth": []
+					}
+				],
 				"parameters": [
 					{
 						"in": "path",
@@ -1819,7 +1898,11 @@
 				"tags": [
 					"App Profiles"
 				],
-				"security": [],
+				"security": [
+					{
+						"bearerAuth": []
+					}
+				],
 				"parameters": [
 					{
 						"in": "path",
@@ -1876,7 +1959,11 @@
 				"tags": [
 					"App Profiles"
 				],
-				"security": [],
+				"security": [
+					{
+						"bearerAuth": []
+					}
+				],
 				"parameters": [
 					{
 						"in": "path",
@@ -1943,7 +2030,11 @@
 				"tags": [
 					"App Profiles"
 				],
-				"security": [],
+				"security": [
+					{
+						"bearerAuth": []
+					}
+				],
 				"parameters": [
 					{
 						"in": "path",
@@ -2008,7 +2099,11 @@
 				"tags": [
 					"App Profiles"
 				],
-				"security": [],
+				"security": [
+					{
+						"bearerAuth": []
+					}
+				],
 				"parameters": [
 					{
 						"in": "path",
@@ -2090,7 +2185,11 @@
 				"tags": [
 					"Applications"
 				],
-				"security": [],
+				"security": [
+					{
+						"bearerAuth": []
+					}
+				],
 				"parameters": [],
 				"requestBody": {
 					"required": true,
@@ -2137,7 +2236,11 @@
 				"tags": [
 					"Applications"
 				],
-				"security": [],
+				"security": [
+					{
+						"bearerAuth": []
+					}
+				],
 				"parameters": [],
 				"requestBody": {
 					"required": true,
@@ -2184,7 +2287,11 @@
 				"tags": [
 					"Applications"
 				],
-				"security": [],
+				"security": [
+					{
+						"bearerAuth": []
+					}
+				],
 				"parameters": [],
 				"requestBody": {
 					"required": true,
@@ -2234,7 +2341,11 @@
 				"tags": [
 					"Applications"
 				],
-				"security": [],
+				"security": [
+					{
+						"bearerAuth": []
+					}
+				],
 				"parameters": []
 			}
 		},
@@ -2274,7 +2385,11 @@
 				"tags": [
 					"Applications"
 				],
-				"security": [],
+				"security": [
+					{
+						"bearerAuth": []
+					}
+				],
 				"parameters": []
 			}
 		},
@@ -2314,7 +2429,11 @@
 				"tags": [
 					"Applications"
 				],
-				"security": [],
+				"security": [
+					{
+						"bearerAuth": []
+					}
+				],
 				"parameters": []
 			}
 		},
@@ -2351,7 +2470,11 @@
 				"tags": [
 					"Applications"
 				],
-				"security": [],
+				"security": [
+					{
+						"bearerAuth": []
+					}
+				],
 				"parameters": [
 					{
 						"in": "path",
@@ -2397,7 +2520,11 @@
 				"tags": [
 					"Applications"
 				],
-				"security": [],
+				"security": [
+					{
+						"bearerAuth": []
+					}
+				],
 				"parameters": [
 					{
 						"in": "path",
@@ -2443,7 +2570,11 @@
 				"tags": [
 					"Applications"
 				],
-				"security": [],
+				"security": [
+					{
+						"bearerAuth": []
+					}
+				],
 				"parameters": [
 					{
 						"in": "path",
@@ -2489,7 +2620,11 @@
 				"tags": [
 					"Applications"
 				],
-				"security": [],
+				"security": [
+					{
+						"bearerAuth": []
+					}
+				],
 				"parameters": [
 					{
 						"in": "path",
@@ -2545,7 +2680,11 @@
 				"tags": [
 					"Applications"
 				],
-				"security": [],
+				"security": [
+					{
+						"bearerAuth": []
+					}
+				],
 				"parameters": [
 					{
 						"in": "path",
@@ -2601,7 +2740,11 @@
 				"tags": [
 					"Applications"
 				],
-				"security": [],
+				"security": [
+					{
+						"bearerAuth": []
+					}
+				],
 				"parameters": [
 					{
 						"in": "path",
@@ -2650,7 +2793,11 @@
 				"tags": [
 					"Applications"
 				],
-				"security": [],
+				"security": [
+					{
+						"bearerAuth": []
+					}
+				],
 				"parameters": [
 					{
 						"in": "path",
@@ -2689,7 +2836,11 @@
 				"tags": [
 					"Applications"
 				],
-				"security": [],
+				"security": [
+					{
+						"bearerAuth": []
+					}
+				],
 				"parameters": [
 					{
 						"in": "path",
@@ -2728,7 +2879,11 @@
 				"tags": [
 					"Applications"
 				],
-				"security": [],
+				"security": [
+					{
+						"bearerAuth": []
+					}
+				],
 				"parameters": [
 					{
 						"in": "path",
@@ -2777,7 +2932,11 @@
 				"tags": [
 					"Applications"
 				],
-				"security": [],
+				"security": [
+					{
+						"bearerAuth": []
+					}
+				],
 				"parameters": [],
 				"requestBody": {
 					"required": true,
@@ -2836,7 +2995,11 @@
 				"tags": [
 					"Applications"
 				],
-				"security": [],
+				"security": [
+					{
+						"bearerAuth": []
+					}
+				],
 				"parameters": [],
 				"requestBody": {
 					"required": true,
@@ -2895,7 +3058,11 @@
 				"tags": [
 					"Applications"
 				],
-				"security": [],
+				"security": [
+					{
+						"bearerAuth": []
+					}
+				],
 				"parameters": [],
 				"requestBody": {
 					"required": true,
@@ -2950,7 +3117,11 @@
 				"tags": [
 					"Applications"
 				],
-				"security": [],
+				"security": [
+					{
+						"bearerAuth": []
+					}
+				],
 				"parameters": [
 					{
 						"in": "path",
@@ -3016,7 +3187,11 @@
 				"tags": [
 					"Applications"
 				],
-				"security": [],
+				"security": [
+					{
+						"bearerAuth": []
+					}
+				],
 				"parameters": [
 					{
 						"in": "path",
@@ -3090,7 +3265,11 @@
 				"tags": [
 					"Applications"
 				],
-				"security": [],
+				"security": [
+					{
+						"bearerAuth": []
+					}
+				],
 				"parameters": [
 					{
 						"in": "path",
@@ -3156,7 +3335,11 @@
 				"tags": [
 					"Applications"
 				],
-				"security": [],
+				"security": [
+					{
+						"bearerAuth": []
+					}
+				],
 				"parameters": [
 					{
 						"in": "path",
@@ -3230,7 +3413,11 @@
 				"tags": [
 					"Applications"
 				],
-				"security": [],
+				"security": [
+					{
+						"bearerAuth": []
+					}
+				],
 				"parameters": [
 					{
 						"in": "path",
@@ -3275,7 +3462,11 @@
 				"tags": [
 					"Applications"
 				],
-				"security": [],
+				"security": [
+					{
+						"bearerAuth": []
+					}
+				],
 				"parameters": [
 					{
 						"in": "path",
@@ -3392,7 +3583,11 @@
 				"tags": [
 					"Auth"
 				],
-				"security": [],
+				"security": [
+					{
+						"bearerAuth": []
+					}
+				],
 				"parameters": [],
 				"requestBody": {
 					"required": true,
@@ -3451,7 +3646,11 @@
 				"tags": [
 					"Auth"
 				],
-				"security": [],
+				"security": [
+					{
+						"bearerAuth": []
+					}
+				],
 				"parameters": []
 			}
 		},
@@ -3481,7 +3680,11 @@
 				"tags": [
 					"Auth"
 				],
-				"security": [],
+				"security": [
+					{
+						"bearerAuth": []
+					}
+				],
 				"parameters": []
 			}
 		},
@@ -3518,7 +3721,11 @@
 				"tags": [
 					"Auth"
 				],
-				"security": [],
+				"security": [
+					{
+						"bearerAuth": []
+					}
+				],
 				"parameters": []
 			}
 		},
@@ -3548,7 +3755,11 @@
 				"tags": [
 					"Auth"
 				],
-				"security": [],
+				"security": [
+					{
+						"bearerAuth": []
+					}
+				],
 				"parameters": []
 			}
 		},
@@ -3610,7 +3821,11 @@
 				"tags": [
 					"Auth"
 				],
-				"security": [],
+				"security": [
+					{
+						"bearerAuth": []
+					}
+				],
 				"parameters": [],
 				"requestBody": {
 					"required": true,
@@ -3665,7 +3880,11 @@
 				"tags": [
 					"Building"
 				],
-				"security": [],
+				"security": [
+					{
+						"bearerAuth": []
+					}
+				],
 				"parameters": [
 					{
 						"in": "path",
@@ -3729,7 +3948,11 @@
 				"tags": [
 					"Building"
 				],
-				"security": [],
+				"security": [
+					{
+						"bearerAuth": []
+					}
+				],
 				"parameters": []
 			}
 		},
@@ -3764,7 +3987,11 @@
 				"tags": [
 					"Building"
 				],
-				"security": [],
+				"security": [
+					{
+						"bearerAuth": []
+					}
+				],
 				"parameters": [
 					{
 						"in": "path",
@@ -3810,7 +4037,11 @@
 				"tags": [
 					"Building"
 				],
-				"security": [],
+				"security": [
+					{
+						"bearerAuth": []
+					}
+				],
 				"parameters": [
 					{
 						"in": "path",
@@ -3869,7 +4100,11 @@
 				"tags": [
 					"Building"
 				],
-				"security": [],
+				"security": [
+					{
+						"bearerAuth": []
+					}
+				],
 				"parameters": [
 					{
 						"in": "path",
@@ -3939,7 +4174,11 @@
 				"tags": [
 					"Building"
 				],
-				"security": [],
+				"security": [
+					{
+						"bearerAuth": []
+					}
+				],
 				"parameters": [
 					{
 						"in": "path",
@@ -3985,7 +4224,11 @@
 				"tags": [
 					"Building"
 				],
-				"security": [],
+				"security": [
+					{
+						"bearerAuth": []
+					}
+				],
 				"parameters": [
 					{
 						"in": "path",
@@ -4038,7 +4281,11 @@
 				"tags": [
 					"Building"
 				],
-				"security": [],
+				"security": [
+					{
+						"bearerAuth": []
+					}
+				],
 				"parameters": [
 					{
 						"in": "path",
@@ -4105,7 +4352,11 @@
 				"tags": [
 					"Building"
 				],
-				"security": [],
+				"security": [
+					{
+						"bearerAuth": []
+					}
+				],
 				"parameters": [
 					{
 						"in": "path",
@@ -4450,7 +4701,11 @@
 				"tags": [
 					"DigitalTwin"
 				],
-				"security": [],
+				"security": [
+					{
+						"bearerAuth": []
+					}
+				],
 				"parameters": [],
 				"requestBody": {
 					"required": true,
@@ -4509,7 +4764,11 @@
 				"tags": [
 					"Portofolio"
 				],
-				"security": [],
+				"security": [
+					{
+						"bearerAuth": []
+					}
+				],
 				"parameters": [],
 				"requestBody": {
 					"required": true,
@@ -4556,7 +4815,11 @@
 				"tags": [
 					"Portofolio"
 				],
-				"security": [],
+				"security": [
+					{
+						"bearerAuth": []
+					}
+				],
 				"parameters": [
 					{
 						"in": "path",
@@ -4602,7 +4865,11 @@
 				"tags": [
 					"Portofolio"
 				],
-				"security": [],
+				"security": [
+					{
+						"bearerAuth": []
+					}
+				],
 				"parameters": [
 					{
 						"in": "path",
@@ -4667,7 +4934,11 @@
 				"tags": [
 					"Portofolio"
 				],
-				"security": [],
+				"security": [
+					{
+						"bearerAuth": []
+					}
+				],
 				"parameters": []
 			}
 		},
@@ -4702,7 +4973,11 @@
 				"tags": [
 					"Portofolio"
 				],
-				"security": [],
+				"security": [
+					{
+						"bearerAuth": []
+					}
+				],
 				"parameters": [
 					{
 						"in": "path",
@@ -4748,7 +5023,11 @@
 				"tags": [
 					"Portofolio"
 				],
-				"security": [],
+				"security": [
+					{
+						"bearerAuth": []
+					}
+				],
 				"parameters": [
 					{
 						"in": "path",
@@ -4795,7 +5074,11 @@
 				"tags": [
 					"Portofolio"
 				],
-				"security": [],
+				"security": [
+					{
+						"bearerAuth": []
+					}
+				],
 				"parameters": []
 			}
 		},
@@ -4825,7 +5108,11 @@
 				"tags": [
 					"Portofolio"
 				],
-				"security": [],
+				"security": [
+					{
+						"bearerAuth": []
+					}
+				],
 				"parameters": [
 					{
 						"in": "path",
@@ -4874,7 +5161,11 @@
 				"tags": [
 					"Portofolio"
 				],
-				"security": [],
+				"security": [
+					{
+						"bearerAuth": []
+					}
+				],
 				"parameters": [
 					{
 						"in": "path",
@@ -4930,7 +5221,11 @@
 				"tags": [
 					"Portofolio"
 				],
-				"security": [],
+				"security": [
+					{
+						"bearerAuth": []
+					}
+				],
 				"parameters": [
 					{
 						"in": "path",
@@ -4987,7 +5282,11 @@
 				"tags": [
 					"Portofolio"
 				],
-				"security": [],
+				"security": [
+					{
+						"bearerAuth": []
+					}
+				],
 				"parameters": [
 					{
 						"in": "path",
@@ -5032,7 +5331,11 @@
 				"tags": [
 					"Portofolio"
 				],
-				"security": [],
+				"security": [
+					{
+						"bearerAuth": []
+					}
+				],
 				"parameters": [
 					{
 						"in": "path",
@@ -5102,7 +5405,11 @@
 				"tags": [
 					"Portofolio"
 				],
-				"security": [],
+				"security": [
+					{
+						"bearerAuth": []
+					}
+				],
 				"parameters": [
 					{
 						"in": "path",
@@ -5172,7 +5479,11 @@
 				"tags": [
 					"Portofolio"
 				],
-				"security": [],
+				"security": [
+					{
+						"bearerAuth": []
+					}
+				],
 				"parameters": [
 					{
 						"in": "path",
@@ -5218,7 +5529,11 @@
 				"tags": [
 					"Portofolio"
 				],
-				"security": [],
+				"security": [
+					{
+						"bearerAuth": []
+					}
+				],
 				"parameters": [
 					{
 						"in": "path",
@@ -5271,7 +5586,11 @@
 				"tags": [
 					"Portofolio"
 				],
-				"security": [],
+				"security": [
+					{
+						"bearerAuth": []
+					}
+				],
 				"parameters": [
 					{
 						"in": "path",
@@ -5338,7 +5657,11 @@
 				"tags": [
 					"Portofolio"
 				],
-				"security": [],
+				"security": [
+					{
+						"bearerAuth": []
+					}
+				],
 				"parameters": [
 					{
 						"in": "path",
@@ -5395,7 +5718,11 @@
 				"tags": [
 					"Portofolio"
 				],
-				"security": [],
+				"security": [
+					{
+						"bearerAuth": []
+					}
+				],
 				"parameters": [
 					{
 						"in": "path",
@@ -5465,7 +5792,11 @@
 				"tags": [
 					"Portofolio"
 				],
-				"security": [],
+				"security": [
+					{
+						"bearerAuth": []
+					}
+				],
 				"parameters": [
 					{
 						"in": "path",
@@ -5511,7 +5842,11 @@
 				"tags": [
 					"Portofolio"
 				],
-				"security": [],
+				"security": [
+					{
+						"bearerAuth": []
+					}
+				],
 				"parameters": [
 					{
 						"in": "path",
@@ -5564,7 +5899,11 @@
 				"tags": [
 					"Portofolio"
 				],
-				"security": [],
+				"security": [
+					{
+						"bearerAuth": []
+					}
+				],
 				"parameters": [
 					{
 						"in": "path",
@@ -5631,7 +5970,11 @@
 				"tags": [
 					"Portofolio"
 				],
-				"security": [],
+				"security": [
+					{
+						"bearerAuth": []
+					}
+				],
 				"parameters": [
 					{
 						"in": "path",
@@ -5685,7 +6028,11 @@
 				"tags": [
 					"user Profiles"
 				],
-				"security": [],
+				"security": [
+					{
+						"bearerAuth": []
+					}
+				],
 				"parameters": [],
 				"requestBody": {
 					"required": true,
@@ -5732,7 +6079,11 @@
 				"tags": [
 					"user Profiles"
 				],
-				"security": [],
+				"security": [
+					{
+						"bearerAuth": []
+					}
+				],
 				"parameters": [
 					{
 						"in": "path",
@@ -5781,7 +6132,11 @@
 				"tags": [
 					"user Profiles"
 				],
-				"security": [],
+				"security": [
+					{
+						"bearerAuth": []
+					}
+				],
 				"parameters": []
 			}
 		},
@@ -5818,7 +6173,11 @@
 				"tags": [
 					"user Profiles"
 				],
-				"security": [],
+				"security": [
+					{
+						"bearerAuth": []
+					}
+				],
 				"parameters": [
 					{
 						"in": "path",
@@ -5867,7 +6226,11 @@
 				"tags": [
 					"user Profiles"
 				],
-				"security": [],
+				"security": [
+					{
+						"bearerAuth": []
+					}
+				],
 				"parameters": [
 					{
 						"in": "path",
@@ -5916,7 +6279,11 @@
 				"tags": [
 					"user Profiles"
 				],
-				"security": [],
+				"security": [
+					{
+						"bearerAuth": []
+					}
+				],
 				"parameters": [
 					{
 						"in": "path",
@@ -5965,7 +6332,11 @@
 				"tags": [
 					"user Profiles"
 				],
-				"security": [],
+				"security": [
+					{
+						"bearerAuth": []
+					}
+				],
 				"parameters": [
 					{
 						"in": "path",
@@ -6037,7 +6408,11 @@
 				"tags": [
 					"user Profiles"
 				],
-				"security": [],
+				"security": [
+					{
+						"bearerAuth": []
+					}
+				],
 				"parameters": [
 					{
 						"in": "path",
@@ -6089,7 +6464,11 @@
 				"tags": [
 					"user Profiles"
 				],
-				"security": [],
+				"security": [
+					{
+						"bearerAuth": []
+					}
+				],
 				"parameters": [
 					{
 						"in": "path",
@@ -6161,7 +6540,11 @@
 				"tags": [
 					"user Profiles"
 				],
-				"security": [],
+				"security": [
+					{
+						"bearerAuth": []
+					}
+				],
 				"parameters": [
 					{
 						"in": "path",
@@ -6218,7 +6601,11 @@
 				"tags": [
 					"user Profiles"
 				],
-				"security": [],
+				"security": [
+					{
+						"bearerAuth": []
+					}
+				],
 				"parameters": [
 					{
 						"in": "path",
@@ -6283,7 +6670,11 @@
 				"tags": [
 					"user Profiles"
 				],
-				"security": [],
+				"security": [
+					{
+						"bearerAuth": []
+					}
+				],
 				"parameters": [
 					{
 						"in": "path",
@@ -6343,7 +6734,11 @@
 				"tags": [
 					"user Profiles"
 				],
-				"security": [],
+				"security": [
+					{
+						"bearerAuth": []
+					}
+				],
 				"parameters": [
 					{
 						"in": "path",
@@ -6450,7 +6845,7 @@
 				],
 				"security": [
 					{
-						"admin": []
+						"bearerAuth": []
 					}
 				],
 				"parameters": [
@@ -6523,7 +6918,7 @@
 				],
 				"security": [
 					{
-						"admin": []
+						"bearerAuth": []
 					}
 				],
 				"parameters": []

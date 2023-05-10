@@ -57,7 +57,6 @@ let BuildingController = class BuildingController extends tsoa_1.Controller {
     constructor() {
         super();
     }
-    // @Security(SECURITY_NAME.profile)
     getBuildingById(req, id) {
         return __awaiter(this, void 0, void 0, function* () {
             try {
@@ -79,7 +78,6 @@ let BuildingController = class BuildingController extends tsoa_1.Controller {
             }
         });
     }
-    // @Security(SECURITY_NAME.admin)
     getAllBuildingsApps(req) {
         return __awaiter(this, void 0, void 0, function* () {
             try {
@@ -100,7 +98,6 @@ let BuildingController = class BuildingController extends tsoa_1.Controller {
             }
         });
     }
-    // @Security(SECURITY_NAME.admin)
     deleteBuilding(req, id) {
         return __awaiter(this, void 0, void 0, function* () {
             try {
@@ -117,7 +114,6 @@ let BuildingController = class BuildingController extends tsoa_1.Controller {
             }
         });
     }
-    // @Security(SECURITY_NAME.admin)
     editBuilding(req, id, data) {
         return __awaiter(this, void 0, void 0, function* () {
             try {
@@ -141,7 +137,6 @@ let BuildingController = class BuildingController extends tsoa_1.Controller {
             }
         });
     }
-    // @Security(SECURITY_NAME.admin)
     addAppToBuilding(req, buildingId, data) {
         return __awaiter(this, void 0, void 0, function* () {
             try {
@@ -162,7 +157,6 @@ let BuildingController = class BuildingController extends tsoa_1.Controller {
             }
         });
     }
-    // @Security(SECURITY_NAME.admin)
     getAppsFromBuilding(req, buildingId) {
         return __awaiter(this, void 0, void 0, function* () {
             try {
@@ -183,7 +177,6 @@ let BuildingController = class BuildingController extends tsoa_1.Controller {
             }
         });
     }
-    // @Security(SECURITY_NAME.profile)
     getAppFromBuilding(req, buildingId, appId) {
         return __awaiter(this, void 0, void 0, function* () {
             try {
@@ -203,7 +196,6 @@ let BuildingController = class BuildingController extends tsoa_1.Controller {
             }
         });
     }
-    // @Security(SECURITY_NAME.admin)
     removeAppFromBuilding(req, buildingId, data) {
         return __awaiter(this, void 0, void 0, function* () {
             try {
@@ -224,7 +216,6 @@ let BuildingController = class BuildingController extends tsoa_1.Controller {
             }
         });
     }
-    // @Security(SECURITY_NAME.admin)
     buildingHasApp(req, buildingId, appId) {
         return __awaiter(this, void 0, void 0, function* () {
             try {
@@ -343,6 +334,7 @@ let BuildingController = class BuildingController extends tsoa_1.Controller {
     }
 };
 __decorate([
+    (0, tsoa_1.Security)(constant_1.SECURITY_NAME.bearerAuth),
     (0, tsoa_1.Post)("/get_building/{id}"),
     __param(0, (0, tsoa_1.Request)()),
     __param(1, (0, tsoa_1.Path)()),
@@ -351,6 +343,7 @@ __decorate([
     __metadata("design:returntype", Promise)
 ], BuildingController.prototype, "getBuildingById", null);
 __decorate([
+    (0, tsoa_1.Security)(constant_1.SECURITY_NAME.bearerAuth),
     (0, tsoa_1.Get)("/get_all_buildings_apps"),
     __param(0, (0, tsoa_1.Request)()),
     __metadata("design:type", Function),
@@ -358,6 +351,7 @@ __decorate([
     __metadata("design:returntype", Promise)
 ], BuildingController.prototype, "getAllBuildingsApps", null);
 __decorate([
+    (0, tsoa_1.Security)(constant_1.SECURITY_NAME.bearerAuth),
     (0, tsoa_1.Delete)("/delete_building/{id}"),
     __param(0, (0, tsoa_1.Request)()),
     __param(1, (0, tsoa_1.Path)()),
@@ -366,6 +360,7 @@ __decorate([
     __metadata("design:returntype", Promise)
 ], BuildingController.prototype, "deleteBuilding", null);
 __decorate([
+    (0, tsoa_1.Security)(constant_1.SECURITY_NAME.bearerAuth),
     (0, tsoa_1.Put)("/edit_building/{id}"),
     __param(0, (0, tsoa_1.Request)()),
     __param(1, (0, tsoa_1.Path)()),
@@ -375,6 +370,7 @@ __decorate([
     __metadata("design:returntype", Promise)
 ], BuildingController.prototype, "editBuilding", null);
 __decorate([
+    (0, tsoa_1.Security)(constant_1.SECURITY_NAME.bearerAuth),
     (0, tsoa_1.Post)("/add_app_to_building/{buildingId}"),
     __param(0, (0, tsoa_1.Request)()),
     __param(1, (0, tsoa_1.Path)()),
@@ -384,6 +380,7 @@ __decorate([
     __metadata("design:returntype", Promise)
 ], BuildingController.prototype, "addAppToBuilding", null);
 __decorate([
+    (0, tsoa_1.Security)(constant_1.SECURITY_NAME.bearerAuth),
     (0, tsoa_1.Get)("/get_apps_from_building/{buildingId}"),
     __param(0, (0, tsoa_1.Request)()),
     __param(1, (0, tsoa_1.Path)()),
@@ -392,6 +389,7 @@ __decorate([
     __metadata("design:returntype", Promise)
 ], BuildingController.prototype, "getAppsFromBuilding", null);
 __decorate([
+    (0, tsoa_1.Security)(constant_1.SECURITY_NAME.bearerAuth),
     (0, tsoa_1.Get)("/get_app_from_building/{buildingId}/{appId}"),
     __param(0, (0, tsoa_1.Request)()),
     __param(1, (0, tsoa_1.Path)()),
@@ -401,6 +399,7 @@ __decorate([
     __metadata("design:returntype", Promise)
 ], BuildingController.prototype, "getAppFromBuilding", null);
 __decorate([
+    (0, tsoa_1.Security)(constant_1.SECURITY_NAME.bearerAuth),
     (0, tsoa_1.Delete)("/remove_app_from_building/{buildingId}"),
     __param(0, (0, tsoa_1.Request)()),
     __param(1, (0, tsoa_1.Path)()),
@@ -410,6 +409,7 @@ __decorate([
     __metadata("design:returntype", Promise)
 ], BuildingController.prototype, "removeAppFromBuilding", null);
 __decorate([
+    (0, tsoa_1.Security)(constant_1.SECURITY_NAME.bearerAuth),
     (0, tsoa_1.Get)("/building_has_app/{buildingId}/{appId}"),
     __param(0, (0, tsoa_1.Request)()),
     __param(1, (0, tsoa_1.Path)()),

@@ -58,7 +58,6 @@ let AppProfileController = class AppProfileController extends tsoa_1.Controller 
     constructor() {
         super();
     }
-    // @Security(SECURITY_NAME.admin)
     createAppProfile(req, data) {
         return __awaiter(this, void 0, void 0, function* () {
             try {
@@ -79,7 +78,6 @@ let AppProfileController = class AppProfileController extends tsoa_1.Controller 
             }
         });
     }
-    // @Security(SECURITY_NAME.admin)
     getAppProfile(req, id) {
         return __awaiter(this, void 0, void 0, function* () {
             try {
@@ -100,7 +98,6 @@ let AppProfileController = class AppProfileController extends tsoa_1.Controller 
             }
         });
     }
-    // @Security(SECURITY_NAME.admin)
     getAllAppProfile(req) {
         return __awaiter(this, void 0, void 0, function* () {
             try {
@@ -117,7 +114,6 @@ let AppProfileController = class AppProfileController extends tsoa_1.Controller 
             }
         });
     }
-    // @Security(SECURITY_NAME.admin)
     updateAppProfile(req, id, data) {
         return __awaiter(this, void 0, void 0, function* () {
             try {
@@ -138,7 +134,6 @@ let AppProfileController = class AppProfileController extends tsoa_1.Controller 
             }
         });
     }
-    // @Security(SECURITY_NAME.admin)
     deleteAppProfile(req, id) {
         return __awaiter(this, void 0, void 0, function* () {
             try {
@@ -158,7 +153,6 @@ let AppProfileController = class AppProfileController extends tsoa_1.Controller 
     ///////////////////
     //   PORTOFOLIO  //
     ///////////////////
-    // @Security(SECURITY_NAME.profile)
     getAuthorizedPortofolio(req, profileId) {
         return __awaiter(this, void 0, void 0, function* () {
             try {
@@ -180,7 +174,6 @@ let AppProfileController = class AppProfileController extends tsoa_1.Controller 
             }
         });
     }
-    // @Security(SECURITY_NAME.admin)
     authorizeToAccessPortofolioApis(req, profileId, data) {
         return __awaiter(this, void 0, void 0, function* () {
             try {
@@ -207,7 +200,6 @@ let AppProfileController = class AppProfileController extends tsoa_1.Controller 
             }
         });
     }
-    // @Security(SECURITY_NAME.profile)
     getAuthorizedPortofolioApis(req, profileId, portofolioId) {
         return __awaiter(this, void 0, void 0, function* () {
             try {
@@ -229,7 +221,6 @@ let AppProfileController = class AppProfileController extends tsoa_1.Controller 
             }
         });
     }
-    // @Security(SECURITY_NAME.admin)
     unauthorizeToAccessPortofolioApis(req, profileId, data) {
         return __awaiter(this, void 0, void 0, function* () {
             try {
@@ -253,7 +244,6 @@ let AppProfileController = class AppProfileController extends tsoa_1.Controller 
     ////////////
     //   BOS  //
     ////////////
-    // @Security(SECURITY_NAME.profile)
     getAuthorizedBos(req, profileId, portofolioId) {
         return __awaiter(this, void 0, void 0, function* () {
             try {
@@ -275,7 +265,6 @@ let AppProfileController = class AppProfileController extends tsoa_1.Controller 
             }
         });
     }
-    // @Security(SECURITY_NAME.admin)
     authorizeToAccessBosApis(req, profileId, portofolioId, data) {
         return __awaiter(this, void 0, void 0, function* () {
             try {
@@ -302,7 +291,6 @@ let AppProfileController = class AppProfileController extends tsoa_1.Controller 
             }
         });
     }
-    // @Security(SECURITY_NAME.profile)
     getAuthorizedBosApis(req, profileId, portofolioId, bosId) {
         return __awaiter(this, void 0, void 0, function* () {
             try {
@@ -324,7 +312,6 @@ let AppProfileController = class AppProfileController extends tsoa_1.Controller 
             }
         });
     }
-    // @Security(SECURITY_NAME.admin)
     unauthorizeToAccessBosApis(req, profileId, portofolioId, data) {
         return __awaiter(this, void 0, void 0, function* () {
             try {
@@ -347,6 +334,7 @@ let AppProfileController = class AppProfileController extends tsoa_1.Controller 
     }
 };
 __decorate([
+    (0, tsoa_1.Security)(constant_1.SECURITY_NAME.bearerAuth),
     (0, tsoa_1.Post)("/create_profile"),
     __param(0, (0, tsoa_1.Request)()),
     __param(1, (0, tsoa_1.Body)()),
@@ -355,6 +343,7 @@ __decorate([
     __metadata("design:returntype", Promise)
 ], AppProfileController.prototype, "createAppProfile", null);
 __decorate([
+    (0, tsoa_1.Security)(constant_1.SECURITY_NAME.bearerAuth),
     (0, tsoa_1.Get)("/get_profile/{id}"),
     __param(0, (0, tsoa_1.Request)()),
     __param(1, (0, tsoa_1.Path)()),
@@ -363,6 +352,7 @@ __decorate([
     __metadata("design:returntype", Promise)
 ], AppProfileController.prototype, "getAppProfile", null);
 __decorate([
+    (0, tsoa_1.Security)(constant_1.SECURITY_NAME.bearerAuth),
     (0, tsoa_1.Get)("/get_all_profile"),
     __param(0, (0, tsoa_1.Request)()),
     __metadata("design:type", Function),
@@ -370,6 +360,7 @@ __decorate([
     __metadata("design:returntype", Promise)
 ], AppProfileController.prototype, "getAllAppProfile", null);
 __decorate([
+    (0, tsoa_1.Security)(constant_1.SECURITY_NAME.bearerAuth),
     (0, tsoa_1.Put)("/edit_profile/{id}"),
     __param(0, (0, tsoa_1.Request)()),
     __param(1, (0, tsoa_1.Path)()),
@@ -379,6 +370,7 @@ __decorate([
     __metadata("design:returntype", Promise)
 ], AppProfileController.prototype, "updateAppProfile", null);
 __decorate([
+    (0, tsoa_1.Security)(constant_1.SECURITY_NAME.bearerAuth),
     (0, tsoa_1.Delete)("/delete_profile/{id}"),
     __param(0, (0, tsoa_1.Request)()),
     __param(1, (0, tsoa_1.Path)()),
@@ -387,6 +379,7 @@ __decorate([
     __metadata("design:returntype", Promise)
 ], AppProfileController.prototype, "deleteAppProfile", null);
 __decorate([
+    (0, tsoa_1.Security)(constant_1.SECURITY_NAME.bearerAuth),
     (0, tsoa_1.Get)("/get_authorized_portofolio/{profileId}"),
     __param(0, (0, tsoa_1.Request)()),
     __param(1, (0, tsoa_1.Path)()),
@@ -395,6 +388,7 @@ __decorate([
     __metadata("design:returntype", Promise)
 ], AppProfileController.prototype, "getAuthorizedPortofolio", null);
 __decorate([
+    (0, tsoa_1.Security)(constant_1.SECURITY_NAME.bearerAuth),
     (0, tsoa_1.Post)("/authorize_portofolio_apis/{profileId}"),
     __param(0, (0, tsoa_1.Request)()),
     __param(1, (0, tsoa_1.Path)()),
@@ -404,6 +398,7 @@ __decorate([
     __metadata("design:returntype", Promise)
 ], AppProfileController.prototype, "authorizeToAccessPortofolioApis", null);
 __decorate([
+    (0, tsoa_1.Security)(constant_1.SECURITY_NAME.bearerAuth),
     (0, tsoa_1.Get)("/get_authorized_portofolio_apis/{profileId}/{portofolioId}"),
     __param(0, (0, tsoa_1.Request)()),
     __param(1, (0, tsoa_1.Path)()),
@@ -413,6 +408,7 @@ __decorate([
     __metadata("design:returntype", Promise)
 ], AppProfileController.prototype, "getAuthorizedPortofolioApis", null);
 __decorate([
+    (0, tsoa_1.Security)(constant_1.SECURITY_NAME.bearerAuth),
     (0, tsoa_1.Post)("/unauthorize_portofolio_apis/{profileId}"),
     __param(0, (0, tsoa_1.Request)()),
     __param(1, (0, tsoa_1.Path)()),
@@ -422,6 +418,7 @@ __decorate([
     __metadata("design:returntype", Promise)
 ], AppProfileController.prototype, "unauthorizeToAccessPortofolioApis", null);
 __decorate([
+    (0, tsoa_1.Security)(constant_1.SECURITY_NAME.bearerAuth),
     (0, tsoa_1.Get)("/get_authorized_bos/{profileId}/{portofolioId}"),
     __param(0, (0, tsoa_1.Request)()),
     __param(1, (0, tsoa_1.Path)()),
@@ -431,6 +428,7 @@ __decorate([
     __metadata("design:returntype", Promise)
 ], AppProfileController.prototype, "getAuthorizedBos", null);
 __decorate([
+    (0, tsoa_1.Security)(constant_1.SECURITY_NAME.bearerAuth),
     (0, tsoa_1.Post)("/authorize_bos_apis/{profileId}/{portofolioId}"),
     __param(0, (0, tsoa_1.Request)()),
     __param(1, (0, tsoa_1.Path)()),
@@ -441,6 +439,7 @@ __decorate([
     __metadata("design:returntype", Promise)
 ], AppProfileController.prototype, "authorizeToAccessBosApis", null);
 __decorate([
+    (0, tsoa_1.Security)(constant_1.SECURITY_NAME.bearerAuth),
     (0, tsoa_1.Get)("/get_authorized_bos_apis/{profileId}/{portofolioId}/{bosId}"),
     __param(0, (0, tsoa_1.Request)()),
     __param(1, (0, tsoa_1.Path)()),
@@ -451,6 +450,7 @@ __decorate([
     __metadata("design:returntype", Promise)
 ], AppProfileController.prototype, "getAuthorizedBosApis", null);
 __decorate([
+    (0, tsoa_1.Security)(constant_1.SECURITY_NAME.bearerAuth),
     (0, tsoa_1.Post)("/unauthorize_bos_apis/{profileId}/{portofolioId}"),
     __param(0, (0, tsoa_1.Request)()),
     __param(1, (0, tsoa_1.Path)()),

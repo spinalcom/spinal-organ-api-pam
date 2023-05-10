@@ -87,7 +87,7 @@ let WebsocketLogsController = class WebsocketLogsController extends tsoa_1.Contr
     }
 };
 __decorate([
-    (0, tsoa_1.Security)(constant_1.SECURITY_NAME.admin),
+    (0, tsoa_1.Security)(constant_1.SECURITY_NAME.bearerAuth),
     (0, tsoa_1.Get)("/websocket/get_logs/{buildingId}"),
     __param(0, (0, tsoa_1.Request)()),
     __param(1, (0, tsoa_1.Path)()),
@@ -96,7 +96,7 @@ __decorate([
     __metadata("design:returntype", Promise)
 ], WebsocketLogsController.prototype, "getWebsocketLogs", null);
 __decorate([
-    (0, tsoa_1.Security)(constant_1.SECURITY_NAME.admin),
+    (0, tsoa_1.Security)(constant_1.SECURITY_NAME.bearerAuth),
     (0, tsoa_1.Get)("/websocket/get_logs"),
     __param(0, (0, tsoa_1.Request)()),
     __metadata("design:type", Function),

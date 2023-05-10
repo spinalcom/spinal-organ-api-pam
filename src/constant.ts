@@ -206,5 +206,6 @@ export enum SECURITY_MESSAGES {
 export enum SECURITY_NAME {
     admin = "admin",
     profile = "profile",
+    bearerAuth = "bearerAuth",
     all = "all"
 } 

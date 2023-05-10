@@ -328,6 +328,7 @@ export function RegisterRoutes(app: express.Router) {
     //      Please look into the "controllerPathGlobs" config option described in the readme: https://github.com/lukeautry/tsoa
     // ###########################################################################################################
         app.post('/api/v1/pam/create_portofolio_api_route',
+            authenticateMiddleware([{"bearerAuth":[]}]),
             ...(fetchMiddlewares<RequestHandler>(APIController)),
             ...(fetchMiddlewares<RequestHandler>(APIController.prototype.createPortofolioApiRoute)),
 
@@ -354,6 +355,7 @@ export function RegisterRoutes(app: express.Router) {
         });
         // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
         app.put('/api/v1/pam/update_portofolio_api_route/:id',
+            authenticateMiddleware([{"bearerAuth":[]}]),
             ...(fetchMiddlewares<RequestHandler>(APIController)),
             ...(fetchMiddlewares<RequestHandler>(APIController.prototype.updatePortofolioApiRoute)),
 
@@ -381,6 +383,7 @@ export function RegisterRoutes(app: express.Router) {
         });
         // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
         app.get('/api/v1/pam/get_portofolio_api_route/:id',
+            authenticateMiddleware([{"bearerAuth":[]}]),
             ...(fetchMiddlewares<RequestHandler>(APIController)),
             ...(fetchMiddlewares<RequestHandler>(APIController.prototype.getPortofolioApiRouteById)),
 
@@ -407,6 +410,7 @@ export function RegisterRoutes(app: express.Router) {
         });
         // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
         app.get('/api/v1/pam/get_all_portofolio_api_route',
+            authenticateMiddleware([{"bearerAuth":[]}]),
             ...(fetchMiddlewares<RequestHandler>(APIController)),
             ...(fetchMiddlewares<RequestHandler>(APIController.prototype.getAllPortofolioApiRoute)),
 
@@ -432,6 +436,7 @@ export function RegisterRoutes(app: express.Router) {
         });
         // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
         app.delete('/api/v1/pam/delete_portofolio_api_route/:id',
+            authenticateMiddleware([{"bearerAuth":[]}]),
             ...(fetchMiddlewares<RequestHandler>(APIController)),
             ...(fetchMiddlewares<RequestHandler>(APIController.prototype.deletePortofolioApiRoute)),
 
@@ -458,6 +463,7 @@ export function RegisterRoutes(app: express.Router) {
         });
         // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
         app.post('/api/v1/pam/upload_portofolio_apis_routes',
+            authenticateMiddleware([{"bearerAuth":[]}]),
             upload.single('file'),
             ...(fetchMiddlewares<RequestHandler>(APIController)),
             ...(fetchMiddlewares<RequestHandler>(APIController.prototype.uploadPortofolioSwaggerFile)),
@@ -485,6 +491,7 @@ export function RegisterRoutes(app: express.Router) {
         });
         // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
         app.post('/api/v1/pam/create_bos_api_route',
+            authenticateMiddleware([{"bearerAuth":[]}]),
             ...(fetchMiddlewares<RequestHandler>(APIController)),
             ...(fetchMiddlewares<RequestHandler>(APIController.prototype.createBosApiRoute)),
 
@@ -511,6 +518,7 @@ export function RegisterRoutes(app: express.Router) {
         });
         // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
         app.put('/api/v1/pam/update_bos_api_route/:id',
+            authenticateMiddleware([{"bearerAuth":[]}]),
             ...(fetchMiddlewares<RequestHandler>(APIController)),
             ...(fetchMiddlewares<RequestHandler>(APIController.prototype.updateBosApiRoute)),
 
@@ -538,6 +546,7 @@ export function RegisterRoutes(app: express.Router) {
         });
         // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
         app.get('/api/v1/pam/get_bos_api_route/:id',
+            authenticateMiddleware([{"bearerAuth":[]}]),
             ...(fetchMiddlewares<RequestHandler>(APIController)),
             ...(fetchMiddlewares<RequestHandler>(APIController.prototype.getBosApiRouteById)),
 
@@ -564,6 +573,7 @@ export function RegisterRoutes(app: express.Router) {
         });
         // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
         app.get('/api/v1/pam/get_all_bos_api_route',
+            authenticateMiddleware([{"bearerAuth":[]}]),
             ...(fetchMiddlewares<RequestHandler>(APIController)),
             ...(fetchMiddlewares<RequestHandler>(APIController.prototype.getAllBosApiRoute)),
 
@@ -589,6 +599,7 @@ export function RegisterRoutes(app: express.Router) {
         });
         // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
         app.delete('/api/v1/pam/delete_bos_api_route/:id',
+            authenticateMiddleware([{"bearerAuth":[]}]),
             ...(fetchMiddlewares<RequestHandler>(APIController)),
             ...(fetchMiddlewares<RequestHandler>(APIController.prototype.deleteBosApiRoute)),
 
@@ -615,6 +626,7 @@ export function RegisterRoutes(app: express.Router) {
         });
         // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
         app.post('/api/v1/pam/upload_bos_apis_routes',
+            authenticateMiddleware([{"bearerAuth":[]}]),
             upload.single('file'),
             ...(fetchMiddlewares<RequestHandler>(APIController)),
             ...(fetchMiddlewares<RequestHandler>(APIController.prototype.uploadBosSwaggerFile)),
@@ -642,6 +654,7 @@ export function RegisterRoutes(app: express.Router) {
         });
         // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
         app.post('/api/v1/pam/app_profile/create_profile',
+            authenticateMiddleware([{"bearerAuth":[]}]),
             ...(fetchMiddlewares<RequestHandler>(AppProfileController)),
             ...(fetchMiddlewares<RequestHandler>(AppProfileController.prototype.createAppProfile)),
 
@@ -668,6 +681,7 @@ export function RegisterRoutes(app: express.Router) {
         });
         // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
         app.get('/api/v1/pam/app_profile/get_profile/:id',
+            authenticateMiddleware([{"bearerAuth":[]}]),
             ...(fetchMiddlewares<RequestHandler>(AppProfileController)),
             ...(fetchMiddlewares<RequestHandler>(AppProfileController.prototype.getAppProfile)),
 
@@ -694,6 +708,7 @@ export function RegisterRoutes(app: express.Router) {
         });
         // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
         app.get('/api/v1/pam/app_profile/get_all_profile',
+            authenticateMiddleware([{"bearerAuth":[]}]),
             ...(fetchMiddlewares<RequestHandler>(AppProfileController)),
             ...(fetchMiddlewares<RequestHandler>(AppProfileController.prototype.getAllAppProfile)),
 
@@ -719,6 +734,7 @@ export function RegisterRoutes(app: express.Router) {
         });
         // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
         app.put('/api/v1/pam/app_profile/edit_profile/:id',
+            authenticateMiddleware([{"bearerAuth":[]}]),
             ...(fetchMiddlewares<RequestHandler>(AppProfileController)),
             ...(fetchMiddlewares<RequestHandler>(AppProfileController.prototype.updateAppProfile)),
 
@@ -746,6 +762,7 @@ export function RegisterRoutes(app: express.Router) {
         });
         // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
         app.delete('/api/v1/pam/app_profile/delete_profile/:id',
+            authenticateMiddleware([{"bearerAuth":[]}]),
             ...(fetchMiddlewares<RequestHandler>(AppProfileController)),
             ...(fetchMiddlewares<RequestHandler>(AppProfileController.prototype.deleteAppProfile)),
 
@@ -772,6 +789,7 @@ export function RegisterRoutes(app: express.Router) {
         });
         // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
         app.get('/api/v1/pam/app_profile/get_authorized_portofolio/:profileId',
+            authenticateMiddleware([{"bearerAuth":[]}]),
             ...(fetchMiddlewares<RequestHandler>(AppProfileController)),
             ...(fetchMiddlewares<RequestHandler>(AppProfileController.prototype.getAuthorizedPortofolio)),
 
@@ -798,6 +816,7 @@ export function RegisterRoutes(app: express.Router) {
         });
         // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
         app.post('/api/v1/pam/app_profile/authorize_portofolio_apis/:profileId',
+            authenticateMiddleware([{"bearerAuth":[]}]),
             ...(fetchMiddlewares<RequestHandler>(AppProfileController)),
             ...(fetchMiddlewares<RequestHandler>(AppProfileController.prototype.authorizeToAccessPortofolioApis)),
 
@@ -825,6 +844,7 @@ export function RegisterRoutes(app: express.Router) {
         });
         // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
         app.get('/api/v1/pam/app_profile/get_authorized_portofolio_apis/:profileId/:portofolioId',
+            authenticateMiddleware([{"bearerAuth":[]}]),
             ...(fetchMiddlewares<RequestHandler>(AppProfileController)),
             ...(fetchMiddlewares<RequestHandler>(AppProfileController.prototype.getAuthorizedPortofolioApis)),
 
@@ -852,6 +872,7 @@ export function RegisterRoutes(app: express.Router) {
         });
         // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
         app.post('/api/v1/pam/app_profile/unauthorize_portofolio_apis/:profileId',
+            authenticateMiddleware([{"bearerAuth":[]}]),
             ...(fetchMiddlewares<RequestHandler>(AppProfileController)),
             ...(fetchMiddlewares<RequestHandler>(AppProfileController.prototype.unauthorizeToAccessPortofolioApis)),
 
@@ -879,6 +900,7 @@ export function RegisterRoutes(app: express.Router) {
         });
         // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
         app.get('/api/v1/pam/app_profile/get_authorized_bos/:profileId/:portofolioId',
+            authenticateMiddleware([{"bearerAuth":[]}]),
             ...(fetchMiddlewares<RequestHandler>(AppProfileController)),
             ...(fetchMiddlewares<RequestHandler>(AppProfileController.prototype.getAuthorizedBos)),
 
@@ -906,6 +928,7 @@ export function RegisterRoutes(app: express.Router) {
         });
         // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
         app.post('/api/v1/pam/app_profile/authorize_bos_apis/:profileId/:portofolioId',
+            authenticateMiddleware([{"bearerAuth":[]}]),
             ...(fetchMiddlewares<RequestHandler>(AppProfileController)),
             ...(fetchMiddlewares<RequestHandler>(AppProfileController.prototype.authorizeToAccessBosApis)),
 
@@ -934,6 +957,7 @@ export function RegisterRoutes(app: express.Router) {
         });
         // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
         app.get('/api/v1/pam/app_profile/get_authorized_bos_apis/:profileId/:portofolioId/:bosId',
+            authenticateMiddleware([{"bearerAuth":[]}]),
             ...(fetchMiddlewares<RequestHandler>(AppProfileController)),
             ...(fetchMiddlewares<RequestHandler>(AppProfileController.prototype.getAuthorizedBosApis)),
 
@@ -962,6 +986,7 @@ export function RegisterRoutes(app: express.Router) {
         });
         // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
         app.post('/api/v1/pam/app_profile/unauthorize_bos_apis/:profileId/:portofolioId',
+            authenticateMiddleware([{"bearerAuth":[]}]),
             ...(fetchMiddlewares<RequestHandler>(AppProfileController)),
             ...(fetchMiddlewares<RequestHandler>(AppProfileController.prototype.unauthorizeToAccessBosApis)),
 
@@ -990,6 +1015,7 @@ export function RegisterRoutes(app: express.Router) {
         });
         // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
         app.post('/api/v1/pam/create_admin_app',
+            authenticateMiddleware([{"bearerAuth":[]}]),
             ...(fetchMiddlewares<RequestHandler>(AppsController)),
             ...(fetchMiddlewares<RequestHandler>(AppsController.prototype.createAdminApp)),
 
@@ -1016,6 +1042,7 @@ export function RegisterRoutes(app: express.Router) {
         });
         // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
         app.post('/api/v1/pam/create_portofolio_app',
+            authenticateMiddleware([{"bearerAuth":[]}]),
             ...(fetchMiddlewares<RequestHandler>(AppsController)),
             ...(fetchMiddlewares<RequestHandler>(AppsController.prototype.createPortofolioApp)),
 
@@ -1042,6 +1069,7 @@ export function RegisterRoutes(app: express.Router) {
         });
         // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
         app.post('/api/v1/pam/create_building_app',
+            authenticateMiddleware([{"bearerAuth":[]}]),
             ...(fetchMiddlewares<RequestHandler>(AppsController)),
             ...(fetchMiddlewares<RequestHandler>(AppsController.prototype.createBuildingApp)),
 
@@ -1068,6 +1096,7 @@ export function RegisterRoutes(app: express.Router) {
         });
         // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
         app.get('/api/v1/pam/get_all_admin_apps',
+            authenticateMiddleware([{"bearerAuth":[]}]),
             ...(fetchMiddlewares<RequestHandler>(AppsController)),
             ...(fetchMiddlewares<RequestHandler>(AppsController.prototype.getAllAdminApps)),
 
@@ -1093,6 +1122,7 @@ export function RegisterRoutes(app: express.Router) {
         });
         // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
         app.get('/api/v1/pam/get_all_portofolio_apps',
+            authenticateMiddleware([{"bearerAuth":[]}]),
             ...(fetchMiddlewares<RequestHandler>(AppsController)),
             ...(fetchMiddlewares<RequestHandler>(AppsController.prototype.getAllPortofolioApps)),
 
@@ -1118,6 +1148,7 @@ export function RegisterRoutes(app: express.Router) {
         });
         // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
         app.get('/api/v1/pam/get_all_building_apps',
+            authenticateMiddleware([{"bearerAuth":[]}]),
             ...(fetchMiddlewares<RequestHandler>(AppsController)),
             ...(fetchMiddlewares<RequestHandler>(AppsController.prototype.getAllBuildingApps)),
 
@@ -1143,6 +1174,7 @@ export function RegisterRoutes(app: express.Router) {
         });
         // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
         app.get('/api/v1/pam/get_admin_app/:appId',
+            authenticateMiddleware([{"bearerAuth":[]}]),
             ...(fetchMiddlewares<RequestHandler>(AppsController)),
             ...(fetchMiddlewares<RequestHandler>(AppsController.prototype.getAdminApp)),
 
@@ -1169,6 +1201,7 @@ export function RegisterRoutes(app: express.Router) {
         });
         // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
         app.get('/api/v1/pam/get_portofolio_app/:appId',
+            authenticateMiddleware([{"bearerAuth":[]}]),
             ...(fetchMiddlewares<RequestHandler>(AppsController)),
             ...(fetchMiddlewares<RequestHandler>(AppsController.prototype.getPortofolioApp)),
 
@@ -1195,6 +1228,7 @@ export function RegisterRoutes(app: express.Router) {
         });
         // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
         app.get('/api/v1/pam/get_building_app/:appId',
+            authenticateMiddleware([{"bearerAuth":[]}]),
             ...(fetchMiddlewares<RequestHandler>(AppsController)),
             ...(fetchMiddlewares<RequestHandler>(AppsController.prototype.getBuildingApp)),
 
@@ -1221,6 +1255,7 @@ export function RegisterRoutes(app: express.Router) {
         });
         // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
         app.put('/api/v1/pam/update_admin_app/:appId',
+            authenticateMiddleware([{"bearerAuth":[]}]),
             ...(fetchMiddlewares<RequestHandler>(AppsController)),
             ...(fetchMiddlewares<RequestHandler>(AppsController.prototype.updateAdminApp)),
 
@@ -1248,6 +1283,7 @@ export function RegisterRoutes(app: express.Router) {
         });
         // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
         app.put('/api/v1/pam/update_portofolio_app/:appId',
+            authenticateMiddleware([{"bearerAuth":[]}]),
             ...(fetchMiddlewares<RequestHandler>(AppsController)),
             ...(fetchMiddlewares<RequestHandler>(AppsController.prototype.updatePortofolioApp)),
 
@@ -1275,6 +1311,7 @@ export function RegisterRoutes(app: express.Router) {
         });
         // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
         app.put('/api/v1/pam/update_building_app/:appId',
+            authenticateMiddleware([{"bearerAuth":[]}]),
             ...(fetchMiddlewares<RequestHandler>(AppsController)),
             ...(fetchMiddlewares<RequestHandler>(AppsController.prototype.updateBuildingApp)),
 
@@ -1302,6 +1339,7 @@ export function RegisterRoutes(app: express.Router) {
         });
         // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
         app.delete('/api/v1/pam/delete_admin_app/:appId',
+            authenticateMiddleware([{"bearerAuth":[]}]),
             ...(fetchMiddlewares<RequestHandler>(AppsController)),
             ...(fetchMiddlewares<RequestHandler>(AppsController.prototype.deleteAdminApp)),
 
@@ -1328,6 +1366,7 @@ export function RegisterRoutes(app: express.Router) {
         });
         // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
         app.delete('/api/v1/pam/delete_portofolio_app/:appId',
+            authenticateMiddleware([{"bearerAuth":[]}]),
             ...(fetchMiddlewares<RequestHandler>(AppsController)),
             ...(fetchMiddlewares<RequestHandler>(AppsController.prototype.deletePortofolioApp)),
 
@@ -1354,6 +1393,7 @@ export function RegisterRoutes(app: express.Router) {
         });
         // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
         app.delete('/api/v1/pam/delete_building_app/:appId',
+            authenticateMiddleware([{"bearerAuth":[]}]),
             ...(fetchMiddlewares<RequestHandler>(AppsController)),
             ...(fetchMiddlewares<RequestHandler>(AppsController.prototype.deleteBuildingApp)),
 
@@ -1380,6 +1420,7 @@ export function RegisterRoutes(app: express.Router) {
         });
         // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
         app.post('/api/v1/pam/upload_admin_apps',
+            authenticateMiddleware([{"bearerAuth":[]}]),
             upload.single('file'),
             ...(fetchMiddlewares<RequestHandler>(AppsController)),
             ...(fetchMiddlewares<RequestHandler>(AppsController.prototype.uploadAdminApp)),
@@ -1407,6 +1448,7 @@ export function RegisterRoutes(app: express.Router) {
         });
         // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
         app.post('/api/v1/pam/upload_portofolio_apps',
+            authenticateMiddleware([{"bearerAuth":[]}]),
             upload.single('file'),
             ...(fetchMiddlewares<RequestHandler>(AppsController)),
             ...(fetchMiddlewares<RequestHandler>(AppsController.prototype.uploadPortofolioApp)),
@@ -1434,6 +1476,7 @@ export function RegisterRoutes(app: express.Router) {
         });
         // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
         app.post('/api/v1/pam/upload_building_apps',
+            authenticateMiddleware([{"bearerAuth":[]}]),
             upload.single('file'),
             ...(fetchMiddlewares<RequestHandler>(AppsController)),
             ...(fetchMiddlewares<RequestHandler>(AppsController.prototype.uploadBuildingApp)),
@@ -1461,6 +1504,7 @@ export function RegisterRoutes(app: express.Router) {
         });
         // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
         app.post('/api/v1/pam/add_app_to_favoris/:portofolioId',
+            authenticateMiddleware([{"bearerAuth":[]}]),
             ...(fetchMiddlewares<RequestHandler>(AppsController)),
             ...(fetchMiddlewares<RequestHandler>(AppsController.prototype.addPortofolioAppToFavoris)),
 
@@ -1488,6 +1532,7 @@ export function RegisterRoutes(app: express.Router) {
         });
         // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
         app.post('/api/v1/pam/add_app_to_favoris/:portofolioId/:bosId',
+            authenticateMiddleware([{"bearerAuth":[]}]),
             ...(fetchMiddlewares<RequestHandler>(AppsController)),
             ...(fetchMiddlewares<RequestHandler>(AppsController.prototype.addBuildingAppToFavoris)),
 
@@ -1516,6 +1561,7 @@ export function RegisterRoutes(app: express.Router) {
         });
         // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
         app.post('/api/v1/pam/remove_app_from_favoris/:portofolioId',
+            authenticateMiddleware([{"bearerAuth":[]}]),
             ...(fetchMiddlewares<RequestHandler>(AppsController)),
             ...(fetchMiddlewares<RequestHandler>(AppsController.prototype.removePortofolioAppFromFavoris)),
 
@@ -1543,6 +1589,7 @@ export function RegisterRoutes(app: express.Router) {
         });
         // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
         app.post('/api/v1/pam/remove_app_from_favoris/:portofolioId/:bosId',
+            authenticateMiddleware([{"bearerAuth":[]}]),
             ...(fetchMiddlewares<RequestHandler>(AppsController)),
             ...(fetchMiddlewares<RequestHandler>(AppsController.prototype.removeBuildingAppFromFavoris)),
 
@@ -1571,6 +1618,7 @@ export function RegisterRoutes(app: express.Router) {
         });
         // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
         app.get('/api/v1/pam/get_favorite_apps/:portofolioId',
+            authenticateMiddleware([{"bearerAuth":[]}]),
             ...(fetchMiddlewares<RequestHandler>(AppsController)),
             ...(fetchMiddlewares<RequestHandler>(AppsController.prototype.getPortofolioFavoriteApps)),
 
@@ -1597,6 +1645,7 @@ export function RegisterRoutes(app: express.Router) {
         });
         // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
         app.get('/api/v1/pam/get_favorite_apps/:portofolioId/:bosId',
+            authenticateMiddleware([{"bearerAuth":[]}]),
             ...(fetchMiddlewares<RequestHandler>(AppsController)),
             ...(fetchMiddlewares<RequestHandler>(AppsController.prototype.getBuildingFavoriteApps)),
 
@@ -1649,6 +1698,7 @@ export function RegisterRoutes(app: express.Router) {
         });
         // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
         app.post('/api/v1/pam/register_admin',
+            authenticateMiddleware([{"bearerAuth":[]}]),
             ...(fetchMiddlewares<RequestHandler>(AuthController)),
             ...(fetchMiddlewares<RequestHandler>(AuthController.prototype.registerToAdmin)),
 
@@ -1675,6 +1725,7 @@ export function RegisterRoutes(app: express.Router) {
         });
         // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
         app.get('/api/v1/pam/get_pam_to_auth_credential',
+            authenticateMiddleware([{"bearerAuth":[]}]),
             ...(fetchMiddlewares<RequestHandler>(AuthController)),
             ...(fetchMiddlewares<RequestHandler>(AuthController.prototype.getBosToAdminCredential)),
 
@@ -1700,6 +1751,7 @@ export function RegisterRoutes(app: express.Router) {
         });
         // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
         app.delete('/api/v1/pam/delete_admin',
+            authenticateMiddleware([{"bearerAuth":[]}]),
             ...(fetchMiddlewares<RequestHandler>(AuthController)),
             ...(fetchMiddlewares<RequestHandler>(AuthController.prototype.deleteAdmin)),
 
@@ -1725,6 +1777,7 @@ export function RegisterRoutes(app: express.Router) {
         });
         // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
         app.get('/api/v1/pam/get_admin_to_pam_credential',
+            authenticateMiddleware([{"bearerAuth":[]}]),
             ...(fetchMiddlewares<RequestHandler>(AuthController)),
             ...(fetchMiddlewares<RequestHandler>(AuthController.prototype.getAdminCredential)),
 
@@ -1750,6 +1803,7 @@ export function RegisterRoutes(app: express.Router) {
         });
         // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
         app.put('/api/v1/pam/update_data',
+            authenticateMiddleware([{"bearerAuth":[]}]),
             ...(fetchMiddlewares<RequestHandler>(AuthController)),
             ...(fetchMiddlewares<RequestHandler>(AuthController.prototype.syncDataToAdmin)),
 
@@ -1775,6 +1829,7 @@ export function RegisterRoutes(app: express.Router) {
         });
         // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
         app.post('/api/v1/pam/getTokenData',
+            authenticateMiddleware([{"bearerAuth":[]}]),
             ...(fetchMiddlewares<RequestHandler>(AuthController)),
             ...(fetchMiddlewares<RequestHandler>(AuthController.prototype.tokenIsValid)),
 
@@ -1800,6 +1855,7 @@ export function RegisterRoutes(app: express.Router) {
         });
         // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
         app.post('/api/v1/pam/get_building/:id',
+            authenticateMiddleware([{"bearerAuth":[]}]),
             ...(fetchMiddlewares<RequestHandler>(BuildingController)),
             ...(fetchMiddlewares<RequestHandler>(BuildingController.prototype.getBuildingById)),
 
@@ -1826,6 +1882,7 @@ export function RegisterRoutes(app: express.Router) {
         });
         // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
         app.get('/api/v1/pam/get_all_buildings_apps',
+            authenticateMiddleware([{"bearerAuth":[]}]),
             ...(fetchMiddlewares<RequestHandler>(BuildingController)),
             ...(fetchMiddlewares<RequestHandler>(BuildingController.prototype.getAllBuildingsApps)),
 
@@ -1851,6 +1908,7 @@ export function RegisterRoutes(app: express.Router) {
         });
         // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
         app.delete('/api/v1/pam/delete_building/:id',
+            authenticateMiddleware([{"bearerAuth":[]}]),
             ...(fetchMiddlewares<RequestHandler>(BuildingController)),
             ...(fetchMiddlewares<RequestHandler>(BuildingController.prototype.deleteBuilding)),
 
@@ -1877,6 +1935,7 @@ export function RegisterRoutes(app: express.Router) {
         });
         // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
         app.put('/api/v1/pam/edit_building/:id',
+            authenticateMiddleware([{"bearerAuth":[]}]),
             ...(fetchMiddlewares<RequestHandler>(BuildingController)),
             ...(fetchMiddlewares<RequestHandler>(BuildingController.prototype.editBuilding)),
 
@@ -1904,6 +1963,7 @@ export function RegisterRoutes(app: express.Router) {
         });
         // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
         app.post('/api/v1/pam/add_app_to_building/:buildingId',
+            authenticateMiddleware([{"bearerAuth":[]}]),
             ...(fetchMiddlewares<RequestHandler>(BuildingController)),
             ...(fetchMiddlewares<RequestHandler>(BuildingController.prototype.addAppToBuilding)),
 
@@ -1931,6 +1991,7 @@ export function RegisterRoutes(app: express.Router) {
         });
         // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
         app.get('/api/v1/pam/get_apps_from_building/:buildingId',
+            authenticateMiddleware([{"bearerAuth":[]}]),
             ...(fetchMiddlewares<RequestHandler>(BuildingController)),
             ...(fetchMiddlewares<RequestHandler>(BuildingController.prototype.getAppsFromBuilding)),
 
@@ -1957,6 +2018,7 @@ export function RegisterRoutes(app: express.Router) {
         });
         // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
         app.get('/api/v1/pam/get_app_from_building/:buildingId/:appId',
+            authenticateMiddleware([{"bearerAuth":[]}]),
             ...(fetchMiddlewares<RequestHandler>(BuildingController)),
             ...(fetchMiddlewares<RequestHandler>(BuildingController.prototype.getAppFromBuilding)),
 
@@ -1984,6 +2046,7 @@ export function RegisterRoutes(app: express.Router) {
         });
         // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
         app.delete('/api/v1/pam/remove_app_from_building/:buildingId',
+            authenticateMiddleware([{"bearerAuth":[]}]),
             ...(fetchMiddlewares<RequestHandler>(BuildingController)),
             ...(fetchMiddlewares<RequestHandler>(BuildingController.prototype.removeAppFromBuilding)),
 
@@ -2011,6 +2074,7 @@ export function RegisterRoutes(app: express.Router) {
         });
         // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
         app.get('/api/v1/pam/building_has_app/:buildingId/:appId',
+            authenticateMiddleware([{"bearerAuth":[]}]),
             ...(fetchMiddlewares<RequestHandler>(BuildingController)),
             ...(fetchMiddlewares<RequestHandler>(BuildingController.prototype.buildingHasApp)),
 
@@ -2172,6 +2236,7 @@ export function RegisterRoutes(app: express.Router) {
         });
         // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
         app.post('/api/v1/pam/create_digitaltwin',
+            authenticateMiddleware([{"bearerAuth":[]}]),
             ...(fetchMiddlewares<RequestHandler>(DigitaltwinController)),
             ...(fetchMiddlewares<RequestHandler>(DigitaltwinController.prototype.createDigitalTwin)),
 
@@ -2198,6 +2263,7 @@ export function RegisterRoutes(app: express.Router) {
         });
         // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
         app.post('/api/v1/pam/add_portofolio',
+            authenticateMiddleware([{"bearerAuth":[]}]),
             ...(fetchMiddlewares<RequestHandler>(PortofolioController)),
             ...(fetchMiddlewares<RequestHandler>(PortofolioController.prototype.addPortofolio)),
 
@@ -2224,6 +2290,7 @@ export function RegisterRoutes(app: express.Router) {
         });
         // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
         app.put('/api/v1/pam/update_portofolio/:portofolioId',
+            authenticateMiddleware([{"bearerAuth":[]}]),
             ...(fetchMiddlewares<RequestHandler>(PortofolioController)),
             ...(fetchMiddlewares<RequestHandler>(PortofolioController.prototype.updatePortofolio)),
 
@@ -2251,6 +2318,7 @@ export function RegisterRoutes(app: express.Router) {
         });
         // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
         app.put('/api/v1/pam/rename_portofolio/:id',
+            authenticateMiddleware([{"bearerAuth":[]}]),
             ...(fetchMiddlewares<RequestHandler>(PortofolioController)),
             ...(fetchMiddlewares<RequestHandler>(PortofolioController.prototype.renamePortofolio)),
 
@@ -2278,6 +2346,7 @@ export function RegisterRoutes(app: express.Router) {
         });
         // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
         app.get('/api/v1/pam/get_all_portofolio',
+            authenticateMiddleware([{"bearerAuth":[]}]),
             ...(fetchMiddlewares<RequestHandler>(PortofolioController)),
             ...(fetchMiddlewares<RequestHandler>(PortofolioController.prototype.getAllPortofolio)),
 
@@ -2303,6 +2372,7 @@ export function RegisterRoutes(app: express.Router) {
         });
         // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
         app.get('/api/v1/pam/get_portofolio/:id',
+            authenticateMiddleware([{"bearerAuth":[]}]),
             ...(fetchMiddlewares<RequestHandler>(PortofolioController)),
             ...(fetchMiddlewares<RequestHandler>(PortofolioController.prototype.getPortofolio)),
 
@@ -2329,6 +2399,7 @@ export function RegisterRoutes(app: express.Router) {
         });
         // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
         app.get('/api/v1/pam/get_portofolio_details/:id',
+            authenticateMiddleware([{"bearerAuth":[]}]),
             ...(fetchMiddlewares<RequestHandler>(PortofolioController)),
             ...(fetchMiddlewares<RequestHandler>(PortofolioController.prototype.getPortofolioDetails)),
 
@@ -2355,6 +2426,7 @@ export function RegisterRoutes(app: express.Router) {
         });
         // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
         app.get('/api/v1/pam/get_all_portofolios_details',
+            authenticateMiddleware([{"bearerAuth":[]}]),
             ...(fetchMiddlewares<RequestHandler>(PortofolioController)),
             ...(fetchMiddlewares<RequestHandler>(PortofolioController.prototype.getAllPortofoliosDetails)),
 
@@ -2380,6 +2452,7 @@ export function RegisterRoutes(app: express.Router) {
         });
         // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
         app.delete('/api/v1/pam/remove_portofolio/:id',
+            authenticateMiddleware([{"bearerAuth":[]}]),
             ...(fetchMiddlewares<RequestHandler>(PortofolioController)),
             ...(fetchMiddlewares<RequestHandler>(PortofolioController.prototype.removePortofolio)),
 
@@ -2406,6 +2479,7 @@ export function RegisterRoutes(app: express.Router) {
         });
         // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
         app.post('/api/v1/pam/add_building_to_portofolio/:portofolioId',
+            authenticateMiddleware([{"bearerAuth":[]}]),
             ...(fetchMiddlewares<RequestHandler>(PortofolioController)),
             ...(fetchMiddlewares<RequestHandler>(PortofolioController.prototype.addBuilding)),
 
@@ -2433,6 +2507,7 @@ export function RegisterRoutes(app: express.Router) {
         });
         // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
         app.get('/api/v1/pam/get_building_from_portofolio/:portofolioId/:buildingId',
+            authenticateMiddleware([{"bearerAuth":[]}]),
             ...(fetchMiddlewares<RequestHandler>(PortofolioController)),
             ...(fetchMiddlewares<RequestHandler>(PortofolioController.prototype.getBuilding)),
 
@@ -2460,6 +2535,7 @@ export function RegisterRoutes(app: express.Router) {
         });
         // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
         app.get('/api/v1/pam/get_all_buildings_from_portofolio/:portofolioId',
+            authenticateMiddleware([{"bearerAuth":[]}]),
             ...(fetchMiddlewares<RequestHandler>(PortofolioController)),
             ...(fetchMiddlewares<RequestHandler>(PortofolioController.prototype.getAllBuilding)),
 
@@ -2486,6 +2562,7 @@ export function RegisterRoutes(app: express.Router) {
         });
         // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
         app.delete('/api/v1/pam/remove_building_from_portofolio/:portofolioId',
+            authenticateMiddleware([{"bearerAuth":[]}]),
             ...(fetchMiddlewares<RequestHandler>(PortofolioController)),
             ...(fetchMiddlewares<RequestHandler>(PortofolioController.prototype.deleteBuildingFromPortofolio)),
 
@@ -2513,6 +2590,7 @@ export function RegisterRoutes(app: express.Router) {
         });
         // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
         app.post('/api/v1/pam/add_app_to_portofolio/:portofolioId',
+            authenticateMiddleware([{"bearerAuth":[]}]),
             ...(fetchMiddlewares<RequestHandler>(PortofolioController)),
             ...(fetchMiddlewares<RequestHandler>(PortofolioController.prototype.addAppToPortofolio)),
 
@@ -2540,6 +2618,7 @@ export function RegisterRoutes(app: express.Router) {
         });
         // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
         app.get('/api/v1/pam/get_apps_from_portofolio/:portofolioId',
+            authenticateMiddleware([{"bearerAuth":[]}]),
             ...(fetchMiddlewares<RequestHandler>(PortofolioController)),
             ...(fetchMiddlewares<RequestHandler>(PortofolioController.prototype.getPortofolioApps)),
 
@@ -2566,6 +2645,7 @@ export function RegisterRoutes(app: express.Router) {
         });
         // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
         app.get('/api/v1/pam/get_app_from_portofolio/:portofolioId/:applicationId',
+            authenticateMiddleware([{"bearerAuth":[]}]),
             ...(fetchMiddlewares<RequestHandler>(PortofolioController)),
             ...(fetchMiddlewares<RequestHandler>(PortofolioController.prototype.getAppFromPortofolio)),
 
@@ -2593,6 +2673,7 @@ export function RegisterRoutes(app: express.Router) {
         });
         // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
         app.delete('/api/v1/pam/remove_app_from_portofolio/:portofolioId',
+            authenticateMiddleware([{"bearerAuth":[]}]),
             ...(fetchMiddlewares<RequestHandler>(PortofolioController)),
             ...(fetchMiddlewares<RequestHandler>(PortofolioController.prototype.removeAppFromPortofolio)),
 
@@ -2620,6 +2701,7 @@ export function RegisterRoutes(app: express.Router) {
         });
         // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
         app.get('/api/v1/pam/portofolio_has_app/:portofolioId/:applicationId',
+            authenticateMiddleware([{"bearerAuth":[]}]),
             ...(fetchMiddlewares<RequestHandler>(PortofolioController)),
             ...(fetchMiddlewares<RequestHandler>(PortofolioController.prototype.portofolioHasApp)),
 
@@ -2647,6 +2729,7 @@ export function RegisterRoutes(app: express.Router) {
         });
         // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
         app.post('/api/v1/pam/add_apiRoute_to_portofolio/:portofolioId',
+            authenticateMiddleware([{"bearerAuth":[]}]),
             ...(fetchMiddlewares<RequestHandler>(PortofolioController)),
             ...(fetchMiddlewares<RequestHandler>(PortofolioController.prototype.addApiToPortofolio)),
 
@@ -2674,6 +2757,7 @@ export function RegisterRoutes(app: express.Router) {
         });
         // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
         app.get('/api/v1/pam/get_apisRoute_from_portofolio/:portofolioId',
+            authenticateMiddleware([{"bearerAuth":[]}]),
             ...(fetchMiddlewares<RequestHandler>(PortofolioController)),
             ...(fetchMiddlewares<RequestHandler>(PortofolioController.prototype.getPortofolioApis)),
 
@@ -2700,6 +2784,7 @@ export function RegisterRoutes(app: express.Router) {
         });
         // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
         app.get('/api/v1/pam/get_apiRoute_from_portofolio/:portofolioId/:apiId',
+            authenticateMiddleware([{"bearerAuth":[]}]),
             ...(fetchMiddlewares<RequestHandler>(PortofolioController)),
             ...(fetchMiddlewares<RequestHandler>(PortofolioController.prototype.getApiFromPortofolio)),
 
@@ -2727,6 +2812,7 @@ export function RegisterRoutes(app: express.Router) {
         });
         // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
         app.delete('/api/v1/pam/remove_apiRoute_from_portofolio/:portofolioId',
+            authenticateMiddleware([{"bearerAuth":[]}]),
             ...(fetchMiddlewares<RequestHandler>(PortofolioController)),
             ...(fetchMiddlewares<RequestHandler>(PortofolioController.prototype.removeApiFromPortofolio)),
 
@@ -2754,6 +2840,7 @@ export function RegisterRoutes(app: express.Router) {
         });
         // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
         app.get('/api/v1/pam/portofolio_has_apiRoute/:portofolioId/:apiId',
+            authenticateMiddleware([{"bearerAuth":[]}]),
             ...(fetchMiddlewares<RequestHandler>(PortofolioController)),
             ...(fetchMiddlewares<RequestHandler>(PortofolioController.prototype.portofolioHasApi)),
 
@@ -2781,6 +2868,7 @@ export function RegisterRoutes(app: express.Router) {
         });
         // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
         app.post('/api/v1/pam/user_profile/create_profile',
+            authenticateMiddleware([{"bearerAuth":[]}]),
             ...(fetchMiddlewares<RequestHandler>(UserProfileController)),
             ...(fetchMiddlewares<RequestHandler>(UserProfileController.prototype.createUserProfile)),
 
@@ -2807,6 +2895,7 @@ export function RegisterRoutes(app: express.Router) {
         });
         // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
         app.get('/api/v1/pam/user_profile/get_profile/:id',
+            authenticateMiddleware([{"bearerAuth":[]}]),
             ...(fetchMiddlewares<RequestHandler>(UserProfileController)),
             ...(fetchMiddlewares<RequestHandler>(UserProfileController.prototype.getUserProfile)),
 
@@ -2833,6 +2922,7 @@ export function RegisterRoutes(app: express.Router) {
         });
         // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
         app.get('/api/v1/pam/user_profile/get_all_profile',
+            authenticateMiddleware([{"bearerAuth":[]}]),
             ...(fetchMiddlewares<RequestHandler>(UserProfileController)),
             ...(fetchMiddlewares<RequestHandler>(UserProfileController.prototype.getAllUserProfile)),
 
@@ -2858,6 +2948,7 @@ export function RegisterRoutes(app: express.Router) {
         });
         // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
         app.put('/api/v1/pam/user_profile/edit_profile/:id',
+            authenticateMiddleware([{"bearerAuth":[]}]),
             ...(fetchMiddlewares<RequestHandler>(UserProfileController)),
             ...(fetchMiddlewares<RequestHandler>(UserProfileController.prototype.updateUserProfile)),
 
@@ -2885,6 +2976,7 @@ export function RegisterRoutes(app: express.Router) {
         });
         // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
         app.delete('/api/v1/pam/user_profile/delete_profile/:id',
+            authenticateMiddleware([{"bearerAuth":[]}]),
             ...(fetchMiddlewares<RequestHandler>(UserProfileController)),
             ...(fetchMiddlewares<RequestHandler>(UserProfileController.prototype.deleteUserProfile)),
 
@@ -2911,6 +3003,7 @@ export function RegisterRoutes(app: express.Router) {
         });
         // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
         app.get('/api/v1/pam/user_profile/get_authorized_portofolio/:profileId',
+            authenticateMiddleware([{"bearerAuth":[]}]),
             ...(fetchMiddlewares<RequestHandler>(UserProfileController)),
             ...(fetchMiddlewares<RequestHandler>(UserProfileController.prototype.getAuthorizedPortofolioApps)),
 
@@ -2937,6 +3030,7 @@ export function RegisterRoutes(app: express.Router) {
         });
         // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
         app.post('/api/v1/pam/user_profile/authorize_portofolio_apps/:profileId',
+            authenticateMiddleware([{"bearerAuth":[]}]),
             ...(fetchMiddlewares<RequestHandler>(UserProfileController)),
             ...(fetchMiddlewares<RequestHandler>(UserProfileController.prototype.authorizeToAccessPortofolioApps)),
 
@@ -2964,6 +3058,7 @@ export function RegisterRoutes(app: express.Router) {
         });
         // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
         app.get('/api/v1/pam/user_profile/get_authorized_portofolio_apps/:profileId/:portofolioId',
+            authenticateMiddleware([{"bearerAuth":[]}]),
             ...(fetchMiddlewares<RequestHandler>(UserProfileController)),
             ...(fetchMiddlewares<RequestHandler>(UserProfileController.prototype.getAuthorizedPortofolioApis)),
 
@@ -2991,6 +3086,7 @@ export function RegisterRoutes(app: express.Router) {
         });
         // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
         app.post('/api/v1/pam/user_profile/unauthorize_portofolio_apps/:profileId',
+            authenticateMiddleware([{"bearerAuth":[]}]),
             ...(fetchMiddlewares<RequestHandler>(UserProfileController)),
             ...(fetchMiddlewares<RequestHandler>(UserProfileController.prototype.unauthorizeToAccessPortofolioApps)),
 
@@ -3018,6 +3114,7 @@ export function RegisterRoutes(app: express.Router) {
         });
         // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
         app.get('/api/v1/pam/user_profile/get_authorized_bos/:profileId/:portofolioId',
+            authenticateMiddleware([{"bearerAuth":[]}]),
             ...(fetchMiddlewares<RequestHandler>(UserProfileController)),
             ...(fetchMiddlewares<RequestHandler>(UserProfileController.prototype.getAuthorizedBos)),
 
@@ -3045,6 +3142,7 @@ export function RegisterRoutes(app: express.Router) {
         });
         // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
         app.post('/api/v1/pam/user_profile/authorize_bos_apps/:profileId/:portofolioId',
+            authenticateMiddleware([{"bearerAuth":[]}]),
             ...(fetchMiddlewares<RequestHandler>(UserProfileController)),
             ...(fetchMiddlewares<RequestHandler>(UserProfileController.prototype.authorizeToAccessBosApps)),
 
@@ -3073,6 +3171,7 @@ export function RegisterRoutes(app: express.Router) {
         });
         // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
         app.get('/api/v1/pam/user_profile/get_authorized_bos_apps/:profileId/:portofolioId/:bosId',
+            authenticateMiddleware([{"bearerAuth":[]}]),
             ...(fetchMiddlewares<RequestHandler>(UserProfileController)),
             ...(fetchMiddlewares<RequestHandler>(UserProfileController.prototype.getAuthorizedBosApis)),
 
@@ -3101,6 +3200,7 @@ export function RegisterRoutes(app: express.Router) {
         });
         // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
         app.post('/api/v1/pam/user_profile/unauthorize_bos_apps/:profileId/:portofolioId',
+            authenticateMiddleware([{"bearerAuth":[]}]),
             ...(fetchMiddlewares<RequestHandler>(UserProfileController)),
             ...(fetchMiddlewares<RequestHandler>(UserProfileController.prototype.unauthorizeToAccessBosApp)),
 
@@ -3129,7 +3229,7 @@ export function RegisterRoutes(app: express.Router) {
         });
         // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
         app.get('/api/v1/pam/websocket/get_logs/:buildingId',
-            authenticateMiddleware([{"admin":[]}]),
+            authenticateMiddleware([{"bearerAuth":[]}]),
             ...(fetchMiddlewares<RequestHandler>(WebsocketLogsController)),
             ...(fetchMiddlewares<RequestHandler>(WebsocketLogsController.prototype.getWebsocketLogs)),
 
@@ -3156,7 +3256,7 @@ export function RegisterRoutes(app: express.Router) {
         });
         // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
         app.get('/api/v1/pam/websocket/get_logs',
-            authenticateMiddleware([{"admin":[]}]),
+            authenticateMiddleware([{"bearerAuth":[]}]),
             ...(fetchMiddlewares<RequestHandler>(WebsocketLogsController)),
             ...(fetchMiddlewares<RequestHandler>(WebsocketLogsController.prototype.getAllWebsocketLogs)),
 

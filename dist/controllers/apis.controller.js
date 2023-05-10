@@ -60,7 +60,6 @@ let APIController = class APIController extends tsoa_1.Controller {
     //////////////////////////////////////////
     //              PORTOFOLIO              //
     //////////////////////////////////////////
-    // @Security(SECURITY_NAME.admin)
     createPortofolioApiRoute(req, data) {
         return __awaiter(this, void 0, void 0, function* () {
             try {
@@ -78,7 +77,6 @@ let APIController = class APIController extends tsoa_1.Controller {
             }
         });
     }
-    // @Security(SECURITY_NAME.admin)
     updatePortofolioApiRoute(req, data, id) {
         return __awaiter(this, void 0, void 0, function* () {
             try {
@@ -95,7 +93,6 @@ let APIController = class APIController extends tsoa_1.Controller {
             }
         });
     }
-    // @Security(SECURITY_NAME.profile)
     getPortofolioApiRouteById(req, id) {
         return __awaiter(this, void 0, void 0, function* () {
             try {
@@ -114,7 +111,6 @@ let APIController = class APIController extends tsoa_1.Controller {
             }
         });
     }
-    // @Security(SECURITY_NAME.admin)
     getAllPortofolioApiRoute(req) {
         return __awaiter(this, void 0, void 0, function* () {
             try {
@@ -131,7 +127,6 @@ let APIController = class APIController extends tsoa_1.Controller {
             }
         });
     }
-    // @Security(SECURITY_NAME.admin)
     deletePortofolioApiRoute(req, id) {
         return __awaiter(this, void 0, void 0, function* () {
             try {
@@ -148,7 +143,6 @@ let APIController = class APIController extends tsoa_1.Controller {
             }
         });
     }
-    // @Security(SECURITY_NAME.admin)
     uploadPortofolioSwaggerFile(req, file) {
         return __awaiter(this, void 0, void 0, function* () {
             try {
@@ -182,7 +176,6 @@ let APIController = class APIController extends tsoa_1.Controller {
     //////////////////////////////////////////
     //              BUILDING                //
     //////////////////////////////////////////
-    // @Security(SECURITY_NAME.admin)
     createBosApiRoute(req, data) {
         return __awaiter(this, void 0, void 0, function* () {
             try {
@@ -200,7 +193,6 @@ let APIController = class APIController extends tsoa_1.Controller {
             }
         });
     }
-    // @Security(SECURITY_NAME.admin)
     updateBosApiRoute(req, data, id) {
         return __awaiter(this, void 0, void 0, function* () {
             try {
@@ -217,7 +209,6 @@ let APIController = class APIController extends tsoa_1.Controller {
             }
         });
     }
-    // @Security(SECURITY_NAME.profile)
     getBosApiRouteById(req, id) {
         return __awaiter(this, void 0, void 0, function* () {
             try {
@@ -239,7 +230,6 @@ let APIController = class APIController extends tsoa_1.Controller {
             }
         });
     }
-    // @Security(SECURITY_NAME.admin)
     getAllBosApiRoute(req) {
         return __awaiter(this, void 0, void 0, function* () {
             try {
@@ -256,7 +246,6 @@ let APIController = class APIController extends tsoa_1.Controller {
             }
         });
     }
-    // @Security(SECURITY_NAME.admin)
     deleteBosApiRoute(req, id) {
         return __awaiter(this, void 0, void 0, function* () {
             try {
@@ -273,7 +262,6 @@ let APIController = class APIController extends tsoa_1.Controller {
             }
         });
     }
-    // @Security(SECURITY_NAME.admin)
     uploadBosSwaggerFile(req, file) {
         return __awaiter(this, void 0, void 0, function* () {
             try {
@@ -306,6 +294,7 @@ let APIController = class APIController extends tsoa_1.Controller {
     }
 };
 __decorate([
+    (0, tsoa_1.Security)(constant_1.SECURITY_NAME.bearerAuth),
     (0, tsoa_1.Post)("/create_portofolio_api_route"),
     __param(0, (0, tsoa_1.Request)()),
     __param(1, (0, tsoa_1.Body)()),
@@ -314,6 +303,7 @@ __decorate([
     __metadata("design:returntype", Promise)
 ], APIController.prototype, "createPortofolioApiRoute", null);
 __decorate([
+    (0, tsoa_1.Security)(constant_1.SECURITY_NAME.bearerAuth),
     (0, tsoa_1.Put)("/update_portofolio_api_route/{id}"),
     __param(0, (0, tsoa_1.Request)()),
     __param(1, (0, tsoa_1.Body)()),
@@ -323,6 +313,7 @@ __decorate([
     __metadata("design:returntype", Promise)
 ], APIController.prototype, "updatePortofolioApiRoute", null);
 __decorate([
+    (0, tsoa_1.Security)(constant_1.SECURITY_NAME.bearerAuth),
     (0, tsoa_1.Get)("/get_portofolio_api_route/{id}"),
     __param(0, (0, tsoa_1.Request)()),
     __param(1, (0, tsoa_1.Path)()),
@@ -331,6 +322,7 @@ __decorate([
     __metadata("design:returntype", Promise)
 ], APIController.prototype, "getPortofolioApiRouteById", null);
 __decorate([
+    (0, tsoa_1.Security)(constant_1.SECURITY_NAME.bearerAuth),
     (0, tsoa_1.Get)("/get_all_portofolio_api_route"),
     __param(0, (0, tsoa_1.Request)()),
     __metadata("design:type", Function),
@@ -338,6 +330,7 @@ __decorate([
     __metadata("design:returntype", Promise)
 ], APIController.prototype, "getAllPortofolioApiRoute", null);
 __decorate([
+    (0, tsoa_1.Security)(constant_1.SECURITY_NAME.bearerAuth),
     (0, tsoa_1.Delete)("/delete_portofolio_api_route/{id}"),
     __param(0, (0, tsoa_1.Request)()),
     __param(1, (0, tsoa_1.Path)()),
@@ -346,6 +339,7 @@ __decorate([
     __metadata("design:returntype", Promise)
 ], APIController.prototype, "deletePortofolioApiRoute", null);
 __decorate([
+    (0, tsoa_1.Security)(constant_1.SECURITY_NAME.bearerAuth),
     (0, tsoa_1.Post)("/upload_portofolio_apis_routes"),
     __param(0, (0, tsoa_1.Request)()),
     __param(1, (0, tsoa_1.UploadedFile)()),
@@ -354,6 +348,7 @@ __decorate([
     __metadata("design:returntype", Promise)
 ], APIController.prototype, "uploadPortofolioSwaggerFile", null);
 __decorate([
+    (0, tsoa_1.Security)(constant_1.SECURITY_NAME.bearerAuth),
     (0, tsoa_1.Post)("/create_bos_api_route"),
     __param(0, (0, tsoa_1.Request)()),
     __param(1, (0, tsoa_1.Body)()),
@@ -362,6 +357,7 @@ __decorate([
     __metadata("design:returntype", Promise)
 ], APIController.prototype, "createBosApiRoute", null);
 __decorate([
+    (0, tsoa_1.Security)(constant_1.SECURITY_NAME.bearerAuth),
     (0, tsoa_1.Put)("/update_bos_api_route/{id}"),
     __param(0, (0, tsoa_1.Request)()),
     __param(1, (0, tsoa_1.Body)()),
@@ -371,6 +367,7 @@ __decorate([
     __metadata("design:returntype", Promise)
 ], APIController.prototype, "updateBosApiRoute", null);
 __decorate([
+    (0, tsoa_1.Security)(constant_1.SECURITY_NAME.bearerAuth),
     (0, tsoa_1.Get)("/get_bos_api_route/{id}"),
     __param(0, (0, tsoa_1.Request)()),
     __param(1, (0, tsoa_1.Path)()),
@@ -379,6 +376,7 @@ __decorate([
     __metadata("design:returntype", Promise)
 ], APIController.prototype, "getBosApiRouteById", null);
 __decorate([
+    (0, tsoa_1.Security)(constant_1.SECURITY_NAME.bearerAuth),
     (0, tsoa_1.Get)("/get_all_bos_api_route"),
     __param(0, (0, tsoa_1.Request)()),
     __metadata("design:type", Function),
@@ -386,6 +384,7 @@ __decorate([
     __metadata("design:returntype", Promise)
 ], APIController.prototype, "getAllBosApiRoute", null);
 __decorate([
+    (0, tsoa_1.Security)(constant_1.SECURITY_NAME.bearerAuth),
     (0, tsoa_1.Delete)("/delete_bos_api_route/{id}"),
     __param(0, (0, tsoa_1.Request)()),
     __param(1, (0, tsoa_1.Path)()),
@@ -394,6 +393,7 @@ __decorate([
     __metadata("design:returntype", Promise)
 ], APIController.prototype, "deleteBosApiRoute", null);
 __decorate([
+    (0, tsoa_1.Security)(constant_1.SECURITY_NAME.bearerAuth),
     (0, tsoa_1.Post)("/upload_bos_apis_routes"),
     __param(0, (0, tsoa_1.Request)()),
     __param(1, (0, tsoa_1.UploadedFile)()),

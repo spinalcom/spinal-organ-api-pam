@@ -183,6 +183,7 @@ var SECURITY_NAME;
 (function (SECURITY_NAME) {
     SECURITY_NAME["admin"] = "admin";
     SECURITY_NAME["profile"] = "profile";
+    SECURITY_NAME["bearerAuth"] = "bearerAuth";
     SECURITY_NAME["all"] = "all";
 })(SECURITY_NAME = exports.SECURITY_NAME || (exports.SECURITY_NAME = {}));
 //# sourceMappingURL=constant.js.map

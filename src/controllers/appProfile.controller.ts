@@ -42,7 +42,7 @@ export class AppProfileController extends Controller {
         super();
     }
 
-    // @Security(SECURITY_NAME.admin)
+    @Security(SECURITY_NAME.bearerAuth)
     @Post("/create_profile")
     public async createAppProfile(@Request() req: express.Request, @Body() data: IProfile): Promise<IProfileData | { message: string }> {
         try {
@@ -66,7 +66,7 @@ export class AppProfileController extends Controller {
         }
     }
 
-    // @Security(SECURITY_NAME.admin)
+    @Security(SECURITY_NAME.bearerAuth)
     @Get("/get_profile/{id}")
     public async getAppProfile(@Request() req: express.Request, @Path() id: string): Promise<IProfileData | { message: string }> {
         try {
@@ -87,7 +87,7 @@ export class AppProfileController extends Controller {
         }
     }
 
-    // @Security(SECURITY_NAME.admin)
+    @Security(SECURITY_NAME.bearerAuth)
     @Get("/get_all_profile")
     public async getAllAppProfile(@Request() req: express.Request,): Promise<IProfileData[] | { message: string }> {
         try {
@@ -103,7 +103,7 @@ export class AppProfileController extends Controller {
         }
     }
 
-    // @Security(SECURITY_NAME.admin)
+    @Security(SECURITY_NAME.bearerAuth)
     @Put("/edit_profile/{id}")
     public async updateAppProfile(@Request() req: express.Request, @Path() id: string, @Body() data: IProfileEdit): Promise<IProfileData | { message: string }> {
         try {
@@ -125,7 +125,7 @@ export class AppProfileController extends Controller {
         }
     }
 
-    // @Security(SECURITY_NAME.admin)
+    @Security(SECURITY_NAME.bearerAuth)
     @Delete("/delete_profile/{id}")
     public async deleteAppProfile(@Request() req: express.Request, @Path() id: string): Promise<{ message: string }> {
         try {
@@ -146,7 +146,7 @@ export class AppProfileController extends Controller {
     //   PORTOFOLIO  //
     ///////////////////
 
-    // @Security(SECURITY_NAME.profile)
+    @Security(SECURITY_NAME.bearerAuth)
     @Get("/get_authorized_portofolio/{profileId}")
     public async getAuthorizedPortofolio(@Request() req: express.Request, @Path() profileId: string): Promise<IPortofolioData[] | { message: string }> {
         try {
@@ -169,7 +169,7 @@ export class AppProfileController extends Controller {
         }
     }
 
-    // @Security(SECURITY_NAME.admin)
+    @Security(SECURITY_NAME.bearerAuth)
     @Post("/authorize_portofolio_apis/{profileId}")
     public async authorizeToAccessPortofolioApis(@Request() req: express.Request, @Path() profileId: string, @Body() data: IPortofolioAuth): Promise<IApiRoute[] | { message: string }> {
         try {
@@ -197,7 +197,7 @@ export class AppProfileController extends Controller {
         }
     }
 
-    // @Security(SECURITY_NAME.profile)
+    @Security(SECURITY_NAME.bearerAuth)
     @Get("/get_authorized_portofolio_apis/{profileId}/{portofolioId}")
     public async getAuthorizedPortofolioApis(@Request() req: express.Request, @Path() profileId: string, @Path() portofolioId: string): Promise<IApiRoute[] | { message: string }> {
         try {
@@ -221,7 +221,7 @@ export class AppProfileController extends Controller {
         }
     }
 
-    // @Security(SECURITY_NAME.admin)
+    @Security(SECURITY_NAME.bearerAuth)
     @Post("/unauthorize_portofolio_apis/{profileId}")
     public async unauthorizeToAccessPortofolioApis(@Request() req: express.Request, @Path() profileId: string, @Body() data: { apisIds: string[], portofolioId: string }[]): Promise<string[] | { message: string }> {
         try {
@@ -251,7 +251,7 @@ export class AppProfileController extends Controller {
     //   BOS  //
     ////////////
 
-    // @Security(SECURITY_NAME.profile)
+    @Security(SECURITY_NAME.bearerAuth)
     @Get("/get_authorized_bos/{profileId}/{portofolioId}")
     public async getAuthorizedBos(@Request() req: express.Request, @Path() profileId: string, @Path() portofolioId: string): Promise<IBosData | { message: string }> {
         try {
@@ -274,7 +274,7 @@ export class AppProfileController extends Controller {
         }
     }
 
-    // @Security(SECURITY_NAME.admin)
+    @Security(SECURITY_NAME.bearerAuth)
     @Post("/authorize_bos_apis/{profileId}/{portofolioId}")
     public async authorizeToAccessBosApis(@Request() req: express.Request, @Path() profileId: string, @Path() portofolioId: string, @Body() data: IBosAuth): Promise<IApiRoute[] | { message: string }> {
         try {
@@ -302,7 +302,7 @@ export class AppProfileController extends Controller {
         }
     }
 
-    // @Security(SECURITY_NAME.profile)
+    @Security(SECURITY_NAME.bearerAuth)
     @Get("/get_authorized_bos_apis/{profileId}/{portofolioId}/{bosId}")
     public async getAuthorizedBosApis(@Request() req: express.Request, @Path() profileId: string, @Path() portofolioId: string, @Path() bosId: string): Promise<IApiRoute[] | { message: string }> {
         try {
@@ -327,7 +327,7 @@ export class AppProfileController extends Controller {
     }
 
 
-    // @Security(SECURITY_NAME.admin)
+    @Security(SECURITY_NAME.bearerAuth)
     @Post("/unauthorize_bos_apis/{profileId}/{portofolioId}")
     public async unauthorizeToAccessBosApis(@Request() req: express.Request, @Path() profileId: string, @Path() portofolioId: string, @Body() data: { apisIds: string[], buildingId: string }[]): Promise<string[] | { message: string }> {
         try {

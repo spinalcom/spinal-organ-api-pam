@@ -57,7 +57,6 @@ let AppsController = class AppsController extends tsoa_1.Controller {
     constructor() {
         super();
     }
-    // @Security(SECURITY_NAME.admin)
     createAdminApp(req, appInfo) {
         return __awaiter(this, void 0, void 0, function* () {
             try {
@@ -78,7 +77,6 @@ let AppsController = class AppsController extends tsoa_1.Controller {
             }
         });
     }
-    // @Security(SECURITY_NAME.admin)
     createPortofolioApp(req, appInfo) {
         return __awaiter(this, void 0, void 0, function* () {
             try {
@@ -99,7 +97,6 @@ let AppsController = class AppsController extends tsoa_1.Controller {
             }
         });
     }
-    // @Security(SECURITY_NAME.admin)
     createBuildingApp(req, appInfo) {
         return __awaiter(this, void 0, void 0, function* () {
             try {
@@ -120,7 +117,6 @@ let AppsController = class AppsController extends tsoa_1.Controller {
             }
         });
     }
-    // @Security(SECURITY_NAME.admin)
     getAllAdminApps(req) {
         return __awaiter(this, void 0, void 0, function* () {
             try {
@@ -137,7 +133,6 @@ let AppsController = class AppsController extends tsoa_1.Controller {
             }
         });
     }
-    // @Security(SECURITY_NAME.admin)
     getAllPortofolioApps(req) {
         return __awaiter(this, void 0, void 0, function* () {
             try {
@@ -154,7 +149,6 @@ let AppsController = class AppsController extends tsoa_1.Controller {
             }
         });
     }
-    // @Security(SECURITY_NAME.admin)
     getAllBuildingApps(req) {
         return __awaiter(this, void 0, void 0, function* () {
             try {
@@ -171,7 +165,6 @@ let AppsController = class AppsController extends tsoa_1.Controller {
             }
         });
     }
-    // @Security(SECURITY_NAME.admin)
     getAdminApp(req, appId) {
         return __awaiter(this, void 0, void 0, function* () {
             try {
@@ -192,7 +185,6 @@ let AppsController = class AppsController extends tsoa_1.Controller {
             }
         });
     }
-    // @Security(SECURITY_NAME.profile)
     getPortofolioApp(req, appId) {
         return __awaiter(this, void 0, void 0, function* () {
             try {
@@ -211,7 +203,6 @@ let AppsController = class AppsController extends tsoa_1.Controller {
             }
         });
     }
-    // @Security(SECURITY_NAME.profile)
     getBuildingApp(req, appId) {
         return __awaiter(this, void 0, void 0, function* () {
             try {
@@ -231,7 +222,6 @@ let AppsController = class AppsController extends tsoa_1.Controller {
             }
         });
     }
-    // @Security(SECURITY_NAME.admin)
     updateAdminApp(req, appId, newInfo) {
         return __awaiter(this, void 0, void 0, function* () {
             try {
@@ -252,7 +242,6 @@ let AppsController = class AppsController extends tsoa_1.Controller {
             }
         });
     }
-    // @Security(SECURITY_NAME.admin)
     updatePortofolioApp(req, appId, newInfo) {
         return __awaiter(this, void 0, void 0, function* () {
             try {
@@ -273,7 +262,6 @@ let AppsController = class AppsController extends tsoa_1.Controller {
             }
         });
     }
-    // @Security(SECURITY_NAME.admin)
     updateBuildingApp(req, appId, newInfo) {
         return __awaiter(this, void 0, void 0, function* () {
             try {
@@ -294,7 +282,6 @@ let AppsController = class AppsController extends tsoa_1.Controller {
             }
         });
     }
-    // @Security(SECURITY_NAME.admin)
     deleteAdminApp(req, appId) {
         return __awaiter(this, void 0, void 0, function* () {
             try {
@@ -313,7 +300,6 @@ let AppsController = class AppsController extends tsoa_1.Controller {
             }
         });
     }
-    // @Security(SECURITY_NAME.admin)
     deletePortofolioApp(req, appId) {
         return __awaiter(this, void 0, void 0, function* () {
             try {
@@ -332,7 +318,6 @@ let AppsController = class AppsController extends tsoa_1.Controller {
             }
         });
     }
-    // @Security(SECURITY_NAME.admin)
     deleteBuildingApp(req, appId) {
         return __awaiter(this, void 0, void 0, function* () {
             try {
@@ -351,7 +336,6 @@ let AppsController = class AppsController extends tsoa_1.Controller {
             }
         });
     }
-    // @Security(SECURITY_NAME.admin)
     uploadAdminApp(req, file) {
         return __awaiter(this, void 0, void 0, function* () {
             try {
@@ -382,7 +366,6 @@ let AppsController = class AppsController extends tsoa_1.Controller {
             }
         });
     }
-    // @Security(SECURITY_NAME.admin)
     uploadPortofolioApp(req, file) {
         return __awaiter(this, void 0, void 0, function* () {
             try {
@@ -412,7 +395,6 @@ let AppsController = class AppsController extends tsoa_1.Controller {
             }
         });
     }
-    // @Security(SECURITY_NAME.admin)
     uploadBuildingApp(req, file) {
         return __awaiter(this, void 0, void 0, function* () {
             try {
@@ -445,7 +427,6 @@ let AppsController = class AppsController extends tsoa_1.Controller {
     /////////////////////////////////////////////////////////
     //                      FAVORIS                        //
     /////////////////////////////////////////////////////////
-    // @Security(SECURITY_NAME.profile)
     addPortofolioAppToFavoris(request, portofolioId, data) {
         return __awaiter(this, void 0, void 0, function* () {
             try {
@@ -462,7 +443,6 @@ let AppsController = class AppsController extends tsoa_1.Controller {
             }
         });
     }
-    // @Security(SECURITY_NAME.profile)
     addBuildingAppToFavoris(request, portofolioId, bosId, data) {
         return __awaiter(this, void 0, void 0, function* () {
             try {
@@ -495,7 +475,6 @@ let AppsController = class AppsController extends tsoa_1.Controller {
             }
         });
     }
-    // @Security(SECURITY_NAME.profile)
     removeBuildingAppFromFavoris(request, portofolioId, bosId, data) {
         return __awaiter(this, void 0, void 0, function* () {
             try {
@@ -544,6 +523,7 @@ let AppsController = class AppsController extends tsoa_1.Controller {
     }
 };
 __decorate([
+    (0, tsoa_1.Security)(constant_1.SECURITY_NAME.bearerAuth),
     (0, tsoa_1.Post)("/create_admin_app"),
     __param(0, (0, tsoa_1.Request)()),
     __param(1, (0, tsoa_1.Body)()),
@@ -552,6 +532,7 @@ __decorate([
     __metadata("design:returntype", Promise)
 ], AppsController.prototype, "createAdminApp", null);
 __decorate([
+    (0, tsoa_1.Security)(constant_1.SECURITY_NAME.bearerAuth),
     (0, tsoa_1.Post)("/create_portofolio_app"),
     __param(0, (0, tsoa_1.Request)()),
     __param(1, (0, tsoa_1.Body)()),
@@ -560,6 +541,7 @@ __decorate([
     __metadata("design:returntype", Promise)
 ], AppsController.prototype, "createPortofolioApp", null);
 __decorate([
+    (0, tsoa_1.Security)(constant_1.SECURITY_NAME.bearerAuth),
     (0, tsoa_1.Post)("/create_building_app"),
     __param(0, (0, tsoa_1.Request)()),
     __param(1, (0, tsoa_1.Body)()),
@@ -568,6 +550,7 @@ __decorate([
     __metadata("design:returntype", Promise)
 ], AppsController.prototype, "createBuildingApp", null);
 __decorate([
+    (0, tsoa_1.Security)(constant_1.SECURITY_NAME.bearerAuth),
     (0, tsoa_1.Get)("/get_all_admin_apps"),
     __param(0, (0, tsoa_1.Request)()),
     __metadata("design:type", Function),
@@ -575,6 +558,7 @@ __decorate([
     __metadata("design:returntype", Promise)
 ], AppsController.prototype, "getAllAdminApps", null);
 __decorate([
+    (0, tsoa_1.Security)(constant_1.SECURITY_NAME.bearerAuth),
     (0, tsoa_1.Get)("/get_all_portofolio_apps"),
     __param(0, (0, tsoa_1.Request)()),
     __metadata("design:type", Function),
@@ -582,6 +566,7 @@ __decorate([
     __metadata("design:returntype", Promise)
 ], AppsController.prototype, "getAllPortofolioApps", null);
 __decorate([
+    (0, tsoa_1.Security)(constant_1.SECURITY_NAME.bearerAuth),
     (0, tsoa_1.Get)("/get_all_building_apps"),
     __param(0, (0, tsoa_1.Request)()),
     __metadata("design:type", Function),
@@ -589,6 +574,7 @@ __decorate([
     __metadata("design:returntype", Promise)
 ], AppsController.prototype, "getAllBuildingApps", null);
 __decorate([
+    (0, tsoa_1.Security)(constant_1.SECURITY_NAME.bearerAuth),
     (0, tsoa_1.Get)("/get_admin_app/{appId}"),
     __param(0, (0, tsoa_1.Request)()),
     __param(1, (0, tsoa_1.Path)()),
@@ -597,6 +583,7 @@ __decorate([
     __metadata("design:returntype", Promise)
 ], AppsController.prototype, "getAdminApp", null);
 __decorate([
+    (0, tsoa_1.Security)(constant_1.SECURITY_NAME.bearerAuth),
     (0, tsoa_1.Get)("/get_portofolio_app/{appId}"),
     __param(0, (0, tsoa_1.Request)()),
     __param(1, (0, tsoa_1.Path)()),
@@ -605,6 +592,7 @@ __decorate([
     __metadata("design:returntype", Promise)
 ], AppsController.prototype, "getPortofolioApp", null);
 __decorate([
+    (0, tsoa_1.Security)(constant_1.SECURITY_NAME.bearerAuth),
     (0, tsoa_1.Get)("/get_building_app/{appId}"),
     __param(0, (0, tsoa_1.Request)()),
     __param(1, (0, tsoa_1.Path)()),
@@ -613,6 +601,7 @@ __decorate([
     __metadata("design:returntype", Promise)
 ], AppsController.prototype, "getBuildingApp", null);
 __decorate([
+    (0, tsoa_1.Security)(constant_1.SECURITY_NAME.bearerAuth),
     (0, tsoa_1.Put)("/update_admin_app/{appId}"),
     __param(0, (0, tsoa_1.Request)()),
     __param(1, (0, tsoa_1.Path)()),
@@ -622,6 +611,7 @@ __decorate([
     __metadata("design:returntype", Promise)
 ], AppsController.prototype, "updateAdminApp", null);
 __decorate([
+    (0, tsoa_1.Security)(constant_1.SECURITY_NAME.bearerAuth),
     (0, tsoa_1.Put)("/update_portofolio_app/{appId}"),
     __param(0, (0, tsoa_1.Request)()),
     __param(1, (0, tsoa_1.Path)()),
@@ -631,6 +621,7 @@ __decorate([
     __metadata("design:returntype", Promise)
 ], AppsController.prototype, "updatePortofolioApp", null);
 __decorate([
+    (0, tsoa_1.Security)(constant_1.SECURITY_NAME.bearerAuth),
     (0, tsoa_1.Put)("/update_building_app/{appId}"),
     __param(0, (0, tsoa_1.Request)()),
     __param(1, (0, tsoa_1.Path)()),
@@ -640,6 +631,7 @@ __decorate([
     __metadata("design:returntype", Promise)
 ], AppsController.prototype, "updateBuildingApp", null);
 __decorate([
+    (0, tsoa_1.Security)(constant_1.SECURITY_NAME.bearerAuth),
     (0, tsoa_1.Delete)("/delete_admin_app/{appId}"),
     __param(0, (0, tsoa_1.Request)()),
     __param(1, (0, tsoa_1.Path)()),
@@ -648,6 +640,7 @@ __decorate([
     __metadata("design:returntype", Promise)
 ], AppsController.prototype, "deleteAdminApp", null);
 __decorate([
+    (0, tsoa_1.Security)(constant_1.SECURITY_NAME.bearerAuth),
     (0, tsoa_1.Delete)("/delete_portofolio_app/{appId}"),
     __param(0, (0, tsoa_1.Request)()),
     __param(1, (0, tsoa_1.Path)()),
@@ -656,6 +649,7 @@ __decorate([
     __metadata("design:returntype", Promise)
 ], AppsController.prototype, "deletePortofolioApp", null);
 __decorate([
+    (0, tsoa_1.Security)(constant_1.SECURITY_NAME.bearerAuth),
     (0, tsoa_1.Delete)("/delete_building_app/{appId}"),
     __param(0, (0, tsoa_1.Request)()),
     __param(1, (0, tsoa_1.Path)()),
@@ -664,6 +658,7 @@ __decorate([
     __metadata("design:returntype", Promise)
 ], AppsController.prototype, "deleteBuildingApp", null);
 __decorate([
+    (0, tsoa_1.Security)(constant_1.SECURITY_NAME.bearerAuth),
     (0, tsoa_1.Post)("/upload_admin_apps"),
     __param(0, (0, tsoa_1.Request)()),
     __param(1, (0, tsoa_1.UploadedFile)()),
@@ -672,6 +667,7 @@ __decorate([
     __metadata("design:returntype", Promise)
 ], AppsController.prototype, "uploadAdminApp", null);
 __decorate([
+    (0, tsoa_1.Security)(constant_1.SECURITY_NAME.bearerAuth),
     (0, tsoa_1.Post)("/upload_portofolio_apps"),
     __param(0, (0, tsoa_1.Request)()),
     __param(1, (0, tsoa_1.UploadedFile)()),
@@ -680,6 +676,7 @@ __decorate([
     __metadata("design:returntype", Promise)
 ], AppsController.prototype, "uploadPortofolioApp", null);
 __decorate([
+    (0, tsoa_1.Security)(constant_1.SECURITY_NAME.bearerAuth),
     (0, tsoa_1.Post)("/upload_building_apps"),
     __param(0, (0, tsoa_1.Request)()),
     __param(1, (0, tsoa_1.UploadedFile)()),
@@ -688,6 +685,7 @@ __decorate([
     __metadata("design:returntype", Promise)
 ], AppsController.prototype, "uploadBuildingApp", null);
 __decorate([
+    (0, tsoa_1.Security)(constant_1.SECURITY_NAME.bearerAuth),
     (0, tsoa_1.Post)("/add_app_to_favoris/{portofolioId}"),
     __param(0, (0, tsoa_1.Request)()),
     __param(1, (0, tsoa_1.Path)()),
@@ -697,6 +695,7 @@ __decorate([
     __metadata("design:returntype", Promise)
 ], AppsController.prototype, "addPortofolioAppToFavoris", null);
 __decorate([
+    (0, tsoa_1.Security)(constant_1.SECURITY_NAME.bearerAuth),
     (0, tsoa_1.Post)("/add_app_to_favoris/{portofolioId}/{bosId}"),
     __param(0, (0, tsoa_1.Request)()),
     __param(1, (0, tsoa_1.Path)()),
@@ -707,6 +706,7 @@ __decorate([
     __metadata("design:returntype", Promise)
 ], AppsController.prototype, "addBuildingAppToFavoris", null);
 __decorate([
+    (0, tsoa_1.Security)(constant_1.SECURITY_NAME.bearerAuth),
     (0, tsoa_1.Post)("/remove_app_from_favoris/{portofolioId}"),
     __param(0, (0, tsoa_1.Request)()),
     __param(1, (0, tsoa_1.Path)()),
@@ -716,6 +716,7 @@ __decorate([
     __metadata("design:returntype", Promise)
 ], AppsController.prototype, "removePortofolioAppFromFavoris", null);
 __decorate([
+    (0, tsoa_1.Security)(constant_1.SECURITY_NAME.bearerAuth),
     (0, tsoa_1.Post)("/remove_app_from_favoris/{portofolioId}/{bosId}"),
     __param(0, (0, tsoa_1.Request)()),
     __param(1, (0, tsoa_1.Path)()),
@@ -726,6 +727,7 @@ __decorate([
     __metadata("design:returntype", Promise)
 ], AppsController.prototype, "removeBuildingAppFromFavoris", null);
 __decorate([
+    (0, tsoa_1.Security)(constant_1.SECURITY_NAME.bearerAuth),
     (0, tsoa_1.Get)("/get_favorite_apps/{portofolioId}"),
     __param(0, (0, tsoa_1.Request)()),
     __param(1, (0, tsoa_1.Path)()),
@@ -734,6 +736,7 @@ __decorate([
     __metadata("design:returntype", Promise)
 ], AppsController.prototype, "getPortofolioFavoriteApps", null);
 __decorate([
+    (0, tsoa_1.Security)(constant_1.SECURITY_NAME.bearerAuth),
     (0, tsoa_1.Get)("/get_favorite_apps/{portofolioId}/{bosId}"),
     __param(0, (0, tsoa_1.Request)()),
     __param(1, (0, tsoa_1.Path)()),

@@ -42,7 +42,7 @@ export class BuildingController extends Controller {
         super();
     }
 
-    // @Security(SECURITY_NAME.profile)
+    @Security(SECURITY_NAME.bearerAuth)
     @Post("/get_building/{id}")
     public async getBuildingById(@Request() req: express.Request, @Path() id: string): Promise<IBuilding | { message: string }> {
         try {
@@ -67,7 +67,7 @@ export class BuildingController extends Controller {
     }
 
 
-    // @Security(SECURITY_NAME.admin)
+    @Security(SECURITY_NAME.bearerAuth)
     @Get("/get_all_buildings_apps")
     public async getAllBuildingsApps(@Request() req: express.Request,): Promise<(IBuilding & { apps: IApp })[] | { message: string }> {
         try {
@@ -95,7 +95,7 @@ export class BuildingController extends Controller {
     }
 
 
-    // @Security(SECURITY_NAME.admin)
+    @Security(SECURITY_NAME.bearerAuth)
     @Delete("/delete_building/{id}")
     public async deleteBuilding(@Request() req: express.Request, @Path() id: string): Promise<any | { message: string }> {
         try {
@@ -112,7 +112,7 @@ export class BuildingController extends Controller {
     }
 
 
-    // @Security(SECURITY_NAME.admin)
+    @Security(SECURITY_NAME.bearerAuth)
     @Put("/edit_building/{id}")
     public async editBuilding(@Request() req: express.Request, @Path() id: string, @Body() data: IEditBuilding): Promise<IBuilding | { message: string }> {
         try {
@@ -137,7 +137,7 @@ export class BuildingController extends Controller {
         }
     }
 
-    // @Security(SECURITY_NAME.admin)
+    @Security(SECURITY_NAME.bearerAuth)
     @Post("/add_app_to_building/{buildingId}")
     public async addAppToBuilding(@Request() req: express.Request, @Path() buildingId: string, @Body() data: { applicationId: string[] }): Promise<IApp[] | { message: string }> {
         try {
@@ -157,7 +157,7 @@ export class BuildingController extends Controller {
         }
     }
 
-    // @Security(SECURITY_NAME.admin)
+    @Security(SECURITY_NAME.bearerAuth)
     @Get("/get_apps_from_building/{buildingId}")
     public async getAppsFromBuilding(@Request() req: express.Request, @Path() buildingId: string): Promise<IApp[] | { message: string }> {
         try {
@@ -178,7 +178,7 @@ export class BuildingController extends Controller {
         }
     }
 
-    // @Security(SECURITY_NAME.profile)
+    @Security(SECURITY_NAME.bearerAuth)
     @Get("/get_app_from_building/{buildingId}/{appId}")
     public async getAppFromBuilding(@Request() req: express.Request, @Path() buildingId: string, @Path() appId: string): Promise<IApp | { message: string }> {
         try {
@@ -198,7 +198,7 @@ export class BuildingController extends Controller {
         }
     }
 
-    // @Security(SECURITY_NAME.admin)
+    @Security(SECURITY_NAME.bearerAuth)
     @Delete("/remove_app_from_building/{buildingId}")
     public async removeAppFromBuilding(@Request() req: express.Request, @Path() buildingId: string, @Body() data: { applicationId: string[] }): Promise<{ message: string; ids?: string[] }> {
         try {
@@ -220,7 +220,7 @@ export class BuildingController extends Controller {
         }
     }
 
-    // @Security(SECURITY_NAME.admin)
+    @Security(SECURITY_NAME.bearerAuth)
     @Get("/building_has_app/{buildingId}/{appId}")
     public async buildingHasApp(@Request() req: express.Request, @Path() buildingId: string, @Path() appId: string): Promise<boolean | { message: string }> {
         try {

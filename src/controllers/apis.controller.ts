@@ -47,7 +47,7 @@ export class APIController extends Controller {
     //              PORTOFOLIO              //
     //////////////////////////////////////////
 
-    // @Security(SECURITY_NAME.admin)
+    @Security(SECURITY_NAME.bearerAuth)
     @Post("/create_portofolio_api_route")
     public async createPortofolioApiRoute(@Request() req: express.Request, @Body() data: IApiRoute): Promise<IApiRoute | { message: string }> {
         try {
@@ -64,7 +64,7 @@ export class APIController extends Controller {
         }
     }
 
-    // @Security(SECURITY_NAME.admin)
+    @Security(SECURITY_NAME.bearerAuth)
     @Put("/update_portofolio_api_route/{id}")
     public async updatePortofolioApiRoute(@Request() req: express.Request, @Body() data: IApiRoute, @Path() id: string): Promise<IApiRoute | { message: string }> {
         try {
@@ -81,7 +81,7 @@ export class APIController extends Controller {
     }
 
 
-    // @Security(SECURITY_NAME.profile)
+    @Security(SECURITY_NAME.bearerAuth)
     @Get("/get_portofolio_api_route/{id}")
     public async getPortofolioApiRouteById(@Request() req: express.Request, @Path() id: string): Promise<IApiRoute | { message: string }> {
         try {
@@ -101,7 +101,7 @@ export class APIController extends Controller {
         }
     }
 
-    // @Security(SECURITY_NAME.admin)
+    @Security(SECURITY_NAME.bearerAuth)
     @Get("/get_all_portofolio_api_route")
     public async getAllPortofolioApiRoute(@Request() req: express.Request,): Promise<IApiRoute[] | { message: string }> {
         try {
@@ -117,7 +117,7 @@ export class APIController extends Controller {
         }
     }
 
-    // @Security(SECURITY_NAME.admin)
+    @Security(SECURITY_NAME.bearerAuth)
     @Delete("/delete_portofolio_api_route/{id}")
     public async deletePortofolioApiRoute(@Request() req: express.Request, @Path() id): Promise<{ message: string }> {
         try {
@@ -133,7 +133,7 @@ export class APIController extends Controller {
         }
     }
 
-    // @Security(SECURITY_NAME.admin)
+    @Security(SECURITY_NAME.bearerAuth)
     @Post("/upload_portofolio_apis_routes")
     public async uploadPortofolioSwaggerFile(@Request() req: express.Request, @UploadedFile() file): Promise<IApiRoute[] | { message: string }> {
         try {
@@ -172,7 +172,7 @@ export class APIController extends Controller {
     //////////////////////////////////////////
 
 
-    // @Security(SECURITY_NAME.admin)
+    @Security(SECURITY_NAME.bearerAuth)
     @Post("/create_bos_api_route")
     public async createBosApiRoute(@Request() req: express.Request, @Body() data: IApiRoute): Promise<IApiRoute | { message: string }> {
         try {
@@ -189,7 +189,7 @@ export class APIController extends Controller {
         }
     }
 
-    // @Security(SECURITY_NAME.admin)
+    @Security(SECURITY_NAME.bearerAuth)
     @Put("/update_bos_api_route/{id}")
     public async updateBosApiRoute(@Request() req: express.Request, @Body() data: IApiRoute, @Path() id: string): Promise<IApiRoute | { message: string }> {
         try {
@@ -205,7 +205,7 @@ export class APIController extends Controller {
         }
     }
 
-    // @Security(SECURITY_NAME.profile)
+    @Security(SECURITY_NAME.bearerAuth)
     @Get("/get_bos_api_route/{id}")
     public async getBosApiRouteById(@Request() req: express.Request, @Path() id: string): Promise<IApiRoute | { message: string }> {
         try {
@@ -230,7 +230,7 @@ export class APIController extends Controller {
         }
     }
 
-    // @Security(SECURITY_NAME.admin)
+    @Security(SECURITY_NAME.bearerAuth)
     @Get("/get_all_bos_api_route")
     public async getAllBosApiRoute(@Request() req: express.Request,): Promise<IApiRoute[] | { message: string }> {
         try {
@@ -246,7 +246,7 @@ export class APIController extends Controller {
         }
     }
 
-    // @Security(SECURITY_NAME.admin)
+    @Security(SECURITY_NAME.bearerAuth)
     @Delete("/delete_bos_api_route/{id}")
     public async deleteBosApiRoute(@Request() req: express.Request, @Path() id): Promise<{ message: string }> {
         try {
@@ -262,7 +262,7 @@ export class APIController extends Controller {
         }
     }
 
-    // @Security(SECURITY_NAME.admin)
+    @Security(SECURITY_NAME.bearerAuth)
     @Post("/upload_bos_apis_routes")
     public async uploadBosSwaggerFile(@Request() req: express.Request, @UploadedFile() file): Promise<IApiRoute[] | { message: string }> {
         try {

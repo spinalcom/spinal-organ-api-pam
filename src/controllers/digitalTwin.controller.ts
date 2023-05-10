@@ -39,7 +39,7 @@ export class DigitaltwinController extends Controller {
         super();
     }
 
-    // @Security(SECURITY_NAME.admin)
+    @Security(SECURITY_NAME.bearerAuth)
     @Post("/create_digitaltwin")
     public async createDigitalTwin(@Request() req: express.Request, @Body() data: { name: string; folderPath: string }) {
         try {

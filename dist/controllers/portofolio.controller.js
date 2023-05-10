@@ -58,7 +58,6 @@ let PortofolioController = class PortofolioController extends tsoa_1.Controller 
     constructor() {
         super();
     }
-    // @Security(SECURITY_NAME.admin)
     addPortofolio(req, data) {
         return __awaiter(this, void 0, void 0, function* () {
             try {
@@ -77,7 +76,6 @@ let PortofolioController = class PortofolioController extends tsoa_1.Controller 
             }
         });
     }
-    // @Security(SECURITY_NAME.admin)
     updatePortofolio(req, portofolioId, data) {
         return __awaiter(this, void 0, void 0, function* () {
             try {
@@ -95,7 +93,6 @@ let PortofolioController = class PortofolioController extends tsoa_1.Controller 
             }
         });
     }
-    // @Security(SECURITY_NAME.admin)
     renamePortofolio(req, id, data) {
         return __awaiter(this, void 0, void 0, function* () {
             try {
@@ -114,7 +111,6 @@ let PortofolioController = class PortofolioController extends tsoa_1.Controller 
             }
         });
     }
-    // @Security(SECURITY_NAME.admin)
     getAllPortofolio(req) {
         return __awaiter(this, void 0, void 0, function* () {
             try {
@@ -131,7 +127,6 @@ let PortofolioController = class PortofolioController extends tsoa_1.Controller 
             }
         });
     }
-    // @Security(SECURITY_NAME.profile)
     getPortofolio(req, id) {
         return __awaiter(this, void 0, void 0, function* () {
             try {
@@ -149,7 +144,6 @@ let PortofolioController = class PortofolioController extends tsoa_1.Controller 
             }
         });
     }
-    // @Security(SECURITY_NAME.admin)
     getPortofolioDetails(req, id) {
         return __awaiter(this, void 0, void 0, function* () {
             try {
@@ -167,7 +161,6 @@ let PortofolioController = class PortofolioController extends tsoa_1.Controller 
             }
         });
     }
-    // @Security(SECURITY_NAME.admin)
     getAllPortofoliosDetails(req) {
         return __awaiter(this, void 0, void 0, function* () {
             try {
@@ -185,7 +178,6 @@ let PortofolioController = class PortofolioController extends tsoa_1.Controller 
             }
         });
     }
-    // @Security(SECURITY_NAME.admin)
     removePortofolio(req, id) {
         return __awaiter(this, void 0, void 0, function* () {
             try {
@@ -204,7 +196,6 @@ let PortofolioController = class PortofolioController extends tsoa_1.Controller 
             }
         });
     }
-    // @Security(SECURITY_NAME.admin)
     addBuilding(req, portofolioId, body) {
         return __awaiter(this, void 0, void 0, function* () {
             try {
@@ -225,7 +216,6 @@ let PortofolioController = class PortofolioController extends tsoa_1.Controller 
             }
         });
     }
-    // @Security(SECURITY_NAME.profile)
     getBuilding(req, portofolioId, buildingId) {
         return __awaiter(this, void 0, void 0, function* () {
             try {
@@ -249,7 +239,6 @@ let PortofolioController = class PortofolioController extends tsoa_1.Controller 
             }
         });
     }
-    // @Security(SECURITY_NAME.admin)
     getAllBuilding(req, portofolioId) {
         return __awaiter(this, void 0, void 0, function* () {
             try {
@@ -268,7 +257,6 @@ let PortofolioController = class PortofolioController extends tsoa_1.Controller 
             }
         });
     }
-    // @Security(SECURITY_NAME.admin)
     deleteBuildingFromPortofolio(req, portofolioId, data) {
         return __awaiter(this, void 0, void 0, function* () {
             try {
@@ -289,7 +277,6 @@ let PortofolioController = class PortofolioController extends tsoa_1.Controller 
             }
         });
     }
-    // @Security(SECURITY_NAME.admin)
     addAppToPortofolio(req, portofolioId, data) {
         return __awaiter(this, void 0, void 0, function* () {
             try {
@@ -311,7 +298,6 @@ let PortofolioController = class PortofolioController extends tsoa_1.Controller 
             }
         });
     }
-    // @Security(SECURITY_NAME.admin)
     getPortofolioApps(req, portofolioId) {
         return __awaiter(this, void 0, void 0, function* () {
             try {
@@ -333,7 +319,6 @@ let PortofolioController = class PortofolioController extends tsoa_1.Controller 
             }
         });
     }
-    // @Security(SECURITY_NAME.profile)
     getAppFromPortofolio(req, portofolioId, applicationId) {
         return __awaiter(this, void 0, void 0, function* () {
             try {
@@ -354,7 +339,6 @@ let PortofolioController = class PortofolioController extends tsoa_1.Controller 
             }
         });
     }
-    // @Security(SECURITY_NAME.admin)
     removeAppFromPortofolio(req, portofolioId, data) {
         return __awaiter(this, void 0, void 0, function* () {
             try {
@@ -376,7 +360,6 @@ let PortofolioController = class PortofolioController extends tsoa_1.Controller 
             }
         });
     }
-    // @Security(SECURITY_NAME.admin)
     portofolioHasApp(req, portofolioId, applicationId) {
         return __awaiter(this, void 0, void 0, function* () {
             try {
@@ -394,7 +377,6 @@ let PortofolioController = class PortofolioController extends tsoa_1.Controller 
             }
         });
     }
-    // @Security(SECURITY_NAME.admin)
     addApiToPortofolio(req, portofolioId, data) {
         return __awaiter(this, void 0, void 0, function* () {
             try {
@@ -416,7 +398,6 @@ let PortofolioController = class PortofolioController extends tsoa_1.Controller 
             }
         });
     }
-    // @Security(SECURITY_NAME.admin)
     getPortofolioApis(req, portofolioId) {
         return __awaiter(this, void 0, void 0, function* () {
             try {
@@ -438,7 +419,6 @@ let PortofolioController = class PortofolioController extends tsoa_1.Controller 
             }
         });
     }
-    // @Security(SECURITY_NAME.admin)
     getApiFromPortofolio(req, portofolioId, apiId) {
         return __awaiter(this, void 0, void 0, function* () {
             try {
@@ -460,7 +440,6 @@ let PortofolioController = class PortofolioController extends tsoa_1.Controller 
             }
         });
     }
-    // @Security(SECURITY_NAME.admin)
     removeApiFromPortofolio(req, portofolioId, data) {
         return __awaiter(this, void 0, void 0, function* () {
             try {
@@ -482,7 +461,6 @@ let PortofolioController = class PortofolioController extends tsoa_1.Controller 
             }
         });
     }
-    // @Security(SECURITY_NAME.admin)
     portofolioHasApi(req, portofolioId, apiId) {
         return __awaiter(this, void 0, void 0, function* () {
             try {
@@ -502,6 +480,7 @@ let PortofolioController = class PortofolioController extends tsoa_1.Controller 
     }
 };
 __decorate([
+    (0, tsoa_1.Security)(constant_1.SECURITY_NAME.bearerAuth),
     (0, tsoa_1.Post)("/add_portofolio"),
     __param(0, (0, tsoa_1.Request)()),
     __param(1, (0, tsoa_1.Body)()),
@@ -510,6 +489,7 @@ __decorate([
     __metadata("design:returntype", Promise)
 ], PortofolioController.prototype, "addPortofolio", null);
 __decorate([
+    (0, tsoa_1.Security)(constant_1.SECURITY_NAME.bearerAuth),
     (0, tsoa_1.Put)("/update_portofolio/{portofolioId}"),
     __param(0, (0, tsoa_1.Request)()),
     __param(1, (0, tsoa_1.Path)()),
@@ -519,6 +499,7 @@ __decorate([
     __metadata("design:returntype", Promise)
 ], PortofolioController.prototype, "updatePortofolio", null);
 __decorate([
+    (0, tsoa_1.Security)(constant_1.SECURITY_NAME.bearerAuth),
     (0, tsoa_1.Put)("/rename_portofolio/{id}"),
     __param(0, (0, tsoa_1.Request)()),
     __param(1, (0, tsoa_1.Path)()),
@@ -528,6 +509,7 @@ __decorate([
     __metadata("design:returntype", Promise)
 ], PortofolioController.prototype, "renamePortofolio", null);
 __decorate([
+    (0, tsoa_1.Security)(constant_1.SECURITY_NAME.bearerAuth),
     (0, tsoa_1.Get)("/get_all_portofolio"),
     __param(0, (0, tsoa_1.Request)()),
     __metadata("design:type", Function),
@@ -535,6 +517,7 @@ __decorate([
     __metadata("design:returntype", Promise)
 ], PortofolioController.prototype, "getAllPortofolio", null);
 __decorate([
+    (0, tsoa_1.Security)(constant_1.SECURITY_NAME.bearerAuth),
     (0, tsoa_1.Get)("/get_portofolio/{id}"),
     __param(0, (0, tsoa_1.Request)()),
     __param(1, (0, tsoa_1.Path)()),
@@ -543,6 +526,7 @@ __decorate([
     __metadata("design:returntype", Promise)
 ], PortofolioController.prototype, "getPortofolio", null);
 __decorate([
+    (0, tsoa_1.Security)(constant_1.SECURITY_NAME.bearerAuth),
     (0, tsoa_1.Get)("/get_portofolio_details/{id}"),
     __param(0, (0, tsoa_1.Request)()),
     __param(1, (0, tsoa_1.Path)()),
@@ -551,6 +535,7 @@ __decorate([
     __metadata("design:returntype", Promise)
 ], PortofolioController.prototype, "getPortofolioDetails", null);
 __decorate([
+    (0, tsoa_1.Security)(constant_1.SECURITY_NAME.bearerAuth),
     (0, tsoa_1.Get)("/get_all_portofolios_details"),
     __param(0, (0, tsoa_1.Request)()),
     __metadata("design:type", Function),
@@ -558,6 +543,7 @@ __decorate([
     __metadata("design:returntype", Promise)
 ], PortofolioController.prototype, "getAllPortofoliosDetails", null);
 __decorate([
+    (0, tsoa_1.Security)(constant_1.SECURITY_NAME.bearerAuth),
     (0, tsoa_1.Delete)("/remove_portofolio/{id}"),
     __param(0, (0, tsoa_1.Request)()),
     __param(1, (0, tsoa_1.Path)()),
@@ -566,6 +552,7 @@ __decorate([
     __metadata("design:returntype", Promise)
 ], PortofolioController.prototype, "removePortofolio", null);
 __decorate([
+    (0, tsoa_1.Security)(constant_1.SECURITY_NAME.bearerAuth),
     (0, tsoa_1.Post)("/add_building_to_portofolio/{portofolioId}"),
     __param(0, (0, tsoa_1.Request)()),
     __param(1, (0, tsoa_1.Path)()),
@@ -575,6 +562,7 @@ __decorate([
     __metadata("design:returntype", Promise)
 ], PortofolioController.prototype, "addBuilding", null);
 __decorate([
+    (0, tsoa_1.Security)(constant_1.SECURITY_NAME.bearerAuth),
     (0, tsoa_1.Get)("/get_building_from_portofolio/{portofolioId}/{buildingId}"),
     __param(0, (0, tsoa_1.Request)()),
     __param(1, (0, tsoa_1.Path)()),
@@ -584,6 +572,7 @@ __decorate([
     __metadata("design:returntype", Promise)
 ], PortofolioController.prototype, "getBuilding", null);
 __decorate([
+    (0, tsoa_1.Security)(constant_1.SECURITY_NAME.bearerAuth),
     (0, tsoa_1.Get)("/get_all_buildings_from_portofolio/{portofolioId}"),
     __param(0, (0, tsoa_1.Request)()),
     __param(1, (0, tsoa_1.Path)()),
@@ -592,6 +581,7 @@ __decorate([
     __metadata("design:returntype", Promise)
 ], PortofolioController.prototype, "getAllBuilding", null);
 __decorate([
+    (0, tsoa_1.Security)(constant_1.SECURITY_NAME.bearerAuth),
     (0, tsoa_1.Delete)("/remove_building_from_portofolio/{portofolioId}"),
     __param(0, (0, tsoa_1.Request)()),
     __param(1, (0, tsoa_1.Path)()),
@@ -601,6 +591,7 @@ __decorate([
     __metadata("design:returntype", Promise)
 ], PortofolioController.prototype, "deleteBuildingFromPortofolio", null);
 __decorate([
+    (0, tsoa_1.Security)(constant_1.SECURITY_NAME.bearerAuth),
     (0, tsoa_1.Post)("/add_app_to_portofolio/{portofolioId}"),
     __param(0, (0, tsoa_1.Request)()),
     __param(1, (0, tsoa_1.Path)()),
@@ -610,6 +601,7 @@ __decorate([
     __metadata("design:returntype", Promise)
 ], PortofolioController.prototype, "addAppToPortofolio", null);
 __decorate([
+    (0, tsoa_1.Security)(constant_1.SECURITY_NAME.bearerAuth),
     (0, tsoa_1.Get)("/get_apps_from_portofolio/{portofolioId}"),
     __param(0, (0, tsoa_1.Request)()),
     __param(1, (0, tsoa_1.Path)()),
@@ -618,6 +610,7 @@ __decorate([
     __metadata("design:returntype", Promise)
 ], PortofolioController.prototype, "getPortofolioApps", null);
 __decorate([
+    (0, tsoa_1.Security)(constant_1.SECURITY_NAME.bearerAuth),
     (0, tsoa_1.Get)("/get_app_from_portofolio/{portofolioId}/{applicationId}"),
     __param(0, (0, tsoa_1.Request)()),
     __param(1, (0, tsoa_1.Path)()),
@@ -627,6 +620,7 @@ __decorate([
     __metadata("design:returntype", Promise)
 ], PortofolioController.prototype, "getAppFromPortofolio", null);
 __decorate([
+    (0, tsoa_1.Security)(constant_1.SECURITY_NAME.bearerAuth),
     (0, tsoa_1.Delete)("/remove_app_from_portofolio/{portofolioId}"),
     __param(0, (0, tsoa_1.Request)()),
     __param(1, (0, tsoa_1.Path)()),
@@ -636,6 +630,7 @@ __decorate([
     __metadata("design:returntype", Promise)
 ], PortofolioController.prototype, "removeAppFromPortofolio", null);
 __decorate([
+    (0, tsoa_1.Security)(constant_1.SECURITY_NAME.bearerAuth),
     (0, tsoa_1.Get)("/portofolio_has_app/{portofolioId}//{applicationId}"),
     __param(0, (0, tsoa_1.Request)()),
     __param(1, (0, tsoa_1.Path)()),
@@ -645,6 +640,7 @@ __decorate([
     __metadata("design:returntype", Promise)
 ], PortofolioController.prototype, "portofolioHasApp", null);
 __decorate([
+    (0, tsoa_1.Security)(constant_1.SECURITY_NAME.bearerAuth),
     (0, tsoa_1.Post)("/add_apiRoute_to_portofolio/{portofolioId}"),
     __param(0, (0, tsoa_1.Request)()),
     __param(1, (0, tsoa_1.Path)()),
@@ -654,6 +650,7 @@ __decorate([
     __metadata("design:returntype", Promise)
 ], PortofolioController.prototype, "addApiToPortofolio", null);
 __decorate([
+    (0, tsoa_1.Security)(constant_1.SECURITY_NAME.bearerAuth),
     (0, tsoa_1.Get)("/get_apisRoute_from_portofolio/{portofolioId}"),
     __param(0, (0, tsoa_1.Request)()),
     __param(1, (0, tsoa_1.Path)()),
@@ -662,6 +659,7 @@ __decorate([
     __metadata("design:returntype", Promise)
 ], PortofolioController.prototype, "getPortofolioApis", null);
 __decorate([
+    (0, tsoa_1.Security)(constant_1.SECURITY_NAME.bearerAuth),
     (0, tsoa_1.Get)("/get_apiRoute_from_portofolio/{portofolioId}/{apiId}"),
     __param(0, (0, tsoa_1.Request)()),
     __param(1, (0, tsoa_1.Path)()),
@@ -671,6 +669,7 @@ __decorate([
     __metadata("design:returntype", Promise)
 ], PortofolioController.prototype, "getApiFromPortofolio", null);
 __decorate([
+    (0, tsoa_1.Security)(constant_1.SECURITY_NAME.bearerAuth),
     (0, tsoa_1.Delete)("/remove_apiRoute_from_portofolio/{portofolioId}"),
     __param(0, (0, tsoa_1.Request)()),
     __param(1, (0, tsoa_1.Path)()),
@@ -680,6 +679,7 @@ __decorate([
     __metadata("design:returntype", Promise)
 ], PortofolioController.prototype, "removeApiFromPortofolio", null);
 __decorate([
+    (0, tsoa_1.Security)(constant_1.SECURITY_NAME.bearerAuth),
     (0, tsoa_1.Get)("/portofolio_has_apiRoute/{portofolioId}/{apiId}"),
     __param(0, (0, tsoa_1.Request)()),
     __param(1, (0, tsoa_1.Path)()),

@@ -56,7 +56,6 @@ let DigitaltwinController = class DigitaltwinController extends tsoa_1.Controlle
     constructor() {
         super();
     }
-    // @Security(SECURITY_NAME.admin)
     createDigitalTwin(req, data) {
         return __awaiter(this, void 0, void 0, function* () {
             try {
@@ -79,6 +78,7 @@ let DigitaltwinController = class DigitaltwinController extends tsoa_1.Controlle
     }
 };
 __decorate([
+    (0, tsoa_1.Security)(constant_1.SECURITY_NAME.bearerAuth),
     (0, tsoa_1.Post)("/create_digitaltwin"),
     __param(0, (0, tsoa_1.Request)()),
     __param(1, (0, tsoa_1.Body)()),
