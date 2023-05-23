@@ -1,10 +1,11 @@
 /// <reference types="node" />
-import { Server as HttpServer } from "http";
+import { Server as HttpServer } from 'http';
 export default class WebSocketServer {
     private _io;
     private _clientToServer;
     private _serverToClient;
-    private _reInitLogData;
+    private _buildingMap;
+    private _sessionToUserInfo;
     constructor(server: HttpServer);
     init(): Promise<void>;
     private _initNameSpace;
@@ -16,5 +17,6 @@ export default class WebSocketServer {
     private _associateClientAndServer;
     private _listenAllEvent;
     private _listenConnectionAndDisconnection;
+    private _createWebsocketLog;
 }
 export { WebSocketServer };

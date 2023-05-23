@@ -24,9 +24,22 @@
  */
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.AuthError = void 0;
+const constant_1 = require("../constant");
 class AuthError extends Error {
     constructor(message) {
         super(message);
+        this.setCode(message);
+    }
+    setCode(message) {
+        switch (message) {
+            case constant_1.SECURITY_MESSAGES.INVALID_TOKEN:
+            case constant_1.SECURITY_MESSAGES.UNAUTHORIZED:
+                this.code = constant_1.HTTP_CODES.UNAUTHORIZED;
+                break;
+            case constant_1.SECURITY_MESSAGES.NO_PROFILE_FOUND:
+                this.code = constant_1.HTTP_CODES.NOT_FOUND;
+                break;
+        }
     }
 }
 exports.AuthError = AuthError;

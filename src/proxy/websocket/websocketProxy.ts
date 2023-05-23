@@ -25,30 +25,30 @@
 
 
 
-import { Application } from "express";
-import { createProxyMiddleware } from "http-proxy-middleware";
+// import { Application } from "express";
+// import { createProxyMiddleware } from "http-proxy-middleware";
 
 
-export function webSocketProxy(app: Application) {
+// export function webSocketProxy(app: Application) {
 
-    const customRouter = function (req) {
-        // console.log(req)
-        return 'https://api-cnp-production-b1.spinalcom.com'; // protocol + host
-    };
+//     const customRouter = function (req) {
+//         // console.log(req)
+//         return 'https://api-cnp-production-b1.spinalcom.com'; // protocol + host
+//     };
 
-    const wsProxy = createProxyMiddleware({
-        // target: "https://api-cnp-production-b1.spinalcom.com",
+//     const wsProxy = createProxyMiddleware({
+//         // target: "https://api-cnp-production-b1.spinalcom.com",
 
-        onProxyReqWs: (proxyReq, req, socket, options, head) => {
-            // console.log(proxyReq, req, socket, options, head);
-        },
-        changeOrigin: true,
-        router: customRouter
+//         onProxyReqWs: (proxyReq, req, socket, options, head) => {
+//             // console.log(proxyReq, req, socket, options, head);
+//         },
+//         changeOrigin: true,
+//         router: customRouter
 
-    })
+//     })
 
-    app.use(/socket.io/, wsProxy);
+//     app.use(/socket.io/, wsProxy);
 
 
-    return wsProxy;
-}
+//     return wsProxy;
+// }

@@ -717,6 +717,80 @@
                         "type": "object"
                     }
                 ]
+            },
+            "WEBSOCKET_STATE": {
+                "enum": [
+                    "running",
+                    "alert",
+                    "unknow"
+                ],
+                "type": "string"
+            },
+            "ILog": {
+                "properties": {
+                    "type": {
+                        "type": "string"
+                    },
+                    "targetInfo": {
+                        "properties": {
+                            "name": {
+                                "type": "string"
+                            },
+                            "id": {
+                                "type": "string"
+                            }
+                        },
+                        "required": [
+                            "name",
+                            "id"
+                        ],
+                        "type": "object"
+                    },
+                    "nodeInfo": {
+                        "properties": {
+                            "name": {
+                                "type": "string"
+                            },
+                            "id": {
+                                "type": "string"
+                            }
+                        },
+                        "additionalProperties": {
+                            "type": "string"
+                        },
+                        "required": [
+                            "name",
+                            "id"
+                        ],
+                        "type": "object"
+                    },
+                    "action": {
+                        "type": "string"
+                    }
+                },
+                "required": [
+                    "type",
+                    "action"
+                ],
+                "type": "object",
+                "additionalProperties": false
+            },
+            "ISpinalDateValue": {
+                "properties": {
+                    "date": {
+                        "type": "number",
+                        "format": "double"
+                    },
+                    "value": {
+                        "$ref": "#/components/schemas/ILog"
+                    }
+                },
+                "required": [
+                    "date",
+                    "value"
+                ],
+                "type": "object",
+                "additionalProperties": false
             }
         },
         "securitySchemes": {
@@ -6787,9 +6861,9 @@
                 }
             }
         },
-        "/api/v1/pam/websocket/get_logs/{buildingId}": {
+        "/api/v1/pam/websocket/{buildingId}/get_websocket_state": {
             "get": {
-                "operationId": "GetWebsocketLogs",
+                "operationId": "GetWebsocketState",
                 "responses": {
                     "200": {
                         "description": "Ok",
@@ -6799,39 +6873,27 @@
                                     "anyOf": [
                                         {
                                             "properties": {
-                                                "logs": {},
+                                                "since": {
+                                                    "type": "number",
+                                                    "format": "double"
+                                                },
                                                 "state": {
-                                                    "type": "string"
+                                                    "$ref": "#/components/schemas/WEBSOCKET_STATE"
                                                 }
                                             },
                                             "required": [
-                                                "logs",
+                                                "since",
                                                 "state"
                                             ],
                                             "type": "object"
                                         },
                                         {
-                                            "items": {
-                                                "properties": {
-                                                    "logs": {},
-                                                    "state": {
-                                                        "type": "string"
-                                                    }
-                                                },
-                                                "required": [
-                                                    "logs",
-                                                    "state"
-                                                ],
-                                                "type": "object"
-                                            },
-                                            "type": "array"
-                                        },
-                                        {
                                             "properties": {
-                                                "message": {
-                                                    "type": "string"
-                                                }
+                                                "message": {}
                                             },
+                                            "required": [
+                                                "message"
+                                            ],
                                             "type": "object"
                                         }
                                     ]
@@ -6841,7 +6903,7 @@
                     }
                 },
                 "tags": [
-                    "Websocket"
+                    "Websocket Logs"
                 ],
                 "security": [
                     {
@@ -6860,9 +6922,9 @@
                 ]
             }
         },
-        "/api/v1/pam/websocket/get_logs": {
+        "/api/v1/pam/websocket_log/{buildingId}/read/{begin}/{end}": {
             "get": {
-                "operationId": "GetAllWebsocketLogs",
+                "operationId": "ReadWebsocketLogs",
                 "responses": {
                     "200": {
                         "description": "Ok",
@@ -6871,40 +6933,18 @@
                                 "schema": {
                                     "anyOf": [
                                         {
-                                            "properties": {
-                                                "logs": {},
-                                                "state": {
-                                                    "type": "string"
-                                                }
-                                            },
-                                            "required": [
-                                                "logs",
-                                                "state"
-                                            ],
-                                            "type": "object"
-                                        },
-                                        {
                                             "items": {
-                                                "properties": {
-                                                    "logs": {},
-                                                    "state": {
-                                                        "type": "string"
-                                                    }
-                                                },
-                                                "required": [
-                                                    "logs",
-                                                    "state"
-                                                ],
-                                                "type": "object"
+                                                "$ref": "#/components/schemas/ISpinalDateValue"
                                             },
                                             "type": "array"
                                         },
                                         {
                                             "properties": {
-                                                "message": {
-                                                    "type": "string"
-                                                }
+                                                "message": {}
                                             },
+                                            "required": [
+                                                "message"
+                                            ],
                                             "type": "object"
                                         }
                                     ]
@@ -6914,14 +6954,188 @@
                     }
                 },
                 "tags": [
-                    "Websocket"
+                    "Websocket Logs"
                 ],
                 "security": [
                     {
                         "bearerAuth": []
                     }
                 ],
-                "parameters": []
+                "parameters": [
+                    {
+                        "in": "path",
+                        "name": "buildingId",
+                        "required": true,
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    {
+                        "in": "path",
+                        "name": "begin",
+                        "required": true,
+                        "schema": {}
+                    },
+                    {
+                        "in": "path",
+                        "name": "end",
+                        "required": true,
+                        "schema": {}
+                    }
+                ]
+            }
+        },
+        "/api/v1/pam/websocket_log/{buildingId}/read_current_week": {
+            "get": {
+                "operationId": "ReadCurrentWeekLogs",
+                "responses": {
+                    "200": {
+                        "description": "Ok",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "anyOf": [
+                                        {
+                                            "items": {
+                                                "$ref": "#/components/schemas/ISpinalDateValue"
+                                            },
+                                            "type": "array"
+                                        },
+                                        {
+                                            "properties": {
+                                                "message": {}
+                                            },
+                                            "required": [
+                                                "message"
+                                            ],
+                                            "type": "object"
+                                        }
+                                    ]
+                                }
+                            }
+                        }
+                    }
+                },
+                "tags": [
+                    "Websocket Logs"
+                ],
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ],
+                "parameters": [
+                    {
+                        "in": "path",
+                        "name": "buildingId",
+                        "required": true,
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                ]
+            }
+        },
+        "/api/v1/pam/websocket_log/{buildingId}/read_current_year": {
+            "get": {
+                "operationId": "ReadCurrentYearLogs",
+                "responses": {
+                    "200": {
+                        "description": "Ok",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "anyOf": [
+                                        {
+                                            "items": {
+                                                "$ref": "#/components/schemas/ISpinalDateValue"
+                                            },
+                                            "type": "array"
+                                        },
+                                        {
+                                            "properties": {
+                                                "message": {}
+                                            },
+                                            "required": [
+                                                "message"
+                                            ],
+                                            "type": "object"
+                                        }
+                                    ]
+                                }
+                            }
+                        }
+                    }
+                },
+                "tags": [
+                    "Websocket Logs"
+                ],
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ],
+                "parameters": [
+                    {
+                        "in": "path",
+                        "name": "buildingId",
+                        "required": true,
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                ]
+            }
+        },
+        "/api/v1/pam/websocket_log/{buildingId}/read_from_last_24h": {
+            "get": {
+                "operationId": "ReadLast24hLogs",
+                "responses": {
+                    "200": {
+                        "description": "Ok",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "anyOf": [
+                                        {
+                                            "items": {
+                                                "$ref": "#/components/schemas/ISpinalDateValue"
+                                            },
+                                            "type": "array"
+                                        },
+                                        {
+                                            "properties": {
+                                                "message": {}
+                                            },
+                                            "required": [
+                                                "message"
+                                            ],
+                                            "type": "object"
+                                        }
+                                    ]
+                                }
+                            }
+                        }
+                    }
+                },
+                "tags": [
+                    "Websocket Logs"
+                ],
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ],
+                "parameters": [
+                    {
+                        "in": "path",
+                        "name": "buildingId",
+                        "required": true,
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                ]
             }
         }
     },

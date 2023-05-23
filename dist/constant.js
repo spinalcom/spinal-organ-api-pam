@@ -28,18 +28,18 @@ exports.HTTP_CODES = exports.BOS_BASE_URI_V2 = exports.BOS_BASE_URI_V1_2 = expor
 exports.SECURITY_NAME = exports.SECURITY_MESSAGES = void 0;
 const spinal_env_viewer_graph_service_1 = require("spinal-env-viewer-graph-service");
 const interfaces_1 = require("./interfaces");
-exports.CONFIG_FILE_MODEl_TYPE = "SpinalPAM";
-exports.CONFIG_DEFAULT_NAME = "PAMConfig";
-exports.CONFIG_DEFAULT_DIRECTORY_PATH = "/__users__/admin/";
-exports.ADMIN_USERNAME = "admin";
-exports.ADMIN_USER_TYPE = "admin";
-exports.CONTEXT_TO_ADMIN_USER_RELATION = "hasAdminUser";
+exports.CONFIG_FILE_MODEl_TYPE = 'SpinalPAM';
+exports.CONFIG_DEFAULT_NAME = 'PAMConfig';
+exports.CONFIG_DEFAULT_DIRECTORY_PATH = '/__users__/admin/';
+exports.ADMIN_USERNAME = 'admin';
+exports.ADMIN_USER_TYPE = 'admin';
+exports.CONTEXT_TO_ADMIN_USER_RELATION = 'hasAdminUser';
 exports.USER_TYPES = Object.freeze({
-    ADMIN: "ADMIN",
-    USER: "USER",
-    APP: "APP",
-    1: "ADMIN",
-    2: "USER"
+    ADMIN: 'ADMIN',
+    USER: 'USER',
+    APP: 'APP',
+    1: 'ADMIN',
+    2: 'USER',
 });
 //Contexts names
 exports.USER_PROFILE_CONTEXT_NAME = 'UserProfileList';
@@ -52,19 +52,19 @@ exports.BUILDING_CONTEXT_NAME = 'Buildings';
 exports.DIGITALTWIN_CONTEXT_NAME = 'DigitalTwins';
 exports.API_ROUTES_CONTEXT_NAME = 'ApiListContext';
 exports.ORGAN_LIST_CONTEXT_NAME = 'OrganListContext';
-exports.AUTHORIZED_PORTOFOLIO_CONTEXT_NAME = "Authorized Portofolio";
-exports.AUTHORIZED_API_CONTEXT_NAME = "Authorized Apis Routes";
-exports.AUTHORIZED_BOS_CONTEXT_NAME = "Authorized BOS";
-exports.PAM_CREDENTIAL_CONTEXT_NAME = "PAMToAuthCredential";
-exports.ADMIN_CREDENTIAL_CONTEXT_NAME = "AdminCredential";
-exports.PORTOFOLIO_CONTEXT_NAME = "Portofolio description Context";
-exports.ADMIN_APPS_GROUP_NAME = "Admin apps";
-exports.PORTOFOLIO_APPS_GROUP_NAME = "Portofolio apps";
-exports.BUILDING_APPS_GROUP_NAME = "Building apps";
-exports.TOKEN_LIST_CONTEXT_NAME = "Tokens";
-exports.BUILDING_API_GROUP_NAME = "Building Apis Routes";
-exports.PORTOFOLIO_API_GROUP_NAME = "Portofolio Apis Routes";
-exports.LOG_CONTEXT_NAME = "Logs";
+exports.AUTHORIZED_PORTOFOLIO_CONTEXT_NAME = 'Authorized Portofolio';
+exports.AUTHORIZED_API_CONTEXT_NAME = 'Authorized Apis Routes';
+exports.AUTHORIZED_BOS_CONTEXT_NAME = 'Authorized BOS';
+exports.PAM_CREDENTIAL_CONTEXT_NAME = 'PAMToAuthCredential';
+exports.ADMIN_CREDENTIAL_CONTEXT_NAME = 'AdminCredential';
+exports.PORTOFOLIO_CONTEXT_NAME = 'Portofolio description Context';
+exports.ADMIN_APPS_GROUP_NAME = 'Admin apps';
+exports.PORTOFOLIO_APPS_GROUP_NAME = 'Portofolio apps';
+exports.BUILDING_APPS_GROUP_NAME = 'Building apps';
+exports.TOKEN_LIST_CONTEXT_NAME = 'Tokens';
+exports.BUILDING_API_GROUP_NAME = 'Building Apis Routes';
+exports.PORTOFOLIO_API_GROUP_NAME = 'Portofolio Apis Routes';
+exports.LOG_CONTEXT_NAME = 'Logs';
 //Contexts types
 exports.USER_PROFILE_CONTEXT_TYPE = 'UserProfileList';
 exports.APP_PROFILE_CONTEXT_TYPE = 'AppProfileList';
@@ -76,43 +76,43 @@ exports.BUILDING_CONTEXT_TYPE = 'BuildingContextList';
 exports.DIGITALTWIN_CONTEXT_TYPE = 'DigitalTwinContext';
 exports.API_ROUTES_CONTEXT_TYPE = 'ApiListContext';
 exports.ORGAN_LIST_CONTEXT_TYPE = 'OrganListContext';
-exports.AUTHORIZED_PORTOFOLIO_CONTEXT_TYPE = "AuthorizedPortofolioContext";
-exports.AUTHORIZED_API_CONTEXT_TYPE = "AuthorizedApisContext";
-exports.AUTHORIZED_BOS_CONTEXT_TYPE = "AuthorizedBosContext";
-exports.PAM_CREDENTIAL_CONTEXT_TYPE = "PamCredential";
-exports.ADMIN_CREDENTIAL_CONTEXT_TYPE = "AdminCredential";
-exports.PORTOFOLIO_CONTEXT_TYPE = "PortofolioContext";
-exports.TOKEN_LIST_CONTEXT_TYPE = "TokenList";
-exports.LOG_CONTEXT_TYPE = "LogsContext";
+exports.AUTHORIZED_PORTOFOLIO_CONTEXT_TYPE = 'AuthorizedPortofolioContext';
+exports.AUTHORIZED_API_CONTEXT_TYPE = 'AuthorizedApisContext';
+exports.AUTHORIZED_BOS_CONTEXT_TYPE = 'AuthorizedBosContext';
+exports.PAM_CREDENTIAL_CONTEXT_TYPE = 'PamCredential';
+exports.ADMIN_CREDENTIAL_CONTEXT_TYPE = 'AdminCredential';
+exports.PORTOFOLIO_CONTEXT_TYPE = 'PortofolioContext';
+exports.TOKEN_LIST_CONTEXT_TYPE = 'TokenList';
+exports.LOG_CONTEXT_TYPE = 'LogsContext';
 // types
-exports.ROLE_TYPE = "role";
-exports.USER_PROFILE_TYPE = "UserProfile";
-exports.APP_PROFILE_TYPE = "AppProfile";
-exports.APP_CATEGORY_TYPE = "AdminAppCategory";
-exports.APP_GROUP_TYPE = "AdminAppGroup";
+exports.ROLE_TYPE = 'role';
+exports.USER_PROFILE_TYPE = 'UserProfile';
+exports.APP_PROFILE_TYPE = 'AppProfile';
+exports.APP_CATEGORY_TYPE = 'AdminAppCategory';
+exports.APP_GROUP_TYPE = 'AdminAppGroup';
 exports.APP_TYPE = 'AdminApp';
 exports.BUILDING_TYPE = 'Building';
 exports.DIGITALTWIN_TYPE = 'Digital twin';
 exports.API_ROUTE_TYPE = 'ApiRoute';
 exports.API_ROUTE_GROUP_TYPE = 'ApiRoute';
 exports.PORTOFOLIO_TYPE = 'Portofolio';
-exports.ADMIN_APPS_GROUP_TYPE = "AdminAppsGroup";
-exports.PORTOFOLIO_APPS_GROUP_TYPE = "PortofolioAppsGroup";
-exports.BUILDING_APPS_GROUP_TYPE = "BuildingAppsGroup";
-exports.ADMIN_APP_TYPE = "AdminApp";
-exports.PORTOFOLIO_APP_TYPE = "PortofolioApp";
-exports.BUILDING_APP_TYPE = "BuildingApp";
-exports.TOKEN_TYPE = "token";
-exports.BUILDING_API_GROUP_TYPE = "BuildingApis";
-exports.PORTOFOLIO_API_GROUP_TYPE = "PortofolioApis";
-exports.ADMIN_PROFILE_TYPE = "AdminProfile";
-exports.ADMIN_PROFILE_NAME = "AdminProfile";
+exports.ADMIN_APPS_GROUP_TYPE = 'AdminAppsGroup';
+exports.PORTOFOLIO_APPS_GROUP_TYPE = 'PortofolioAppsGroup';
+exports.BUILDING_APPS_GROUP_TYPE = 'BuildingAppsGroup';
+exports.ADMIN_APP_TYPE = 'AdminApp';
+exports.PORTOFOLIO_APP_TYPE = 'PortofolioApp';
+exports.BUILDING_APP_TYPE = 'BuildingApp';
+exports.TOKEN_TYPE = 'token';
+exports.BUILDING_API_GROUP_TYPE = 'BuildingApis';
+exports.PORTOFOLIO_API_GROUP_TYPE = 'PortofolioApis';
+exports.ADMIN_PROFILE_TYPE = 'AdminProfile';
+exports.ADMIN_PROFILE_NAME = 'AdminProfile';
 // RelationName
 // export const CONTEXT_TO_APP_CATEGORY_RELATION_NAME = "hasAppCategory";
 // export const CATEGORY_TO_APP_GROUP_RELATION_NAME = 'hasAppGroup';
 // export const APP_GROUP_TO_APP_RELATION_NAME = 'groupHasApp';
 exports.CONTEXT_TO_APP_RELATION_NAME = 'hasApps';
-exports.CONTEXT_TO_APPS_GROUP = "hasAppsGroups";
+exports.CONTEXT_TO_APPS_GROUP = 'hasAppsGroups';
 exports.CONTEXT_TO_USER_PROFILE_RELATION_NAME = 'hasUserProfile';
 exports.CONTEXT_TO_APP_PROFILE_RELATION_NAME = 'hasAppProfile';
 exports.CONTEXT_TO_ROLE_RELATION_NAME = 'hasRole';
@@ -120,24 +120,24 @@ exports.CONTEXT_TO_USER_RELATION_NAME = 'hasUser';
 exports.CONTEXT_TO_DIGITALTWIN_RELATION_NAME = 'hasDigitalTwin';
 exports.CONTEXT_TO_API_ROUTE_GROUP_RELATION_NAME = 'hasApiRouteGroup';
 exports.API_RELATION_NAME = 'hasApiRoute';
-exports.CONTEXT_TO_PORTOFOLIO_RELATION_NAME = "hasPortofolio";
+exports.CONTEXT_TO_PORTOFOLIO_RELATION_NAME = 'hasPortofolio';
 // export const CONTEXT_TO_AUTHORIZED_APPS_RELATION_NAME = "profileHasApps";
-exports.CONTEXT_TO_AUTHORIZED_APIS_RELATION_NAME = "profileHasApis";
+exports.CONTEXT_TO_AUTHORIZED_APIS_RELATION_NAME = 'profileHasApis';
 // export const CONTEXT_TO_AUTHORIZED_BOS_RELATION_NAME = "profileHasBos";
-exports.TOKEN_RELATION_NAME = "hasToken";
-exports.APP_RELATION_NAME = "hasApps";
+exports.TOKEN_RELATION_NAME = 'hasToken';
+exports.APP_RELATION_NAME = 'hasApps';
 exports.BUILDING_RELATION_NAME = 'hasBuilding';
-exports.PROFILE_TO_AUTHORIZED_PORTOFOLIO_RELATION = "hasAccessToPortofolio";
-exports.PROFILE_TO_AUTHORIZED_BOS_RELATION = "hasAccessToBos";
-exports.USER_TO_FAVORITE_APP_RELATION = "hasFavoriteApp";
+exports.PROFILE_TO_AUTHORIZED_PORTOFOLIO_RELATION = 'hasAccessToPortofolio';
+exports.PROFILE_TO_AUTHORIZED_BOS_RELATION = 'hasAccessToBos';
+exports.USER_TO_FAVORITE_APP_RELATION = 'hasFavoriteApp';
 // Relation Type
 exports.PTR_LST_TYPE = spinal_env_viewer_graph_service_1.SPINAL_RELATION_PTR_LST_TYPE;
 exports.LST_PTR_TYPE = spinal_env_viewer_graph_service_1.SPINAL_RELATION_LST_PTR_TYPE;
-exports.DEFAULT_ROLES = Object.freeze(["Read", "Write", "Delete"]);
+exports.DEFAULT_ROLES = Object.freeze(['Read', 'Write', 'Delete']);
 exports.ROLE_METHODS = Object.freeze({
     Read: [interfaces_1.HTTP_METHODS.GET],
     Write: [interfaces_1.HTTP_METHODS.POST, interfaces_1.HTTP_METHODS.PUT, interfaces_1.HTTP_METHODS.PATCH],
-    Delete: [interfaces_1.HTTP_METHODS.DELETE]
+    Delete: [interfaces_1.HTTP_METHODS.DELETE],
 });
 // Error
 const ERROR_PREFIX = 'PAM Admin Service App Error: ';
@@ -158,10 +158,10 @@ exports.routesToProxy = [
     '/get_delete_account_by_admin',
     '/get_change_account_rights_by_admin',
 ];
-exports.PAM_BASE_URI = "/api/v1/pam";
-exports.BOS_BASE_URI_V1 = "/api/v1/building";
-exports.BOS_BASE_URI_V1_2 = "/v1/building";
-exports.BOS_BASE_URI_V2 = "/api/v2/building";
+exports.PAM_BASE_URI = '/api/v1/pam';
+exports.BOS_BASE_URI_V1 = '/api/v1/building';
+exports.BOS_BASE_URI_V1_2 = '/v1/building';
+exports.BOS_BASE_URI_V2 = '/api/v2/building';
 var HTTP_CODES;
 (function (HTTP_CODES) {
     HTTP_CODES[HTTP_CODES["OK"] = 200] = "OK";

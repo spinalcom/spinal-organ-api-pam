@@ -1,5 +1,5 @@
-import { SpinalContext, SpinalNode } from "spinal-env-viewer-graph-service";
-import { IPortofolioAuth, IPortofolioAuthEdit, IPortofolioAuthRes } from "../interfaces";
+import { SpinalContext, SpinalNode } from 'spinal-env-viewer-graph-service';
+import { IPortofolioAuth, IPortofolioAuthEdit, IPortofolioAuthRes } from '../interfaces';
 export declare class AdminProfileService {
     private static instance;
     private _adminNode;

@@ -325,6 +325,31 @@ const models = {
         "type": { "dataType": "intersection", "subSchemas": [{ "ref": "IBuilding" }, { "dataType": "nestedObjectLiteral", "nestedProperties": { "apiIds": { "dataType": "array", "array": { "dataType": "string" } }, "appIds": { "dataType": "array", "array": { "dataType": "string" } } } }], "validators": {} },
     },
     // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
+    "WEBSOCKET_STATE": {
+        "dataType": "refEnum",
+        "enums": ["running", "alert", "unknow"],
+    },
+    // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
+    "ILog": {
+        "dataType": "refObject",
+        "properties": {
+            "type": { "dataType": "string", "required": true },
+            "targetInfo": { "dataType": "nestedObjectLiteral", "nestedProperties": { "name": { "dataType": "string", "required": true }, "id": { "dataType": "string", "required": true } } },
+            "nodeInfo": { "dataType": "nestedObjectLiteral", "nestedProperties": { "name": { "dataType": "string", "required": true }, "id": { "dataType": "string", "required": true } }, "additionalProperties": { "dataType": "string" } },
+            "action": { "dataType": "string", "required": true },
+        },
+        "additionalProperties": false,
+    },
+    // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
+    "ISpinalDateValue": {
+        "dataType": "refObject",
+        "properties": {
+            "date": { "dataType": "double", "required": true },
+            "value": { "ref": "ILog", "required": true },
+        },
+        "additionalProperties": false,
+    },
+    // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
 };
 const validationService = new runtime_1.ValidationService(models);
 // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
@@ -2281,7 +2306,7 @@ function RegisterRoutes(app) {
         }
     });
     // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
-    app.get('/api/v1/pam/websocket/get_logs/:buildingId', authenticateMiddleware([{ "bearerAuth": [] }]), ...((0, runtime_1.fetchMiddlewares)(websocketLogs_controller_1.WebsocketLogsController)), ...((0, runtime_1.fetchMiddlewares)(websocketLogs_controller_1.WebsocketLogsController.prototype.getWebsocketLogs)), function WebsocketLogsController_getWebsocketLogs(request, response, next) {
+    app.get('/api/v1/pam/websocket/:buildingId/get_websocket_state', authenticateMiddleware([{ "bearerAuth": [] }]), ...((0, runtime_1.fetchMiddlewares)(websocketLogs_controller_1.WebsocketLogsController)), ...((0, runtime_1.fetchMiddlewares)(websocketLogs_controller_1.WebsocketLogsController.prototype.getWebsocketState)), function WebsocketLogsController_getWebsocketState(request, response, next) {
         const args = {
             req: { "in": "request", "name": "req", "required": true, "dataType": "object" },
             buildingId: { "in": "path", "name": "buildingId", "required": true, "dataType": "string" },
@@ -2291,7 +2316,7 @@ function RegisterRoutes(app) {
         try {
             validatedArgs = getValidatedArgs(args, request, response);
             const controller = new websocketLogs_controller_1.WebsocketLogsController();
-            const promise = controller.getWebsocketLogs.apply(controller, validatedArgs);
+            const promise = controller.getWebsocketState.apply(controller, validatedArgs);
             promiseHandler(controller, promise, response, undefined, next);
         }
         catch (err) {
@@ -2299,16 +2324,73 @@ function RegisterRoutes(app) {
         }
     });
     // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
-    app.get('/api/v1/pam/websocket/get_logs', authenticateMiddleware([{ "bearerAuth": [] }]), ...((0, runtime_1.fetchMiddlewares)(websocketLogs_controller_1.WebsocketLogsController)), ...((0, runtime_1.fetchMiddlewares)(websocketLogs_controller_1.WebsocketLogsController.prototype.getAllWebsocketLogs)), function WebsocketLogsController_getAllWebsocketLogs(request, response, next) {
+    app.get('/api/v1/pam/websocket_log/:buildingId/read/:begin/:end', authenticateMiddleware([{ "bearerAuth": [] }]), ...((0, runtime_1.fetchMiddlewares)(websocketLogs_controller_1.WebsocketLogsController)), ...((0, runtime_1.fetchMiddlewares)(websocketLogs_controller_1.WebsocketLogsController.prototype.readWebsocketLogs)), function WebsocketLogsController_readWebsocketLogs(request, response, next) {
         const args = {
             req: { "in": "request", "name": "req", "required": true, "dataType": "object" },
+            buildingId: { "in": "path", "name": "buildingId", "required": true, "dataType": "string" },
+            begin: { "in": "path", "name": "begin", "required": true, "dataType": "union", "subSchemas": [{ "dataType": "string" }, { "dataType": "double" }] },
+            end: { "in": "path", "name": "end", "required": true, "dataType": "union", "subSchemas": [{ "dataType": "string" }, { "dataType": "double" }] },
         };
         // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
         let validatedArgs = [];
         try {
             validatedArgs = getValidatedArgs(args, request, response);
             const controller = new websocketLogs_controller_1.WebsocketLogsController();
-            const promise = controller.getAllWebsocketLogs.apply(controller, validatedArgs);
+            const promise = controller.readWebsocketLogs.apply(controller, validatedArgs);
+            promiseHandler(controller, promise, response, undefined, next);
+        }
+        catch (err) {
+            return next(err);
+        }
+    });
+    // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
+    app.get('/api/v1/pam/websocket_log/:buildingId/read_current_week', authenticateMiddleware([{ "bearerAuth": [] }]), ...((0, runtime_1.fetchMiddlewares)(websocketLogs_controller_1.WebsocketLogsController)), ...((0, runtime_1.fetchMiddlewares)(websocketLogs_controller_1.WebsocketLogsController.prototype.readCurrentWeekLogs)), function WebsocketLogsController_readCurrentWeekLogs(request, response, next) {
+        const args = {
+            req: { "in": "request", "name": "req", "required": true, "dataType": "object" },
+            buildingId: { "in": "path", "name": "buildingId", "required": true, "dataType": "string" },
+        };
+        // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
+        let validatedArgs = [];
+        try {
+            validatedArgs = getValidatedArgs(args, request, response);
+            const controller = new websocketLogs_controller_1.WebsocketLogsController();
+            const promise = controller.readCurrentWeekLogs.apply(controller, validatedArgs);
+            promiseHandler(controller, promise, response, undefined, next);
+        }
+        catch (err) {
+            return next(err);
+        }
+    });
+    // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
+    app.get('/api/v1/pam/websocket_log/:buildingId/read_current_year', authenticateMiddleware([{ "bearerAuth": [] }]), ...((0, runtime_1.fetchMiddlewares)(websocketLogs_controller_1.WebsocketLogsController)), ...((0, runtime_1.fetchMiddlewares)(websocketLogs_controller_1.WebsocketLogsController.prototype.readCurrentYearLogs)), function WebsocketLogsController_readCurrentYearLogs(request, response, next) {
+        const args = {
+            req: { "in": "request", "name": "req", "required": true, "dataType": "object" },
+            buildingId: { "in": "path", "name": "buildingId", "required": true, "dataType": "string" },
+        };
+        // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
+        let validatedArgs = [];
+        try {
+            validatedArgs = getValidatedArgs(args, request, response);
+            const controller = new websocketLogs_controller_1.WebsocketLogsController();
+            const promise = controller.readCurrentYearLogs.apply(controller, validatedArgs);
+            promiseHandler(controller, promise, response, undefined, next);
+        }
+        catch (err) {
+            return next(err);
+        }
+    });
+    // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
+    app.get('/api/v1/pam/websocket_log/:buildingId/read_from_last_24h', authenticateMiddleware([{ "bearerAuth": [] }]), ...((0, runtime_1.fetchMiddlewares)(websocketLogs_controller_1.WebsocketLogsController)), ...((0, runtime_1.fetchMiddlewares)(websocketLogs_controller_1.WebsocketLogsController.prototype.readLast24hLogs)), function WebsocketLogsController_readLast24hLogs(request, response, next) {
+        const args = {
+            req: { "in": "request", "name": "req", "required": true, "dataType": "object" },
+            buildingId: { "in": "path", "name": "buildingId", "required": true, "dataType": "string" },
+        };
+        // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
+        let validatedArgs = [];
+        try {
+            validatedArgs = getValidatedArgs(args, request, response);
+            const controller = new websocketLogs_controller_1.WebsocketLogsController();
+            const promise = controller.readLast24hLogs.apply(controller, validatedArgs);
             promiseHandler(controller, promise, response, undefined, next);
         }
         catch (err) {

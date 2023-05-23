@@ -47,22 +47,33 @@ exports.WebsocketLogsController = void 0;
  */
 const tsoa_1 = require("tsoa");
 const constant_1 = require("../constant");
-const websocketLogs_1 = require("../proxy/websocket/logs/websocketLogs");
+const webSocketLogs_service_1 = require("../services/webSocketLogs.service");
 const express = require("express");
 const authentication_1 = require("../security/authentication");
 const AuthError_1 = require("../security/AuthError");
+const services_1 = require("../services");
+const spinal_service_pubsub_logs_1 = require("spinal-service-pubsub-logs");
+const buildingInstance = services_1.BuildingService.getInstance();
 let WebsocketLogsController = class WebsocketLogsController extends tsoa_1.Controller {
     constructor() {
         super();
+        this._websocketLogService = webSocketLogs_service_1.WebsocketLogsService.getInstance();
     }
-    getWebsocketLogs(req, buildingId) {
+    getWebsocketState(req, buildingId) {
         return __awaiter(this, void 0, void 0, function* () {
             try {
                 const isAdmin = yield (0, authentication_1.checkIfItIsAdmin)(req);
                 if (!isAdmin)
                     throw new AuthError_1.AuthError(constant_1.SECURITY_MESSAGES.UNAUTHORIZED);
+                const building = yield buildingInstance.getBuildingById(buildingId);
+                if (!building) {
+                    throw {
+                        code: constant_1.HTTP_CODES.NOT_FOUND,
+                        message: `No building foudn for ${buildingId}`,
+                    };
+                }
                 this.setStatus(constant_1.HTTP_CODES.OK);
-                return websocketLogs_1.default.getInstance().getSocketLogs(buildingId);
+                return this._websocketLogService.getWebsocketState(building);
             }
             catch (error) {
                 this.setStatus(error.code || constant_1.HTTP_CODES.INTERNAL_ERROR);
@@ -70,14 +81,89 @@ let WebsocketLogsController = class WebsocketLogsController extends tsoa_1.Contr
             }
         });
     }
-    getAllWebsocketLogs(req) {
+    readWebsocketLogs(req, buildingId, begin, end) {
         return __awaiter(this, void 0, void 0, function* () {
             try {
                 const isAdmin = yield (0, authentication_1.checkIfItIsAdmin)(req);
                 if (!isAdmin)
                     throw new AuthError_1.AuthError(constant_1.SECURITY_MESSAGES.UNAUTHORIZED);
+                const building = yield buildingInstance.getBuildingById(buildingId);
+                if (!building) {
+                    throw {
+                        code: constant_1.HTTP_CODES.NOT_FOUND,
+                        message: `No building found for ${buildingId}`,
+                    };
+                }
                 this.setStatus(constant_1.HTTP_CODES.OK);
-                return websocketLogs_1.default.getInstance().getSocketLogs();
+                const t = yield this._websocketLogService.getFromIntervalTime(building, begin, end);
+                console.log(t);
+                return t;
+            }
+            catch (error) {
+                this.setStatus(error.code || constant_1.HTTP_CODES.INTERNAL_ERROR);
+                return { message: error.message };
+            }
+        });
+    }
+    readCurrentWeekLogs(req, buildingId) {
+        return __awaiter(this, void 0, void 0, function* () {
+            try {
+                const isAdmin = yield (0, authentication_1.checkIfItIsAdmin)(req);
+                if (!isAdmin)
+                    throw new AuthError_1.AuthError(constant_1.SECURITY_MESSAGES.UNAUTHORIZED);
+                const building = yield buildingInstance.getBuildingById(buildingId);
+                if (!building) {
+                    throw {
+                        code: constant_1.HTTP_CODES.NOT_FOUND,
+                        message: `No building found for ${buildingId}`,
+                    };
+                }
+                const { end, start } = spinal_service_pubsub_logs_1.SpinalServiceLog.getInstance().getDateFromLastDays(7);
+                return this._websocketLogService.getFromIntervalTime(building, start, end);
+            }
+            catch (error) {
+                this.setStatus(error.code || constant_1.HTTP_CODES.INTERNAL_ERROR);
+                return { message: error.message };
+            }
+        });
+    }
+    readCurrentYearLogs(req, buildingId) {
+        return __awaiter(this, void 0, void 0, function* () {
+            try {
+                const isAdmin = yield (0, authentication_1.checkIfItIsAdmin)(req);
+                if (!isAdmin)
+                    throw new AuthError_1.AuthError(constant_1.SECURITY_MESSAGES.UNAUTHORIZED);
+                const building = yield buildingInstance.getBuildingById(buildingId);
+                if (!building) {
+                    throw {
+                        code: constant_1.HTTP_CODES.NOT_FOUND,
+                        message: `No building found for ${buildingId}`,
+                    };
+                }
+                const { end, start } = spinal_service_pubsub_logs_1.SpinalServiceLog.getInstance().getDateFromLastDays(365);
+                return this._websocketLogService.getFromIntervalTime(building, start, end);
+            }
+            catch (error) {
+                this.setStatus(error.code || constant_1.HTTP_CODES.INTERNAL_ERROR);
+                return { message: error.message };
+            }
+        });
+    }
+    readLast24hLogs(req, buildingId) {
+        return __awaiter(this, void 0, void 0, function* () {
+            try {
+                const isAdmin = yield (0, authentication_1.checkIfItIsAdmin)(req);
+                if (!isAdmin)
+                    throw new AuthError_1.AuthError(constant_1.SECURITY_MESSAGES.UNAUTHORIZED);
+                const building = yield buildingInstance.getBuildingById(buildingId);
+                if (!building) {
+                    throw {
+                        code: constant_1.HTTP_CODES.NOT_FOUND,
+                        message: `No building found for ${buildingId}`,
+                    };
+                }
+                this.setStatus(constant_1.HTTP_CODES.OK);
+                return yield this._websocketLogService.getDataFromLast24Hours(building);
             }
             catch (error) {
                 this.setStatus(error.code || constant_1.HTTP_CODES.INTERNAL_ERROR);
@@ -88,24 +174,54 @@ let WebsocketLogsController = class WebsocketLogsController extends tsoa_1.Contr
 };
 __decorate([
     (0, tsoa_1.Security)(constant_1.SECURITY_NAME.bearerAuth),
-    (0, tsoa_1.Get)("/websocket/get_logs/{buildingId}"),
+    (0, tsoa_1.Get)('/websocket/{buildingId}/get_websocket_state'),
     __param(0, (0, tsoa_1.Request)()),
     __param(1, (0, tsoa_1.Path)()),
     __metadata("design:type", Function),
     __metadata("design:paramtypes", [Object, String]),
     __metadata("design:returntype", Promise)
-], WebsocketLogsController.prototype, "getWebsocketLogs", null);
+], WebsocketLogsController.prototype, "getWebsocketState", null);
 __decorate([
     (0, tsoa_1.Security)(constant_1.SECURITY_NAME.bearerAuth),
-    (0, tsoa_1.Get)("/websocket/get_logs"),
+    (0, tsoa_1.Get)('/websocket_log/{buildingId}/read/{begin}/{end}'),
     __param(0, (0, tsoa_1.Request)()),
+    __param(1, (0, tsoa_1.Path)()),
+    __param(2, (0, tsoa_1.Path)()),
+    __param(3, (0, tsoa_1.Path)()),
     __metadata("design:type", Function),
-    __metadata("design:paramtypes", [Object]),
+    __metadata("design:paramtypes", [Object, String, Object, Object]),
     __metadata("design:returntype", Promise)
-], WebsocketLogsController.prototype, "getAllWebsocketLogs", null);
+], WebsocketLogsController.prototype, "readWebsocketLogs", null);
+__decorate([
+    (0, tsoa_1.Security)(constant_1.SECURITY_NAME.bearerAuth),
+    (0, tsoa_1.Get)('/websocket_log/{buildingId}/read_current_week'),
+    __param(0, (0, tsoa_1.Request)()),
+    __param(1, (0, tsoa_1.Path)()),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [Object, String]),
+    __metadata("design:returntype", Promise)
+], WebsocketLogsController.prototype, "readCurrentWeekLogs", null);
+__decorate([
+    (0, tsoa_1.Security)(constant_1.SECURITY_NAME.bearerAuth),
+    (0, tsoa_1.Get)('/websocket_log/{buildingId}/read_current_year'),
+    __param(0, (0, tsoa_1.Request)()),
+    __param(1, (0, tsoa_1.Path)()),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [Object, String]),
+    __metadata("design:returntype", Promise)
+], WebsocketLogsController.prototype, "readCurrentYearLogs", null);
+__decorate([
+    (0, tsoa_1.Security)(constant_1.SECURITY_NAME.bearerAuth),
+    (0, tsoa_1.Get)('/websocket_log/{buildingId}/read_from_last_24h'),
+    __param(0, (0, tsoa_1.Request)()),
+    __param(1, (0, tsoa_1.Path)()),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [Object, String]),
+    __metadata("design:returntype", Promise)
+], WebsocketLogsController.prototype, "readLast24hLogs", null);
 WebsocketLogsController = __decorate([
-    (0, tsoa_1.Route)("/api/v1/pam"),
-    (0, tsoa_1.Tags)("Websocket"),
+    (0, tsoa_1.Route)('/api/v1/pam'),
+    (0, tsoa_1.Tags)('Websocket Logs'),
     __metadata("design:paramtypes", [])
 ], WebsocketLogsController);
 exports.WebsocketLogsController = WebsocketLogsController;

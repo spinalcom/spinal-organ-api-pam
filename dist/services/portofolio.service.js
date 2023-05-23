@@ -69,7 +69,7 @@ class PortofolioService {
                 node,
                 apps,
                 buildings: [],
-                apis
+                apis,
             };
         });
     }
@@ -107,20 +107,26 @@ class PortofolioService {
     getPortofolio(portofolioId) {
         return __awaiter(this, void 0, void 0, function* () {
             const portofolios = yield this.getAllPortofolio();
-            return portofolios.find(el => el.getId().get() === portofolioId);
+            return portofolios.find((el) => el.getId().get() === portofolioId);
         });
     }
     getPortofolioDetails(portofolio) {
         return __awaiter(this, void 0, void 0, function* () {
-            const node = portofolio instanceof spinal_env_viewer_graph_service_1.SpinalNode ? portofolio : yield this.getPortofolio(portofolio);
+            const node = portofolio instanceof spinal_env_viewer_graph_service_1.SpinalNode
+                ? portofolio
+                : yield this.getPortofolio(portofolio);
             if (!node)
                 throw new Error(`No portofolio found for {portofolio}`);
-            const [apps, buildings, apis] = yield Promise.all([this.getPortofolioApps(node), this.getPortofolioBuildings(node), this.getPortofolioApis(node)]);
+            const [apps, buildings, apis] = yield Promise.all([
+                this.getPortofolioApps(node),
+                this.getPortofolioBuildings(node),
+                this.getPortofolioApis(node),
+            ]);
             return {
                 node,
                 apps,
-                buildings: yield Promise.all(buildings.map(el => building_service_1.BuildingService.getInstance().getBuildingStructure(el))),
-                apis
+                buildings: yield Promise.all(buildings.map((el) => building_service_1.BuildingService.getInstance().getBuildingStructure(el))),
+                apis,
             };
         });
     }
@@ -139,9 +145,11 @@ class PortofolioService {
     removePortofolio(portofolio) {
         return __awaiter(this, void 0, void 0, function* () {
             try {
-                const node = portofolio instanceof spinal_env_viewer_graph_service_1.SpinalNode ? portofolio : yield this.getPortofolio(portofolio);
+                const node = portofolio instanceof spinal_env_viewer_graph_service_1.SpinalNode
+                    ? portofolio
+                    : yield this.getPortofolio(portofolio);
                 const buildings = yield this.getPortofolioBuildings(node);
-                yield Promise.all(buildings.map(el => building_service_1.BuildingService.getInstance().deleteBuilding(el.getId().get())));
+                yield Promise.all(buildings.map((el) => building_service_1.BuildingService.getInstance().deleteBuilding(el.getId().get())));
                 yield this.context.removeChild(node, constant_1.CONTEXT_TO_PORTOFOLIO_RELATION_NAME, constant_1.PTR_LST_TYPE);
                 yield (0, utils_1.removeNodeReferences)(node);
                 return true;
@@ -156,7 +164,7 @@ class PortofolioService {
     //////////////////////////////////////////////////////
     addAppToPortofolio(portofolio, applicationId) {
         return __awaiter(this, void 0, void 0, function* () {
-            if (typeof portofolio === "string")
+            if (typeof portofolio === 'string')
                 portofolio = yield this.getPortofolio(portofolio);
             if (!(portofolio instanceof spinal_env_viewer_graph_service_1.SpinalNode))
                 throw new Error(`No portofolio found for ${portofolio}`);
@@ -168,7 +176,7 @@ class PortofolioService {
                 if (!(appNode instanceof spinal_env_viewer_graph_service_1.SpinalNode))
                     return liste;
                 const childrenIds = portofolio.getChildrenIds();
-                const isChild = childrenIds.find(el => el === appId);
+                const isChild = childrenIds.find((el) => el === appId);
                 if (!isChild)
                     portofolio.addChildInContext(appNode, constant_1.APP_RELATION_NAME, constant_1.PTR_LST_TYPE, this.context);
                 liste.push(appNode);
@@ -180,7 +188,7 @@ class PortofolioService {
     }
     getPortofolioApps(portofolio) {
         return __awaiter(this, void 0, void 0, function* () {
-            if (typeof portofolio === "string")
+            if (typeof portofolio === 'string')
                 portofolio = yield this.getPortofolio(portofolio);
             if (!(portofolio instanceof spinal_env_viewer_graph_service_1.SpinalNode))
                 return [];
@@ -189,17 +197,17 @@ class PortofolioService {
     }
     getAppFromPortofolio(portofolio, appId) {
         return __awaiter(this, void 0, void 0, function* () {
-            if (typeof portofolio === "string")
+            if (typeof portofolio === 'string')
                 portofolio = yield this.getPortofolio(portofolio);
             if (!(portofolio instanceof spinal_env_viewer_graph_service_1.SpinalNode))
                 return;
             const children = yield portofolio.getChildren([constant_1.APP_RELATION_NAME]);
-            return children.find(el => el.getId().get() === appId);
+            return children.find((el) => el.getId().get() === appId);
         });
     }
     removeAppFromPortofolio(portofolio, applicationId) {
         return __awaiter(this, void 0, void 0, function* () {
-            if (typeof portofolio === "string")
+            if (typeof portofolio === 'string')
                 portofolio = yield this.getPortofolio(portofolio);
             if (!(portofolio instanceof spinal_env_viewer_graph_service_1.SpinalNode))
                 throw new Error(`No portofolio found for ${portofolio}`);
@@ -225,7 +233,7 @@ class PortofolioService {
     portofolioHasApp(portofolio, appId) {
         return __awaiter(this, void 0, void 0, function* () {
             const apps = yield this.getPortofolioApps(portofolio);
-            return apps.find(el => el.getId().get() === appId);
+            return apps.find((el) => el.getId().get() === appId);
         });
     }
     //////////////////////////////////////////////////////
@@ -233,7 +241,7 @@ class PortofolioService {
     //////////////////////////////////////////////////////
     addApiToPortofolio(portofolio, apisIds) {
         return __awaiter(this, void 0, void 0, function* () {
-            if (typeof portofolio === "string")
+            if (typeof portofolio === 'string')
                 portofolio = yield this.getPortofolio(portofolio);
             if (!(portofolio instanceof spinal_env_viewer_graph_service_1.SpinalNode))
                 throw new Error(`No portofolio found for ${portofolio}`);
@@ -245,7 +253,7 @@ class PortofolioService {
                 if (!(apiNode instanceof spinal_env_viewer_graph_service_1.SpinalNode))
                     return liste;
                 const childrenIds = portofolio.getChildrenIds();
-                const isChild = childrenIds.find(el => el === apiId);
+                const isChild = childrenIds.find((el) => el === apiId);
                 if (!isChild)
                     portofolio.addChildInContext(apiNode, constant_1.API_RELATION_NAME, constant_1.PTR_LST_TYPE, this.context);
                 liste.push(apiNode);
@@ -257,7 +265,7 @@ class PortofolioService {
     }
     getPortofolioApis(portofolio) {
         return __awaiter(this, void 0, void 0, function* () {
-            if (typeof portofolio === "string")
+            if (typeof portofolio === 'string')
                 portofolio = yield this.getPortofolio(portofolio);
             if (!(portofolio instanceof spinal_env_viewer_graph_service_1.SpinalNode))
                 return [];
@@ -266,17 +274,17 @@ class PortofolioService {
     }
     getApiFromPortofolio(portofolio, apiId) {
         return __awaiter(this, void 0, void 0, function* () {
-            if (typeof portofolio === "string")
+            if (typeof portofolio === 'string')
                 portofolio = yield this.getPortofolio(portofolio);
             if (!(portofolio instanceof spinal_env_viewer_graph_service_1.SpinalNode))
                 return;
             const children = yield this.getPortofolioApis(portofolio);
-            return children.find(el => el.getId().get() === apiId);
+            return children.find((el) => el.getId().get() === apiId);
         });
     }
     removeApiFromPortofolio(portofolio, apisIds) {
         return __awaiter(this, void 0, void 0, function* () {
-            if (typeof portofolio === "string")
+            if (typeof portofolio === 'string')
                 portofolio = yield this.getPortofolio(portofolio);
             if (!(portofolio instanceof spinal_env_viewer_graph_service_1.SpinalNode))
                 throw new Error(`No portofolio found for ${portofolio}`);
@@ -302,7 +310,7 @@ class PortofolioService {
     portofolioHasApi(portofolio, apiId) {
         return __awaiter(this, void 0, void 0, function* () {
             const apps = yield this.getPortofolioApis(portofolio);
-            return apps.find(el => el.getId().get() === apiId);
+            return apps.find((el) => el.getId().get() === apiId);
         });
     }
     uploadSwaggerFile(buffer) {
@@ -315,7 +323,7 @@ class PortofolioService {
     //////////////////////////////////////////////////////
     addBuildingToPortofolio(portofolio, buildingInfo) {
         return __awaiter(this, void 0, void 0, function* () {
-            if (typeof portofolio === "string")
+            if (typeof portofolio === 'string')
                 portofolio = yield this.getPortofolio(portofolio);
             if (!(portofolio instanceof spinal_env_viewer_graph_service_1.SpinalNode))
                 throw new Error(`No portofolio found for ${portofolio}`);
@@ -340,7 +348,7 @@ class PortofolioService {
     }
     getPortofolioBuildings(portofolio) {
         return __awaiter(this, void 0, void 0, function* () {
-            if (typeof portofolio === "string")
+            if (typeof portofolio === 'string')
                 portofolio = yield this.getPortofolio(portofolio);
             if (!(portofolio instanceof spinal_env_viewer_graph_service_1.SpinalNode))
                 throw new Error(`No portofolio found for ${portofolio}`);
@@ -349,7 +357,7 @@ class PortofolioService {
     }
     removeBuildingFromPortofolio(portofolio, buildingId) {
         return __awaiter(this, void 0, void 0, function* () {
-            if (typeof portofolio === "string")
+            if (typeof portofolio === 'string')
                 portofolio = yield this.getPortofolio(portofolio);
             if (!(portofolio instanceof spinal_env_viewer_graph_service_1.SpinalNode))
                 throw new Error(`No portofolio found for ${portofolio}`);
@@ -376,11 +384,11 @@ class PortofolioService {
     getBuildingFromPortofolio(portofolio, buildingId) {
         return __awaiter(this, void 0, void 0, function* () {
             const buildings = yield this.getPortofolioBuildings(portofolio);
-            return buildings.find(el => el.getId().get() === buildingId);
+            return buildings.find((el) => el.getId().get() === buildingId);
         });
     }
     _formatDetails(data) {
-        return Object.assign(Object.assign({}, (data.node.info.get())), { buildings: (data.buildings || []).map(el => building_service_1.BuildingService.getInstance().formatBuildingStructure(el)), apps: (data.apps || []).map(el => el.info.get()), apis: (data.apis || []).map(el => el.info.get()) });
+        return Object.assign(Object.assign({}, data.node.info.get()), { buildings: (data.buildings || []).map((el) => building_service_1.BuildingService.getInstance().formatBuildingStructure(el)), apps: (data.apps || []).map((el) => el.info.get()), apis: (data.apis || []).map((el) => el.info.get()) });
     }
 }
 exports.PortofolioService = PortofolioService;

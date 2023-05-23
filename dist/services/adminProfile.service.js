@@ -97,15 +97,16 @@ class AdminProfileService {
             if (!context)
                 return;
             const children = yield context.getChildren();
-            return children.find(el => {
-                return el.getName().get() === constant_1.ADMIN_PROFILE_NAME && el.getType().get() === constant_1.ADMIN_PROFILE_TYPE;
+            return children.find((el) => {
+                return (el.getName().get() === constant_1.ADMIN_PROFILE_NAME &&
+                    el.getType().get() === constant_1.ADMIN_PROFILE_TYPE);
             });
         });
     }
     _createAdminProfile() {
         const info = {
             name: constant_1.ADMIN_PROFILE_NAME,
-            type: constant_1.ADMIN_PROFILE_TYPE
+            type: constant_1.ADMIN_PROFILE_TYPE,
         };
         const graph = new spinal_env_viewer_graph_service_1.SpinalGraph(constant_1.ADMIN_PROFILE_NAME);
         const profileId = spinal_env_viewer_graph_service_1.SpinalGraphService.createNode(info, graph);
@@ -118,25 +119,25 @@ class AdminProfileService {
             return details.map(({ node, apps, apis, buildings }) => {
                 return {
                     portofolioId: node.getId().get(),
-                    appsIds: apps.map(el => el.getId().get()),
-                    apisIds: apis.map(el => el.getId().get()),
-                    building: buildings.map(building => {
+                    appsIds: apps.map((el) => el.getId().get()),
+                    apisIds: apis.map((el) => el.getId().get()),
+                    building: buildings.map((building) => {
                         return {
                             buildingId: building.node.getId().get(),
-                            appsIds: building.apps.map(el => el.getId().get()),
-                            apisIds: building.apis.map(el => el.getId().get()),
+                            appsIds: building.apps.map((el) => el.getId().get()),
+                            apisIds: building.apis.map((el) => el.getId().get()),
                         };
-                    })
+                    }),
                 };
             });
         });
     }
     _createOrGetAdminPortofolio() {
         return __awaiter(this, void 0, void 0, function* () {
-            const adminPortofolio = "Administration";
+            const adminPortofolio = 'Administration';
             const context = yield authorization_service_1.default.getInstance()._getAuthorizedPortofolioContext(this._adminNode, true);
             const children = yield context.getChildren();
-            let found = children.find(el => el.getName().get() === adminPortofolio);
+            let found = children.find((el) => el.getName().get() === adminPortofolio);
             if (found)
                 return { context, portofolio: found };
             const node = new spinal_env_viewer_graph_service_1.SpinalNode(adminPortofolio, adminPortofolio);

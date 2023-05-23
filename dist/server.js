@@ -44,7 +44,7 @@ const tsoa_1 = require("tsoa");
 const routes_1 = require("./routes");
 const AuthError_1 = require("./security/AuthError");
 const websocket_1 = require("./proxy/websocket");
-const websocketLogs_1 = require("./proxy/websocket/logs/websocketLogs");
+const webSocketLogs_service_1 = require("./services/webSocketLogs.service");
 // import { webSocketProxy } from './proxy/websocketProxy';
 function initExpress(conn) {
     return __awaiter(this, void 0, void 0, function* () {
@@ -68,7 +68,7 @@ function initExpress(conn) {
         // app.use(errorHandler);
         const server_port = process.env.SERVER_PORT || 2022;
         const server = app.listen(server_port, () => console.log(`api server listening on port ${server_port}!`));
-        yield websocketLogs_1.default.getInstance().init(conn);
+        yield webSocketLogs_service_1.WebsocketLogsService.getInstance().init(conn);
         const ws = new websocket_1.WebSocketServer(server);
         yield ws.init();
         // const wsProxy = webSocketProxy(app)
@@ -83,10 +83,12 @@ exports.default = initExpress;
 //          Middleware             //
 /////////////////////////////////////
 function useHubProxy(app) {
-    const HUB_HOST = `http://${process.env.HUB_HOST}:${process.env.HUB_PORT}`;
+    const HUB_HOST = `${process.env.HUB_PROTOCOL}://${process.env.HUB_HOST}:${process.env.HUB_PORT}`;
     const proxyHub = proxy(HUB_HOST, {
         limit: '1tb',
-        proxyReqPathResolver: function (req) { return req.originalUrl; }
+        proxyReqPathResolver: function (req) {
+            return req.originalUrl;
+        },
     });
     for (const routeToProxy of constant_1.routesToProxy) {
         app.use(routeToProxy, proxyHub);
@@ -96,19 +98,19 @@ function useClientMiddleWare(app) {
     const oneDay = 1000 * 60 * 60 * 24;
     const root = path.resolve(__dirname, '..');
     app.use(express.static(root));
-    app.get("/", (req, res) => {
-        res.redirect("/docs");
+    app.get('/', (req, res) => {
+        res.redirect('/docs');
     });
 }
 function initSwagger(app) {
-    app.use("/swagger.json", (req, res) => {
-        res.sendFile(path.resolve(__dirname, "./swagger/swagger.json"));
+    app.use('/swagger.json', (req, res) => {
+        res.sendFile(path.resolve(__dirname, './swagger/swagger.json'));
     });
     app.get('/logo.png', (req, res) => {
-        res.sendFile('spinalcore.png', { root: path.resolve(__dirname, "./assets") });
+        res.sendFile('spinalcore.png', { root: path.resolve(__dirname, './assets') });
     });
-    app.use("/docs", swaggerUi.serve, (req, res) => __awaiter(this, void 0, void 0, function* () {
-        return res.send(swaggerUi.generateHTML(yield Promise.resolve().then(() => require("./swagger/swagger.json"))));
+    app.use('/docs', swaggerUi.serve, (req, res) => __awaiter(this, void 0, void 0, function* () {
+        return res.send(swaggerUi.generateHTML(yield Promise.resolve().then(() => require('./swagger/swagger.json'))));
     }));
 }
 function useApiMiddleWare(app) {
@@ -132,7 +134,7 @@ function errorHandler(err, req, res, next) {
     }
     if (err instanceof Error) {
         return res.status(constant_1.HTTP_CODES.INTERNAL_ERROR).json({
-            message: "Internal Server Error",
+            message: 'Internal Server Error',
         });
     }
     next();
@@ -140,7 +142,7 @@ function errorHandler(err, req, res, next) {
 function _formatValidationError(err) {
     err;
     return {
-        message: "Validation Failed",
+        message: 'Validation Failed',
         details: err === null || err === void 0 ? void 0 : err.fields,
     };
 }

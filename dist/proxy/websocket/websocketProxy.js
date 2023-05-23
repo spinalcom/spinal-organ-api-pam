@@ -1,4 +1,3 @@
-"use strict";
 /*
  * Copyright 2022 SpinalCom - www.spinalcom.com
  *
@@ -22,24 +21,22 @@
  * with this file. If not, see
  * <http://resources.spinalcom.com/licenses.pdf>.
  */
-Object.defineProperty(exports, "__esModule", { value: true });
-exports.webSocketProxy = void 0;
-const http_proxy_middleware_1 = require("http-proxy-middleware");
-function webSocketProxy(app) {
-    const customRouter = function (req) {
-        // console.log(req)
-        return 'https://api-cnp-production-b1.spinalcom.com'; // protocol + host
-    };
-    const wsProxy = (0, http_proxy_middleware_1.createProxyMiddleware)({
-        // target: "https://api-cnp-production-b1.spinalcom.com",
-        onProxyReqWs: (proxyReq, req, socket, options, head) => {
-            // console.log(proxyReq, req, socket, options, head);
-        },
-        changeOrigin: true,
-        router: customRouter
-    });
-    app.use(/socket.io/, wsProxy);
-    return wsProxy;
-}
-exports.webSocketProxy = webSocketProxy;
+// import { Application } from "express";
+// import { createProxyMiddleware } from "http-proxy-middleware";
+// export function webSocketProxy(app: Application) {
+//     const customRouter = function (req) {
+//         // console.log(req)
+//         return 'https://api-cnp-production-b1.spinalcom.com'; // protocol + host
+//     };
+//     const wsProxy = createProxyMiddleware({
+//         // target: "https://api-cnp-production-b1.spinalcom.com",
+//         onProxyReqWs: (proxyReq, req, socket, options, head) => {
+//             // console.log(proxyReq, req, socket, options, head);
+//         },
+//         changeOrigin: true,
+//         router: customRouter
+//     })
+//     app.use(/socket.io/, wsProxy);
+//     return wsProxy;
+// }
 //# sourceMappingURL=websocketProxy.js.map

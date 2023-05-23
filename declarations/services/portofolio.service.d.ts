@@ -1,6 +1,6 @@
 /// <reference types="node" />
-import { SpinalContext, SpinalNode } from "spinal-env-viewer-graph-service";
-import { IEditProtofolio, IPortofolioData, IPortofolioDetails, IBuildingCreation, IBuildingDetails } from "../interfaces";
+import { SpinalContext, SpinalNode } from 'spinal-env-viewer-graph-service';
+import { IEditProtofolio, IPortofolioData, IPortofolioDetails, IBuildingCreation, IBuildingDetails } from '../interfaces';
 export declare class PortofolioService {
     private static instance;
     context: SpinalContext;
