@@ -53,6 +53,7 @@ export default class WebSocketServer {
 
   constructor(server: HttpServer) {
     this._io = new Server(server);
+    logInstance.setIo(this._io);
   }
 
   public async init(): Promise<void> {

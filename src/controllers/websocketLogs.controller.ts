@@ -67,12 +67,37 @@ export class WebsocketLogsController extends Controller {
       if (!building) {
         throw {
           code: HTTP_CODES.NOT_FOUND,
-          message: `No building foudn for ${buildingId}`,
+          message: `No building found for ${buildingId}`,
         };
       }
 
       this.setStatus(HTTP_CODES.OK);
       return this._websocketLogService.getWebsocketState(building);
+    } catch (error) {
+      this.setStatus(error.code || HTTP_CODES.INTERNAL_ERROR);
+      return {message: error.message};
+    }
+  }
+
+  @Security(SECURITY_NAME.bearerAuth)
+  @Get('/websocket/{buildingId}/get_client_connected_count')
+  public async getNbClientConnected(
+    @Request() req: express.Request,
+    @Path() buildingId: string
+  ) {
+    try {
+      const isAdmin = await checkIfItIsAdmin(req);
+      if (!isAdmin) throw new AuthError(SECURITY_MESSAGES.UNAUTHORIZED);
+      const building = await buildingInstance.getBuildingById(buildingId);
+      if (!building) {
+        throw {
+          code: HTTP_CODES.NOT_FOUND,
+          message: `No building found for ${buildingId}`,
+        };
+      }
+
+      this.setStatus(HTTP_CODES.OK);
+      return this._websocketLogService.getClientConnected(buildingId);
     } catch (error) {
       this.setStatus(error.code || HTTP_CODES.INTERNAL_ERROR);
       return {message: error.message};

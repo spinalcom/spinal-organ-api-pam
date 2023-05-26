@@ -53,6 +53,9 @@ class WebsocketLogsService {
             this._instance = new WebsocketLogsService();
         return this._instance;
     }
+    setIo(io) {
+        this._io = io;
+    }
     init(conn) {
         return __awaiter(this, void 0, void 0, function* () {
             // const buildings = await this._getAllBuildings();
@@ -72,6 +75,19 @@ class WebsocketLogsService {
         this._addLogs(building, type, action, targetInfo, nodeInfo);
         this._startTimer(building);
     }
+    getClientConnected(buildingId) {
+        return __awaiter(this, void 0, void 0, function* () {
+            const sockets = yield this._io
+                .of(`/building/${buildingId}`)
+                .fetchSockets();
+            let count = (sockets === null || sockets === void 0 ? void 0 : sockets.length) || 0;
+            // for (const socket of sockets) {
+            //   const id = socket.auth?.building?.id;
+            //   if (buildingId === id) count++;
+            // }
+            return { numberOfClientConnected: count };
+        });
+    }
     ///////////////////////////////
     // SpinalLog
     //////////////////////////////
@@ -90,6 +106,8 @@ class WebsocketLogsService {
     getWebsocketState(building) {
         return __awaiter(this, void 0, void 0, function* () {
             const spinalLog = yield this.getLogModel(building);
+            if (!spinalLog)
+                return { state: spinal_service_pubsub_logs_1.WEBSOCKET_STATE.unknow, since: 0 };
             return spinal_service_pubsub_logs_1.SpinalServiceLog.getInstance().getWebsocketState(spinalLog);
         });
     }
@@ -102,24 +120,32 @@ class WebsocketLogsService {
     getDataFromLast24Hours(building) {
         return __awaiter(this, void 0, void 0, function* () {
             const spinalLog = yield this.getLogModel(building);
+            if (!spinalLog)
+                return [];
             return spinal_service_pubsub_logs_1.SpinalServiceLog.getInstance().getDataFromLast24Hours(spinalLog);
         });
     }
     getDataFromLastHours(building, numberOfHours) {
         return __awaiter(this, void 0, void 0, function* () {
             const spinalLog = yield this.getLogModel(building);
+            if (!spinalLog)
+                return [];
             return spinal_service_pubsub_logs_1.SpinalServiceLog.getInstance().getDataFromLastHours(spinalLog, numberOfHours);
         });
     }
     getDataFromYesterday(building) {
         return __awaiter(this, void 0, void 0, function* () {
             const spinalLog = yield this.getLogModel(building);
+            if (!spinalLog)
+                return [];
             return spinal_service_pubsub_logs_1.SpinalServiceLog.getInstance().getDataFromYesterday(spinalLog);
         });
     }
     getFromIntervalTime(building, start, end) {
         return __awaiter(this, void 0, void 0, function* () {
             const spinalLog = yield this.getLogModel(building);
+            if (!spinalLog)
+                return [];
             return spinal_service_pubsub_logs_1.SpinalServiceLog.getInstance().getFromIntervalTime(spinalLog, start, end);
         });
     }

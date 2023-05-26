@@ -69,11 +69,33 @@ let WebsocketLogsController = class WebsocketLogsController extends tsoa_1.Contr
                 if (!building) {
                     throw {
                         code: constant_1.HTTP_CODES.NOT_FOUND,
-                        message: `No building foudn for ${buildingId}`,
+                        message: `No building found for ${buildingId}`,
                     };
                 }
                 this.setStatus(constant_1.HTTP_CODES.OK);
                 return this._websocketLogService.getWebsocketState(building);
+            }
+            catch (error) {
+                this.setStatus(error.code || constant_1.HTTP_CODES.INTERNAL_ERROR);
+                return { message: error.message };
+            }
+        });
+    }
+    getNbClientConnected(req, buildingId) {
+        return __awaiter(this, void 0, void 0, function* () {
+            try {
+                const isAdmin = yield (0, authentication_1.checkIfItIsAdmin)(req);
+                if (!isAdmin)
+                    throw new AuthError_1.AuthError(constant_1.SECURITY_MESSAGES.UNAUTHORIZED);
+                const building = yield buildingInstance.getBuildingById(buildingId);
+                if (!building) {
+                    throw {
+                        code: constant_1.HTTP_CODES.NOT_FOUND,
+                        message: `No building found for ${buildingId}`,
+                    };
+                }
+                this.setStatus(constant_1.HTTP_CODES.OK);
+                return this._websocketLogService.getClientConnected(buildingId);
             }
             catch (error) {
                 this.setStatus(error.code || constant_1.HTTP_CODES.INTERNAL_ERROR);
@@ -181,6 +203,15 @@ __decorate([
     __metadata("design:paramtypes", [Object, String]),
     __metadata("design:returntype", Promise)
 ], WebsocketLogsController.prototype, "getWebsocketState", null);
+__decorate([
+    (0, tsoa_1.Security)(constant_1.SECURITY_NAME.bearerAuth),
+    (0, tsoa_1.Get)('/websocket/{buildingId}/get_client_connected_count'),
+    __param(0, (0, tsoa_1.Request)()),
+    __param(1, (0, tsoa_1.Path)()),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [Object, String]),
+    __metadata("design:returntype", Promise)
+], WebsocketLogsController.prototype, "getNbClientConnected", null);
 __decorate([
     (0, tsoa_1.Security)(constant_1.SECURITY_NAME.bearerAuth),
     (0, tsoa_1.Get)('/websocket_log/{buildingId}/read/{begin}/{end}'),

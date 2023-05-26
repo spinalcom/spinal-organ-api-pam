@@ -2324,6 +2324,24 @@ function RegisterRoutes(app) {
         }
     });
     // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
+    app.get('/api/v1/pam/websocket/:buildingId/get_client_connected_count', authenticateMiddleware([{ "bearerAuth": [] }]), ...((0, runtime_1.fetchMiddlewares)(websocketLogs_controller_1.WebsocketLogsController)), ...((0, runtime_1.fetchMiddlewares)(websocketLogs_controller_1.WebsocketLogsController.prototype.getNbClientConnected)), function WebsocketLogsController_getNbClientConnected(request, response, next) {
+        const args = {
+            req: { "in": "request", "name": "req", "required": true, "dataType": "object" },
+            buildingId: { "in": "path", "name": "buildingId", "required": true, "dataType": "string" },
+        };
+        // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
+        let validatedArgs = [];
+        try {
+            validatedArgs = getValidatedArgs(args, request, response);
+            const controller = new websocketLogs_controller_1.WebsocketLogsController();
+            const promise = controller.getNbClientConnected.apply(controller, validatedArgs);
+            promiseHandler(controller, promise, response, undefined, next);
+        }
+        catch (err) {
+            return next(err);
+        }
+    });
+    // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
     app.get('/api/v1/pam/websocket_log/:buildingId/read/:begin/:end', authenticateMiddleware([{ "bearerAuth": [] }]), ...((0, runtime_1.fetchMiddlewares)(websocketLogs_controller_1.WebsocketLogsController)), ...((0, runtime_1.fetchMiddlewares)(websocketLogs_controller_1.WebsocketLogsController.prototype.readWebsocketLogs)), function WebsocketLogsController_readWebsocketLogs(request, response, next) {
         const args = {
             req: { "in": "request", "name": "req", "required": true, "dataType": "object" },

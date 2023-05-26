@@ -32,6 +32,7 @@ import {
 import {SpinalGraph, SpinalNode} from 'spinal-env-viewer-graph-service';
 import {SpinalQueue} from '../utils/SpinalQueue';
 import {PortofolioService} from './portofolio.service';
+import {Server} from 'socket.io';
 
 const fileName = 'logs_websocket';
 
@@ -43,6 +44,7 @@ export default class WebsocketLogsService {
   private _spinalQueue: SpinalQueue = new SpinalQueue();
   private _logPromMap: Map<string, SpinalLog> = new Map();
   private _lastSendTime: number;
+  private _io: Server;
 
   private constructor() {
     this._spinalQueue.on('start', () => {
@@ -53,6 +55,10 @@ export default class WebsocketLogsService {
   public static getInstance(): WebsocketLogsService {
     if (!this._instance) this._instance = new WebsocketLogsService();
     return this._instance;
+  }
+
+  public setIo(io: Server) {
+    this._io = io;
   }
 
   public async init(conn: spinal.FileSystem) {
@@ -83,6 +89,21 @@ export default class WebsocketLogsService {
     this._startTimer(building);
   }
 
+  public async getClientConnected(buildingId: string) {
+    const sockets = await (this._io as any)
+      .of(`/building/${buildingId}`)
+      .fetchSockets();
+
+    let count = sockets?.length || 0;
+
+    // for (const socket of sockets) {
+    //   const id = socket.auth?.building?.id;
+    //   if (buildingId === id) count++;
+    // }
+
+    return {numberOfClientConnected: count};
+  }
+
   ///////////////////////////////
   // SpinalLog
   //////////////////////////////
@@ -101,6 +122,8 @@ export default class WebsocketLogsService {
 
   public async getWebsocketState(building: SpinalNode) {
     const spinalLog = await this.getLogModel(building);
+    if (!spinalLog) return {state: WEBSOCKET_STATE.unknow, since: 0};
+
     return SpinalServiceLog.getInstance().getWebsocketState(spinalLog);
   }
 
@@ -111,6 +134,7 @@ export default class WebsocketLogsService {
 
   public async getDataFromLast24Hours(building: SpinalNode) {
     const spinalLog = await this.getLogModel(building);
+    if (!spinalLog) return [];
     return SpinalServiceLog.getInstance().getDataFromLast24Hours(spinalLog);
   }
 
@@ -119,6 +143,7 @@ export default class WebsocketLogsService {
     numberOfHours: number
   ) {
     const spinalLog = await this.getLogModel(building);
+    if (!spinalLog) return [];
     return SpinalServiceLog.getInstance().getDataFromLastHours(
       spinalLog,
       numberOfHours
@@ -127,6 +152,7 @@ export default class WebsocketLogsService {
 
   public async getDataFromYesterday(building: SpinalNode) {
     const spinalLog = await this.getLogModel(building);
+    if (!spinalLog) return [];
     return SpinalServiceLog.getInstance().getDataFromYesterday(spinalLog);
   }
 
@@ -136,6 +162,7 @@ export default class WebsocketLogsService {
     end: string | number | Date
   ) {
     const spinalLog = await this.getLogModel(building);
+    if (!spinalLog) return [];
     return SpinalServiceLog.getInstance().getFromIntervalTime(
       spinalLog,
       start,

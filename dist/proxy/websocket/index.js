@@ -51,6 +51,7 @@ class WebSocketServer {
         this._buildingMap = new Map();
         this._sessionToUserInfo = new Map();
         this._io = new socket_io_1.Server(server);
+        logInstance.setIo(this._io);
     }
     init() {
         return __awaiter(this, void 0, void 0, function* () {

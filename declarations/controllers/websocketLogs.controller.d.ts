@@ -10,6 +10,11 @@ export declare class WebsocketLogsController extends Controller {
     } | {
         message: any;
     }>;
+    getNbClientConnected(req: express.Request, buildingId: string): Promise<{
+        numberOfClientConnected: any;
+    } | {
+        message: any;
+    }>;
     readWebsocketLogs(req: express.Request, buildingId: string, begin: string | number, end: string | number): Promise<ISpinalDateValue[] | {
         message: any;
     }>;

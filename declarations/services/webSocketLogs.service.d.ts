@@ -1,5 +1,6 @@
 import { WEBSOCKET_STATE, SpinalLog } from 'spinal-service-pubsub-logs';
 import { SpinalNode } from 'spinal-env-viewer-graph-service';
+import { Server } from 'socket.io';
 export default class WebsocketLogsService {
     private static _instance;
     private _alertTime;
@@ -8,8 +9,10 @@ export default class WebsocketLogsService {
     private _spinalQueue;
     private _logPromMap;
     private _lastSendTime;
+    private _io;
     private constructor();
     static getInstance(): WebsocketLogsService;
+    setIo(io: Server): void;
     init(conn: spinal.FileSystem): Promise<void>;
     createLog(building: SpinalNode, type: string, action: string, targetInfo?: {
         id: string;
@@ -19,6 +22,9 @@ export default class WebsocketLogsService {
         name: string;
         [key: string]: string;
     }): void;
+    getClientConnected(buildingId: string): Promise<{
+        numberOfClientConnected: any;
+    }>;
     getLogModel(building: SpinalNode): Promise<SpinalLog>;
     getWebsocketState(building: SpinalNode): Promise<{
         state: WEBSOCKET_STATE;
