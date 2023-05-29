@@ -38,7 +38,8 @@ const fileName = 'logs_websocket';
 
 export default class WebsocketLogsService {
   private static _instance: WebsocketLogsService;
-  private _alertTime: number = 60 * 1000;
+  private _alertTime: number =
+    parseInt(process.env.WEBSOCKET_ALERT_TIME) || 60 * 1000;
   private timeoutIds: {[key: string]: any} = {};
   private _directory: spinal.Directory;
   private _spinalQueue: SpinalQueue = new SpinalQueue();

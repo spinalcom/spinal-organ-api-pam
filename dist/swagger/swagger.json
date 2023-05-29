@@ -803,7 +803,7 @@
     },
     "info": {
         "title": "spinal-organ-api-pam",
-        "version": "1.2.2",
+        "version": "1.2.3",
         "license": {
             "name": "ISC"
         },

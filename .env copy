@@ -7,5 +7,7 @@ HUB_PORT="8060"
 CONFIG_DIRECTORY_PATH="/__users__/admin/"
 CONFIG_FILE_NAME="PAMConfig"
 
+WEBSOCKET_ALERT_TIME="60000" # en milliseconde
+
 SERVER_PORT=2023
 PATH_DIR_STATIC_HTML=".browser_organs"
