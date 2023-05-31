@@ -31,6 +31,8 @@ import {
   AuthentificationService,
   BuildingService,
   TokenService,
+  SEND_EVENT,
+  RECEIVE_EVENT,
 } from '../../services';
 import {profileHasAccessToBuilding} from '../bos/utils';
 import {Server, Socket} from 'socket.io';
@@ -272,7 +274,7 @@ export default class WebSocketServer {
     const targetInfo = {id: userInfo.id, name: userInfo.userName};
     let type, action;
 
-    type = sendItToClient ? 'send' : 'receive';
+    type = sendItToClient ? SEND_EVENT : RECEIVE_EVENT;
 
     const nodeInfo = dataSent?.data?.node;
     const event = dataSent?.data?.event?.name || eventName;

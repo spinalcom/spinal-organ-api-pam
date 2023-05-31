@@ -27,6 +27,9 @@ import {
   ILog,
   WEBSOCKET_STATE,
   SpinalLog,
+  SEND_EVENT,
+  RECEIVE_EVENT,
+  ALERT_EVENT,
 } from 'spinal-service-pubsub-logs';
 
 import {SpinalGraph, SpinalNode} from 'spinal-env-viewer-graph-service';
@@ -35,6 +38,8 @@ import {PortofolioService} from './portofolio.service';
 import {Server} from 'socket.io';
 
 const fileName = 'logs_websocket';
+
+export {SEND_EVENT, RECEIVE_EVENT, ALERT_EVENT};
 
 export default class WebsocketLogsService {
   private static _instance: WebsocketLogsService;
@@ -192,7 +197,7 @@ export default class WebsocketLogsService {
     //    this._websocket[buildingId].state.set(logTypes.Alarm);
     //    this._addLogs(buildingId, message, logTypes.Alarm);
     //  }
-    return this._addLogs(building, 'Alert', 'alert');
+    return this._addLogs(building, ALERT_EVENT, ALERT_EVENT);
   }
 
   private async _addLogs(
@@ -203,7 +208,6 @@ export default class WebsocketLogsService {
     nodeInfo?: {id: string; name: string; [key: string]: string}
   ) {
     const log: ILog = {targetInfo, type: logType, action, nodeInfo};
-    console.log('log', log);
     this._addToQueue(building, log);
   }
 
@@ -215,7 +219,7 @@ export default class WebsocketLogsService {
     while (!this._spinalQueue.isEmpty()) {
       const {building, log} = this._spinalQueue.dequeue();
       const actualState =
-        log.type.toLowerCase() === 'alert'
+        log.type.toLowerCase() === ALERT_EVENT
           ? WEBSOCKET_STATE.alert
           : WEBSOCKET_STATE.running;
 
