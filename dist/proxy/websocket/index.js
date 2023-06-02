@@ -37,6 +37,7 @@ const constant_1 = require("../../constant");
 const services_1 = require("../../services");
 const utils_1 = require("../bos/utils");
 const socket_io_1 = require("socket.io");
+const spinal_service_pubsub_logs_1 = require("spinal-service-pubsub-logs");
 const SocketClient = require('socket.io-client');
 const logInstance = services_1.WebsocketLogsService.getInstance();
 class WebSocketServer {
@@ -60,7 +61,7 @@ class WebSocketServer {
         });
     }
     _initNameSpace() {
-        -this._io.of(/.*/).use((socket, next) => __awaiter(this, void 0, void 0, function* () {
+        this._io.of(/.*/).use((socket, next) => __awaiter(this, void 0, void 0, function* () {
             let err;
             try {
                 // let client = this._serverToClient.get((<any>socket).sessionID || socket.id);
@@ -138,12 +139,14 @@ class WebSocketServer {
                 auth: { token, sessionId, building: (_a = building === null || building === void 0 ? void 0 : building.info) === null || _a === void 0 ? void 0 : _a.get() },
                 transports: ['websocket'],
             });
-            client.on('session_created', (id) => {
+            client.on('session_created', (id) => __awaiter(this, void 0, void 0, function* () {
+                this._sessionToUserInfo.set(id, tokenInfo.userInfo);
                 socket.emit('session_created', id);
                 client['sessionId'] = id;
                 socket['sessionId'] = id;
+                yield this._saveConnectionLog(client);
                 resolve(client);
-            });
+            }));
             client.on('connect_error', (err) => reject(err));
         });
     }
@@ -158,58 +161,105 @@ class WebSocketServer {
             const emitter = this._clientToServer.get(pamToBosSocket.sessionId || pamToBosSocket.id);
             if (emitter) {
                 const emitterInfo = this._sessionToUserInfo.get(emitter.sessionId);
+                yield this._createWebsocketLog(pamToBosSocket, eventName, data[0], emitterInfo, services_1.SEND_EVENT);
                 emitter.emit(eventName, ...data);
                 const name = emitterInfo.userName || emitter.sessionId;
                 console.log(`receive "${eventName}" request from bos and send it to client [${name}]`, data);
-                yield this._createWebsocketLog(pamToBosSocket, eventName, data[0], emitterInfo, true);
             }
         }));
         clientToPamSocket.onAny((eventName, ...data) => __awaiter(this, void 0, void 0, function* () {
             const emitter = this._serverToClient.get(clientToPamSocket.sessionId || clientToPamSocket.id);
             if (emitter) {
                 const emitterInfo = this._sessionToUserInfo.get(emitter.sessionId);
+                yield this._createWebsocketLog(emitter, eventName, data[0], emitterInfo, services_1.RECEIVE_EVENT);
                 emitter.emit(eventName, ...data);
                 const name = emitterInfo.userName || emitter.sessionId;
                 console.log(`receive request from client [${name}] and send it to bos`);
-                yield this._createWebsocketLog(emitter, eventName, data[0], emitterInfo, false);
             }
         }));
     }
     _listenConnectionAndDisconnection(pamToBosSocket, clientToPamSocket) {
-        pamToBosSocket.on('connect', () => {
-            console.log(pamToBosSocket.sessionId, 'is connected');
-            // const emitter = this._clientToServer.get((<any>client).sessionID || client.id);
-            // if (emitter) emitter.emit(eventName, ...data);
-        });
-        pamToBosSocket.on('disconnect', (reason) => {
+        // pamToBosSocket.on('connect', async () => {
+        //   const emitter: any = this._clientToServer.get(
+        //     (<any>pamToBosSocket).sessionId || pamToBosSocket.id
+        //   );
+        //   // if (emitter) {
+        //   //   const emitterInfo = this._sessionToUserInfo.get(emitter.sessionId);
+        //   //   // console.log('save connection log');
+        //   //   // await this._createWebsocketLog(
+        //   //   //   pamToBosSocket,
+        //   //   //   CONNECTION_EVENT,
+        //   //   //   undefined,
+        //   //   //   emitterInfo,
+        //   //   //   CONNECTION_EVENT
+        //   //   // );
+        //   // }
+        //   // // const emitter = this._clientToServer.get((<any>client).sessionID || client.id);
+        //   // // if (emitter) emitter.emit(eventName, ...data);
+        // });
+        pamToBosSocket.on('disconnect', (reason) => __awaiter(this, void 0, void 0, function* () {
             // console.log((<any>pamToBosSocket).sessionId || pamToBosSocket.id, "is disconnected")
             const emitter = this._clientToServer.get(pamToBosSocket.sessionId || pamToBosSocket.id);
-            if (emitter)
+            if (emitter) {
+                const emitterInfo = this._sessionToUserInfo.get(emitter.sessionId);
                 emitter.disconnect();
-        });
-        clientToPamSocket.on('connect', () => {
-            console.log(clientToPamSocket.sessionId, 'is connected');
-            // const emitter = this._serverToClient.get((<any>server).sessionId || server.id);
-            // if (emitter) emitter.emit(eventName, ...data);
-        });
-        clientToPamSocket.on('disconnect', (reson) => {
+                // console.log('save disconnection log');
+                // await this._createWebsocketLog(
+                //   pamToBosSocket,
+                //   DISCONNECTION_EVENT,
+                //   undefined,
+                //   emitterInfo,
+                //   DISCONNECTION_EVENT
+                // );
+            }
+        }));
+        // clientToPamSocket.on('connect', async () => {
+        //   const emitterInfo = this._sessionToUserInfo.get(
+        //     (<any>clientToPamSocket).sessionId
+        //   );
+        //   console.log(emitterInfo.userName, 'is connected');
+        //   await this._createWebsocketLog(
+        //     pamToBosSocket,
+        //     CONNECTION_EVENT,
+        //     undefined,
+        //     emitterInfo,
+        //     CONNECTION_EVENT
+        //   );
+        //   // const emitter = this._serverToClient.get((<any>server).sessionId || server.id);
+        //   // if (emitter) emitter.emit(eventName, ...data);
+        // });
+        clientToPamSocket.on('disconnect', (reson) => __awaiter(this, void 0, void 0, function* () {
             const emitter = this._serverToClient.get(clientToPamSocket.sessionId || clientToPamSocket.id);
-            if (emitter)
+            if (emitter) {
+                const emitterInfo = this._sessionToUserInfo.get(emitter.sessionId);
                 emitter.disconnect();
-        });
+                yield this._createWebsocketLog(emitter, spinal_service_pubsub_logs_1.DISCONNECTION_EVENT, undefined, emitterInfo, spinal_service_pubsub_logs_1.DISCONNECTION_EVENT);
+            }
+        }));
     }
-    _createWebsocketLog(socket, eventName, dataSent, userInfo, sendItToClient = false) {
+    _createWebsocketLog(socket, eventName, dataSent, userInfo, type) {
         var _a, _b, _c;
         const buildingId = socket.auth.building.id;
         const building = this._buildingMap.get(buildingId);
         const targetInfo = { id: userInfo.id, name: userInfo.userName };
-        let type, action;
-        type = sendItToClient ? 'send' : 'receive';
+        // let type, action;
+        // type = sendItToClient ? SEND_EVENT : RECEIVE_EVENT;
+        let action;
         const nodeInfo = (_a = dataSent === null || dataSent === void 0 ? void 0 : dataSent.data) === null || _a === void 0 ? void 0 : _a.node;
-        const event = ((_c = (_b = dataSent === null || dataSent === void 0 ? void 0 : dataSent.data) === null || _b === void 0 ? void 0 : _b.event) === null || _c === void 0 ? void 0 : _c.name) || eventName;
-        action = `${type}_${event}_event`;
+        const event = ((_c = (_b = dataSent === null || dataSent === void 0 ? void 0 : dataSent.data) === null || _b === void 0 ? void 0 : _b.event) === null || _c === void 0 ? void 0 : _c.type) || eventName;
+        if (type === services_1.RECEIVE_EVENT || type === services_1.SEND_EVENT)
+            action = `${type}_${event}_event`;
+        else
+            action = type;
         return logInstance.createLog(building, type, action, targetInfo, nodeInfo);
         // return logInstance.createLog(building, type, status, targetInfo);
+    }
+    _saveConnectionLog(socket) {
+        return __awaiter(this, void 0, void 0, function* () {
+            const emitterInfo = this._sessionToUserInfo.get(socket.sessionId);
+            //   // console.log('save connection log');
+            yield this._createWebsocketLog(socket, spinal_service_pubsub_logs_1.CONNECTION_EVENT, undefined, emitterInfo, spinal_service_pubsub_logs_1.CONNECTION_EVENT);
+        });
     }
 }
 exports.default = WebSocketServer;

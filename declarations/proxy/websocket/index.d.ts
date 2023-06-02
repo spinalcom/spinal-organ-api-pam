@@ -18,5 +18,6 @@ export default class WebSocketServer {
     private _listenAllEvent;
     private _listenConnectionAndDisconnection;
     private _createWebsocketLog;
+    _saveConnectionLog(socket: any): Promise<void>;
 }
 export { WebSocketServer };

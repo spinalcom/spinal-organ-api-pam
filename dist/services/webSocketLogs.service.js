@@ -32,15 +32,18 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
     });
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.WebsocketLogsService = void 0;
+exports.WebsocketLogsService = exports.ALERT_EVENT = exports.RECEIVE_EVENT = exports.SEND_EVENT = void 0;
 const spinal_service_pubsub_logs_1 = require("spinal-service-pubsub-logs");
+Object.defineProperty(exports, "SEND_EVENT", { enumerable: true, get: function () { return spinal_service_pubsub_logs_1.SEND_EVENT; } });
+Object.defineProperty(exports, "RECEIVE_EVENT", { enumerable: true, get: function () { return spinal_service_pubsub_logs_1.RECEIVE_EVENT; } });
+Object.defineProperty(exports, "ALERT_EVENT", { enumerable: true, get: function () { return spinal_service_pubsub_logs_1.ALERT_EVENT; } });
 const spinal_env_viewer_graph_service_1 = require("spinal-env-viewer-graph-service");
 const SpinalQueue_1 = require("../utils/SpinalQueue");
 const portofolio_service_1 = require("./portofolio.service");
 const fileName = 'logs_websocket';
 class WebsocketLogsService {
     constructor() {
-        this._alertTime = 60 * 1000;
+        this._alertTime = parseInt(process.env.WEBSOCKET_ALERT_TIME) || 60 * 1000;
         this.timeoutIds = {};
         this._spinalQueue = new SpinalQueue_1.SpinalQueue();
         this._logPromMap = new Map();
@@ -168,12 +171,11 @@ class WebsocketLogsService {
         //    this._websocket[buildingId].state.set(logTypes.Alarm);
         //    this._addLogs(buildingId, message, logTypes.Alarm);
         //  }
-        return this._addLogs(building, 'Alert', 'alert');
+        return this._addLogs(building, spinal_service_pubsub_logs_1.ALERT_EVENT, spinal_service_pubsub_logs_1.ALERT_EVENT);
     }
     _addLogs(building, logType, action, targetInfo, nodeInfo) {
         return __awaiter(this, void 0, void 0, function* () {
             const log = { targetInfo, type: logType, action, nodeInfo };
-            console.log('log', log);
             this._addToQueue(building, log);
         });
     }
@@ -184,7 +186,7 @@ class WebsocketLogsService {
         return __awaiter(this, void 0, void 0, function* () {
             while (!this._spinalQueue.isEmpty()) {
                 const { building, log } = this._spinalQueue.dequeue();
-                const actualState = log.type.toLowerCase() === 'alert'
+                const actualState = log.type.toLowerCase() === spinal_service_pubsub_logs_1.ALERT_EVENT
                     ? spinal_service_pubsub_logs_1.WEBSOCKET_STATE.alert
                     : spinal_service_pubsub_logs_1.WEBSOCKET_STATE.running;
                 yield spinal_service_pubsub_logs_1.SpinalServiceLog.getInstance().pushFromNode(building, log);

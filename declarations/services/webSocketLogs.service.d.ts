@@ -1,6 +1,7 @@
-import { WEBSOCKET_STATE, SpinalLog } from 'spinal-service-pubsub-logs';
+import { WEBSOCKET_STATE, SpinalLog, SEND_EVENT, RECEIVE_EVENT, ALERT_EVENT } from 'spinal-service-pubsub-logs';
 import { SpinalNode } from 'spinal-env-viewer-graph-service';
 import { Server } from 'socket.io';
+export { SEND_EVENT, RECEIVE_EVENT, ALERT_EVENT };
 export default class WebsocketLogsService {
     private static _instance;
     private _alertTime;
