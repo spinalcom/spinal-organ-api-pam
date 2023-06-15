@@ -1,6 +1,6 @@
-import { SpinalContext, SpinalNode } from "spinal-env-viewer-graph-service";
-import { HTTP_CODES } from "../constant";
-import { IUserCredential, IUserInfo, IUserToken } from "../interfaces";
+import { SpinalContext, SpinalNode } from 'spinal-env-viewer-graph-service';
+import { HTTP_CODES } from '../constant';
+import { IUserCredential, IUserInfo, IUserToken } from '../interfaces';
 export declare class UserListService {
     private static instance;
     context: SpinalContext;

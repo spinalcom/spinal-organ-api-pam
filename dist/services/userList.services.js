@@ -58,7 +58,11 @@ class UserListService {
             if (!this.context) {
                 this.context = yield configFile_service_1.configServiceInstance.addContext(constant_1.USER_LIST_CONTEXT_NAME, constant_1.USER_LIST_CONTEXT_TYPE);
             }
-            const info = { name: "admin", userName: "admin", password: this._generateString(15) };
+            const info = {
+                name: 'admin',
+                userName: 'admin',
+                password: this._generateString(15),
+            };
             yield this.createAdminUser(info);
             return this.context;
         });
@@ -73,7 +77,13 @@ class UserListService {
             }
             if (data.code === constant_1.HTTP_CODES.OK) {
                 const type = isAdmin ? constant_1.USER_TYPES.ADMIN : constant_1.USER_TYPES.USER;
-                const info = { name: user.userName, userName: user.userName, type, userType: type, userId: data.data.userId };
+                const info = {
+                    name: user.userName,
+                    userName: user.userName,
+                    type,
+                    userType: type,
+                    userId: data.data.userId,
+                };
                 const playload = data.data;
                 const token = data.data.token;
                 const node = yield this._addUserToContext(info);
@@ -85,8 +95,15 @@ class UserListService {
     }
     getUser(username) {
         return __awaiter(this, void 0, void 0, function* () {
-            const users = yield this.context.getChildren([constant_1.CONTEXT_TO_ADMIN_USER_RELATION, constant_1.CONTEXT_TO_USER_RELATION_NAME]);
-            return users.find(el => { var _a, _b; return ((_a = el.info.userName) === null || _a === void 0 ? void 0 : _a.get()) === username || ((_b = el.info.userId) === null || _b === void 0 ? void 0 : _b.get()) === username; });
+            const users = yield this.context.getChildren([
+                constant_1.CONTEXT_TO_ADMIN_USER_RELATION,
+                constant_1.CONTEXT_TO_USER_RELATION_NAME,
+            ]);
+            return users.find((el) => {
+                var _a, _b;
+                return ((_a = el.info.userName) === null || _a === void 0 ? void 0 : _a.get()) === username ||
+                    ((_b = el.info.userId) === null || _b === void 0 ? void 0 : _b.get()) === username;
+            });
         });
     }
     ///////////////////////////////////////////////
@@ -122,7 +139,7 @@ class UserListService {
                 appIds = [appIds];
             const user = yield this.getUser(userId);
             const favoriteApps = yield user.getChildren(constant_1.USER_TO_FAVORITE_APP_RELATION);
-            const favoriteAppObj = this._convertListToObj(favoriteApps, "appId");
+            const favoriteAppObj = this._convertListToObj(favoriteApps, 'appId');
             return appIds.reduce((prom, appId) => __awaiter(this, void 0, void 0, function* () {
                 const list = yield prom;
                 try {
@@ -144,7 +161,9 @@ class UserListService {
             const children = yield user.getChildren(constant_1.USER_TO_FAVORITE_APP_RELATION);
             return children.reduce((prom, el) => __awaiter(this, void 0, void 0, function* () {
                 const list = yield prom;
-                const portId = el.info.portofolioId ? el.info.portofolioId.get() : undefined;
+                const portId = el.info.portofolioId
+                    ? el.info.portofolioId.get()
+                    : undefined;
                 const buildId = el.info.buildingId ? el.info.buildingId.get() : undefined;
                 if (portofolioId === portId && buildId == buildingId) {
                     const element = yield el.getElement(true);
@@ -165,25 +184,36 @@ class UserListService {
             if (userExist)
                 return;
             const password = (userInfo && userInfo.password) || this._generateString(16);
-            fileLog(JSON.stringify({ userName, password }), path.resolve(__dirname, "../../.admin.log"));
-            return this._addUserToContext({ name: userName, userName, type: constant_1.USER_TYPES.ADMIN, userType: constant_1.USER_TYPES.ADMIN }, new spinal_core_connectorjs_type_1.Model({ userName, password: yield this._hashPassword(password) }), true);
+            fileLog(JSON.stringify({ userName, password }), path.resolve(__dirname, '../../.admin.log'));
+            return this._addUserToContext({
+                name: userName,
+                userName,
+                type: constant_1.USER_TYPES.ADMIN,
+                userType: constant_1.USER_TYPES.ADMIN,
+            }, new spinal_core_connectorjs_type_1.Model({ userName, password: yield this._hashPassword(password) }), true);
         });
     }
     getAdminUser(userName) {
         return __awaiter(this, void 0, void 0, function* () {
             const children = yield this.context.getChildren(constant_1.CONTEXT_TO_ADMIN_USER_RELATION);
-            return children.find(el => el.info.userName.get() === userName);
+            return children.find((el) => el.info.userName.get() === userName);
         });
     }
     authAdmin(user) {
         return __awaiter(this, void 0, void 0, function* () {
             const node = yield this.getAdminUser(user.userName);
             if (!node)
-                return { code: constant_1.HTTP_CODES.INTERNAL_ERROR, data: "bad username and/or password" };
+                return {
+                    code: constant_1.HTTP_CODES.INTERNAL_ERROR,
+                    data: 'bad username and/or password',
+                };
             const element = yield node.getElement(true);
             const success = yield this._comparePassword(user.password, element.password.get());
             if (!success)
-                return { code: constant_1.HTTP_CODES.UNAUTHORIZED, data: "bad username and/or password" };
+                return {
+                    code: constant_1.HTTP_CODES.UNAUTHORIZED,
+                    data: 'bad username and/or password',
+                };
             // await this._deleteUserToken(node);
             const res = yield token_service_1.TokenService.getInstance().getAdminPlayLoad(node);
             return { code: constant_1.HTTP_CODES.OK, data: res };
@@ -193,19 +223,22 @@ class UserListService {
         return __awaiter(this, void 0, void 0, function* () {
             const adminCredential = yield this._getAuthPlateformInfo();
             const url = `${adminCredential.urlAdmin}/users/login`;
-            return axios_1.default.post(url, user).then((result) => __awaiter(this, void 0, void 0, function* () {
+            return axios_1.default
+                .post(url, user)
+                .then((result) => __awaiter(this, void 0, void 0, function* () {
                 const data = result.data;
                 data.profile = yield this._getProfileInfo(data.token, adminCredential);
                 data.userInfo = yield this._getUserInfo(data.userId, adminCredential, data.token);
                 return {
                     code: constant_1.HTTP_CODES.OK,
-                    data
+                    data,
                 };
-            })).catch(err => {
-                console.error(err);
+            }))
+                .catch((err) => {
+                // console.error(err)
                 return {
                     code: constant_1.HTTP_CODES.UNAUTHORIZED,
-                    data: "bad credential"
+                    data: 'bad credential',
                 };
             });
         });
@@ -216,12 +249,14 @@ class UserListService {
     _addUserToContext(info, element, isAdmin = false) {
         return __awaiter(this, void 0, void 0, function* () {
             const users = yield this.context.getChildrenInContext();
-            const found = users.find(el => { var _a; return ((_a = el.info.userName) === null || _a === void 0 ? void 0 : _a.get()) === info.userName; });
+            const found = users.find((el) => { var _a; return ((_a = el.info.userName) === null || _a === void 0 ? void 0 : _a.get()) === info.userName; });
             if (found)
                 return found;
             const nodeId = spinal_env_viewer_graph_service_1.SpinalGraphService.createNode(info, element);
             const node = spinal_env_viewer_graph_service_1.SpinalGraphService.getRealNode(nodeId);
-            const relationName = isAdmin ? constant_1.CONTEXT_TO_ADMIN_USER_RELATION : constant_1.CONTEXT_TO_USER_RELATION_NAME;
+            const relationName = isAdmin
+                ? constant_1.CONTEXT_TO_ADMIN_USER_RELATION
+                : constant_1.CONTEXT_TO_USER_RELATION_NAME;
             return this.context.addChildInContext(node, relationName, constant_1.PTR_LST_TYPE, this.context);
         });
     }
@@ -232,8 +267,8 @@ class UserListService {
         return bcrypt.compare(password, hash);
     }
     _generateString(length = 10) {
-        const charset = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789*/-_@#&";
-        let text = "";
+        const charset = 'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789*/-_@#&';
+        let text = '';
         for (var i = 0, n = charset.length; i < length; ++i) {
             text += charset.charAt(Math.floor(Math.random() * n));
         }
@@ -242,7 +277,7 @@ class UserListService {
     _deleteUserToken(userNode) {
         return __awaiter(this, void 0, void 0, function* () {
             const tokens = yield userNode.getChildren(constant_1.TOKEN_RELATION_NAME);
-            const promises = tokens.map(token => token_service_1.TokenService.getInstance().deleteToken(token));
+            const promises = tokens.map((token) => token_service_1.TokenService.getInstance().deleteToken(token));
             return Promise.all(promises);
         });
     }
@@ -254,17 +289,20 @@ class UserListService {
     }
     _getProfileInfo(userToken, adminCredential, isUser = true) {
         let urlAdmin = adminCredential.urlAdmin;
-        let endpoint = "/tokens/getUserProfileByToken";
-        return axios_1.default.post(urlAdmin + endpoint, {
+        let endpoint = '/tokens/getUserProfileByToken';
+        return axios_1.default
+            .post(urlAdmin + endpoint, {
             platformId: adminCredential.idPlateform,
-            token: userToken
-        }).then((result) => {
+            token: userToken,
+        })
+            .then((result) => {
             if (!result.data)
                 return;
             const data = result.data;
             delete data.password;
             return data;
-        }).catch(err => {
+        })
+            .catch((err) => {
             return {};
         });
     }
@@ -273,12 +311,15 @@ class UserListService {
             headers: {
                 'Content-Type': 'application/json',
                 // "x-access-token": adminCredential.tokenBosAdmin
-                "x-access-token": userToken
+                'x-access-token': userToken,
             },
         };
-        return axios_1.default.get(`${adminCredential.urlAdmin}/users/${userId}`, config).then((result) => {
+        return axios_1.default
+            .get(`${adminCredential.urlAdmin}/users/${userId}`, config)
+            .then((result) => {
             return result.data;
-        }).catch((err) => {
+        })
+            .catch((err) => {
             console.error(err);
         });
     }
@@ -286,11 +327,11 @@ class UserListService {
         return __awaiter(this, void 0, void 0, function* () {
             const adminCredential = yield authentification_service_1.AuthentificationService.getInstance().getPamToAdminCredential();
             if (!adminCredential)
-                throw new Error("No authentication platform is registered");
+                throw new Error('No authentication platform is registered');
             return adminCredential;
         });
     }
-    _convertListToObj(liste, key = "id") {
+    _convertListToObj(liste, key = 'id') {
         return liste.reduce((obj, item) => {
             var _a;
             const id = (_a = item.info[key]) === null || _a === void 0 ? void 0 : _a.get();
