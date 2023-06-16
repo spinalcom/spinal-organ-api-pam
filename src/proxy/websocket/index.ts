@@ -166,7 +166,10 @@ export default class WebSocketServer {
       });
 
       client.on('connect', () => {
-        console.log(tokenInfo?.userInfo?.userName || 'client', 'is connected');
+        console.log(
+          tokenInfo?.userInfo?.name || tokenInfo?.userInfo?.id,
+          'is connected'
+        );
       });
 
       client.on('session_created', async (id) => {
