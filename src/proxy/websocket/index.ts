@@ -41,6 +41,7 @@ import {
   DISCONNECTION_EVENT,
 } from 'spinal-service-pubsub-logs';
 import {async} from 'q';
+import { isObject } from 'lodash';
 const SocketClient = require('socket.io-client');
 
 const logInstance = WebsocketLogsService.getInstance();
@@ -69,6 +70,11 @@ export default class WebSocketServer {
   }
 
   private _initNameSpace() {
+
+    this._io.on("connection", (socket: Socket) => {
+      console.log(socket.id ,"is connected");
+    })
+
     this._io.of(/.*/).use(async (socket: Socket, next: NextFunction) => {
       let err;
 
@@ -87,6 +93,7 @@ export default class WebSocketServer {
       } catch (error) {
         err = error;
       }
+
 
       next(err);
     });
@@ -157,7 +164,12 @@ export default class WebSocketServer {
       const client = SocketClient(api_url, {
         auth: {token, sessionId, building: building?.info?.get()},
         transports: ['websocket'],
+        reconnection: false
       });
+
+      client.on("connect", () => {
+        console.log(tokenInfo?.userInfo?.name || tokenInfo?.userInfo?.id, "is connected")
+      })
 
       client.on('session_created', async (id) => {
         this._sessionToUserInfo.set(id, tokenInfo.userInfo);
@@ -266,23 +278,13 @@ export default class WebSocketServer {
     // });
 
     pamToBosSocket.on('disconnect', async (reason) => {
-      // console.log((<any>pamToBosSocket).sessionId || pamToBosSocket.id, "is disconnected")
       const emitter: any = this._clientToServer.get(
         (<any>pamToBosSocket).sessionId || pamToBosSocket.id
       );
       if (emitter) {
         const emitterInfo = this._sessionToUserInfo.get(emitter.sessionId);
+        console.log(emitterInfo.userName || emitter.sessionId, "is disconnected", reason);
         emitter.disconnect();
-
-        // console.log('save disconnection log');
-
-        // await this._createWebsocketLog(
-        //   pamToBosSocket,
-        //   DISCONNECTION_EVENT,
-        //   undefined,
-        //   emitterInfo,
-        //   DISCONNECTION_EVENT
-        // );
       }
     });
 
@@ -304,13 +306,15 @@ export default class WebSocketServer {
     //   // if (emitter) emitter.emit(eventName, ...data);
     // });
 
-    clientToPamSocket.on('disconnect', async (reson) => {
+    clientToPamSocket.on('disconnect', async (reason) => {
       const emitter: any = this._serverToClient.get(
         (<any>clientToPamSocket).sessionId || clientToPamSocket.id
       );
 
       if (emitter) {
         const emitterInfo = this._sessionToUserInfo.get(emitter.sessionId);
+        console.log(emitterInfo.userName || emitter.sessionId, "is disconnected", reason);
+
         emitter.disconnect();
 
         await this._createWebsocketLog(
