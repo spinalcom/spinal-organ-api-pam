@@ -121,13 +121,14 @@ class AdminProfileService {
                     portofolioId: node.getId().get(),
                     appsIds: apps.map((el) => el.getId().get()),
                     apisIds: apis.map((el) => el.getId().get()),
-                    building: buildings.map((building) => {
-                        return {
-                            buildingId: building.node.getId().get(),
-                            appsIds: building.apps.map((el) => el.getId().get()),
-                            apisIds: building.apis.map((el) => el.getId().get()),
-                        };
-                    }),
+                    buildingIds: buildings.map(el => el.getId().get())
+                    // building: buildings.map((building) => {
+                    //   return {
+                    //     buildingIds: building.node.getId().get(),
+                    //     appsIds: building.apps.map((el) => el.getId().get()),
+                    //     apisIds: building.apis.map((el) => el.getId().get()),
+                    //   };
+                    // }),
                 };
             });
         });

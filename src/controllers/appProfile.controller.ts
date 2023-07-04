@@ -24,13 +24,14 @@
 
 import * as express from 'express';
 import { HTTP_CODES, SECURITY_MESSAGES, SECURITY_NAME } from "../constant";
-import { IApiRoute, IBosAuth, IBosData, IPortofolioAuth, IPortofolioData, IProfile, IProfileData, IProfileEdit } from "../interfaces";
-import { AppProfileService } from "../services";
+import { IApiRoute, IBosData, IPortofolioAuth, IPortofolioData, IProfile, IProfileData, IProfileEdit } from "../interfaces";
+import { AppProfileService, PortofolioService } from "../services";
 import { Route, Tags, Get, Post, Put, Delete, Path, Body, Controller, Security, Request } from 'tsoa';
-import { _formatBosAuthRes, _formatPortofolioAuthRes, _formatProfile, _getNodeListInfo } from "../utils/profileUtils";
+import { _formatPortofolioAuthRes, _formatProfile, _getNodeListInfo } from "../utils/profileUtils";
 import { checkIfItIsAdmin, getProfileId } from "../security/authentication";
 import { AuthError } from "../security/AuthError";
 import { AdminProfileService } from '../services/adminProfile.service';
+import { SpinalNode } from 'spinal-env-viewer-graph-service';
 
 const serviceInstance = AppProfileService.getInstance();
 
@@ -260,59 +261,7 @@ export class AppProfileController extends Controller {
 
             if (!isAdmin && profileId !== id) throw new AuthError(SECURITY_MESSAGES.UNAUTHORIZED);
 
-            const nodes = await serviceInstance.getBosAuthStructure(profileId, portofolioId);
-            if (nodes) {
-                this.setStatus(HTTP_CODES.OK)
-                return nodes.map(node => _formatBosAuthRes(node));
-            }
-
-            this.setStatus(HTTP_CODES.NOT_FOUND)
-            return { message: `no profile found for ${profileId}` };
-        } catch (error) {
-            this.setStatus(error.code || HTTP_CODES.INTERNAL_ERROR);
-            return { message: error.message };
-        }
-    }
-
-    @Security(SECURITY_NAME.bearerAuth)
-    @Post("/authorize_bos_apis/{profileId}/{portofolioId}")
-    public async authorizeToAccessBosApis(@Request() req: express.Request, @Path() profileId: string, @Path() portofolioId: string, @Body() data: IBosAuth): Promise<IApiRoute[] | { message: string }> {
-        try {
-            const isAdmin = await checkIfItIsAdmin(req);
-            if (!isAdmin) throw new AuthError(SECURITY_MESSAGES.UNAUTHORIZED);
-
-            const nodes = await serviceInstance.authorizeToAccessBosApiRoute(profileId, portofolioId, data);
-            if (nodes) {
-
-                this.setStatus(HTTP_CODES.OK)
-                return nodes.reduce((liste, { apis }) => {
-                    apis.forEach((node) => {
-                        if (node) liste.push(..._getNodeListInfo([node]))
-                    })
-
-                    return liste;
-                }, []);
-            }
-
-            this.setStatus(HTTP_CODES.NOT_FOUND)
-            return { message: `no profile found for ${profileId}` };
-        } catch (error) {
-            this.setStatus(error.code || HTTP_CODES.INTERNAL_ERROR);
-            return { message: error.message };
-        }
-    }
-
-    @Security(SECURITY_NAME.bearerAuth)
-    @Get("/get_authorized_bos_apis/{profileId}/{portofolioId}/{bosId}")
-    public async getAuthorizedBosApis(@Request() req: express.Request, @Path() profileId: string, @Path() portofolioId: string, @Path() bosId: string): Promise<IApiRoute[] | { message: string }> {
-        try {
-            const id = await getProfileId(req);
-            const isAdmin = AdminProfileService.getInstance().adminNode.getId().get() === id;
-
-            if (!isAdmin && profileId !== id) throw new AuthError(SECURITY_MESSAGES.UNAUTHORIZED);
-
-            const nodes = await serviceInstance.getAuthorizedBosApis(profileId, portofolioId, bosId);
-
+            const nodes = await serviceInstance.getAuthorizedBos(profileId, portofolioId);
             if (nodes) {
                 this.setStatus(HTTP_CODES.OK)
                 return _getNodeListInfo(nodes);
@@ -325,31 +274,6 @@ export class AppProfileController extends Controller {
             return { message: error.message };
         }
     }
-
-
-    @Security(SECURITY_NAME.bearerAuth)
-    @Post("/unauthorize_bos_apis/{profileId}/{portofolioId}")
-    public async unauthorizeToAccessBosApis(@Request() req: express.Request, @Path() profileId: string, @Path() portofolioId: string, @Body() data: { apisIds: string[], buildingId: string }[]): Promise<string[] | { message: string }> {
-        try {
-            const isAdmin = await checkIfItIsAdmin(req);
-            if (!isAdmin) throw new AuthError(SECURITY_MESSAGES.UNAUTHORIZED);
-
-            const nodes = await serviceInstance.unauthorizeToAccessBosApiRoute(profileId, portofolioId, data);
-            if (nodes) {
-                this.setStatus(HTTP_CODES.OK)
-                return nodes.filter(el => el);
-            }
-
-
-            this.setStatus(HTTP_CODES.NOT_FOUND)
-            return { message: `no profile found for ${profileId}` };
-
-        } catch (error) {
-            this.setStatus(error.code || HTTP_CODES.INTERNAL_ERROR);
-            return { message: error.message };
-        }
-    }
-
 
 }
 

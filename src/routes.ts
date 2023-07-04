@@ -88,23 +88,13 @@ const models: TsoaRoute.Models = {
         "additionalProperties": {"dataType":"any"},
     },
     // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
-    "IBosAuth": {
-        "dataType": "refObject",
-        "properties": {
-            "buildingId": {"dataType":"string","required":true},
-            "appsIds": {"dataType":"array","array":{"dataType":"string"}},
-            "apisIds": {"dataType":"array","array":{"dataType":"string"}},
-        },
-        "additionalProperties": false,
-    },
-    // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
     "IPortofolioAuth": {
         "dataType": "refObject",
         "properties": {
             "portofolioId": {"dataType":"string","required":true},
             "appsIds": {"dataType":"array","array":{"dataType":"string"}},
             "apisIds": {"dataType":"array","array":{"dataType":"string"}},
-            "building": {"dataType":"array","array":{"dataType":"refObject","ref":"IBosAuth"}},
+            "buildingIds": {"dataType":"array","array":{"dataType":"string"}},
         },
         "additionalProperties": false,
     },
@@ -118,27 +108,16 @@ const models: TsoaRoute.Models = {
         "additionalProperties": false,
     },
     // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
-    "IBosAuthEdit": {
-        "dataType": "refObject",
-        "properties": {
-            "buildingId": {"dataType":"string","required":true},
-            "appsIds": {"dataType":"array","array":{"dataType":"string"}},
-            "apisIds": {"dataType":"array","array":{"dataType":"string"}},
-            "unauthorizeAppsIds": {"dataType":"array","array":{"dataType":"string"}},
-            "unauthorizeApisIds": {"dataType":"array","array":{"dataType":"string"}},
-        },
-        "additionalProperties": false,
-    },
-    // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
     "IPortofolioAuthEdit": {
         "dataType": "refObject",
         "properties": {
             "portofolioId": {"dataType":"string","required":true},
             "appsIds": {"dataType":"array","array":{"dataType":"string"}},
             "apisIds": {"dataType":"array","array":{"dataType":"string"}},
+            "buildingIds": {"dataType":"array","array":{"dataType":"string"}},
             "unauthorizeAppsIds": {"dataType":"array","array":{"dataType":"string"}},
             "unauthorizeApisIds": {"dataType":"array","array":{"dataType":"string"}},
-            "building": {"dataType":"array","array":{"dataType":"refObject","ref":"IBosAuthEdit"}},
+            "unauthorizeBuildingIds": {"dataType":"array","array":{"dataType":"string"}},
         },
         "additionalProperties": false,
     },
@@ -946,93 +925,6 @@ export function RegisterRoutes(app: express.Router) {
 
 
               const promise = controller.getAuthorizedBos.apply(controller, validatedArgs as any);
-              promiseHandler(controller, promise, response, undefined, next);
-            } catch (err) {
-                return next(err);
-            }
-        });
-        // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
-        app.post('/api/v1/pam/app_profile/authorize_bos_apis/:profileId/:portofolioId',
-            authenticateMiddleware([{"bearerAuth":[]}]),
-            ...(fetchMiddlewares<RequestHandler>(AppProfileController)),
-            ...(fetchMiddlewares<RequestHandler>(AppProfileController.prototype.authorizeToAccessBosApis)),
-
-            function AppProfileController_authorizeToAccessBosApis(request: any, response: any, next: any) {
-            const args = {
-                    req: {"in":"request","name":"req","required":true,"dataType":"object"},
-                    profileId: {"in":"path","name":"profileId","required":true,"dataType":"string"},
-                    portofolioId: {"in":"path","name":"portofolioId","required":true,"dataType":"string"},
-                    data: {"in":"body","name":"data","required":true,"ref":"IBosAuth"},
-            };
-
-            // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
-
-            let validatedArgs: any[] = [];
-            try {
-                validatedArgs = getValidatedArgs(args, request, response);
-
-                const controller = new AppProfileController();
-
-
-              const promise = controller.authorizeToAccessBosApis.apply(controller, validatedArgs as any);
-              promiseHandler(controller, promise, response, undefined, next);
-            } catch (err) {
-                return next(err);
-            }
-        });
-        // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
-        app.get('/api/v1/pam/app_profile/get_authorized_bos_apis/:profileId/:portofolioId/:bosId',
-            authenticateMiddleware([{"bearerAuth":[]}]),
-            ...(fetchMiddlewares<RequestHandler>(AppProfileController)),
-            ...(fetchMiddlewares<RequestHandler>(AppProfileController.prototype.getAuthorizedBosApis)),
-
-            function AppProfileController_getAuthorizedBosApis(request: any, response: any, next: any) {
-            const args = {
-                    req: {"in":"request","name":"req","required":true,"dataType":"object"},
-                    profileId: {"in":"path","name":"profileId","required":true,"dataType":"string"},
-                    portofolioId: {"in":"path","name":"portofolioId","required":true,"dataType":"string"},
-                    bosId: {"in":"path","name":"bosId","required":true,"dataType":"string"},
-            };
-
-            // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
-
-            let validatedArgs: any[] = [];
-            try {
-                validatedArgs = getValidatedArgs(args, request, response);
-
-                const controller = new AppProfileController();
-
-
-              const promise = controller.getAuthorizedBosApis.apply(controller, validatedArgs as any);
-              promiseHandler(controller, promise, response, undefined, next);
-            } catch (err) {
-                return next(err);
-            }
-        });
-        // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
-        app.post('/api/v1/pam/app_profile/unauthorize_bos_apis/:profileId/:portofolioId',
-            authenticateMiddleware([{"bearerAuth":[]}]),
-            ...(fetchMiddlewares<RequestHandler>(AppProfileController)),
-            ...(fetchMiddlewares<RequestHandler>(AppProfileController.prototype.unauthorizeToAccessBosApis)),
-
-            function AppProfileController_unauthorizeToAccessBosApis(request: any, response: any, next: any) {
-            const args = {
-                    req: {"in":"request","name":"req","required":true,"dataType":"object"},
-                    profileId: {"in":"path","name":"profileId","required":true,"dataType":"string"},
-                    portofolioId: {"in":"path","name":"portofolioId","required":true,"dataType":"string"},
-                    data: {"in":"body","name":"data","required":true,"dataType":"array","array":{"dataType":"nestedObjectLiteral","nestedProperties":{"buildingId":{"dataType":"string","required":true},"apisIds":{"dataType":"array","array":{"dataType":"string"},"required":true}}}},
-            };
-
-            // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
-
-            let validatedArgs: any[] = [];
-            try {
-                validatedArgs = getValidatedArgs(args, request, response);
-
-                const controller = new AppProfileController();
-
-
-              const promise = controller.unauthorizeToAccessBosApis.apply(controller, validatedArgs as any);
               promiseHandler(controller, promise, response, undefined, next);
             } catch (err) {
                 return next(err);
@@ -3160,93 +3052,6 @@ export function RegisterRoutes(app: express.Router) {
 
 
               const promise = controller.getAuthorizedBos.apply(controller, validatedArgs as any);
-              promiseHandler(controller, promise, response, undefined, next);
-            } catch (err) {
-                return next(err);
-            }
-        });
-        // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
-        app.post('/api/v1/pam/user_profile/authorize_bos_apps/:profileId/:portofolioId',
-            authenticateMiddleware([{"bearerAuth":[]}]),
-            ...(fetchMiddlewares<RequestHandler>(UserProfileController)),
-            ...(fetchMiddlewares<RequestHandler>(UserProfileController.prototype.authorizeToAccessBosApps)),
-
-            function UserProfileController_authorizeToAccessBosApps(request: any, response: any, next: any) {
-            const args = {
-                    req: {"in":"request","name":"req","required":true,"dataType":"object"},
-                    profileId: {"in":"path","name":"profileId","required":true,"dataType":"string"},
-                    portofolioId: {"in":"path","name":"portofolioId","required":true,"dataType":"string"},
-                    data: {"in":"body","name":"data","required":true,"dataType":"array","array":{"dataType":"refObject","ref":"IBosAuth"}},
-            };
-
-            // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
-
-            let validatedArgs: any[] = [];
-            try {
-                validatedArgs = getValidatedArgs(args, request, response);
-
-                const controller = new UserProfileController();
-
-
-              const promise = controller.authorizeToAccessBosApps.apply(controller, validatedArgs as any);
-              promiseHandler(controller, promise, response, undefined, next);
-            } catch (err) {
-                return next(err);
-            }
-        });
-        // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
-        app.get('/api/v1/pam/user_profile/get_authorized_bos_apps/:profileId/:portofolioId/:bosId',
-            authenticateMiddleware([{"bearerAuth":[]}]),
-            ...(fetchMiddlewares<RequestHandler>(UserProfileController)),
-            ...(fetchMiddlewares<RequestHandler>(UserProfileController.prototype.getAuthorizedBosApis)),
-
-            function UserProfileController_getAuthorizedBosApis(request: any, response: any, next: any) {
-            const args = {
-                    req: {"in":"request","name":"req","required":true,"dataType":"object"},
-                    profileId: {"in":"path","name":"profileId","required":true,"dataType":"string"},
-                    portofolioId: {"in":"path","name":"portofolioId","required":true,"dataType":"string"},
-                    bosId: {"in":"path","name":"bosId","required":true,"dataType":"string"},
-            };
-
-            // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
-
-            let validatedArgs: any[] = [];
-            try {
-                validatedArgs = getValidatedArgs(args, request, response);
-
-                const controller = new UserProfileController();
-
-
-              const promise = controller.getAuthorizedBosApis.apply(controller, validatedArgs as any);
-              promiseHandler(controller, promise, response, undefined, next);
-            } catch (err) {
-                return next(err);
-            }
-        });
-        // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
-        app.post('/api/v1/pam/user_profile/unauthorize_bos_apps/:profileId/:portofolioId',
-            authenticateMiddleware([{"bearerAuth":[]}]),
-            ...(fetchMiddlewares<RequestHandler>(UserProfileController)),
-            ...(fetchMiddlewares<RequestHandler>(UserProfileController.prototype.unauthorizeToAccessBosApp)),
-
-            function UserProfileController_unauthorizeToAccessBosApp(request: any, response: any, next: any) {
-            const args = {
-                    req: {"in":"request","name":"req","required":true,"dataType":"object"},
-                    profileId: {"in":"path","name":"profileId","required":true,"dataType":"string"},
-                    portofolioId: {"in":"path","name":"portofolioId","required":true,"dataType":"string"},
-                    data: {"in":"body","name":"data","required":true,"dataType":"array","array":{"dataType":"nestedObjectLiteral","nestedProperties":{"buildingId":{"dataType":"string","required":true},"appsIds":{"dataType":"array","array":{"dataType":"string"},"required":true}}}},
-            };
-
-            // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
-
-            let validatedArgs: any[] = [];
-            try {
-                validatedArgs = getValidatedArgs(args, request, response);
-
-                const controller = new UserProfileController();
-
-
-              const promise = controller.unauthorizeToAccessBosApp.apply(controller, validatedArgs as any);
               promiseHandler(controller, promise, response, undefined, next);
             } catch (err) {
                 return next(err);

@@ -165,11 +165,7 @@ export class PortofolioService {
     return {
       node,
       apps,
-      buildings: await Promise.all(
-        buildings.map((el) =>
-          BuildingService.getInstance().getBuildingStructure(el)
-        )
-      ),
+      buildings,
       apis,
     };
   }
@@ -545,9 +541,10 @@ export class PortofolioService {
   public _formatDetails(data: IPortofolioDetails): IPortofolioData {
     return {
       ...data.node.info.get(),
-      buildings: (data.buildings || []).map((el) =>
-        BuildingService.getInstance().formatBuildingStructure(el)
-      ),
+      buildings : data.buildings.map(el => el.info.get()),
+      // buildings: (data.buildings || []).map((el) =>
+      //   BuildingService.getInstance().formatBuildingStructure(el)
+      // ),
       apps: (data.apps || []).map((el) => el.info.get()),
       apis: (data.apis || []).map((el) => el.info.get()),
     };

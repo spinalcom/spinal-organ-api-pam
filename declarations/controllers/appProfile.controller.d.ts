@@ -1,5 +1,5 @@
 import * as express from 'express';
-import { IApiRoute, IBosAuth, IBosData, IPortofolioAuth, IPortofolioData, IProfile, IProfileData, IProfileEdit } from "../interfaces";
+import { IApiRoute, IBosData, IPortofolioAuth, IPortofolioData, IProfile, IProfileData, IProfileEdit } from "../interfaces";
 import { Controller } from 'tsoa';
 export declare class AppProfileController extends Controller {
     constructor();
@@ -34,18 +34,6 @@ export declare class AppProfileController extends Controller {
         message: string;
     }>;
     getAuthorizedBos(req: express.Request, profileId: string, portofolioId: string): Promise<IBosData | {
-        message: string;
-    }>;
-    authorizeToAccessBosApis(req: express.Request, profileId: string, portofolioId: string, data: IBosAuth): Promise<IApiRoute[] | {
-        message: string;
-    }>;
-    getAuthorizedBosApis(req: express.Request, profileId: string, portofolioId: string, bosId: string): Promise<IApiRoute[] | {
-        message: string;
-    }>;
-    unauthorizeToAccessBosApis(req: express.Request, profileId: string, portofolioId: string, data: {
-        apisIds: string[];
-        buildingId: string;
-    }[]): Promise<string[] | {
         message: string;
     }>;
 }

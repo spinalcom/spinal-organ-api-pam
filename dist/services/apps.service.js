@@ -93,7 +93,9 @@ class AppService {
             appInfo.type = constant_1.PORTOFOLIO_APP_TYPE;
             const appId = spinal_env_viewer_graph_service_1.SpinalGraphService.createNode(appInfo, undefined);
             const node = spinal_env_viewer_graph_service_1.SpinalGraphService.getRealNode(appId);
-            return groupNode.addChildInContext(node, constant_1.APP_RELATION_NAME, constant_1.PTR_LST_TYPE, this.context);
+            yield groupNode.addChildInContext(node, constant_1.APP_RELATION_NAME, constant_1.PTR_LST_TYPE, this.context);
+            // await this._addAppToAllPortofolio(appId);
+            return node;
         });
     }
     createBuildingApp(appInfo) {
@@ -343,6 +345,14 @@ class AppService {
             }
             return liste;
         }, []);
+    }
+    _addAppToAllPortofolio(appId) {
+        return __awaiter(this, void 0, void 0, function* () {
+            const instance = portofolio_service_1.PortofolioService.getInstance();
+            const portofolios = yield instance.getAllPortofolio();
+            const promises = portofolios.map(el => instance.addAppToPortofolio(el, appId));
+            return Promise.all(promises);
+        });
     }
 }
 exports.AppService = AppService;

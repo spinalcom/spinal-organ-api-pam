@@ -89,7 +89,10 @@ export class AppService {
     appInfo.type = PORTOFOLIO_APP_TYPE;
     const appId = SpinalGraphService.createNode(appInfo, undefined);
     const node = SpinalGraphService.getRealNode(appId);
-    return groupNode.addChildInContext(node, APP_RELATION_NAME, PTR_LST_TYPE, this.context);
+    await  groupNode.addChildInContext(node, APP_RELATION_NAME, PTR_LST_TYPE, this.context);
+    // await this._addAppToAllPortofolio(appId);
+
+    return node;
   }
 
   public async createBuildingApp(appInfo: IApp): Promise<SpinalNode> {
@@ -105,6 +108,8 @@ export class AppService {
     const node = SpinalGraphService.getRealNode(appId);
     return groupNode.addChildInContext(node, APP_RELATION_NAME, PTR_LST_TYPE, this.context);
   }
+
+
 
 
   //////////////////////////////////
@@ -334,4 +339,10 @@ export class AppService {
 
   }
 
+  private async _addAppToAllPortofolio(appId: string): Promise<SpinalNode[][]> {
+    const instance = PortofolioService.getInstance()
+    const portofolios = await instance.getAllPortofolio();
+    const promises = portofolios.map(el => instance.addAppToPortofolio(el, appId));
+    return Promise.all(promises);
+  }
 }

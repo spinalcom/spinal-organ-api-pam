@@ -23,19 +23,22 @@
  * <http://resources.spinalcom.com/licenses.pdf>.
  */
 Object.defineProperty(exports, "__esModule", { value: true });
-exports._filterBosList = exports._filterPortofolioList = exports._filterApisList = exports._formatAuthorizationData = exports._formatProfileKeys = exports._getNodeListInfo = exports._formatBosAuthRes = exports._formatPortofolioAuthRes = exports._formatProfile = void 0;
+exports._filterPortofolioList = exports._filterApisList = exports._formatAuthorizationData = exports._formatProfileKeys = exports._getNodeListInfo = exports._formatPortofolioAuthRes = exports._formatProfile = void 0;
 function _formatProfile(data) {
     return Object.assign(Object.assign({}, data.node.info.get()), { authorized: data.authorized.map(el => _formatPortofolioAuthRes(el)) });
 }
 exports._formatProfile = _formatProfile;
 function _formatPortofolioAuthRes(data) {
-    return Object.assign(Object.assign({}, data.portofolio.info.get()), { apps: _getNodeListInfo(data.apps), apis: _getNodeListInfo(data.apis), buildings: data.buildings.map(el => _formatBosAuthRes(el)) });
+    return Object.assign(Object.assign({}, data.portofolio.info.get()), { apps: _getNodeListInfo(data.apps), apis: _getNodeListInfo(data.apis), buildings: _getNodeListInfo(data.buildings) });
 }
 exports._formatPortofolioAuthRes = _formatPortofolioAuthRes;
-function _formatBosAuthRes(data) {
-    return Object.assign(Object.assign({}, data.building.info.get()), { apps: _getNodeListInfo(data.apps), apis: _getNodeListInfo(data.apis) });
-}
-exports._formatBosAuthRes = _formatBosAuthRes;
+// export function _formatBosAuthRes(data: SpinalNode): IBosData {
+//     return {
+//         ...data.building.info.get(),
+//         apps: _getNodeListInfo(data.apps),
+//         apis: _getNodeListInfo(data.apis)
+//     }
+// }
 function _getNodeListInfo(nodes = []) {
     return nodes.map(el => el.info.get());
 }
@@ -71,11 +74,11 @@ function _unifyData(profile1, profile2) {
         profile1.appsIds = [];
     if (!profile1.apisIds)
         profile1.apisIds = [];
-    if (!profile1.building)
-        profile1.building = [];
+    if (!profile1.buildingIds)
+        profile1.buildingIds = [];
     profile1.appsIds = [...profile1.appsIds, ...(profile2.appsIds || [])];
     profile1.apisIds = [...profile1.apisIds, ...(profile2.apisIds || [])];
-    profile1.building = [...profile1.building, ...(profile2.building || [])];
+    profile1.buildingIds = [...profile1.buildingIds, ...(profile2.buildingIds || [])];
     return profile1;
 }
 function _filterApisList(authorizedIds = [], unauthorizedIds = []) {
@@ -107,25 +110,23 @@ function _filterPortofolioList(authorizedPortofolio = [], unauthorizedPortofolio
     }, []);
 }
 exports._filterPortofolioList = _filterPortofolioList;
-function _filterBosList(authorizedBos = [], unauthorizedBos = []) {
-    const obj = {};
-    unauthorizedBos.map(({ buildingId, appsIds }) => {
-        obj[buildingId] = appsIds;
-        return;
-    });
-    return authorizedBos.reduce((liste, item) => {
-        const apps = obj[item.buildingId];
-        if (apps) {
-            if (!item.appsIds)
-                item.appsIds = [];
-            item.appsIds = Array.isArray(item.appsIds) ? item.appsIds : [item.appsIds];
-            item.appsIds = item.appsIds.filter(id => {
-                return apps.find(el => el !== id);
-            });
-        }
-        liste.push(item);
-        return liste;
-    }, []);
-}
-exports._filterBosList = _filterBosList;
+// export function _filterBosList(authorizedBos: IBosAuth[] = [], unauthorizedBos: IBosAuth[] = []): IBosAuth[] {
+//     const obj = {};
+//     unauthorizedBos.map(({ buildingId, appsIds }) => {
+//         obj[buildingId] = appsIds;
+//         return;
+//     })
+//     return authorizedBos.reduce((liste, item) => {
+//         const apps = obj[item.buildingId]
+//         if (apps) {
+//             if (!item.appsIds) item.appsIds = [];
+//             item.appsIds = Array.isArray(item.appsIds) ? item.appsIds : [item.appsIds];
+//             item.appsIds = item.appsIds.filter(id => {
+//                 return apps.find(el => el !== id);
+//             })
+//         }
+//         liste.push(item);
+//         return liste;
+//     }, [])
+// }
 //# sourceMappingURL=profileUtils.js.map

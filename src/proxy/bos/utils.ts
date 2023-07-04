@@ -26,9 +26,8 @@ import * as express from "express";
 import { ProxyOptions } from "express-http-proxy";
 import { SpinalNode } from "spinal-env-viewer-graph-service";
 import { HTTP_CODES } from "../../constant";
-import { IApiRoute, IBosAuthRes, IProfileRes } from "../../interfaces";
+import {  IProfileRes } from "../../interfaces";
 import { AppProfileService, UserProfileService } from "../../services";
-import AuthorizationService from "../../services/authorization.service";
 import { Utils } from "../../utils/pam_v1_utils/utils";
 import { correspondanceObj } from "./correspondance";
 
@@ -133,7 +132,7 @@ function _getCorrespondance(url: string) {
     return url;
 }
 
-function _hasAccessToBuilding(profile: IProfileRes, buildingId: string): IBosAuthRes {
+function _hasAccessToBuilding(profile: IProfileRes, buildingId: string): any {
     for (const { buildings } of profile.authorized) {
         const found = buildings.find(({ building }) => building.getId().get() === buildingId);
         if (found) return found;
@@ -142,7 +141,7 @@ function _hasAccessToBuilding(profile: IProfileRes, buildingId: string): IBosAut
     return;
 }
 
-function _hasAccessToApiRoute(building: IBosAuthRes, apiRoute: { method: string; route: string }): SpinalNode {
+function _hasAccessToApiRoute(building: any, apiRoute: { method: string; route: string }): SpinalNode {
     return building.apis.find(node => {
         const route = node.info.get();
         if (apiRoute.method.toUpperCase() !== route.method.toUpperCase()) return false;

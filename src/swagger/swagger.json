@@ -140,30 +140,6 @@
 				"type": "object",
 				"additionalProperties": {}
 			},
-			"IBosAuth": {
-				"properties": {
-					"buildingId": {
-						"type": "string"
-					},
-					"appsIds": {
-						"items": {
-							"type": "string"
-						},
-						"type": "array"
-					},
-					"apisIds": {
-						"items": {
-							"type": "string"
-						},
-						"type": "array"
-					}
-				},
-				"required": [
-					"buildingId"
-				],
-				"type": "object",
-				"additionalProperties": false
-			},
 			"IPortofolioAuth": {
 				"properties": {
 					"portofolioId": {
@@ -181,9 +157,9 @@
 						},
 						"type": "array"
 					},
-					"building": {
+					"buildingIds": {
 						"items": {
-							"$ref": "#/components/schemas/IBosAuth"
+							"type": "string"
 						},
 						"type": "array"
 					}
@@ -213,42 +189,6 @@
 				"type": "object",
 				"additionalProperties": false
 			},
-			"IBosAuthEdit": {
-				"properties": {
-					"buildingId": {
-						"type": "string"
-					},
-					"appsIds": {
-						"items": {
-							"type": "string"
-						},
-						"type": "array"
-					},
-					"apisIds": {
-						"items": {
-							"type": "string"
-						},
-						"type": "array"
-					},
-					"unauthorizeAppsIds": {
-						"items": {
-							"type": "string"
-						},
-						"type": "array"
-					},
-					"unauthorizeApisIds": {
-						"items": {
-							"type": "string"
-						},
-						"type": "array"
-					}
-				},
-				"required": [
-					"buildingId"
-				],
-				"type": "object",
-				"additionalProperties": false
-			},
 			"IPortofolioAuthEdit": {
 				"properties": {
 					"portofolioId": {
@@ -266,6 +206,12 @@
 						},
 						"type": "array"
 					},
+					"buildingIds": {
+						"items": {
+							"type": "string"
+						},
+						"type": "array"
+					},
 					"unauthorizeAppsIds": {
 						"items": {
 							"type": "string"
@@ -278,9 +224,9 @@
 						},
 						"type": "array"
 					},
-					"building": {
+					"unauthorizeBuildingIds": {
 						"items": {
-							"$ref": "#/components/schemas/IBosAuthEdit"
+							"type": "string"
 						},
 						"type": "array"
 					}
@@ -1995,235 +1941,6 @@
 						}
 					}
 				]
-			}
-		},
-		"/api/v1/pam/app_profile/authorize_bos_apis/{profileId}/{portofolioId}": {
-			"post": {
-				"operationId": "AuthorizeToAccessBosApis",
-				"responses": {
-					"200": {
-						"description": "Ok",
-						"content": {
-							"application/json": {
-								"schema": {
-									"anyOf": [
-										{
-											"items": {
-												"$ref": "#/components/schemas/IApiRoute"
-											},
-											"type": "array"
-										},
-										{
-											"properties": {
-												"message": {
-													"type": "string"
-												}
-											},
-											"required": [
-												"message"
-											],
-											"type": "object"
-										}
-									]
-								}
-							}
-						}
-					}
-				},
-				"tags": [
-					"App Profiles"
-				],
-				"security": [
-					{
-						"bearerAuth": []
-					}
-				],
-				"parameters": [
-					{
-						"in": "path",
-						"name": "profileId",
-						"required": true,
-						"schema": {
-							"type": "string"
-						}
-					},
-					{
-						"in": "path",
-						"name": "portofolioId",
-						"required": true,
-						"schema": {
-							"type": "string"
-						}
-					}
-				],
-				"requestBody": {
-					"required": true,
-					"content": {
-						"application/json": {
-							"schema": {
-								"$ref": "#/components/schemas/IBosAuth"
-							}
-						}
-					}
-				}
-			}
-		},
-		"/api/v1/pam/app_profile/get_authorized_bos_apis/{profileId}/{portofolioId}/{bosId}": {
-			"get": {
-				"operationId": "GetAuthorizedBosApis",
-				"responses": {
-					"200": {
-						"description": "Ok",
-						"content": {
-							"application/json": {
-								"schema": {
-									"anyOf": [
-										{
-											"items": {
-												"$ref": "#/components/schemas/IApiRoute"
-											},
-											"type": "array"
-										},
-										{
-											"properties": {
-												"message": {
-													"type": "string"
-												}
-											},
-											"required": [
-												"message"
-											],
-											"type": "object"
-										}
-									]
-								}
-							}
-						}
-					}
-				},
-				"tags": [
-					"App Profiles"
-				],
-				"security": [
-					{
-						"bearerAuth": []
-					}
-				],
-				"parameters": [
-					{
-						"in": "path",
-						"name": "profileId",
-						"required": true,
-						"schema": {
-							"type": "string"
-						}
-					},
-					{
-						"in": "path",
-						"name": "portofolioId",
-						"required": true,
-						"schema": {
-							"type": "string"
-						}
-					},
-					{
-						"in": "path",
-						"name": "bosId",
-						"required": true,
-						"schema": {
-							"type": "string"
-						}
-					}
-				]
-			}
-		},
-		"/api/v1/pam/app_profile/unauthorize_bos_apis/{profileId}/{portofolioId}": {
-			"post": {
-				"operationId": "UnauthorizeToAccessBosApis",
-				"responses": {
-					"200": {
-						"description": "Ok",
-						"content": {
-							"application/json": {
-								"schema": {
-									"anyOf": [
-										{
-											"items": {
-												"type": "string"
-											},
-											"type": "array"
-										},
-										{
-											"properties": {
-												"message": {
-													"type": "string"
-												}
-											},
-											"required": [
-												"message"
-											],
-											"type": "object"
-										}
-									]
-								}
-							}
-						}
-					}
-				},
-				"tags": [
-					"App Profiles"
-				],
-				"security": [
-					{
-						"bearerAuth": []
-					}
-				],
-				"parameters": [
-					{
-						"in": "path",
-						"name": "profileId",
-						"required": true,
-						"schema": {
-							"type": "string"
-						}
-					},
-					{
-						"in": "path",
-						"name": "portofolioId",
-						"required": true,
-						"schema": {
-							"type": "string"
-						}
-					}
-				],
-				"requestBody": {
-					"required": true,
-					"content": {
-						"application/json": {
-							"schema": {
-								"items": {
-									"properties": {
-										"buildingId": {
-											"type": "string"
-										},
-										"apisIds": {
-											"items": {
-												"type": "string"
-											},
-											"type": "array"
-										}
-									},
-									"required": [
-										"buildingId",
-										"apisIds"
-									],
-									"type": "object"
-								},
-								"type": "array"
-							}
-						}
-					}
-				}
 			}
 		},
 		"/api/v1/pam/create_admin_app": {
@@ -6637,228 +6354,6 @@
 						}
 					}
 				]
-			}
-		},
-		"/api/v1/pam/user_profile/authorize_bos_apps/{profileId}/{portofolioId}": {
-			"post": {
-				"operationId": "AuthorizeToAccessBosApps",
-				"responses": {
-					"200": {
-						"description": "Ok",
-						"content": {
-							"application/json": {
-								"schema": {
-									"anyOf": [
-										{
-											"items": {
-												"$ref": "#/components/schemas/IBosData"
-											},
-											"type": "array"
-										},
-										{
-											"properties": {
-												"message": {
-													"type": "string"
-												}
-											},
-											"required": [
-												"message"
-											],
-											"type": "object"
-										}
-									]
-								}
-							}
-						}
-					}
-				},
-				"tags": [
-					"user Profiles"
-				],
-				"security": [
-					{
-						"bearerAuth": []
-					}
-				],
-				"parameters": [
-					{
-						"in": "path",
-						"name": "profileId",
-						"required": true,
-						"schema": {
-							"type": "string"
-						}
-					},
-					{
-						"in": "path",
-						"name": "portofolioId",
-						"required": true,
-						"schema": {
-							"type": "string"
-						}
-					}
-				],
-				"requestBody": {
-					"required": true,
-					"content": {
-						"application/json": {
-							"schema": {
-								"items": {
-									"$ref": "#/components/schemas/IBosAuth"
-								},
-								"type": "array"
-							}
-						}
-					}
-				}
-			}
-		},
-		"/api/v1/pam/user_profile/get_authorized_bos_apps/{profileId}/{portofolioId}/{bosId}": {
-			"get": {
-				"operationId": "GetAuthorizedBosApis",
-				"responses": {
-					"200": {
-						"description": "Ok",
-						"content": {
-							"application/json": {
-								"schema": {
-									"anyOf": [
-										{},
-										{
-											"properties": {
-												"message": {
-													"type": "string"
-												}
-											},
-											"required": [
-												"message"
-											],
-											"type": "object"
-										}
-									]
-								}
-							}
-						}
-					}
-				},
-				"tags": [
-					"user Profiles"
-				],
-				"security": [
-					{
-						"bearerAuth": []
-					}
-				],
-				"parameters": [
-					{
-						"in": "path",
-						"name": "profileId",
-						"required": true,
-						"schema": {
-							"type": "string"
-						}
-					},
-					{
-						"in": "path",
-						"name": "portofolioId",
-						"required": true,
-						"schema": {
-							"type": "string"
-						}
-					},
-					{
-						"in": "path",
-						"name": "bosId",
-						"required": true,
-						"schema": {
-							"type": "string"
-						}
-					}
-				]
-			}
-		},
-		"/api/v1/pam/user_profile/unauthorize_bos_apps/{profileId}/{portofolioId}": {
-			"post": {
-				"operationId": "UnauthorizeToAccessBosApp",
-				"responses": {
-					"200": {
-						"description": "Ok",
-						"content": {
-							"application/json": {
-								"schema": {
-									"anyOf": [
-										{},
-										{
-											"properties": {
-												"message": {
-													"type": "string"
-												}
-											},
-											"required": [
-												"message"
-											],
-											"type": "object"
-										}
-									]
-								}
-							}
-						}
-					}
-				},
-				"tags": [
-					"user Profiles"
-				],
-				"security": [
-					{
-						"bearerAuth": []
-					}
-				],
-				"parameters": [
-					{
-						"in": "path",
-						"name": "profileId",
-						"required": true,
-						"schema": {
-							"type": "string"
-						}
-					},
-					{
-						"in": "path",
-						"name": "portofolioId",
-						"required": true,
-						"schema": {
-							"type": "string"
-						}
-					}
-				],
-				"requestBody": {
-					"required": true,
-					"content": {
-						"application/json": {
-							"schema": {
-								"items": {
-									"properties": {
-										"buildingId": {
-											"type": "string"
-										},
-										"appsIds": {
-											"items": {
-												"type": "string"
-											},
-											"type": "array"
-										}
-									},
-									"required": [
-										"buildingId",
-										"appsIds"
-									],
-									"type": "object"
-								},
-								"type": "array"
-							}
-						}
-					}
-				}
 			}
 		},
 		"/api/v1/pam/websocket/{buildingId}/get_websocket_state": {

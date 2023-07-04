@@ -24,7 +24,7 @@
 
 import { SpinalGraphService, SpinalGraph, SpinalContext, SpinalNode } from 'spinal-env-viewer-graph-service';
 import { APP_PROFILE_TYPE, PTR_LST_TYPE, CONTEXT_TO_APP_PROFILE_RELATION_NAME, APP_PROFILE_CONTEXT_NAME, APP_PROFILE_CONTEXT_TYPE } from '../constant';
-import { IProfile, IBosAuth, IPortofolioAuth, IPortofolioAuthRes, IBosAuthRes, IProfileRes, IProfileEdit, IPortofolioAuthEdit, IBosAuthEdit } from '../interfaces';
+import { IProfile, IPortofolioAuth, IPortofolioAuthRes, IProfileRes, IProfileEdit, IPortofolioAuthEdit } from '../interfaces';
 import { authorizationInstance } from './authorization.service';
 import { configServiceInstance } from './configFile.service';
 
@@ -32,7 +32,6 @@ import {
   _formatAuthorizationData,
   _filterApisList,
   _filterPortofolioList,
-  _filterBosList,
 } from '../utils/profileUtils';
 
 export class AppProfileService {
@@ -270,7 +269,7 @@ export class AppProfileService {
         portofolio,
         apps: await this.getAuthorizedPortofolioApp(profile, portofolioId),
         apis: await this.getAuthorizedPortofolioApis(profile, portofolioId),
-        buildings: await this.getBosAuthStructure(profile, portofolioId)
+        buildings: await this.getAuthorizedBos(profile, portofolioId)
       }
     })
 
@@ -300,113 +299,11 @@ export class AppProfileService {
     return Promise.all(promises);
   }
 
-  public async authorizeToAccessBosApp(profile: SpinalNode | string, portofolioId: string, data: IBosAuth | IBosAuth[]): Promise<IBosAuthRes[]> {
-    data = Array.isArray(data) ? data : [data];
-
-    const node = profile instanceof SpinalNode ? profile : await this._getAppProfileNode(profile);
-    if (!(node instanceof SpinalNode)) return;
-
-    return data.reduce(async (prom, { buildingId, appsIds }) => {
-      const liste = await prom;
-
-      const bos = await authorizationInstance.authorizeProfileToAccessBos(node, portofolioId, buildingId);
-      const apps = await authorizationInstance.authorizeProfileToAccessBosApp(node, portofolioId, buildingId, appsIds);
-      liste.push(
-        {
-          building: bos,
-          apps
-        }
-      )
-      return liste;
-    }, Promise.resolve([]))
-  }
-
-  public async unauthorizeToAccessBosApp(profile: SpinalNode | string, portofolioId: string, data: IBosAuth | IBosAuth[]): Promise<SpinalNode[]> {
-    data = Array.isArray(data) ? data : [data];
-
-    const node = profile instanceof SpinalNode ? profile : await this._getAppProfileNode(profile);
-    if (!(node instanceof SpinalNode)) return;
-
-    const promises = data.map(({ buildingId, appsIds }) => {
-      return authorizationInstance.unauthorizeProfileToAccessBosApp(node, portofolioId, buildingId, appsIds);
-    })
-
-    return Promise.all(promises).then((result) => {
-      return result.flat();
-    })
-  }
-
-  public async authorizeToAccessBosApiRoute(profile: SpinalNode | string, portofolioId: string, data: IBosAuth | IBosAuth[]): Promise<IBosAuthRes[]> {
-    data = Array.isArray(data) ? data : [data];
-
-    const node = profile instanceof SpinalNode ? profile : await this._getAppProfileNode(profile);
-    if (!(node instanceof SpinalNode)) return;
-
-    return data.reduce(async (prom, { buildingId, apisIds }) => {
-      const liste = await prom;
-
-      const bos = await authorizationInstance.authorizeProfileToAccessBos(node, portofolioId, buildingId);
-      const apis = await authorizationInstance.authorizeProfileToAccessBosApisRoutes(node, portofolioId, buildingId, apisIds);
-      liste.push(
-        {
-          building: bos,
-          apis
-        }
-      )
-      return liste;
-    }, Promise.resolve([]))
-  }
-
-  public async unauthorizeToAccessBosApiRoute(profile: SpinalNode | string, portofolioId: string, data: IBosAuth | IBosAuth[]): Promise<string[]> {
-    data = Array.isArray(data) ? data : [data];
-
-    const node = profile instanceof SpinalNode ? profile : await this._getAppProfileNode(profile);
-    if (!(node instanceof SpinalNode)) return;
-
-    const promises = data.map(({ buildingId, apisIds }) => {
-      return authorizationInstance.unauthorizeProfileToAccessBosApisRoutes(node, portofolioId, buildingId, apisIds);
-    })
-
-    return Promise.all(promises).then((result) => {
-      const res = result.flat();
-      return res.map(el => el?.getId().get());
-    })
-  }
-
 
   public async getAuthorizedBos(profile: SpinalNode | string, portofolioId: string,): Promise<SpinalNode[]> {
     const node = profile instanceof SpinalNode ? profile : await this._getAppProfileNode(profile);
     if (!(node instanceof SpinalNode)) return;
     return authorizationInstance.getAuthorizedBosFromProfile(node, portofolioId);
-  }
-
-  public async getAuthorizedBosApp(profile: SpinalNode | string, portofolioId: string, bosId: string): Promise<SpinalNode[]> {
-    const node = profile instanceof SpinalNode ? profile : await this._getAppProfileNode(profile);
-    if (!(node instanceof SpinalNode)) return;
-    return authorizationInstance.getAuthorizedBosAppFromProfile(node, portofolioId, bosId);
-  }
-
-  public async getAuthorizedBosApis(profile: SpinalNode | string, portofolioId: string, bosId: string): Promise<SpinalNode[]> {
-    const node = profile instanceof SpinalNode ? profile : await this._getAppProfileNode(profile);
-    if (!(node instanceof SpinalNode)) return;
-    return authorizationInstance.getAuthorizedBosApisRoutesFromProfile(node, portofolioId, bosId);
-  }
-
-  public async getBosAuthStructure(profile: string | SpinalNode, portofolioId: string): Promise<IBosAuthRes[]> {
-    const node = profile instanceof SpinalNode ? profile : await this._getAppProfileNode(profile);
-    if (!(node instanceof SpinalNode)) return;
-
-    const buildings = await this.getAuthorizedBos(profile, portofolioId);
-    const promises = buildings.map(async building => {
-      const bosId = building.getId().get()
-      return {
-        building,
-        apps: await this.getAuthorizedBosApp(profile, portofolioId, bosId),
-        apis: await this.getAuthorizedBosApis(profile, portofolioId, bosId)
-      }
-    })
-
-    return Promise.all(promises);
   }
 
   public async getAllAuthorizedBos(profile: string | SpinalNode): Promise<SpinalNode[]> {
@@ -431,38 +328,20 @@ export class AppProfileService {
   private async _authorizeIPortofolioAuth(profile: SpinalNode, portofolioAuth: IPortofolioAuth): Promise<IPortofolioAuthRes> {
     const [portofolio] = await this.authorizePortofolio(profile, portofolioAuth.portofolioId);
     const apisData = await this.authorizeToAccessPortofolioApisRoute(profile, portofolioAuth);
-    const buildingProm = portofolioAuth.building.map(bos => this._authorizeIBosAuth(profile, bos, portofolioAuth.portofolioId))
+    const buildings = await this.authorizeToAccessBos(profile, portofolioAuth.portofolioId, portofolioAuth.buildingIds)
     return {
       portofolio,
       apis: apisData[0]?.apis,
-      buildings: await Promise.all(buildingProm)
+      buildings
     }
 
   }
 
   private async _unauthorizeIPortofolioAuth(profile: SpinalNode, portofolioAuth: IPortofolioAuthEdit): Promise<any> {
-    await this.unauthorizeToAccessPortofolioApisRoute(profile, { portofolioId: portofolioAuth.portofolioId, apisIds: portofolioAuth.unauthorizeApisIds });
-    const buildingProm = portofolioAuth.building.map(bos => this._unauthorizeIBosAuth(profile, bos, portofolioAuth.portofolioId))
-    await Promise.all(buildingProm);
+    const prom1 = this.unauthorizeToAccessPortofolioApisRoute(profile, { portofolioId: portofolioAuth.portofolioId, apisIds: portofolioAuth.unauthorizeApisIds });
+    const prom2 =  this.unauthorizeToAccessBos(profile, portofolioAuth.portofolioId, portofolioAuth.unauthorizeBuildingIds);
+    return Promise.all([prom1, prom2]);
   }
-
-
-  private async _authorizeIBosAuth(profile: SpinalNode, bosAuth: IBosAuth, portofolioId: string): Promise<IBosAuthRes> {
-    const [building] = await this.authorizeToAccessBos(profile, portofolioId, bosAuth.buildingId);
-    const apisData = await this.authorizeToAccessBosApiRoute(profile, portofolioId, bosAuth);
-
-    return {
-      building,
-      apis: apisData[0]?.apis
-    }
-  }
-
-  private async _unauthorizeIBosAuth(profile: SpinalNode, bosAuth: IBosAuthEdit, portofolioId: string): Promise<any> {
-    const apisData = await this.unauthorizeToAccessBosApiRoute(profile, portofolioId, { buildingId: bosAuth.buildingId, apisIds: bosAuth.unauthorizeApisIds });
-    return apisData;
-  }
-
-
 
   public async _getAppProfileNodeGraph(profileId: string): Promise<SpinalGraph | void> {
     const profile = await this._getAppProfileNode(profileId);

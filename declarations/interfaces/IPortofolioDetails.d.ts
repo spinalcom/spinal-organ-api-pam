@@ -1,9 +1,8 @@
 import { SpinalNode } from "spinal-env-viewer-graph-service";
-import { IBuildingDetails } from "./IBuilding";
 export interface IPortofolioDetails {
     node: SpinalNode;
     apps: SpinalNode[];
-    buildings: IBuildingDetails[];
+    buildings: SpinalNode[];
     apis: SpinalNode[];
 }
 export interface IPortofolioInfo {

@@ -37,6 +37,7 @@ const constant_1 = require("../constant");
 const spinal_env_viewer_graph_service_1 = require("spinal-env-viewer-graph-service");
 const configFile_service_1 = require("./configFile.service");
 const utils_1 = require("../utils/utils");
+const portofolio_service_1 = require("./portofolio.service");
 class APIService {
     constructor() { }
     static getInstance() {
@@ -63,7 +64,9 @@ class APIService {
             const parent = yield this._getOrGetRoutesGroup(parentType);
             const routeId = spinal_env_viewer_graph_service_1.SpinalGraphService.createNode(routeInfo, undefined);
             const node = spinal_env_viewer_graph_service_1.SpinalGraphService.getRealNode(routeId);
-            return parent.addChildInContext(node, constant_1.API_RELATION_NAME, constant_1.PTR_LST_TYPE, this.context);
+            yield parent.addChildInContext(node, constant_1.API_RELATION_NAME, constant_1.PTR_LST_TYPE, this.context);
+            // if(parentType === PORTOFOLIO_API_GROUP_TYPE) await this._addApiToAllPortofolio(routeId);
+            return node;
         });
     }
     updateApiRoute(routeId, newValue, parentType) {
@@ -196,6 +199,14 @@ class APIService {
             route = route.substring(0, route.indexOf('?'));
         const routeFormatted = route.replace(/\{(.*?)\}/g, (el) => '(.*?)');
         return new RegExp(`^${routeFormatted}$`);
+    }
+    _addApiToAllPortofolio(appId) {
+        return __awaiter(this, void 0, void 0, function* () {
+            const instance = portofolio_service_1.PortofolioService.getInstance();
+            const portofolios = yield instance.getAllPortofolio();
+            const promises = portofolios.map(el => instance.addApiToPortofolio(el, appId));
+            return Promise.all(promises);
+        });
     }
 }
 exports.APIService = APIService;

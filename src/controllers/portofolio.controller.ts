@@ -31,6 +31,7 @@ import * as express from 'express';
 import { checkIfItIsAdmin, getProfileNode } from "../security/authentication";
 import { AuthError } from "../security/AuthError";
 import AuthorizationService from "../services/authorization.service";
+import { getAllPortofolioApiIds, getAllPortofolioAppIds } from "../utils/utils";
 
 
 const serviceInstance = BuildingService.getInstance();
@@ -53,7 +54,9 @@ export class PortofolioController extends Controller {
             const isAdmin = await checkIfItIsAdmin(req);
             if (!isAdmin) throw new AuthError(SECURITY_MESSAGES.UNAUTHORIZED);
 
-            const { name, appIds, apiIds } = data;
+            let { name, appIds, apiIds } = data;
+            // appIds = await getAllPortofolioAppIds();
+            // apiIds = await getAllPortofolioApiIds();
 
             const res = await portofolioInstance.addPortofolio(name, appIds, apiIds);
             const details = portofolioInstance._formatDetails(res);

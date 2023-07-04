@@ -22,7 +22,7 @@
  * <http://resources.spinalcom.com/licenses.pdf>.
  */
 
-import { IBosAuth, IPortofolioAuth, IProfile, IProfileRes, IPortofolioAuthRes, IBosAuthRes, IPortofolioData, IBosData, IProfileData } from "../interfaces";
+import { IPortofolioAuth, IProfile, IProfileRes, IPortofolioAuthRes, IPortofolioData, IBosData, IProfileData } from "../interfaces";
 import { SpinalNode } from 'spinal-env-viewer-graph-service'
 
 export function _formatProfile(data: IProfileRes): IProfileData {
@@ -38,17 +38,17 @@ export function _formatPortofolioAuthRes(data: IPortofolioAuthRes): IPortofolioD
         ...data.portofolio.info.get(),
         apps: _getNodeListInfo(data.apps),
         apis: _getNodeListInfo(data.apis),
-        buildings: data.buildings.map(el => _formatBosAuthRes(el))
+        buildings: _getNodeListInfo(data.buildings)
     }
 }
 
-export function _formatBosAuthRes(data: IBosAuthRes): IBosData {
-    return {
-        ...data.building.info.get(),
-        apps: _getNodeListInfo(data.apps),
-        apis: _getNodeListInfo(data.apis)
-    }
-}
+// export function _formatBosAuthRes(data: SpinalNode): IBosData {
+//     return {
+//         ...data.building.info.get(),
+//         apps: _getNodeListInfo(data.apps),
+//         apis: _getNodeListInfo(data.apis)
+//     }
+// }
 
 export function _getNodeListInfo(nodes: SpinalNode[] = []): any[] {
     return nodes.map(el => el.info.get());
@@ -87,11 +87,11 @@ export function _formatAuthorizationData(profileData: IProfile): IPortofolioAuth
 function _unifyData(profile1: IPortofolioAuth, profile2: IPortofolioAuth): IPortofolioAuth {
     if (!profile1.appsIds) profile1.appsIds = [];
     if (!profile1.apisIds) profile1.apisIds = [];
-    if (!profile1.building) profile1.building = [];
+    if (!profile1.buildingIds) profile1.buildingIds = [];
 
     profile1.appsIds = [...profile1.appsIds, ...(profile2.appsIds || [])];
     profile1.apisIds = [...profile1.apisIds, ...(profile2.apisIds || [])];
-    profile1.building = [...profile1.building, ...(profile2.building || [])];
+    profile1.buildingIds = [...profile1.buildingIds, ...(profile2.buildingIds || [])];
 
     return profile1;
 }
@@ -130,25 +130,25 @@ export function _filterPortofolioList(authorizedPortofolio: IPortofolioAuth[] = 
 
 }
 
-export function _filterBosList(authorizedBos: IBosAuth[] = [], unauthorizedBos: IBosAuth[] = []): IBosAuth[] {
-    const obj = {};
+// export function _filterBosList(authorizedBos: IBosAuth[] = [], unauthorizedBos: IBosAuth[] = []): IBosAuth[] {
+//     const obj = {};
 
-    unauthorizedBos.map(({ buildingId, appsIds }) => {
-        obj[buildingId] = appsIds;
-        return;
-    })
+//     unauthorizedBos.map(({ buildingId, appsIds }) => {
+//         obj[buildingId] = appsIds;
+//         return;
+//     })
 
-    return authorizedBos.reduce((liste, item) => {
-        const apps = obj[item.buildingId]
-        if (apps) {
-            if (!item.appsIds) item.appsIds = [];
-            item.appsIds = Array.isArray(item.appsIds) ? item.appsIds : [item.appsIds];
+//     return authorizedBos.reduce((liste, item) => {
+//         const apps = obj[item.buildingId]
+//         if (apps) {
+//             if (!item.appsIds) item.appsIds = [];
+//             item.appsIds = Array.isArray(item.appsIds) ? item.appsIds : [item.appsIds];
 
-            item.appsIds = item.appsIds.filter(id => {
-                return apps.find(el => el !== id);
-            })
-        }
-        liste.push(item);
-        return liste;
-    }, [])
-}
+//             item.appsIds = item.appsIds.filter(id => {
+//                 return apps.find(el => el !== id);
+//             })
+//         }
+//         liste.push(item);
+//         return liste;
+//     }, [])
+// }

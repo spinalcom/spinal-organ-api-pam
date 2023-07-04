@@ -29,19 +29,6 @@ export interface IProfile {
   authorize: IPortofolioAuth[]
 }
 
-export interface IPortofolioAuth {
-  portofolioId: string;
-  appsIds?: string[];
-  apisIds?: string[];
-  building?: IBosAuth[]
-}
-
-export interface IBosAuth {
-  buildingId: string;
-  appsIds?: string[];
-  apisIds?: string[]
-}
-
 export interface IProfileRes {
   node: SpinalNode;
   authorized: IPortofolioAuthRes[]
@@ -51,58 +38,33 @@ export interface IPortofolioAuthRes {
   portofolio: SpinalNode;
   apps?: SpinalNode[];
   apis?: SpinalNode[];
-  buildings?: IBosAuthRes[];
+  buildings?: SpinalNode[];
 }
 
-export interface IBosAuthRes {
-  building: SpinalNode;
-  apps?: SpinalNode[];
-  apis?: SpinalNode[];
+export interface IPortofolioAuth {
+  portofolioId: string;
+  appsIds?: string[];
+  apisIds?: string[];
+  buildingIds?: string[]
 }
+
+
+
+
 
 ///////////////////////////////////
 //            EDIT               //
 //////////////////////////////////
 
-export interface IPortofolioAuthEdit {
-  portofolioId: string;
-  appsIds?: string[];
-  apisIds?: string[];
-  unauthorizeAppsIds?: string[];
-  unauthorizeApisIds?: string[];
-  building?: IBosAuthEdit[]
-}
-
-export interface IBosAuthEdit {
-  buildingId: string;
-  appsIds?: string[];
-  apisIds?: string[];
-  unauthorizeAppsIds?: string[];
-  unauthorizeApisIds?: string[];
-}
-
 export interface IProfileEdit {
   name?: string;
   authorize?: IPortofolioAuthEdit[]
 }
-// export interface IProfile {
-//   name?: string;
-//   autorize?: IPortofolioAuth[];
-//   // unauthorizePortofolio?: IPortofolioAuth[];
-//   // authorizeApis?: string[];
-//   // unauthorizeApis?: string[];
-//   // authorizeBos?: IBosAuth[];
-//   // unauthorizeBos?: IBosAuth[];
-// }
+
+export interface IPortofolioAuthEdit extends IPortofolioAuth {
+  unauthorizeAppsIds?: string[];
+  unauthorizeApisIds?: string[];
+  unauthorizeBuildingIds?: string[];
+}
 
 
-
-// export interface IAuthRes {
-  // authorizedPortofolio?: IPortofolioAuthRes[];
-  // authorizedRoutes?: SpinalNode[];
-  // authorizedBos?: IBosAuthRes[];
-// }
-
-// export interface IProfileRes extends IAuthRes {
-  // node: SpinalNode;
-// }

@@ -27,7 +27,7 @@ import { SpinalContext, SpinalGraphService, SpinalNode } from "spinal-env-viewer
 import { configServiceInstance } from "./configFile.service";
 import { IApiRoute, ISwaggerFile, ISwaggerPath, ISwaggerPathData } from "../interfaces";
 import { removeNodeReferences } from "../utils/utils";
-import { AdminProfileService } from "./adminProfile.service";
+import { PortofolioService } from "./portofolio.service";
 
 export class APIService {
     private static instance: APIService;
@@ -56,7 +56,10 @@ export class APIService {
         const parent = await this._getOrGetRoutesGroup(parentType);
         const routeId = SpinalGraphService.createNode(routeInfo, undefined);
         const node = SpinalGraphService.getRealNode(routeId);
-        return parent.addChildInContext(node, API_RELATION_NAME, PTR_LST_TYPE, this.context);
+        await parent.addChildInContext(node, API_RELATION_NAME, PTR_LST_TYPE, this.context);
+        
+        // if(parentType === PORTOFOLIO_API_GROUP_TYPE) await this._addApiToAllPortofolio(routeId);
+        return node;
     }
 
     public async updateApiRoute(routeId: string, newValue: IApiRoute, parentType) {
@@ -200,6 +203,13 @@ export class APIService {
 
         const routeFormatted = route.replace(/\{(.*?)\}/g, (el) => '(.*?)')
         return new RegExp(`^${routeFormatted}$`);
+    }
+
+    private async _addApiToAllPortofolio(appId: string): Promise<SpinalNode[][]> {
+        const instance = PortofolioService.getInstance()
+        const portofolios = await instance.getAllPortofolio();
+        const promises = portofolios.map(el => instance.addApiToPortofolio(el, appId));
+        return Promise.all(promises);
     }
 
 }

@@ -283,9 +283,17 @@ class UserListService {
     }
     _getAuthorizedApps(userProfileId, portofolioId, buildingId) {
         const userProfileInstance = userProfile_service_1.UserProfileService.getInstance();
-        return buildingId
-            ? userProfileInstance.getAuthorizedBosApp(userProfileId, portofolioId, buildingId)
-            : userProfileInstance.getAuthorizedPortofolioApp(userProfileId, portofolioId);
+        return userProfileInstance.getAuthorizedPortofolioApp(userProfileId, portofolioId);
+        // return buildingId
+        //   ? userProfileInstance.getAuthorizedBosApp(
+        //       userProfileId,
+        //       portofolioId,
+        //       buildingId
+        //     )
+        //   : userProfileInstance.getAuthorizedPortofolioApp(
+        //       userProfileId,
+        //       portofolioId
+        //     );
     }
     _getProfileInfo(userToken, adminCredential, isUser = true) {
         let urlAdmin = adminCredential.urlAdmin;

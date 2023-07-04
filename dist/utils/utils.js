@@ -32,7 +32,9 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
     });
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.removeRelationFromReference = exports.removeNodeReferences = void 0;
+exports.getAllPortofolioApiIds = exports.getAllPortofolioAppIds = exports.removeRelationFromReference = exports.removeNodeReferences = void 0;
+const services_1 = require("../services");
+const constant_1 = require("../constant");
 function removeNodeReferences(node, referenceNode) {
     return __awaiter(this, void 0, void 0, function* () {
         try {
@@ -92,4 +94,18 @@ function getReferences(node) {
         });
     });
 }
+function getAllPortofolioAppIds() {
+    return __awaiter(this, void 0, void 0, function* () {
+        const apps = yield services_1.AppService.getInstance().getAllPortofolioApps();
+        return apps.map(el => el.getId().get());
+    });
+}
+exports.getAllPortofolioAppIds = getAllPortofolioAppIds;
+function getAllPortofolioApiIds() {
+    return __awaiter(this, void 0, void 0, function* () {
+        const apis = yield services_1.APIService.getInstance().getAllApiRoute(constant_1.PORTOFOLIO_API_GROUP_TYPE);
+        return apis.map(el => el.getId().get());
+    });
+}
+exports.getAllPortofolioApiIds = getAllPortofolioApiIds;
 //# sourceMappingURL=utils.js.map

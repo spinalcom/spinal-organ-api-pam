@@ -1,5 +1,5 @@
 import { SpinalGraph, SpinalContext, SpinalNode } from 'spinal-env-viewer-graph-service';
-import { IBosAuth, IPortofolioAuth, IProfile, IProfileRes, IPortofolioAuthRes, IBosAuthRes, IProfileEdit, IPortofolioAuthEdit } from '../interfaces';
+import { IPortofolioAuth, IProfile, IProfileRes, IPortofolioAuthRes, IProfileEdit, IPortofolioAuthEdit } from '../interfaces';
 export declare class UserProfileService {
     private static instance;
     context: SpinalContext;
@@ -25,19 +25,10 @@ export declare class UserProfileService {
     getPortofolioAuthStructure(profile: string | SpinalNode): Promise<IPortofolioAuthRes[]>;
     authorizeToAccessBos(profile: SpinalNode | string, portofolioId: string, BosId: string | string[]): Promise<SpinalNode[]>;
     unauthorizeToAccessBos(profile: SpinalNode | string, portofolioId: string, BosId: string | string[]): Promise<boolean[]>;
-    authorizeToAccessBosApp(profile: SpinalNode | string, portofolioId: string, data: IBosAuth | IBosAuth[]): Promise<IBosAuthRes[]>;
-    unauthorizeToAccessBosApp(profile: SpinalNode | string, portofolioId: string, data: IBosAuth | IBosAuth[]): Promise<SpinalNode[]>;
-    authorizeToAccessBosApiRoute(profile: SpinalNode | string, portofolioId: string, data: IBosAuth | IBosAuth[]): Promise<IBosAuthRes[]>;
-    unauthorizeToAccessBosApiRoute(profile: SpinalNode | string, portofolioId: string, data: IBosAuth | IBosAuth[]): Promise<string[]>;
     getAuthorizedBos(profile: SpinalNode | string, portofolioId: string): Promise<SpinalNode[]>;
-    getAuthorizedBosApp(profile: SpinalNode | string, portofolioId: string, bosId: string): Promise<SpinalNode[]>;
-    getAuthorizedBosApis(profile: SpinalNode | string, portofolioId: string, bosId: string): Promise<SpinalNode[]>;
-    getBosAuthStructure(profile: string | SpinalNode, portofolioId: string): Promise<IBosAuthRes[]>;
     getAllAuthorizedBos(profile: string | SpinalNode): Promise<SpinalNode[]>;
     _authorizeIPortofolioAuth(profile: SpinalNode, portofolioAuth: IPortofolioAuth): Promise<IPortofolioAuthRes>;
     _unauthorizeIPortofolioAuth(profile: SpinalNode, portofolioAuth: IPortofolioAuthEdit): Promise<any>;
-    private _authorizeIBosAuth;
-    private _unauthorizeIBosAuth;
     _getUserProfileNodeGraph(profileId: string): Promise<SpinalGraph | void>;
     private _findChildInContext;
     private _createUserProfileNode;

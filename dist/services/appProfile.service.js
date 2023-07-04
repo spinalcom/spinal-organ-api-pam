@@ -263,7 +263,7 @@ class AppProfileService {
                     portofolio,
                     apps: yield this.getAuthorizedPortofolioApp(profile, portofolioId),
                     apis: yield this.getAuthorizedPortofolioApis(profile, portofolioId),
-                    buildings: yield this.getBosAuthStructure(profile, portofolioId)
+                    buildings: yield this.getAuthorizedBos(profile, portofolioId)
                 };
             }));
             return Promise.all(promises);
@@ -292,110 +292,12 @@ class AppProfileService {
             return Promise.all(promises);
         });
     }
-    authorizeToAccessBosApp(profile, portofolioId, data) {
-        return __awaiter(this, void 0, void 0, function* () {
-            data = Array.isArray(data) ? data : [data];
-            const node = profile instanceof spinal_env_viewer_graph_service_1.SpinalNode ? profile : yield this._getAppProfileNode(profile);
-            if (!(node instanceof spinal_env_viewer_graph_service_1.SpinalNode))
-                return;
-            return data.reduce((prom, { buildingId, appsIds }) => __awaiter(this, void 0, void 0, function* () {
-                const liste = yield prom;
-                const bos = yield authorization_service_1.authorizationInstance.authorizeProfileToAccessBos(node, portofolioId, buildingId);
-                const apps = yield authorization_service_1.authorizationInstance.authorizeProfileToAccessBosApp(node, portofolioId, buildingId, appsIds);
-                liste.push({
-                    building: bos,
-                    apps
-                });
-                return liste;
-            }), Promise.resolve([]));
-        });
-    }
-    unauthorizeToAccessBosApp(profile, portofolioId, data) {
-        return __awaiter(this, void 0, void 0, function* () {
-            data = Array.isArray(data) ? data : [data];
-            const node = profile instanceof spinal_env_viewer_graph_service_1.SpinalNode ? profile : yield this._getAppProfileNode(profile);
-            if (!(node instanceof spinal_env_viewer_graph_service_1.SpinalNode))
-                return;
-            const promises = data.map(({ buildingId, appsIds }) => {
-                return authorization_service_1.authorizationInstance.unauthorizeProfileToAccessBosApp(node, portofolioId, buildingId, appsIds);
-            });
-            return Promise.all(promises).then((result) => {
-                return result.flat();
-            });
-        });
-    }
-    authorizeToAccessBosApiRoute(profile, portofolioId, data) {
-        return __awaiter(this, void 0, void 0, function* () {
-            data = Array.isArray(data) ? data : [data];
-            const node = profile instanceof spinal_env_viewer_graph_service_1.SpinalNode ? profile : yield this._getAppProfileNode(profile);
-            if (!(node instanceof spinal_env_viewer_graph_service_1.SpinalNode))
-                return;
-            return data.reduce((prom, { buildingId, apisIds }) => __awaiter(this, void 0, void 0, function* () {
-                const liste = yield prom;
-                const bos = yield authorization_service_1.authorizationInstance.authorizeProfileToAccessBos(node, portofolioId, buildingId);
-                const apis = yield authorization_service_1.authorizationInstance.authorizeProfileToAccessBosApisRoutes(node, portofolioId, buildingId, apisIds);
-                liste.push({
-                    building: bos,
-                    apis
-                });
-                return liste;
-            }), Promise.resolve([]));
-        });
-    }
-    unauthorizeToAccessBosApiRoute(profile, portofolioId, data) {
-        return __awaiter(this, void 0, void 0, function* () {
-            data = Array.isArray(data) ? data : [data];
-            const node = profile instanceof spinal_env_viewer_graph_service_1.SpinalNode ? profile : yield this._getAppProfileNode(profile);
-            if (!(node instanceof spinal_env_viewer_graph_service_1.SpinalNode))
-                return;
-            const promises = data.map(({ buildingId, apisIds }) => {
-                return authorization_service_1.authorizationInstance.unauthorizeProfileToAccessBosApisRoutes(node, portofolioId, buildingId, apisIds);
-            });
-            return Promise.all(promises).then((result) => {
-                const res = result.flat();
-                return res.map(el => el === null || el === void 0 ? void 0 : el.getId().get());
-            });
-        });
-    }
     getAuthorizedBos(profile, portofolioId) {
         return __awaiter(this, void 0, void 0, function* () {
             const node = profile instanceof spinal_env_viewer_graph_service_1.SpinalNode ? profile : yield this._getAppProfileNode(profile);
             if (!(node instanceof spinal_env_viewer_graph_service_1.SpinalNode))
                 return;
             return authorization_service_1.authorizationInstance.getAuthorizedBosFromProfile(node, portofolioId);
-        });
-    }
-    getAuthorizedBosApp(profile, portofolioId, bosId) {
-        return __awaiter(this, void 0, void 0, function* () {
-            const node = profile instanceof spinal_env_viewer_graph_service_1.SpinalNode ? profile : yield this._getAppProfileNode(profile);
-            if (!(node instanceof spinal_env_viewer_graph_service_1.SpinalNode))
-                return;
-            return authorization_service_1.authorizationInstance.getAuthorizedBosAppFromProfile(node, portofolioId, bosId);
-        });
-    }
-    getAuthorizedBosApis(profile, portofolioId, bosId) {
-        return __awaiter(this, void 0, void 0, function* () {
-            const node = profile instanceof spinal_env_viewer_graph_service_1.SpinalNode ? profile : yield this._getAppProfileNode(profile);
-            if (!(node instanceof spinal_env_viewer_graph_service_1.SpinalNode))
-                return;
-            return authorization_service_1.authorizationInstance.getAuthorizedBosApisRoutesFromProfile(node, portofolioId, bosId);
-        });
-    }
-    getBosAuthStructure(profile, portofolioId) {
-        return __awaiter(this, void 0, void 0, function* () {
-            const node = profile instanceof spinal_env_viewer_graph_service_1.SpinalNode ? profile : yield this._getAppProfileNode(profile);
-            if (!(node instanceof spinal_env_viewer_graph_service_1.SpinalNode))
-                return;
-            const buildings = yield this.getAuthorizedBos(profile, portofolioId);
-            const promises = buildings.map((building) => __awaiter(this, void 0, void 0, function* () {
-                const bosId = building.getId().get();
-                return {
-                    building,
-                    apps: yield this.getAuthorizedBosApp(profile, portofolioId, bosId),
-                    apis: yield this.getAuthorizedBosApis(profile, portofolioId, bosId)
-                };
-            }));
-            return Promise.all(promises);
         });
     }
     getAllAuthorizedBos(profile) {
@@ -422,36 +324,19 @@ class AppProfileService {
         return __awaiter(this, void 0, void 0, function* () {
             const [portofolio] = yield this.authorizePortofolio(profile, portofolioAuth.portofolioId);
             const apisData = yield this.authorizeToAccessPortofolioApisRoute(profile, portofolioAuth);
-            const buildingProm = portofolioAuth.building.map(bos => this._authorizeIBosAuth(profile, bos, portofolioAuth.portofolioId));
+            const buildings = yield this.authorizeToAccessBos(profile, portofolioAuth.portofolioId, portofolioAuth.buildingIds);
             return {
                 portofolio,
                 apis: (_a = apisData[0]) === null || _a === void 0 ? void 0 : _a.apis,
-                buildings: yield Promise.all(buildingProm)
+                buildings
             };
         });
     }
     _unauthorizeIPortofolioAuth(profile, portofolioAuth) {
         return __awaiter(this, void 0, void 0, function* () {
-            yield this.unauthorizeToAccessPortofolioApisRoute(profile, { portofolioId: portofolioAuth.portofolioId, apisIds: portofolioAuth.unauthorizeApisIds });
-            const buildingProm = portofolioAuth.building.map(bos => this._unauthorizeIBosAuth(profile, bos, portofolioAuth.portofolioId));
-            yield Promise.all(buildingProm);
-        });
-    }
-    _authorizeIBosAuth(profile, bosAuth, portofolioId) {
-        var _a;
-        return __awaiter(this, void 0, void 0, function* () {
-            const [building] = yield this.authorizeToAccessBos(profile, portofolioId, bosAuth.buildingId);
-            const apisData = yield this.authorizeToAccessBosApiRoute(profile, portofolioId, bosAuth);
-            return {
-                building,
-                apis: (_a = apisData[0]) === null || _a === void 0 ? void 0 : _a.apis
-            };
-        });
-    }
-    _unauthorizeIBosAuth(profile, bosAuth, portofolioId) {
-        return __awaiter(this, void 0, void 0, function* () {
-            const apisData = yield this.unauthorizeToAccessBosApiRoute(profile, portofolioId, { buildingId: bosAuth.buildingId, apisIds: bosAuth.unauthorizeApisIds });
-            return apisData;
+            const prom1 = this.unauthorizeToAccessPortofolioApisRoute(profile, { portofolioId: portofolioAuth.portofolioId, apisIds: portofolioAuth.unauthorizeApisIds });
+            const prom2 = this.unauthorizeToAccessBos(profile, portofolioAuth.portofolioId, portofolioAuth.unauthorizeBuildingIds);
+            return Promise.all([prom1, prom2]);
         });
     }
     _getAppProfileNodeGraph(profileId) {

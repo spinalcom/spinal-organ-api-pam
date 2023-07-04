@@ -33,4 +33,5 @@ export declare class AppService {
     private _getApplicationGroupNode;
     private _convertExcelToJson;
     private _formatAppsJson;
+    private _addAppToAllPortofolio;
 }

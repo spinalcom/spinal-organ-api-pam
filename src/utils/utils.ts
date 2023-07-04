@@ -23,6 +23,8 @@
  */
 
 import { SpinalNode } from "spinal-env-viewer-graph-service";
+import { APIService, AppService } from "../services";
+import { PORTOFOLIO_API_GROUP_TYPE } from "../constant";
 
 export async function removeNodeReferences(node: SpinalNode, referenceNode?: SpinalNode): Promise<boolean> {
     try {
@@ -83,4 +85,14 @@ function getReferences(node: SpinalNode): Promise<spinal.Lst<SpinalNode> | Spina
             resolve(references);
         })
     });
+}
+
+export async function getAllPortofolioAppIds(): Promise<string[]> {
+    const apps = await AppService.getInstance().getAllPortofolioApps();
+    return apps.map(el => el.getId().get());
+}
+
+export async function getAllPortofolioApiIds(): Promise<string[]> {
+    const apis = await APIService.getInstance().getAllApiRoute(PORTOFOLIO_API_GROUP_TYPE);
+    return apis.map(el => el.getId().get());
 }

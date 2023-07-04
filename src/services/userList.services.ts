@@ -390,16 +390,18 @@ export class UserListService {
   ): Promise<SpinalNode[]> {
     const userProfileInstance = UserProfileService.getInstance();
 
-    return buildingId
-      ? userProfileInstance.getAuthorizedBosApp(
-          userProfileId,
-          portofolioId,
-          buildingId
-        )
-      : userProfileInstance.getAuthorizedPortofolioApp(
-          userProfileId,
-          portofolioId
-        );
+    return userProfileInstance.getAuthorizedPortofolioApp(userProfileId, portofolioId);
+    
+    // return buildingId
+    //   ? userProfileInstance.getAuthorizedBosApp(
+    //       userProfileId,
+    //       portofolioId,
+    //       buildingId
+    //     )
+    //   : userProfileInstance.getAuthorizedPortofolioApp(
+    //       userProfileId,
+    //       portofolioId
+    //     );
   }
 
   private _getProfileInfo(

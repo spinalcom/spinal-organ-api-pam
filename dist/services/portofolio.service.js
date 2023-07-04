@@ -125,7 +125,7 @@ class PortofolioService {
             return {
                 node,
                 apps,
-                buildings: yield Promise.all(buildings.map((el) => building_service_1.BuildingService.getInstance().getBuildingStructure(el))),
+                buildings,
                 apis,
             };
         });
@@ -388,7 +388,11 @@ class PortofolioService {
         });
     }
     _formatDetails(data) {
-        return Object.assign(Object.assign({}, data.node.info.get()), { buildings: (data.buildings || []).map((el) => building_service_1.BuildingService.getInstance().formatBuildingStructure(el)), apps: (data.apps || []).map((el) => el.info.get()), apis: (data.apis || []).map((el) => el.info.get()) });
+        return Object.assign(Object.assign({}, data.node.info.get()), { buildings: data.buildings.map(el => el.info.get()), 
+            // buildings: (data.buildings || []).map((el) =>
+            //   BuildingService.getInstance().formatBuildingStructure(el)
+            // ),
+            apps: (data.apps || []).map((el) => el.info.get()), apis: (data.apis || []).map((el) => el.info.get()) });
     }
 }
 exports.PortofolioService = PortofolioService;

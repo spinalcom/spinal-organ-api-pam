@@ -21,4 +21,5 @@ export declare class APIService {
     private _getScope;
     private _readBuffer;
     private _formatRoute;
+    private _addApiToAllPortofolio;
 }

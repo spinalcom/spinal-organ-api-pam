@@ -64,7 +64,9 @@ let PortofolioController = class PortofolioController extends tsoa_1.Controller 
                 const isAdmin = yield (0, authentication_1.checkIfItIsAdmin)(req);
                 if (!isAdmin)
                     throw new AuthError_1.AuthError(constant_1.SECURITY_MESSAGES.UNAUTHORIZED);
-                const { name, appIds, apiIds } = data;
+                let { name, appIds, apiIds } = data;
+                // appIds = await getAllPortofolioAppIds();
+                // apiIds = await getAllPortofolioApiIds();
                 const res = yield portofolioInstance.addPortofolio(name, appIds, apiIds);
                 const details = portofolioInstance._formatDetails(res);
                 this.setStatus(constant_1.HTTP_CODES.CREATED);
