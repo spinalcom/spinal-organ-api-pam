@@ -803,7 +803,7 @@
     },
     "info": {
         "title": "spinal-organ-api-pam",
-        "version": "1.2.4",
+        "version": "1.2.5",
         "license": {
             "name": "ISC"
         },
@@ -3923,6 +3923,54 @@
         },
         "/api/v1/pam/get_building/{id}": {
             "post": {
+                "operationId": "GetBuildingByIdByPost",
+                "responses": {
+                    "200": {
+                        "description": "Ok",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "anyOf": [
+                                        {
+                                            "$ref": "#/components/schemas/IBuilding"
+                                        },
+                                        {
+                                            "properties": {
+                                                "message": {
+                                                    "type": "string"
+                                                }
+                                            },
+                                            "required": [
+                                                "message"
+                                            ],
+                                            "type": "object"
+                                        }
+                                    ]
+                                }
+                            }
+                        }
+                    }
+                },
+                "tags": [
+                    "Building"
+                ],
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ],
+                "parameters": [
+                    {
+                        "in": "path",
+                        "name": "id",
+                        "required": true,
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                ]
+            },
+            "get": {
                 "operationId": "GetBuildingById",
                 "responses": {
                     "200": {

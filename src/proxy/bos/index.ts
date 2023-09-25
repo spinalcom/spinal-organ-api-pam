@@ -42,19 +42,27 @@ export default function configureProxy(app: express.Express, useV1: boolean = fa
 
         try {
             const { building_id } = req.params;
-            const tokenInfo = await checkAndGetTokenInfo(req);
             req["endpoint"] = formatUri(req.url, uri);
 
             const building = await BuildingService.getInstance().getBuildingById(building_id);
             if (!building) return res.status(HTTP_CODES.NOT_FOUND).send(`No building found for ${building_id}`);
+            apiData.url = building.info.apiUrl.get();
+
+            if (/\BIM\/file/.test((<any>req).endpoint)) {
+                req["endpoint"] = (<any>req).endpoint.replace("/api/v1", "");
+                return next();
+            }
+
+            const tokenInfo = await checkAndGetTokenInfo(req);
+
+            // const building = await BuildingService.getInstance().getBuildingById(building_id);
+            // if (!building) return res.status(HTTP_CODES.NOT_FOUND).send(`No building found for ${building_id}`);
 
             if (tokenInfo.userInfo?.type != USER_TYPES.ADMIN) {
-
                 const isAppProfile = tokenInfo.profile.appProfileBosConfigId ? true : false;
                 const profileId = tokenInfo.profile.appProfileBosConfigId || tokenInfo.profile.userProfileBosConfigId || tokenInfo.profile.profileId;
                 const access = await canAccess(building_id, { method: req.method, route: (<any>req).endpoint }, profileId, isAppProfile)
                 if (!access) throw new Error(SECURITY_MESSAGES.UNAUTHORIZED);
-
             }
 
             apiData.url = building.info.apiUrl.get();

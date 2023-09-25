@@ -45,11 +45,18 @@ function configureProxy(app, useV1 = false) {
         var _a;
         try {
             const { building_id } = req.params;
-            const tokenInfo = yield (0, authentication_1.checkAndGetTokenInfo)(req);
             req["endpoint"] = (0, utils_1.formatUri)(req.url, uri);
             const building = yield services_1.BuildingService.getInstance().getBuildingById(building_id);
             if (!building)
                 return res.status(constant_1.HTTP_CODES.NOT_FOUND).send(`No building found for ${building_id}`);
+            apiData.url = building.info.apiUrl.get();
+            if (/\BIM\/file/.test(req.endpoint)) {
+                req["endpoint"] = req.endpoint.replace("/api/v1", "");
+                return next();
+            }
+            const tokenInfo = yield (0, authentication_1.checkAndGetTokenInfo)(req);
+            // const building = await BuildingService.getInstance().getBuildingById(building_id);
+            // if (!building) return res.status(HTTP_CODES.NOT_FOUND).send(`No building found for ${building_id}`);
             if (((_a = tokenInfo.userInfo) === null || _a === void 0 ? void 0 : _a.type) != constant_1.USER_TYPES.ADMIN) {
                 const isAppProfile = tokenInfo.profile.appProfileBosConfigId ? true : false;
                 const profileId = tokenInfo.profile.appProfileBosConfigId || tokenInfo.profile.userProfileBosConfigId || tokenInfo.profile.profileId;

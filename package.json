@@ -41,12 +41,14 @@
     "q": "^1.5.1",
     "socket.io": "^4.5.4",
     "socket.io-client": "^4.5.4",
+    "spinal-core-connectorjs_type": "git+https://github.com/spinalcom/spinal-core-connectorjs_type.git",
     "spinal-env-viewer-graph-service": "git+https://github.com/spinalcom/Spinal-Graph-Service.git",
+    "spinal-env-viewer-plugin-documentation-service": "git+https://github.com/spinalcom/spinal-env-viewer-plugin-documentation-service.git",
     "spinal-env-viewer-plugin-excel-manager-service": "git+https://github.com/spinalcom/spinal-env-viewer-plugin-excel-manager-service.git",
+    "spinal-model-graph": "git+https://github.com/spinalcom/spinal-model-graph.git",
     "spinal-service-pubsub-logs": "git+https://github.com/spinalcom/spinal-service-pubsub-logs.git",
     "swagger-ui-express": "^4.5.0",
     "tsoa": "^4.1.2",
-    "typescript": "^4.4.3",
     "uuid": "^8.3.2"
   },
   "devDependencies": {
@@ -63,7 +65,7 @@
     "nodemon": "^2.0.20",
     "swagger-jsdoc-generator": "^1.0.3",
     "ts-node": "^10.9.1",
-    "typescript": "~4.5.5"
+    "typescript": "^5.2.2"
   },
   "nodemonConfig": {
     "watch": [

@@ -57,7 +57,7 @@ let BuildingController = class BuildingController extends tsoa_1.Controller {
     constructor() {
         super();
     }
-    getBuildingById(req, id) {
+    getBuildingByIdByPost(req, id) {
         return __awaiter(this, void 0, void 0, function* () {
             try {
                 const profile = yield (0, authentication_1.getProfileNode)(req);
@@ -76,6 +76,11 @@ let BuildingController = class BuildingController extends tsoa_1.Controller {
                 this.setStatus(constant_1.HTTP_CODES.INTERNAL_ERROR);
                 return { message: error.message };
             }
+        });
+    }
+    getBuildingById(req, id) {
+        return __awaiter(this, void 0, void 0, function* () {
+            return this.getBuildingByIdByPost(req, id);
         });
     }
     getAllBuildingsApps(req) {
@@ -333,9 +338,19 @@ let BuildingController = class BuildingController extends tsoa_1.Controller {
         });
     }
 };
+exports.BuildingController = BuildingController;
 __decorate([
     (0, tsoa_1.Security)(constant_1.SECURITY_NAME.bearerAuth),
     (0, tsoa_1.Post)("/get_building/{id}"),
+    __param(0, (0, tsoa_1.Request)()),
+    __param(1, (0, tsoa_1.Path)()),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [Object, String]),
+    __metadata("design:returntype", Promise)
+], BuildingController.prototype, "getBuildingByIdByPost", null);
+__decorate([
+    (0, tsoa_1.Security)(constant_1.SECURITY_NAME.bearerAuth),
+    (0, tsoa_1.Get)("/get_building/{id}"),
     __param(0, (0, tsoa_1.Request)()),
     __param(1, (0, tsoa_1.Path)()),
     __metadata("design:type", Function),
@@ -462,11 +477,10 @@ __decorate([
     __metadata("design:paramtypes", [Object, String, String]),
     __metadata("design:returntype", Promise)
 ], BuildingController.prototype, "buildingHasApi", null);
-BuildingController = __decorate([
+exports.BuildingController = BuildingController = __decorate([
     (0, tsoa_1.Route)("/api/v1/pam"),
     (0, tsoa_1.Tags)("Building"),
     __metadata("design:paramtypes", [])
 ], BuildingController);
-exports.BuildingController = BuildingController;
 exports.default = new BuildingController();
 //# sourceMappingURL=building.controller.js.map

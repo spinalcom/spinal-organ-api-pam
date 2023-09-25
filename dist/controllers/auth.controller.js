@@ -182,6 +182,7 @@ let AuthController = class AuthController extends tsoa_1.Controller {
         });
     }
 };
+exports.AuthController = AuthController;
 __decorate([
     (0, tsoa_1.Post)("/auth"),
     __param(0, (0, tsoa_1.Body)()),
@@ -238,11 +239,10 @@ __decorate([
     __metadata("design:paramtypes", [Object]),
     __metadata("design:returntype", Promise)
 ], AuthController.prototype, "tokenIsValid", null);
-AuthController = __decorate([
+exports.AuthController = AuthController = __decorate([
     (0, tsoa_1.Route)("/api/v1/pam"),
     (0, tsoa_1.Tags)("Auth"),
     __metadata("design:paramtypes", [])
 ], AuthController);
-exports.AuthController = AuthController;
 exports.default = new AuthController();
 //# sourceMappingURL=auth.controller.js.map

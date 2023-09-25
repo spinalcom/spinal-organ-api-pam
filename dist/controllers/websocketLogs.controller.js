@@ -194,6 +194,7 @@ let WebsocketLogsController = class WebsocketLogsController extends tsoa_1.Contr
         });
     }
 };
+exports.WebsocketLogsController = WebsocketLogsController;
 __decorate([
     (0, tsoa_1.Security)(constant_1.SECURITY_NAME.bearerAuth),
     (0, tsoa_1.Get)('/websocket/{buildingId}/get_websocket_state'),
@@ -250,10 +251,9 @@ __decorate([
     __metadata("design:paramtypes", [Object, String]),
     __metadata("design:returntype", Promise)
 ], WebsocketLogsController.prototype, "readLast24hLogs", null);
-WebsocketLogsController = __decorate([
+exports.WebsocketLogsController = WebsocketLogsController = __decorate([
     (0, tsoa_1.Route)('/api/v1/pam'),
     (0, tsoa_1.Tags)('Websocket Logs'),
     __metadata("design:paramtypes", [])
 ], WebsocketLogsController);
-exports.WebsocketLogsController = WebsocketLogsController;
 //# sourceMappingURL=websocketLogs.controller.js.map
