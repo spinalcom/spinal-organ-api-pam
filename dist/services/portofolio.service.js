@@ -115,8 +115,10 @@ class PortofolioService {
             const node = portofolio instanceof spinal_env_viewer_graph_service_1.SpinalNode
                 ? portofolio
                 : yield this.getPortofolio(portofolio);
-            if (!node)
-                throw new Error(`No portofolio found for {portofolio}`);
+            if (!node) {
+                const id = typeof portofolio === "string" ? portofolio : portofolio.getId().get();
+                throw new Error(`No portofolio found for ${id}`);
+            }
             const [apps, buildings, apis] = yield Promise.all([
                 this.getPortofolioApps(node),
                 this.getPortofolioBuildings(node),

@@ -75,8 +75,9 @@ class APIException {
         this._aCodes = config.RESULT_CODE;
         for (const type in this._aCodes) {
             for (const codes of this._aCodes[type]) {
-                if (codes.message === codeMsg) {
+                if (codes.code === codeMsg || codes.message === codeMsg) {
                     this.setAll(codes, customErr);
+                    return;
                 }
             }
         }

@@ -24,11 +24,14 @@
 
 import { BOS_BASE_URI_V2, BOS_BASE_URI_V1, BOS_BASE_URI_V1_2, HTTP_CODES, SECURITY_NAME, USER_TYPES, SECURITY_MESSAGES, PAM_BASE_URI } from "../../constant";
 import * as express from "express";
-import { BuildingService } from '../../services'
+import { AuthentificationService, BuildingService } from '../../services'
 import * as proxy from "express-http-proxy";
 import { checkAndGetTokenInfo } from "../../security/authentication"
 import { canAccess, formatUri, getProfileBuildings, proxyOptions } from "./utils";
 import { Utils } from "../../utils/pam_v1_utils/utils";
+import axios from "axios";
+import { AuthError } from "../../security/AuthError";
+import { APIException } from "../../utils/pam_v1_utils/api_exception";
 
 
 interface IApiData { url: string; clientId: string; secretId: string }
@@ -45,7 +48,8 @@ export default function configureProxy(app: express.Express, useV1: boolean = fa
             req["endpoint"] = formatUri(req.url, uri);
 
             const building = await BuildingService.getInstance().getBuildingById(building_id);
-            if (!building) return res.status(HTTP_CODES.NOT_FOUND).send(`No building found for ${building_id}`);
+            if (!building) return new AuthError(SECURITY_MESSAGES.UNAUTHORIZED);
+
             apiData.url = building.info.apiUrl.get();
 
             if (/\BIM\/file/.test((<any>req).endpoint)) {
@@ -62,20 +66,25 @@ export default function configureProxy(app: express.Express, useV1: boolean = fa
                 const isAppProfile = tokenInfo.profile.appProfileBosConfigId ? true : false;
                 const profileId = tokenInfo.profile.appProfileBosConfigId || tokenInfo.profile.userProfileBosConfigId || tokenInfo.profile.profileId;
                 const access = await canAccess(building_id, { method: req.method, route: (<any>req).endpoint }, profileId, isAppProfile)
-                if (!access) throw new Error(SECURITY_MESSAGES.UNAUTHORIZED);
+                if (!access) throw new AuthError(SECURITY_MESSAGES.UNAUTHORIZED);
             }
 
             apiData.url = building.info.apiUrl.get();
             next();
 
         } catch (error) {
+            if (useV1) {
+                const apiExc = new APIException(error.code || HTTP_CODES.UNAUTHORIZED, error.message);
+                const err = Utils.getErrObj(apiExc, "");
+                return res.status(err.code).send(err.msg);
+            }
             return res.status(HTTP_CODES.UNAUTHORIZED).send(error.message);
         }
 
     }, proxy((req: express.Request) => apiData.url, proxyOptions(useV1)))
 
 
-    buildingListMiddleware(app);
+    buildingListMiddleware(app, useV1);
 }
 
 
@@ -99,12 +108,82 @@ function buildingListMiddleware(app: express.Application, useV1: boolean = false
                 const data = Utils.getReturnObj(null, buildings, "READ");
                 return res.send(data);
             } catch (error) {
-                return res.status(HTTP_CODES.UNAUTHORIZED).send(error.message);
+                return res.status(HTTP_CODES.UNAUTHORIZED).send({
+                    statusCode: HTTP_CODES.UNAUTHORIZED,
+                    status: HTTP_CODES.UNAUTHORIZED,
+                    code: HTTP_CODES.UNAUTHORIZED,
+                    message: error.message
+                });
             }
         })
 
-        app.post("/v1/oauth/token", (req: express.Request, res: express.Response) => {
-            res.redirect(307, `${PAM_BASE_URI}/auth`)
+        app.post("/v1/oauth/token", async (req: express.Request, res: express.Response) => {
+            // res.redirect(307, `${PAM_BASE_URI}/auth`)
+
+            
+            try {
+                const credential = req.body;
+                const { code, data } = await AuthentificationService.getInstance().authenticate(credential);
+                
+                return res.status(code).send(formatResponse(data, credential));
+            } catch (error) {
+                res.status(error.code || HTTP_CODES.UNAUTHORIZED).send({
+                    code: HTTP_CODES.UNAUTHORIZED,
+                    message: "Invalid  client_id or client_secret",
+                    description : "Invalid credential"
+                })
+            }
+           
+
+            // {
+            //     "client": {
+            //         "grants": [
+            //         "authorization_code",
+            //         "password",
+            //         "refresh_token",
+            //         "client_credentials"
+            //         ],
+            //         "_id": "6045f0456ca4c532c16eecc9",
+            //         "name": "Mon Building",
+            //         "scope": "read-write",
+            //         "redirect_uri": "",
+            //         "User": "5f7dbd62c2b33acaa6941a0b",
+            //         "client_secret": "jsVsl4KLnzGYPcHWrSFo8TbmoL1ERs",
+            //         "client_id": "tpqHG6ycrY",
+            //         "created_at": "2021-03-08T09:37:09.072Z",
+            //         "updated_at": "2021-03-08T09:37:09.072Z",
+            //         "__v": 0
+            //     },
+            //     "user": "5f7dbd62c2b33acaa6941a0b",
+            //     "access_token": "48ed6c62a3f0d060fbb36795d728653d7967c5b3",
+            //     "accessToken": "48ed6c62a3f0d060fbb36795d728653d7967c5b3",
+            //     "accessTokenExpiresAt": "2023-09-26T18:51:04.384Z",
+            //     "scope": "read-write"
+            // }
         })
+    }
+}
+
+
+function formatResponse(data: any, credential: any) {
+    return {
+        client: {
+            grants: ["authorization_code", "password", "refresh_token", "client_credentials"],
+            _id: data.applicationId,
+            name: data.name,
+            scope: "read-write",
+            redirect_uri: "",
+            User: data.applicationId,
+            client_secret: credential.client_secret,
+            client_id: credential.client_id,
+            created_at: new Date(data.createdToken * 1000).toISOString(),
+            updated_at: new Date(data.createdToken * 1000).toISOString(),
+            __v: 0
+        },
+        user:  data.applicationId,
+        access_token: data.token,
+        accessToken: data.token,
+        accessTokenExpiresAt: new Date(data.expieredToken * 1000).toISOString(),
+        scope: "read-write"
     }
 }

@@ -31,6 +31,8 @@ import { AppProfileService, UserProfileService } from "../../services";
 import AuthorizationService from "../../services/authorization.service";
 import { Utils } from "../../utils/pam_v1_utils/utils";
 import { correspondanceObj } from "./correspondance";
+import { APIException } from "../../utils/pam_v1_utils/api_exception";
+import proxy = require("express-http-proxy");
 
 const apiServerEndpoint = "/api/v1/";
 
@@ -78,14 +80,19 @@ export const proxyOptions = (useV1: boolean): ProxyOptions => {
         userResDecorator: (proxyRes, proxyResData) => {
             return new Promise((resolve, reject) => {
                 if (!useV1) return resolve(proxyResData);
-                if (proxyRes.statusCode == HTTP_CODES.NOT_FOUND) return resolve(proxyResData);
 
                 try {
+                    if (proxyRes.statusCode >= 400 && proxyRes.statusCode <= 599) {
+                        throw new APIException(proxyRes.statusCode as any, proxyResData.toString());
+                    }
+                    
                     const response = JSON.parse(proxyResData.toString());
                     const data = Utils.getReturnObj(null, response, _get_method((<any>proxyRes).req.method));
                     resolve(data);
                 } catch (error) {
-                    resolve(proxyResData)
+                    const oErr = Utils.getErrObj(error, '');
+                    resolve(oErr.msg);
+                    // resolve(proxyResData)
                 }
             });
         }

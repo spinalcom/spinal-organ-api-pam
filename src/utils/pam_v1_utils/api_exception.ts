@@ -91,8 +91,9 @@ export class APIException {
 	constructor(codeMsg = "OK", customErr?: string) {
 		for (const type in this._aCodes) {
 			for (const codes of this._aCodes[type]) {
-				if (codes.message === codeMsg) {
+				if (codes.code === codeMsg || codes.message === codeMsg) {
 					this.setAll(codes, customErr);
+					return;
 				}
 			}
 		}

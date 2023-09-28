@@ -1,6 +1,6 @@
 {
   "name": "spinal-organ-api-pam",
-  "version": "1.3.6",
+  "version": "1.3.7",
   "description": "",
   "main": "index.js",
   "keywords": [],
@@ -19,9 +19,11 @@
     "async-iterator-to-array": "0.0.1",
     "axios": "^0.27.2",
     "bcrypt": "^5.0.1",
+    "bcryptjs": "^2.4.3",
     "body-parser": "^1.19.0",
     "cookie-parser": "^1.4.6",
     "cors": "^2.8.5",
+    "crypto-js": "^4.1.1",
     "express": "^4.15.4",
     "express-http-proxy": "^1.6.3",
     "express-jsdoc-swagger": "^1.6.8",
@@ -33,11 +35,13 @@
     "jsonwebtoken": "^8.5.1",
     "log-to-file": "^3.0.3",
     "material-design-icons-iconfont": "^6.7.0",
+    "mongoose": "^7.5.3",
     "morgan": "^1.10.0",
     "multer": "^1.4.5-lts.1",
     "node-cron": "^3.0.2",
     "node-geocoder": "^4.0.0",
     "node-open-geocoder": "^4.0.1",
+    "oauth2-server": "^3.1.1",
     "q": "^1.5.1",
     "socket.io": "^4.5.4",
     "socket.io-client": "^4.5.4",
@@ -49,7 +53,8 @@
     "spinal-service-pubsub-logs": "git+https://github.com/spinalcom/spinal-service-pubsub-logs.git",
     "swagger-ui-express": "^4.5.0",
     "tsoa": "^4.1.2",
-    "uuid": "^8.3.2"
+    "uuid": "^8.3.2",
+    "validator": "^13.11.0"
   },
   "devDependencies": {
     "@types/cors": "^2.8.12",

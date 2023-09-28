@@ -33,10 +33,10 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.profileHasAccessToBuilding = exports.proxyOptions = exports.canAccess = exports.formatUri = exports.getProfileBuildings = void 0;
-const constant_1 = require("../../constant");
 const services_1 = require("../../services");
 const utils_1 = require("../../utils/pam_v1_utils/utils");
 const correspondance_1 = require("./correspondance");
+const api_exception_1 = require("../../utils/pam_v1_utils/api_exception");
 const apiServerEndpoint = "/api/v1/";
 function getProfileBuildings(profileId, isApp) {
     return __awaiter(this, void 0, void 0, function* () {
@@ -83,15 +83,18 @@ const proxyOptions = (useV1) => {
             return new Promise((resolve, reject) => {
                 if (!useV1)
                     return resolve(proxyResData);
-                if (proxyRes.statusCode == constant_1.HTTP_CODES.NOT_FOUND)
-                    return resolve(proxyResData);
                 try {
+                    if (proxyRes.statusCode >= 400 && proxyRes.statusCode <= 599) {
+                        throw new api_exception_1.APIException(proxyRes.statusCode, proxyResData.toString());
+                    }
                     const response = JSON.parse(proxyResData.toString());
                     const data = utils_1.Utils.getReturnObj(null, response, _get_method(proxyRes.req.method));
                     resolve(data);
                 }
                 catch (error) {
-                    resolve(proxyResData);
+                    const oErr = utils_1.Utils.getErrObj(error, '');
+                    resolve(oErr.msg);
+                    // resolve(proxyResData)
                 }
             });
         }
