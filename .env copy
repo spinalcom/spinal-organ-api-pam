@@ -11,11 +11,3 @@ WEBSOCKET_ALERT_TIME="60000" # en milliseconde
 
 SERVER_PORT=2023
 PATH_DIR_STATIC_HTML=".browser_organs"
-
-#Mongo DB
-DB_HOST=""
-DB_DRIVER=""
-DB_PORT=""
-DB_NAME=""
-DB_USER=""
-DB_PASS=""
