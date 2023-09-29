@@ -40,7 +40,6 @@ export default function configureProxy(app: express.Express, useV1: boolean = fa
     let apiData: IApiData = { url: "", clientId: "", secretId: "" };
     const uri = !useV1 ? BOS_BASE_URI_V2 : `(${BOS_BASE_URI_V1}|${BOS_BASE_URI_V1_2})`;
 
-
     app.all(`${uri}/:building_id/*`, async (req: express.Request, res: express.Response, next: express.NextFunction) => {
 
         try {

@@ -77,8 +77,10 @@ exports.canAccess = canAccess;
 const proxyOptions = (useV1) => {
     return {
         memoizeHost: false,
-        proxyReqPathResolver: (req) => req["endpoint"],
-        limit: '500mb',
+        proxyReqPathResolver: (req) => {
+            return req["endpoint"];
+        },
+        limit: '500gb',
         userResDecorator: (proxyRes, proxyResData) => {
             return new Promise((resolve, reject) => {
                 if (!useV1)

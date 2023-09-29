@@ -43,9 +43,10 @@ export default async function initExpress(conn: spinal.FileSystem) {
   var app = express();
   app.use(morgan('dev'));
 
-  useApiMiddleWare(app);
   configureBosProxy(app);
   configureBosProxy(app, true);
+  
+  useApiMiddleWare(app);
   useHubProxy(app);
   useClientMiddleWare(app);
   initSwagger(app);
@@ -128,7 +129,7 @@ function initSwagger(app: express.Express) {
 function useApiMiddleWare(app: express.Express) {
   app.use(cors({origin: '*'}));
   app.use(express.json({limit: '500mb'}));
-  app.use(express.urlencoded({extended: true, limit: '500mb'}));
+  app.use(express.urlencoded({ extended: true, limit: '500mb' }));
 
   // const bodyParserDefault = bodyParser.json();
   // const bodyParserTicket = bodyParser.json({ limit: '500mb' });

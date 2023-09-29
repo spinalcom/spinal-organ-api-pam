@@ -28,11 +28,9 @@ import { SpinalNode } from "spinal-env-viewer-graph-service";
 import { HTTP_CODES } from "../../constant";
 import { IApiRoute, IBosAuthRes, IProfileRes } from "../../interfaces";
 import { AppProfileService, UserProfileService } from "../../services";
-import AuthorizationService from "../../services/authorization.service";
 import { Utils } from "../../utils/pam_v1_utils/utils";
 import { correspondanceObj } from "./correspondance";
 import { APIException } from "../../utils/pam_v1_utils/api_exception";
-import proxy = require("express-http-proxy");
 
 const apiServerEndpoint = "/api/v1/";
 
@@ -75,8 +73,10 @@ export async function canAccess(buildingId: string, api: { method: string; route
 export const proxyOptions = (useV1: boolean): ProxyOptions => {
     return {
         memoizeHost: false,
-        proxyReqPathResolver: (req: express.Request) => req["endpoint"],
-        limit: '500mb',
+        proxyReqPathResolver: (req: express.Request) => {
+            return req["endpoint"]
+        },
+        limit: '500gb',
         userResDecorator: (proxyRes, proxyResData) => {
             return new Promise((resolve, reject) => {
                 if (!useV1) return resolve(proxyResData);

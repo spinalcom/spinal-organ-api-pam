@@ -50,9 +50,9 @@ function initExpress(conn) {
     return __awaiter(this, void 0, void 0, function* () {
         var app = express();
         app.use(morgan('dev'));
-        useApiMiddleWare(app);
         (0, bos_1.default)(app);
         (0, bos_1.default)(app, true);
+        useApiMiddleWare(app);
         useHubProxy(app);
         useClientMiddleWare(app);
         initSwagger(app);
