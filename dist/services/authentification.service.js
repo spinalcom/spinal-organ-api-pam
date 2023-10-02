@@ -214,15 +214,18 @@ class AuthentificationService {
         });
     }
     _formatInfo(info) {
+        const obj = { clientId: undefined, clientSecret: undefined };
         if ("client_id" in info) {
-            info["clientId"] = info["client_id"];
-            delete info.client_id;
+            // info["clientId"] = info["client_id"]
+            // delete info.client_id;
+            obj.clientId = info["client_id"];
         }
         if ("client_secret" in info) {
-            info["clientSecret"] = info["client_secret"];
-            delete info.client_secret;
+            // info["clientSecret"] = info["client_secret"]
+            // delete info.client_secret;
+            obj.clientId = info["client_id"];
         }
-        return info;
+        return (obj.clientId && obj.clientSecret ? obj : info);
     }
 }
 exports.AuthentificationService = AuthentificationService;
