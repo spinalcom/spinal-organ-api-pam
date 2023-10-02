@@ -40,6 +40,7 @@ const utils_1 = require("./utils");
 const utils_2 = require("../../utils/pam_v1_utils/utils");
 const AuthError_1 = require("../../security/AuthError");
 const api_exception_1 = require("../../utils/pam_v1_utils/api_exception");
+const bodyParser = require("body-parser");
 function configureProxy(app, useV1 = false) {
     let apiData = { url: "", clientId: "", secretId: "" };
     const uri = !useV1 ? constant_1.BOS_BASE_URI_V2 : `(${constant_1.BOS_BASE_URI_V1}|${constant_1.BOS_BASE_URI_V1_2})`;
@@ -109,18 +110,22 @@ function buildingListMiddleware(app, useV1 = false) {
                 });
             }
         }));
-        app.post("/v1/oauth/token", (req, res) => __awaiter(this, void 0, void 0, function* () {
+        app.post("/v1/oauth/token", bodyParser.json(), (req, res) => __awaiter(this, void 0, void 0, function* () {
             // res.redirect(307, `${PAM_BASE_URI}/auth`)
             try {
-                const credential = req.body;
+                let credential = req.body;
+                if (Object.keys(credential).length <= 0)
+                    credential = formatViaHeader(req);
+                if (!credential || Object.keys(credential).length <= 0)
+                    throw { code: constant_1.HTTP_CODES.BAD_REQUEST, message: "Bad request", description: "Bad request, please check your request" };
                 const { code, data } = yield services_1.AuthentificationService.getInstance().authenticate(credential);
                 return res.status(code).send(formatResponse(data, credential));
             }
             catch (error) {
                 res.status(error.code || constant_1.HTTP_CODES.UNAUTHORIZED).send({
-                    code: constant_1.HTTP_CODES.UNAUTHORIZED,
-                    message: "Invalid  client_id or client_secret",
-                    description: "Invalid credential"
+                    code: error.code || constant_1.HTTP_CODES.UNAUTHORIZED,
+                    message: error.code || "Invalid  client_id or client_secret",
+                    description: error.description || "Invalid credential"
                 });
             }
             // {
@@ -172,5 +177,14 @@ function formatResponse(data, credential) {
         accessTokenExpiresAt: new Date(data.expieredToken * 1000).toISOString(),
         scope: "read-write"
     };
+}
+function formatViaHeader(req) {
+    var _a;
+    const auth = req.headers.authorization || "";
+    const [, authCode] = auth.split(" ");
+    if (!authCode)
+        return;
+    const [clientId, clientSecret] = (_a = atob(authCode)) === null || _a === void 0 ? void 0 : _a.split(":");
+    return { clientId, clientSecret };
 }
 //# sourceMappingURL=index.js.map

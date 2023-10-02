@@ -32,6 +32,7 @@ import { Utils } from "../../utils/pam_v1_utils/utils";
 import axios from "axios";
 import { AuthError } from "../../security/AuthError";
 import { APIException } from "../../utils/pam_v1_utils/api_exception";
+import * as bodyParser from "body-parser";
 
 
 interface IApiData { url: string; clientId: string; secretId: string }
@@ -116,20 +117,25 @@ function buildingListMiddleware(app: express.Application, useV1: boolean = false
             }
         })
 
-        app.post("/v1/oauth/token", async (req: express.Request, res: express.Response) => {
+        app.post("/v1/oauth/token", bodyParser.json(), async (req: express.Request, res: express.Response) => {
             // res.redirect(307, `${PAM_BASE_URI}/auth`)
 
             
             try {
-                const credential = req.body;
+                let credential = req.body;
+                if (Object.keys(credential).length <= 0) credential = formatViaHeader(req);
+
+                if(!credential || Object.keys(credential).length <= 0) throw {code : HTTP_CODES.BAD_REQUEST, message: "Bad request", description: "Bad request, please check your request"};
+                
+
                 const { code, data } = await AuthentificationService.getInstance().authenticate(credential);
                 
                 return res.status(code).send(formatResponse(data, credential));
             } catch (error) {
                 res.status(error.code || HTTP_CODES.UNAUTHORIZED).send({
-                    code: HTTP_CODES.UNAUTHORIZED,
-                    message: "Invalid  client_id or client_secret",
-                    description : "Invalid credential"
+                    code: error.code || HTTP_CODES.UNAUTHORIZED,
+                    message: error.code || "Invalid  client_id or client_secret",
+                    description : error.description ||  "Invalid credential"
                 })
             }
            
@@ -185,4 +191,14 @@ function formatResponse(data: any, credential: any) {
         accessTokenExpiresAt: new Date(data.expieredToken * 1000).toISOString(),
         scope: "read-write"
     }
+}
+
+
+function formatViaHeader(req: express.Request) {
+    const auth = req.headers.authorization || "";
+    const [,authCode] = auth.split(" ");
+    if (!authCode) return;
+
+    const [clientId, clientSecret] = atob(authCode)?.split(":");
+    return { clientId, clientSecret };
 }
