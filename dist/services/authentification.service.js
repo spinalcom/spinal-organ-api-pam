@@ -223,7 +223,7 @@ class AuthentificationService {
         if ("client_secret" in info) {
             // info["clientSecret"] = info["client_secret"]
             // delete info.client_secret;
-            obj.clientId = info["client_id"];
+            obj.clientSecret = info["client_secret"];
         }
         return (obj.clientId && obj.clientSecret ? obj : info);
     }
