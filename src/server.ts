@@ -42,6 +42,7 @@ import {WebsocketLogsService} from './services/webSocketLogs.service';
 export default async function initExpress(conn: spinal.FileSystem) {
   var app = express();
   app.use(morgan('dev'));
+  app.use(cors({origin: '*'}));
 
   configureBosProxy(app);
   configureBosProxy(app, true);
@@ -127,7 +128,6 @@ function initSwagger(app: express.Express) {
 }
 
 function useApiMiddleWare(app: express.Express) {
-  app.use(cors({origin: '*'}));
   app.use(express.json({limit: '500mb'}));
   app.use(express.urlencoded({ extended: true, limit: '500mb' }));
 

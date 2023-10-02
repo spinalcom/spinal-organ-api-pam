@@ -50,6 +50,7 @@ function initExpress(conn) {
     return __awaiter(this, void 0, void 0, function* () {
         var app = express();
         app.use(morgan('dev'));
+        app.use(cors({ origin: '*' }));
         (0, bos_1.default)(app);
         (0, bos_1.default)(app, true);
         useApiMiddleWare(app);
@@ -114,7 +115,6 @@ function initSwagger(app) {
     }));
 }
 function useApiMiddleWare(app) {
-    app.use(cors({ origin: '*' }));
     app.use(express.json({ limit: '500mb' }));
     app.use(express.urlencoded({ extended: true, limit: '500mb' }));
     // const bodyParserDefault = bodyParser.json();
