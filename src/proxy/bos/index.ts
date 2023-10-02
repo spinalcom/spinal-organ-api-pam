@@ -33,7 +33,7 @@ import axios from "axios";
 import { AuthError } from "../../security/AuthError";
 import { APIException } from "../../utils/pam_v1_utils/api_exception";
 import * as bodyParser from "body-parser";
-
+import * as atob from "atob";
 
 interface IApiData { url: string; clientId: string; secretId: string }
 

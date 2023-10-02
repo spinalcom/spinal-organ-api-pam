@@ -33,6 +33,7 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.profileHasAccessToBuilding = exports.proxyOptions = exports.canAccess = exports.formatUri = exports.getProfileBuildings = void 0;
+const constant_1 = require("../../constant");
 const services_1 = require("../../services");
 const utils_1 = require("../../utils/pam_v1_utils/utils");
 const correspondance_1 = require("./correspondance");
@@ -90,11 +91,12 @@ const proxyOptions = (useV1) => {
                         throw new api_exception_1.APIException(proxyRes.statusCode, proxyResData.toString());
                     }
                     const response = JSON.parse(proxyResData.toString());
-                    const data = utils_1.Utils.getReturnObj(null, response, _get_method(proxyRes.req.method));
+                    const data = utils_1.Utils.getReturnObj(null, response, _get_method(proxyRes.req.method, proxyRes.statusCode));
                     resolve(data);
                 }
                 catch (error) {
                     const oErr = utils_1.Utils.getErrObj(error, '');
+                    oErr.msg.datas = { "ko": {} };
                     resolve(oErr.msg);
                     // resolve(proxyResData)
                 }
@@ -154,14 +156,18 @@ function _hasAccessToApiRoute(building, apiRoute) {
         return apiRoute.route.match(regex);
     });
 }
-function _get_method(method) {
+function _get_method(method, statusCode) {
     switch (method) {
-        case "GET":
-            return "READ";
         case "POST":
-            return "ADD";
+            if (statusCode === constant_1.HTTP_CODES.CREATED)
+                return "ADD";
+            return "READ";
         case "DELETE":
             return "DEL";
+        default:
+            if (statusCode >= 400 && statusCode <= 599)
+                return "ERROR";
+            return "READ";
     }
 }
 //# sourceMappingURL=utils.js.map

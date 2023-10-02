@@ -41,6 +41,7 @@ const utils_2 = require("../../utils/pam_v1_utils/utils");
 const AuthError_1 = require("../../security/AuthError");
 const api_exception_1 = require("../../utils/pam_v1_utils/api_exception");
 const bodyParser = require("body-parser");
+const atob = require("atob");
 function configureProxy(app, useV1 = false) {
     let apiData = { url: "", clientId: "", secretId: "" };
     const uri = !useV1 ? constant_1.BOS_BASE_URI_V2 : `(${constant_1.BOS_BASE_URI_V1}|${constant_1.BOS_BASE_URI_V1_2})`;

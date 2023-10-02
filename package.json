@@ -1,6 +1,6 @@
 {
   "name": "spinal-organ-api-pam",
-  "version": "1.4.10",
+  "version": "1.4.11",
   "description": "",
   "main": "index.js",
   "keywords": [],
@@ -17,6 +17,7 @@
   },
   "dependencies": {
     "async-iterator-to-array": "0.0.1",
+    "atob": "^2.1.2",
     "axios": "^0.27.2",
     "bcrypt": "^5.0.1",
     "bcryptjs": "^2.4.3",

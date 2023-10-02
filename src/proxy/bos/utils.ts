@@ -35,6 +35,8 @@ import { APIException } from "../../utils/pam_v1_utils/api_exception";
 const apiServerEndpoint = "/api/v1/";
 
 
+
+
 export async function getProfileBuildings(profileId: string, isApp: boolean) {
     const instance = isApp ? AppProfileService.getInstance() : UserProfileService.getInstance();
     const buildings = await instance.getAllAuthorizedBos(profileId);
@@ -87,10 +89,11 @@ export const proxyOptions = (useV1: boolean): ProxyOptions => {
                     }
                     
                     const response = JSON.parse(proxyResData.toString());
-                    const data = Utils.getReturnObj(null, response, _get_method((<any>proxyRes).req.method));
+                    const data = Utils.getReturnObj(null, response, _get_method((<any>proxyRes).req.method, proxyRes.statusCode));
                     resolve(data);
                 } catch (error) {
                     const oErr = Utils.getErrObj(error, '');
+                    oErr.msg.datas = { "ko": {} };
                     resolve(oErr.msg);
                     // resolve(proxyResData)
                 }
@@ -160,13 +163,15 @@ function _hasAccessToApiRoute(building: IBosAuthRes, apiRoute: { method: string;
     })
 }
 
-function _get_method(method: string) {
+function _get_method(method: string, statusCode: number) {
     switch (method) {
-        case "GET":
-            return "READ";
         case "POST":
-            return "ADD";
+            if (statusCode === HTTP_CODES.CREATED) return "ADD";
+            return "READ";
         case "DELETE":
             return "DEL";
+        default:
+            if (statusCode >= 400 && statusCode <= 599) return "ERROR";
+            return "READ";
     }
 }
