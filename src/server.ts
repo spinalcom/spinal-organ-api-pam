@@ -26,7 +26,6 @@ import * as cors from 'cors';
 import * as express from 'express';
 import * as morgan from 'morgan';
 import * as path from 'path';
-import * as bodyParser from 'body-parser';
 
 import {HTTP_CODES, routesToProxy} from './constant';
 import configureBosProxy from './proxy/bos';

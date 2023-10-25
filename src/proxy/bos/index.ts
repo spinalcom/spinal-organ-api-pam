@@ -117,7 +117,7 @@ function buildingListMiddleware(app: express.Application, useV1: boolean = false
             }
         })
 
-        app.post("/v1/oauth/token", bodyParser.json(), async (req: express.Request, res: express.Response) => {
+        app.post("/v1/oauth/token", bodyParser.json(), bodyParser.urlencoded({extended: true}) ,async (req: express.Request, res: express.Response) => {
             // res.redirect(307, `${PAM_BASE_URI}/auth`)
 
             

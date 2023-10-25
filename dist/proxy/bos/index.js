@@ -111,7 +111,7 @@ function buildingListMiddleware(app, useV1 = false) {
                 });
             }
         }));
-        app.post("/v1/oauth/token", bodyParser.json(), (req, res) => __awaiter(this, void 0, void 0, function* () {
+        app.post("/v1/oauth/token", bodyParser.json(), bodyParser.urlencoded({ extended: true }), (req, res) => __awaiter(this, void 0, void 0, function* () {
             // res.redirect(307, `${PAM_BASE_URI}/auth`)
             try {
                 let credential = req.body;
