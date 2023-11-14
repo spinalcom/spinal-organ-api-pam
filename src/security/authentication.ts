@@ -45,7 +45,7 @@ export async function checkIfItIsAdmin(request: express.Request): Promise<boolea
 
     let profileId = await getProfileId(request);
 
-    return AdminProfileService.getInstance().adminNode.getId().get() === profileId;
+    return AdminProfileService.getInstance().isAdmin(profileId)
 }
 
 

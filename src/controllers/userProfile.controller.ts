@@ -67,7 +67,7 @@ export class UserProfileController extends Controller {
     public async getUserProfile(@Request() req: express.Request, @Path() id: string): Promise<IProfileData | { message: string }> {
         try {
             const profileId = await getProfileId(req);
-            const isAdmin = AdminProfileService.getInstance().adminNode.getId().get() === profileId;
+            const isAdmin = AdminProfileService.getInstance().isAdmin(profileId);
 
             if (!isAdmin && profileId !== id) throw new AuthError(SECURITY_MESSAGES.UNAUTHORIZED);
 
@@ -150,7 +150,7 @@ export class UserProfileController extends Controller {
     public async getAuthorizedPortofolioApps(@Request() req: express.Request, @Path() profileId: string): Promise<IPortofolioData[] | { message: string }> {
         try {
             const id = await getProfileId(req);
-            const isAdmin = AdminProfileService.getInstance().adminNode.getId().get() === id;
+            const isAdmin = AdminProfileService.getInstance().isAdmin(id);
 
             if (!isAdmin && profileId !== id) throw new AuthError(SECURITY_MESSAGES.UNAUTHORIZED);
 
@@ -195,7 +195,7 @@ export class UserProfileController extends Controller {
     public async getAuthorizedPortofolioApis(@Request() req: express.Request, @Path() profileId: string, @Path() portofolioId: string): Promise<any | { message: string }> {
         try {
             const id = await getProfileId(req);
-            const isAdmin = AdminProfileService.getInstance().adminNode.getId().get() === id;
+            const isAdmin = AdminProfileService.getInstance().isAdmin(id);
 
             if (!isAdmin && profileId !== id) throw new AuthError(SECURITY_MESSAGES.UNAUTHORIZED);
 
@@ -249,7 +249,7 @@ export class UserProfileController extends Controller {
     public async getAuthorizedBos(@Request() req: express.Request, @Path() profileId: string, @Path() portofolioId: string): Promise<any | { message: string }> {
         try {
             const id = await getProfileId(req);
-            const isAdmin = AdminProfileService.getInstance().adminNode.getId().get() === id;
+            const isAdmin = AdminProfileService.getInstance().isAdmin(id);
 
             if (!isAdmin && profileId !== id) throw new AuthError(SECURITY_MESSAGES.UNAUTHORIZED);
 
@@ -294,7 +294,7 @@ export class UserProfileController extends Controller {
     public async getAuthorizedBosApis(@Request() req: express.Request, @Path() profileId: string, @Path() portofolioId: string, @Path() bosId: string): Promise<any | { message: string }> {
         try {
             const id = await getProfileId(req);
-            const isAdmin = AdminProfileService.getInstance().adminNode.getId().get() === id;
+            const isAdmin = AdminProfileService.getInstance().isAdmin(id);
 
             if (!isAdmin && profileId !== id) throw new AuthError(SECURITY_MESSAGES.UNAUTHORIZED);
 

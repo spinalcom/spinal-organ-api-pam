@@ -112,7 +112,7 @@ export default class AuthorizationService {
         const context = await this._getAuthorizedPortofolioContext(profile, false);
         const reference = await this._getReference(context, portofolioId);
 
-        return appIds.reduce(async (prom, id) => {
+        const data = await appIds.reduce(async (prom, id) => {
             let liste = await prom;
             const app = await PortofolioService.getInstance().getAppFromPortofolio(portofolioId, id);
             if (app) {
@@ -128,6 +128,9 @@ export default class AuthorizationService {
 
             return liste;
         }, Promise.resolve([]));
+
+        await this._checkPortofolioValidity(profile, portofolioId, reference);
+        return data
     }
 
 
@@ -236,9 +239,9 @@ export default class AuthorizationService {
     public async authorizeProfileToAccessBosApp(profile: SpinalNode, portofolioId: string, BosId: string, appIds: string | string[]): Promise<SpinalNode[]> {
         if (!Array.isArray(appIds)) appIds = [appIds];
         await this.authorizeProfileToAccessBos(profile, portofolioId, BosId);
-        const { context, bosRef } = await this._getRefTree(profile, portofolioId, BosId);
+        const { context, bosRef, portofolioRef } = await this._getRefTree(profile, portofolioId, BosId);
 
-        return appIds.reduce(async (prom, id) => {
+        const d = await appIds.reduce(async (prom, id) => {
             let liste = await prom;
             const app = await BuildingService.getInstance().getAppFromBuilding(BosId, id);
 
@@ -255,6 +258,9 @@ export default class AuthorizationService {
 
             return liste;
         }, Promise.resolve([]));
+
+        await this._checkBosValidity(profile, portofolioId, BosId, bosRef, portofolioRef);
+        return d
     }
 
 
@@ -274,7 +280,7 @@ export default class AuthorizationService {
 
     public async unauthorizeProfileToAccessBosApp(profile: SpinalNode, portofolioId: string, BosId: string, appIds: string | string[]): Promise<SpinalNode[]> {
         if (!Array.isArray(appIds)) appIds = [appIds];
-        const { bosRef } = await this._getRefTree(profile, portofolioId, BosId)
+        const { bosRef, portofolioRef } = await this._getRefTree(profile, portofolioId, BosId)
 
         if (!bosRef) return;
 
@@ -294,7 +300,7 @@ export default class AuthorizationService {
             return liste;
         }, Promise.resolve([]));
 
-        await this._checkBosValidity(profile, portofolioId, BosId, bosRef);
+        await this._checkBosValidity(profile, portofolioId, BosId, bosRef, portofolioRef);
         return data;
     }
 
@@ -350,7 +356,7 @@ export default class AuthorizationService {
         const { context, portofolioRef } = await this._getRefTree(profile, portofolioId);
 
 
-        return apiRoutesIds.reduce(async (prom, id: string) => {
+        const data = await apiRoutesIds.reduce(async (prom, id: string) => {
             const liste = await prom;
             const node = await PortofolioService.getInstance().getApiFromPortofolio(portofolioId, id);
             if (node) {
@@ -366,16 +372,19 @@ export default class AuthorizationService {
 
             return liste;
         }, Promise.resolve([]))
+
+
+        return data;
     }
 
     public async authorizeProfileToAccessBosApisRoutes(profile: SpinalNode, portofolioId: string, bosId: string, apiRoutesIds: string | string[]): Promise<SpinalNode[]> {
         if (!Array.isArray(apiRoutesIds)) apiRoutesIds = [apiRoutesIds];
 
         await this.authorizeProfileToAccessBos(profile, portofolioId, bosId);
-        const { context, bosRef } = await this._getRefTree(profile, portofolioId, bosId);
+        const { context, bosRef, portofolioRef } = await this._getRefTree(profile, portofolioId, bosId);
         if (!bosRef) return;
 
-        return apiRoutesIds.reduce(async (prom, id: string) => {
+        const data = await apiRoutesIds.reduce(async (prom, id: string) => {
             const liste = await prom;
             const node = await BuildingService.getInstance().getApiFromBuilding(bosId, id);
             if (node) {
@@ -390,7 +399,11 @@ export default class AuthorizationService {
             }
 
             return liste;
-        }, Promise.resolve([]))
+        }, Promise.resolve([]));
+
+        await this._checkBosValidity(profile, portofolioId, bosId, bosRef, portofolioRef);
+
+        return data;
     }
 
     // unauthorize
@@ -399,7 +412,7 @@ export default class AuthorizationService {
         const { portofolioRef } = await this._getRefTree(profile, portofolioId)
         if (!portofolioRef) return;
 
-        return apiRoutesIds.reduce(async (prom, id: string) => {
+        const data = await apiRoutesIds.reduce(async (prom, id: string) => {
             const liste = await prom;
 
             const route = await PortofolioService.getInstance().getApiFromPortofolio(portofolioId, id);
@@ -416,15 +429,18 @@ export default class AuthorizationService {
             // this._removeApiFromContext(authcontext, el)
         }, Promise.resolve([]));
 
+        await this._checkPortofolioValidity(profile, portofolioId, portofolioRef);
+        return data
+
     }
 
     public async unauthorizeProfileToAccessBosApisRoutes(profile: SpinalNode, portofolioId: string, bosId: string, apiRoutesIds: string | string[]): Promise<SpinalNode[]> {
         if (!Array.isArray(apiRoutesIds)) apiRoutesIds = [apiRoutesIds];
-        const { bosRef } = await this._getRefTree(profile, portofolioId, bosId)
+        const { bosRef, portofolioRef } = await this._getRefTree(profile, portofolioId, bosId)
 
         if (!bosRef) return;
 
-        return apiRoutesIds.reduce(async (prom, id: string) => {
+        const data = await apiRoutesIds.reduce(async (prom, id: string) => {
             const liste = await prom;
 
             const route = await BuildingService.getInstance().getApiFromBuilding(bosId, id);
@@ -439,6 +455,9 @@ export default class AuthorizationService {
             return liste;
             // this._removeApiFromContext(authcontext, el)
         }, Promise.resolve([]));
+
+        await this._checkBosValidity(profile, portofolioId, bosId, bosRef, portofolioRef);
+        return data;
     }
 
     // get
@@ -610,10 +629,12 @@ export default class AuthorizationService {
         return this.unauthorizeProfileToAccessPortofolio(profile, portofolioId);
     }
 
-    private async _checkBosValidity(profile: SpinalNode, portofolioId: string, bosId: string, reference: SpinalNode) {
+    private async _checkBosValidity(profile: SpinalNode, portofolioId: string, bosId: string, reference: SpinalNode, portofolioRef: SpinalNode) {
         const children = await reference.getChildren();
         if (children.length > 0) return;
-        return this.unauthorizeProfileToAccessBos(profile, portofolioId, bosId);
+
+        await this.unauthorizeProfileToAccessBos(profile, portofolioId, bosId);
+        return this._checkPortofolioValidity(profile, portofolioId, portofolioRef)
     }
 }
 

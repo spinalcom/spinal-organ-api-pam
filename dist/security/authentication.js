@@ -52,7 +52,7 @@ exports.expressAuthentication = expressAuthentication;
 function checkIfItIsAdmin(request) {
     return __awaiter(this, void 0, void 0, function* () {
         let profileId = yield getProfileId(request);
-        return adminProfile_service_1.AdminProfileService.getInstance().adminNode.getId().get() === profileId;
+        return adminProfile_service_1.AdminProfileService.getInstance().isAdmin(profileId);
     });
 }
 exports.checkIfItIsAdmin = checkIfItIsAdmin;

@@ -95,7 +95,7 @@ class AuthorizationService {
             yield this.authorizeProfileToAccessPortofolio(profile, portofolioId);
             const context = yield this._getAuthorizedPortofolioContext(profile, false);
             const reference = yield this._getReference(context, portofolioId);
-            return appIds.reduce((prom, id) => __awaiter(this, void 0, void 0, function* () {
+            const data = yield appIds.reduce((prom, id) => __awaiter(this, void 0, void 0, function* () {
                 let liste = yield prom;
                 const app = yield portofolio_service_1.PortofolioService.getInstance().getAppFromPortofolio(portofolioId, id);
                 if (app) {
@@ -109,6 +109,8 @@ class AuthorizationService {
                 }
                 return liste;
             }), Promise.resolve([]));
+            yield this._checkPortofolioValidity(profile, portofolioId, reference);
+            return data;
         });
     }
     // unauthorize
@@ -209,7 +211,7 @@ class AuthorizationService {
                 appIds = [appIds];
             yield this.authorizeProfileToAccessBos(profile, portofolioId, BosId);
             const { context, bosRef } = yield this._getRefTree(profile, portofolioId, BosId);
-            return appIds.reduce((prom, id) => __awaiter(this, void 0, void 0, function* () {
+            const d = yield appIds.reduce((prom, id) => __awaiter(this, void 0, void 0, function* () {
                 let liste = yield prom;
                 const app = yield building_service_1.BuildingService.getInstance().getAppFromBuilding(BosId, id);
                 if (app) {
@@ -223,6 +225,8 @@ class AuthorizationService {
                 }
                 return liste;
             }), Promise.resolve([]));
+            yield this._checkBosValidity(profile, portofolioId, BosId, bosRef);
+            return d;
         });
     }
     // unauthorize
@@ -305,7 +309,7 @@ class AuthorizationService {
             // if (!authApicontext) return;
             yield this.authorizeProfileToAccessPortofolio(profile, portofolioId);
             const { context, portofolioRef } = yield this._getRefTree(profile, portofolioId);
-            return apiRoutesIds.reduce((prom, id) => __awaiter(this, void 0, void 0, function* () {
+            const data = yield apiRoutesIds.reduce((prom, id) => __awaiter(this, void 0, void 0, function* () {
                 const liste = yield prom;
                 const node = yield portofolio_service_1.PortofolioService.getInstance().getApiFromPortofolio(portofolioId, id);
                 if (node) {
@@ -318,6 +322,7 @@ class AuthorizationService {
                 }
                 return liste;
             }), Promise.resolve([]));
+            return data;
         });
     }
     authorizeProfileToAccessBosApisRoutes(profile, portofolioId, bosId, apiRoutesIds) {
@@ -328,7 +333,7 @@ class AuthorizationService {
             const { context, bosRef } = yield this._getRefTree(profile, portofolioId, bosId);
             if (!bosRef)
                 return;
-            return apiRoutesIds.reduce((prom, id) => __awaiter(this, void 0, void 0, function* () {
+            const data = yield apiRoutesIds.reduce((prom, id) => __awaiter(this, void 0, void 0, function* () {
                 const liste = yield prom;
                 const node = yield building_service_1.BuildingService.getInstance().getApiFromBuilding(bosId, id);
                 if (node) {
@@ -341,6 +346,8 @@ class AuthorizationService {
                 }
                 return liste;
             }), Promise.resolve([]));
+            yield this._checkBosValidity(profile, portofolioId, bosId, bosRef);
+            return data;
         });
     }
     // unauthorize
@@ -351,7 +358,7 @@ class AuthorizationService {
             const { portofolioRef } = yield this._getRefTree(profile, portofolioId);
             if (!portofolioRef)
                 return;
-            return apiRoutesIds.reduce((prom, id) => __awaiter(this, void 0, void 0, function* () {
+            const data = yield apiRoutesIds.reduce((prom, id) => __awaiter(this, void 0, void 0, function* () {
                 const liste = yield prom;
                 const route = yield portofolio_service_1.PortofolioService.getInstance().getApiFromPortofolio(portofolioId, id);
                 if (route) {
@@ -365,6 +372,8 @@ class AuthorizationService {
                 return liste;
                 // this._removeApiFromContext(authcontext, el)
             }), Promise.resolve([]));
+            yield this._checkPortofolioValidity(profile, portofolioId, portofolioRef);
+            return data;
         });
     }
     unauthorizeProfileToAccessBosApisRoutes(profile, portofolioId, bosId, apiRoutesIds) {
@@ -374,7 +383,7 @@ class AuthorizationService {
             const { bosRef } = yield this._getRefTree(profile, portofolioId, bosId);
             if (!bosRef)
                 return;
-            return apiRoutesIds.reduce((prom, id) => __awaiter(this, void 0, void 0, function* () {
+            const data = yield apiRoutesIds.reduce((prom, id) => __awaiter(this, void 0, void 0, function* () {
                 const liste = yield prom;
                 const route = yield building_service_1.BuildingService.getInstance().getApiFromBuilding(bosId, id);
                 if (route) {
@@ -388,6 +397,8 @@ class AuthorizationService {
                 return liste;
                 // this._removeApiFromContext(authcontext, el)
             }), Promise.resolve([]));
+            yield this._checkBosValidity(profile, portofolioId, bosId, bosRef);
+            return data;
         });
     }
     // get

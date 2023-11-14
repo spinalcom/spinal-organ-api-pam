@@ -103,6 +103,9 @@ class AdminProfileService {
             });
         });
     }
+    isAdmin(profileId) {
+        return this._adminNode.getId().get() === profileId;
+    }
     _createAdminProfile() {
         const info = {
             name: constant_1.ADMIN_PROFILE_NAME,
