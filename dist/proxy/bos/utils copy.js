@@ -32,7 +32,7 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
     });
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports._get_method = exports.profileHasAccessToBuilding = exports.proxyOptions = exports.tryToAccessBuildingInfo = exports.canAccess = exports.formatUri = exports.getProfileBuildings = exports._formatBuildingRes = exports.tryToDownloadSvf = void 0;
+exports.profileHasAccessToBuilding = exports.proxyOptions = exports.canAccess = exports.formatUri = exports.getProfileBuildings = exports.tryToDownloadSvf = void 0;
 const constant_1 = require("../../constant");
 const services_1 = require("../../services");
 const utils_1 = require("../../utils/pam_v1_utils/utils");
@@ -47,19 +47,6 @@ function tryToDownloadSvf(req) {
     return false;
 }
 exports.tryToDownloadSvf = tryToDownloadSvf;
-function _formatBuildingRes(building) {
-    return {
-        name: building.name,
-        _id: building.id,
-        id: building.id,
-        address: building.address,
-        description: building.description,
-        urlBos: building.bosUrl,
-        type: building.type,
-        localisation: building.location,
-    };
-}
-exports._formatBuildingRes = _formatBuildingRes;
 function getProfileBuildings(profileId, isApp) {
     return __awaiter(this, void 0, void 0, function* () {
         const instance = isApp ? services_1.AppProfileService.getInstance() : services_1.UserProfileService.getInstance();
@@ -85,7 +72,7 @@ function canAccess(buildingId, api, profileId, isAppProfile) {
         const buildingAccess = yield profileHasAccessToBuilding(profileId, buildingId, isAppProfile);
         if (!buildingAccess)
             return false;
-        if (!isAppProfile || tryToAccessBuildingInfo(api))
+        if (!isAppProfile)
             return true;
         if (api.route.includes("?"))
             api.route = api.route.substring(0, api.route.indexOf("?"));
@@ -96,13 +83,6 @@ function canAccess(buildingId, api, profileId, isAppProfile) {
     });
 }
 exports.canAccess = canAccess;
-function tryToAccessBuildingInfo(api) {
-    if (api.method.toUpperCase() !== "GET")
-        return false;
-    const reqWithOutApi = api.route.replace("/api/v1", "");
-    return reqWithOutApi === "/" || reqWithOutApi.length == 0;
-}
-exports.tryToAccessBuildingInfo = tryToAccessBuildingInfo;
 const proxyOptions = (useV1) => {
     return {
         memoizeHost: false,
@@ -198,5 +178,4 @@ function _get_method(method, statusCode) {
             return "READ";
     }
 }
-exports._get_method = _get_method;
-//# sourceMappingURL=utils.js.map
+//# sourceMappingURL=utils%20copy.js.map

@@ -27,7 +27,7 @@ import * as express from "express";
 import { AuthentificationService, BuildingService } from "../../services";
 import * as proxy from "express-http-proxy";
 import { checkAndGetTokenInfo } from "../../security/authentication";
-import { _formatBuildingRes, canAccess, formatUri, getProfileBuildings, proxyOptions, tryToDownloadSvf } from "./utils";
+import { canAccess, formatUri, getProfileBuildings, proxyOptions, tryToDownloadSvf } from "./utils";
 import { Utils } from "../../utils/pam_v1_utils/utils";
 import axios from "axios";
 import { AuthError } from "../../security/AuthError";
@@ -44,16 +44,13 @@ interface IApiData {
 export default function configureProxy(app: express.Express, useV1: boolean = false) {
 	let apiData: IApiData = { url: "", clientId: "", secretId: "" };
 	const uri = !useV1 ? BOS_BASE_URI_V2 : `(${BOS_BASE_URI_V1}|${BOS_BASE_URI_V1_2})`;
+
 	app.all(
 		`(${uri}/:building_id/*|${uri}/:building_id)`,
 		async (req: express.Request, res: express.Response, next: express.NextFunction) => {
 			try {
 				const { building_id } = req.params;
 				req["endpoint"] = formatUri(req.url, uri);
-
-				//////////////////////////////////////////////
-				//   Check if user has access to building
-				//////////////////////////////////////////////
 
 				const building = await BuildingService.getInstance().getBuildingById(building_id);
 				if (!building) return new AuthError(SECURITY_MESSAGES.UNAUTHORIZED);
@@ -67,25 +64,21 @@ export default function configureProxy(app: express.Express, useV1: boolean = fa
 
 				const tokenInfo = await checkAndGetTokenInfo(req);
 
-				// if (tokenInfo.userInfo?.type != USER_TYPES.ADMIN) {
-				const isAppProfile = tokenInfo.profile.appProfileBosConfigId ? true : false;
-				const profileId = tokenInfo.profile.appProfileBosConfigId || tokenInfo.profile.userProfileBosConfigId || tokenInfo.profile.profileId;
-				const access = await canAccess(building_id, { method: req.method, route: (<any>req).endpoint }, profileId, isAppProfile);
-				if (!access) throw new AuthError(SECURITY_MESSAGES.UNAUTHORIZED);
-				// }
-
-				//////////////////////////////////////////////
-				//   Condition to check
-				//////////////////////////////////////////////
 				const reqWithOutApi = (<any>req).endpoint.replace("/api/v1", "");
 				if (reqWithOutApi === "/" || reqWithOutApi.length == 0) {
-					let data = building.info.get();
-					if (useV1) data = Utils.getReturnObj(null, _formatBuildingRes(data), req.method, "READ");
+					return res.status(200).send(building.info.get());
+				}
+				// const building = await BuildingService.getInstance().getBuildingById(building_id);
+				// if (!building) return res.status(HTTP_CODES.NOT_FOUND).send(`No building found for ${building_id}`);
 
-					return res.status(HTTP_CODES.OK).send(data);
+				if (tokenInfo.userInfo?.type != USER_TYPES.ADMIN) {
+					const isAppProfile = tokenInfo.profile.appProfileBosConfigId ? true : false;
+					const profileId = tokenInfo.profile.appProfileBosConfigId || tokenInfo.profile.userProfileBosConfigId || tokenInfo.profile.profileId;
+					const access = await canAccess(building_id, { method: req.method, route: (<any>req).endpoint }, profileId, isAppProfile);
+					if (!access) throw new AuthError(SECURITY_MESSAGES.UNAUTHORIZED);
 				}
 
-				// apiData.url = building.info.apiUrl.get();
+				apiData.url = building.info.apiUrl.get();
 				next();
 			} catch (error) {
 				if (useV1) {
@@ -129,10 +122,6 @@ function buildingListMiddleware(app: express.Application, useV1: boolean = false
 					message: error.message,
 				});
 			}
-		});
-
-		app.get("/v1/building/:building_id", (req: express.Request, res: express.Response) => {
-			const { building_id } = req.params;
 		});
 
 		app.post("/v1/oauth/token", bodyParser.json(), bodyParser.urlencoded({ extended: true }), async (req: express.Request, res: express.Response) => {

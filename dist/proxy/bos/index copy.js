@@ -46,12 +46,10 @@ function configureProxy(app, useV1 = false) {
     let apiData = { url: "", clientId: "", secretId: "" };
     const uri = !useV1 ? constant_1.BOS_BASE_URI_V2 : `(${constant_1.BOS_BASE_URI_V1}|${constant_1.BOS_BASE_URI_V1_2})`;
     app.all(`(${uri}/:building_id/*|${uri}/:building_id)`, (req, res, next) => __awaiter(this, void 0, void 0, function* () {
+        var _a;
         try {
             const { building_id } = req.params;
             req["endpoint"] = (0, utils_1.formatUri)(req.url, uri);
-            //////////////////////////////////////////////
-            //   Check if user has access to building
-            //////////////////////////////////////////////
             const building = yield services_1.BuildingService.getInstance().getBuildingById(building_id);
             if (!building)
                 return new AuthError_1.AuthError(constant_1.SECURITY_MESSAGES.UNAUTHORIZED);
@@ -62,24 +60,20 @@ function configureProxy(app, useV1 = false) {
             if ((0, utils_1.tryToDownloadSvf)(req))
                 return next();
             const tokenInfo = yield (0, authentication_1.checkAndGetTokenInfo)(req);
-            // if (tokenInfo.userInfo?.type != USER_TYPES.ADMIN) {
-            const isAppProfile = tokenInfo.profile.appProfileBosConfigId ? true : false;
-            const profileId = tokenInfo.profile.appProfileBosConfigId || tokenInfo.profile.userProfileBosConfigId || tokenInfo.profile.profileId;
-            const access = yield (0, utils_1.canAccess)(building_id, { method: req.method, route: req.endpoint }, profileId, isAppProfile);
-            if (!access)
-                throw new AuthError_1.AuthError(constant_1.SECURITY_MESSAGES.UNAUTHORIZED);
-            // }
-            //////////////////////////////////////////////
-            //   Condition to check
-            //////////////////////////////////////////////
             const reqWithOutApi = req.endpoint.replace("/api/v1", "");
             if (reqWithOutApi === "/" || reqWithOutApi.length == 0) {
-                let data = building.info.get();
-                if (useV1)
-                    data = utils_2.Utils.getReturnObj(null, (0, utils_1._formatBuildingRes)(data), req.method, "READ");
-                return res.status(constant_1.HTTP_CODES.OK).send(data);
+                return res.status(200).send(building.info.get());
             }
-            // apiData.url = building.info.apiUrl.get();
+            // const building = await BuildingService.getInstance().getBuildingById(building_id);
+            // if (!building) return res.status(HTTP_CODES.NOT_FOUND).send(`No building found for ${building_id}`);
+            if (((_a = tokenInfo.userInfo) === null || _a === void 0 ? void 0 : _a.type) != constant_1.USER_TYPES.ADMIN) {
+                const isAppProfile = tokenInfo.profile.appProfileBosConfigId ? true : false;
+                const profileId = tokenInfo.profile.appProfileBosConfigId || tokenInfo.profile.userProfileBosConfigId || tokenInfo.profile.profileId;
+                const access = yield (0, utils_1.canAccess)(building_id, { method: req.method, route: req.endpoint }, profileId, isAppProfile);
+                if (!access)
+                    throw new AuthError_1.AuthError(constant_1.SECURITY_MESSAGES.UNAUTHORIZED);
+            }
+            apiData.url = building.info.apiUrl.get();
             next();
         }
         catch (error) {
@@ -122,9 +116,6 @@ function buildingListMiddleware(app, useV1 = false) {
                 });
             }
         }));
-        app.get("/v1/building/:building_id", (req, res) => {
-            const { building_id } = req.params;
-        });
         app.post("/v1/oauth/token", bodyParser.json(), bodyParser.urlencoded({ extended: true }), (req, res) => __awaiter(this, void 0, void 0, function* () {
             // res.redirect(307, `${PAM_BASE_URI}/auth`)
             try {
@@ -202,4 +193,4 @@ function formatViaHeader(req) {
     const [clientId, clientSecret] = (_a = atob(authCode)) === null || _a === void 0 ? void 0 : _a.split(":");
     return { clientId, clientSecret };
 }
-//# sourceMappingURL=index.js.map
+//# sourceMappingURL=index%20copy.js.map

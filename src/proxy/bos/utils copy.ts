@@ -26,7 +26,7 @@ import * as express from "express";
 import { ProxyOptions } from "express-http-proxy";
 import { SpinalNode } from "spinal-env-viewer-graph-service";
 import { HTTP_CODES } from "../../constant";
-import { IApiRoute, IBosAuthRes, IBuilding, IProfileRes } from "../../interfaces";
+import { IApiRoute, IBosAuthRes, IProfileRes } from "../../interfaces";
 import { AppProfileService, UserProfileService } from "../../services";
 import { Utils } from "../../utils/pam_v1_utils/utils";
 import { correspondanceObj } from "./correspondance";
@@ -41,19 +41,6 @@ export function tryToDownloadSvf(req: any): boolean {
 	}
 
 	return false;
-}
-
-export function _formatBuildingRes(building: IBuilding) {
-	return {
-		name: building.name,
-		_id: building.id,
-		id: building.id,
-		address: building.address,
-		description: building.description,
-		urlBos: building.bosUrl,
-		type: building.type,
-		localisation: building.location,
-	};
 }
 
 export async function getProfileBuildings(profileId: string, isApp: boolean) {
@@ -74,11 +61,11 @@ export function formatUri(argUrl: string, uri: string): string {
 	return (/^api\/v1/.test(correspondance) ? "/" + correspondance : apiServerEndpoint + correspondance) + query;
 }
 
-export async function canAccess(buildingId: string, api: { method: string; route: string }, profileId: string, isAppProfile: boolean): Promise<boolean> {
+export async function canAccess(buildingId: string, api: { method: string; route: string }, profileId: string, isAppProfile): Promise<boolean> {
 	const buildingAccess = await profileHasAccessToBuilding(profileId, buildingId, isAppProfile);
 
 	if (!buildingAccess) return false;
-	if (!isAppProfile || tryToAccessBuildingInfo(api)) return true;
+	if (!isAppProfile) return true;
 
 	if (api.route.includes("?")) api.route = api.route.substring(0, api.route.indexOf("?"));
 
@@ -86,13 +73,6 @@ export async function canAccess(buildingId: string, api: { method: string; route
 	if (!routeFound) return false;
 
 	return true;
-}
-
-export function tryToAccessBuildingInfo(api: { method: string; route: string }) {
-	if (api.method.toUpperCase() !== "GET") return false;
-
-	const reqWithOutApi = api.route.replace("/api/v1", "");
-	return reqWithOutApi === "/" || reqWithOutApi.length == 0;
 }
 
 export const proxyOptions = (useV1: boolean): ProxyOptions => {
@@ -180,7 +160,7 @@ function _hasAccessToApiRoute(building: IBosAuthRes, apiRoute: { method: string;
 	});
 }
 
-export function _get_method(method: string, statusCode: number) {
+function _get_method(method: string, statusCode: number) {
 	switch (method) {
 		case "POST":
 			if (statusCode === HTTP_CODES.CREATED) return "ADD";
