@@ -27,8 +27,9 @@ const path = require("path");
 require("dotenv").config({ path: path.resolve(__dirname, "../.env") });
 import { spinalCore } from 'spinal-core-connectorjs_type';
 import { configServiceInstance } from './services/configFile.service';
-
 import expressServer from './server';
+import ConfigFile from "spinal-lib-organ-monitoring";
+
 
 const conn = spinalCore.connect(`${process.env.HUB_PROTOCOL}://${process.env.USER_ID}:${process.env.USER_MDP}@${process.env.HUB_HOST}:${process.env.HUB_PORT}/`);
 
@@ -36,7 +37,7 @@ const conn = spinalCore.connect(`${process.env.HUB_PROTOCOL}://${process.env.USE
 configServiceInstance.init(conn).then(async () => {
 
   const { app } = await expressServer(conn);
-
+  await ConfigFile.init(conn, process.env.ORGAN_NAME, "PAM_API", process.env.HUB_HOST, parseInt(process.env.HUB_PORT));
 }).catch((err: Error) => {
   console.error(err);
 });
