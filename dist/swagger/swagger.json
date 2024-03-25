@@ -802,12 +802,16 @@
         }
     },
     "info": {
-        "title": "spinal-organ-api-pam",
-        "version": "1.4.13",
+        "title": "BOS config admin API routes",
+        "version": "1.0.0",
+        "description": "Welcome to the reference documentation for Portofolio asset manager (PAM) REST API! </br></br>To learn about the common use cases and concept this REST APIs, check out our resource center  (<a>https://resourcecenter.fr.spinalcom.com/ressources-développeur</a>).</br></br>In addition to the API Reference, we also provide complete documentation for adminnistration API, that need to install and implement Spinalcore Digital Twin Operating System on their built environment.",
         "license": {
             "name": "ISC"
         },
-        "contact": {}
+        "contact": {
+            "name": "Spinalcom",
+            "email": "developers@spinalcom.com"
+        }
     },
     "openapi": "3.0.0",
     "paths": {
