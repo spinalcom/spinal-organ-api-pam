@@ -70,23 +70,21 @@ let AuthController = class AuthController extends tsoa_1.Controller {
             }
         });
     }
-    registerToAdmin(req, data) {
-        return __awaiter(this, void 0, void 0, function* () {
-            try {
-                const isAdmin = yield (0, authentication_1.checkIfItIsAdmin)(req);
-                if (!isAdmin)
-                    throw new AuthError_1.AuthError(constant_1.SECURITY_MESSAGES.UNAUTHORIZED);
-                const registeredData = yield serviceInstance.registerToAdmin(data.pamInfo, data.adminInfo);
-                yield serviceInstance.sendDataToAdmin();
-                this.setStatus(constant_1.HTTP_CODES.OK);
-                return registeredData;
-            }
-            catch (error) {
-                this.setStatus(error.code || constant_1.HTTP_CODES.INTERNAL_ERROR);
-                return { message: error.message };
-            }
-        });
-    }
+    // @Security(SECURITY_NAME.bearerAuth)
+    // @Post("/register_admin")
+    // public async registerToAdmin(@Request() req: express.Request, @Body() data: { pamInfo: IPamInfo, adminInfo: IAdmin }): Promise<IPamCredential | { message: string }> {
+    //     try {
+    //         const isAdmin = await checkIfItIsAdmin(req);
+    //         if (!isAdmin) throw new AuthError(SECURITY_MESSAGES.UNAUTHORIZED);
+    //         const registeredData = await serviceInstance.registerToAdmin(data.pamInfo, data.adminInfo);
+    //         await serviceInstance.sendDataToAdmin();
+    //         this.setStatus(HTTP_CODES.OK)
+    //         return registeredData;
+    //     } catch (error) {
+    //         this.setStatus(error.code || HTTP_CODES.INTERNAL_ERROR);
+    //         return { message: error.message };
+    //     }
+    // }
     getBosToAdminCredential(req) {
         return __awaiter(this, void 0, void 0, function* () {
             try {
@@ -190,15 +188,6 @@ __decorate([
     __metadata("design:paramtypes", [Object]),
     __metadata("design:returntype", Promise)
 ], AuthController.prototype, "authenticate", null);
-__decorate([
-    (0, tsoa_1.Security)(constant_1.SECURITY_NAME.bearerAuth),
-    (0, tsoa_1.Post)("/register_admin"),
-    __param(0, (0, tsoa_1.Request)()),
-    __param(1, (0, tsoa_1.Body)()),
-    __metadata("design:type", Function),
-    __metadata("design:paramtypes", [Object, Object]),
-    __metadata("design:returntype", Promise)
-], AuthController.prototype, "registerToAdmin", null);
 __decorate([
     (0, tsoa_1.Security)(constant_1.SECURITY_NAME.bearerAuth),
     (0, tsoa_1.Get)("/get_pam_to_auth_credential"),

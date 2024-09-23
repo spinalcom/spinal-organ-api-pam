@@ -470,53 +470,6 @@
                 "type": "object",
                 "additionalProperties": false
             },
-            "IPamInfo": {
-                "properties": {
-                    "name": {
-                        "type": "string"
-                    },
-                    "url": {
-                        "type": "string"
-                    },
-                    "address": {
-                        "type": "string"
-                    },
-                    "statusPlatform": {
-                        "type": "string",
-                        "enum": [
-                            "online",
-                            "fail",
-                            "stop"
-                        ]
-                    }
-                },
-                "required": [
-                    "name",
-                    "url"
-                ],
-                "type": "object",
-                "additionalProperties": false
-            },
-            "IAdmin": {
-                "properties": {
-                    "name": {
-                        "type": "string"
-                    },
-                    "urlAdmin": {
-                        "type": "string"
-                    },
-                    "registerKey": {
-                        "type": "string"
-                    }
-                },
-                "required": [
-                    "name",
-                    "urlAdmin",
-                    "registerKey"
-                ],
-                "type": "object",
-                "additionalProperties": false
-            },
             "IAdminCredential": {
                 "properties": {
                     "TokenAdminToPam": {
@@ -3622,69 +3575,6 @@
                                         "$ref": "#/components/schemas/IOAuth2Credential"
                                     }
                                 ]
-                            }
-                        }
-                    }
-                }
-            }
-        },
-        "/api/v1/pam/register_admin": {
-            "post": {
-                "operationId": "RegisterToAdmin",
-                "responses": {
-                    "200": {
-                        "description": "Ok",
-                        "content": {
-                            "application/json": {
-                                "schema": {
-                                    "anyOf": [
-                                        {
-                                            "$ref": "#/components/schemas/IPamCredential"
-                                        },
-                                        {
-                                            "properties": {
-                                                "message": {
-                                                    "type": "string"
-                                                }
-                                            },
-                                            "required": [
-                                                "message"
-                                            ],
-                                            "type": "object"
-                                        }
-                                    ]
-                                }
-                            }
-                        }
-                    }
-                },
-                "tags": [
-                    "Auth"
-                ],
-                "security": [
-                    {
-                        "bearerAuth": []
-                    }
-                ],
-                "parameters": [],
-                "requestBody": {
-                    "required": true,
-                    "content": {
-                        "application/json": {
-                            "schema": {
-                                "properties": {
-                                    "adminInfo": {
-                                        "$ref": "#/components/schemas/IAdmin"
-                                    },
-                                    "pamInfo": {
-                                        "$ref": "#/components/schemas/IPamInfo"
-                                    }
-                                },
-                                "required": [
-                                    "adminInfo",
-                                    "pamInfo"
-                                ],
-                                "type": "object"
                             }
                         }
                     }

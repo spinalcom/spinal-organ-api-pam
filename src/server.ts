@@ -27,27 +27,28 @@ import * as express from 'express';
 import * as morgan from 'morgan';
 import * as path from 'path';
 
-import {HTTP_CODES, routesToProxy} from './constant';
+import { HTTP_CODES, routesToProxy } from './constant';
 import configureBosProxy from './proxy/bos';
 var proxy = require('express-http-proxy');
 import * as swaggerUi from 'swagger-ui-express';
-import {ValidateError} from 'tsoa';
-import {RegisterRoutes} from './routes';
-import {AuthError} from './security/AuthError';
-import {WebSocketServer} from './proxy/websocket';
-import {WebsocketLogsService} from './services/webSocketLogs.service';
-// import { webSocketProxy } from './proxy/websocketProxy';
+import { ValidateError } from 'tsoa';
+import { RegisterRoutes } from './routes';
+import { AuthError } from './security/AuthError';
+import { WebSocketServer } from './proxy/websocket';
+import { WebsocketLogsService } from './services/webSocketLogs.service';
+import { useLoginProxy } from './proxy/login';
 
 export default async function initExpress(conn: spinal.FileSystem) {
   var app = express();
   app.use(morgan('dev'));
-  app.use(cors({origin: '*'}));
+  app.use(cors({ origin: '*' }));
 
   configureBosProxy(app);
   configureBosProxy(app, true);
-  
+
   useApiMiddleWare(app);
   useHubProxy(app);
+  useLoginProxy(app);
   useClientMiddleWare(app);
   initSwagger(app);
 
@@ -79,7 +80,7 @@ export default async function initExpress(conn: spinal.FileSystem) {
   // server.on("upgrade", (req: any, socket: any, head) => {
   //   wsProxy.upgrade(req, socket, head)
   // });
-  return {server, app};
+  return { server, app };
 }
 
 /////////////////////////////////////
@@ -116,7 +117,7 @@ function initSwagger(app: express.Express) {
   });
 
   app.get('/logo.png', (req, res) => {
-    res.sendFile('spinalcore.png', {root: path.resolve(__dirname, './assets')});
+    res.sendFile('spinalcore.png', { root: path.resolve(__dirname, './assets') });
   });
 
   app.use('/docs', swaggerUi.serve, async (req, res) => {
@@ -127,7 +128,7 @@ function initSwagger(app: express.Express) {
 }
 
 function useApiMiddleWare(app: express.Express) {
-  app.use(express.json({limit: '500mb'}));
+  app.use(express.json({ limit: '500mb' }));
   app.use(express.urlencoded({ extended: true, limit: '500mb' }));
 
   // const bodyParserDefault = bodyParser.json();
@@ -151,7 +152,7 @@ function errorHandler(
   }
 
   if (err instanceof AuthError) {
-    return res.status(HTTP_CODES.UNAUTHORIZED).send({message: err.message});
+    return res.status(HTTP_CODES.UNAUTHORIZED).send({ message: err.message });
   }
 
   if (err instanceof Error) {

@@ -194,9 +194,7 @@ class UserListService {
             const adminCredential = yield this._getAuthPlateformInfo();
             const url = `${adminCredential.urlAdmin}/users/login`;
             return axios_1.default.post(url, user).then((result) => __awaiter(this, void 0, void 0, function* () {
-                const data = result.data;
-                data.profile = yield this._getProfileInfo(data.token, adminCredential);
-                data.userInfo = yield this._getUserInfo(data.userId, adminCredential, data.token);
+                const data = this.getUserDataFormatted(result.data, adminCredential);
                 return {
                     code: constant_1.HTTP_CODES.OK,
                     data
@@ -208,6 +206,14 @@ class UserListService {
                     data: "bad credential"
                 };
             });
+        });
+    }
+    getUserDataFormatted(data, adminCredential) {
+        return __awaiter(this, void 0, void 0, function* () {
+            adminCredential = adminCredential || (yield this._getAuthPlateformInfo());
+            data.profile = yield this._getProfileInfo(data.token, adminCredential);
+            data.userInfo = yield this._getUserInfo(data.userId, adminCredential, data.token);
+            return data;
         });
     }
     //////////////////////////////////////////////////

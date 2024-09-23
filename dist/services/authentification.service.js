@@ -50,6 +50,13 @@ class AuthentificationService {
             this.instance = new AuthentificationService();
         return this.instance;
     }
+    init() {
+        return __awaiter(this, void 0, void 0, function* () {
+            return this.registerToAdmin().then(() => __awaiter(this, void 0, void 0, function* () {
+                yield this.sendDataToAdmin();
+            }));
+        });
+    }
     authenticate(info) {
         return __awaiter(this, void 0, void 0, function* () {
             const isUser = "userName" in info && "password" in info ? true : false;
@@ -61,19 +68,44 @@ class AuthentificationService {
         });
     }
     // PAM Credential
-    registerToAdmin(pamInfo, adminInfo) {
-        if (adminInfo.urlAdmin[adminInfo.urlAdmin.length - 1] === "/") {
-            adminInfo.urlAdmin = adminInfo.urlAdmin.substring(0, adminInfo.urlAdmin.lastIndexOf('/'));
+    // public registerToAdmin(pamInfo: IPamInfo): Promise<IPamCredential> {
+    registerToAdmin() {
+        let urlAdmin = process.env.AUTH_SERVER_URL;
+        const clientId = process.env.AUTH_CLIENT_ID;
+        const clientSecret = process.env.AUTH_CLIENT_SECRET;
+        if (!urlAdmin || !(/^https?:\/\//.test(urlAdmin)))
+            throw new Error("AUTH_SERVER_URL is not valid in .env file");
+        if (!clientId)
+            throw new Error("AUTH_CLIENT_ID is not valid in .env file");
+        if (!clientSecret)
+            throw new Error("AUTH_CLIENT_SECRET is not valid in .env file");
+        if (urlAdmin[urlAdmin.length - 1] === "/") {
+            urlAdmin = urlAdmin.substring(0, urlAdmin.lastIndexOf('/'));
         }
-        return axios_1.default.post(`${adminInfo.urlAdmin}/register`, {
-            platformCreationParms: pamInfo,
-            registerKey: adminInfo.registerKey
+        return axios_1.default.post(`${urlAdmin}/register`, {
+            // platformCreationParms: pamInfo,
+            clientId,
+            clientSecret
         }).then((result) => {
-            result.data.url = adminInfo.urlAdmin;
-            result.data.registerKey = adminInfo.registerKey;
+            result.data.url = urlAdmin;
+            result.data.clientId = clientId;
             return this._editPamCredential(result.data);
         });
     }
+    // // PAM Credential
+    // public registerToAdmin(pamInfo: IPamInfo, adminInfo: IAdmin): Promise<IPamCredential> {
+    //     if (adminInfo.urlAdmin[adminInfo.urlAdmin.length - 1] === "/") {
+    //         adminInfo.urlAdmin = adminInfo.urlAdmin.substring(0, adminInfo.urlAdmin.lastIndexOf('/'))
+    //     }
+    //     return axios.post(`${adminInfo.urlAdmin}/register`, {
+    //         platformCreationParms: pamInfo,
+    //         registerKey: adminInfo.registerKey
+    //     }).then((result) => {
+    //         result.data.url = adminInfo.urlAdmin;
+    //         result.data.registerKey = adminInfo.registerKey;
+    //         return this._editPamCredential(result.data)
+    //     })
+    // }
     getPamToAdminCredential() {
         return __awaiter(this, void 0, void 0, function* () {
             let context = yield configFile_service_1.configServiceInstance.getContext(constant_1.PAM_CREDENTIAL_CONTEXT_NAME);
@@ -184,8 +216,8 @@ class AuthentificationService {
                 contextInfo.mod_attr("idPlateform", bosCredential.id);
             if (bosCredential.url)
                 contextInfo.mod_attr("urlAdmin", bosCredential.url);
-            if (bosCredential.registerKey)
-                contextInfo.mod_attr("registerKey", bosCredential.registerKey);
+            if (bosCredential.clientId)
+                contextInfo.mod_attr("clientId", bosCredential.clientId);
             return contextInfo.get();
         });
     }

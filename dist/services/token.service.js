@@ -41,6 +41,8 @@ const adminProfile_service_1 = require("./adminProfile.service");
 const jwt = require("jsonwebtoken");
 const globalCache = require("global-cache");
 const cron = require("node-cron");
+const authentification_service_1 = require("./authentification.service");
+const axios_1 = require("axios");
 class TokenService {
     constructor() { }
     static getInstance() {
@@ -134,9 +136,11 @@ class TokenService {
     }
     tokenIsValid(token, deleteIfExpired = false) {
         return __awaiter(this, void 0, void 0, function* () {
-            const data = yield this.getTokenData(token);
-            if (!data)
-                return;
+            let data = yield this.getTokenData(token);
+            if (!data) {
+                data = yield this.verifyToken(token);
+            }
+            ;
             const expirationTime = data.expieredToken;
             const tokenExpired = expirationTime ? Date.now() >= expirationTime * 1000 : true;
             if (tokenExpired) {
@@ -153,6 +157,14 @@ class TokenService {
             if (data)
                 return data.profile.profileId || data.profile.userProfileBosConfigId || data.profile.appProfileBosConfigId;
             return;
+        });
+    }
+    verifyToken(token, actor = "user") {
+        return __awaiter(this, void 0, void 0, function* () {
+            const authAdmin = yield authentification_service_1.AuthentificationService.getInstance().getPamToAdminCredential();
+            return axios_1.default.post(`${authAdmin.urlAdmin}/tokens/verifyToken`, { tokenParam: token, actor }).then((result) => {
+                return result.data;
+            });
         });
     }
     //////////////////////////////////////////////////

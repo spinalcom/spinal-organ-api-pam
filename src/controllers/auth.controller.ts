@@ -54,22 +54,22 @@ export class AuthController extends Controller {
     }
 
 
-    @Security(SECURITY_NAME.bearerAuth)
-    @Post("/register_admin")
-    public async registerToAdmin(@Request() req: express.Request, @Body() data: { pamInfo: IPamInfo, adminInfo: IAdmin }): Promise<IPamCredential | { message: string }> {
-        try {
-            const isAdmin = await checkIfItIsAdmin(req);
-            if (!isAdmin) throw new AuthError(SECURITY_MESSAGES.UNAUTHORIZED);
+    // @Security(SECURITY_NAME.bearerAuth)
+    // @Post("/register_admin")
+    // public async registerToAdmin(@Request() req: express.Request, @Body() data: { pamInfo: IPamInfo, adminInfo: IAdmin }): Promise<IPamCredential | { message: string }> {
+    //     try {
+    //         const isAdmin = await checkIfItIsAdmin(req);
+    //         if (!isAdmin) throw new AuthError(SECURITY_MESSAGES.UNAUTHORIZED);
 
-            const registeredData = await serviceInstance.registerToAdmin(data.pamInfo, data.adminInfo);
-            await serviceInstance.sendDataToAdmin();
-            this.setStatus(HTTP_CODES.OK)
-            return registeredData;
-        } catch (error) {
-            this.setStatus(error.code || HTTP_CODES.INTERNAL_ERROR);
-            return { message: error.message };
-        }
-    }
+    //         const registeredData = await serviceInstance.registerToAdmin(data.pamInfo, data.adminInfo);
+    //         await serviceInstance.sendDataToAdmin();
+    //         this.setStatus(HTTP_CODES.OK)
+    //         return registeredData;
+    //     } catch (error) {
+    //         this.setStatus(error.code || HTTP_CODES.INTERNAL_ERROR);
+    //         return { message: error.message };
+    //     }
+    // }
 
     @Security(SECURITY_NAME.bearerAuth)
     @Get("/get_pam_to_auth_credential")

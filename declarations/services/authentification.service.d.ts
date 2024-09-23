@@ -1,13 +1,14 @@
-import { IAdmin, IAdminCredential, IPamCredential, IPamInfo, IUserCredential, IAppCredential, IApplicationToken, IUserToken, IOAuth2Credential } from "../interfaces";
+import { IAdminCredential, IPamCredential, IUserCredential, IAppCredential, IApplicationToken, IUserToken, IOAuth2Credential } from "../interfaces";
 export declare class AuthentificationService {
     private static instance;
     private constructor();
     static getInstance(): AuthentificationService;
+    init(): Promise<void>;
     authenticate(info: IUserCredential | IAppCredential | IOAuth2Credential): Promise<{
         code: number;
         data: string | IApplicationToken | IUserToken;
     }>;
-    registerToAdmin(pamInfo: IPamInfo, adminInfo: IAdmin): Promise<IPamCredential>;
+    registerToAdmin(): Promise<IPamCredential>;
     getPamToAdminCredential(): Promise<IPamCredential>;
     deleteCredentials(): Promise<{
         removed: boolean;

@@ -54,6 +54,7 @@ class ConfigFileService {
         return this.loadOrMakeConfigFile(connect).then((graph) => {
             this.hubConnect = connect;
             this.graph = graph;
+            console.log("graph._server_id", graph._server_id);
             return this._initServices().then((result) => __awaiter(this, void 0, void 0, function* () {
                 yield _1.DigitalTwinService.getInstance().createDigitalTwin("PAM DigitalTwin", constant_1.CONFIG_DEFAULT_DIRECTORY_PATH);
                 yield (0, adminApps_1.createDefaultAdminApps)();
@@ -94,7 +95,8 @@ class ConfigFileService {
             // DigitalTwinService,
             _1.PortofolioService,
             _1.TokenService,
-            _1.LogService
+            _1.LogService,
+            _1.AuthentificationService
         ];
         const promises = services.map(service => {
             try {

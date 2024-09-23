@@ -5,7 +5,7 @@ export default class ConfigFileService {
     hubConnect: spinal.FileSystem;
     private constructor();
     static getInstance(): ConfigFileService;
-    init(connect: spinal.FileSystem): Promise<SpinalContext[]>;
+    init(connect: spinal.FileSystem): Promise<(SpinalContext | void)[]>;
     getContext(contextName: string): Promise<SpinalContext>;
     addContext(contextName: string, contextType?: string): Promise<SpinalContext>;
     private loadOrMakeConfigFile;

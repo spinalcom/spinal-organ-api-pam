@@ -1,6 +1,6 @@
 import { SpinalContext, SpinalNode } from "spinal-env-viewer-graph-service";
 import { HTTP_CODES } from "../constant";
-import { IUserCredential, IUserInfo, IUserToken } from "../interfaces";
+import { IPamCredential, IUserCredential, IUserInfo, IUserToken } from "../interfaces";
 export declare class UserListService {
     private static instance;
     context: SpinalContext;
@@ -25,14 +25,15 @@ export declare class UserListService {
         code: HTTP_CODES;
         data: any;
     }>;
+    getUserDataFormatted(data: any, adminCredential?: any): Promise<any>;
     private _addUserToContext;
     private _hashPassword;
     private _comparePassword;
     private _generateString;
     private _deleteUserToken;
     private _getAuthorizedApps;
-    private _getProfileInfo;
-    private _getUserInfo;
+    _getProfileInfo(userToken: string, adminCredential: IPamCredential, isUser?: boolean): Promise<any>;
+    _getUserInfo(userId: string, adminCredential: IPamCredential, userToken: string): Promise<any>;
     private _getAuthPlateformInfo;
     private _convertListToObj;
 }

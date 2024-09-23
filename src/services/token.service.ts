@@ -31,6 +31,8 @@ import * as jwt from "jsonwebtoken";
 import * as globalCache from 'global-cache';
 import { IApplicationToken, IUserToken } from "../interfaces";
 import * as cron from 'node-cron';
+import { AuthentificationService } from "./authentification.service";
+import axios from "axios";
 
 export class TokenService {
     private static instance: TokenService;
@@ -107,6 +109,8 @@ export class TokenService {
             globalCache.set(token, element.get())
             return element.get();
         }
+
+
     }
 
     public async deleteToken(token: SpinalNode | string): Promise<boolean> {
@@ -125,8 +129,11 @@ export class TokenService {
     }
 
     public async tokenIsValid(token: string, deleteIfExpired: boolean = false): Promise<IUserToken | IApplicationToken> {
-        const data = await this.getTokenData(token);
-        if (!data) return;
+        let data = await this.getTokenData(token);
+
+        if (!data) {
+            data = await this.verifyToken(token);
+        };
 
         const expirationTime = data.expieredToken;
         const tokenExpired = expirationTime ? Date.now() >= expirationTime * 1000 : true;
@@ -144,6 +151,14 @@ export class TokenService {
         if (data) return data.profile.profileId || data.profile.userProfileBosConfigId || data.profile.appProfileBosConfigId;
 
         return;
+    }
+
+    public async verifyToken(token: string, actor: "user" | "app" = "user") {
+        const authAdmin = await AuthentificationService.getInstance().getPamToAdminCredential();
+
+        return axios.post(`${authAdmin.urlAdmin}/tokens/verifyToken`, { tokenParam: token, actor }).then((result) => {
+            return result.data;
+        })
     }
 
     //////////////////////////////////////////////////

@@ -14,6 +14,7 @@ export declare class TokenService {
     deleteToken(token: SpinalNode | string): Promise<boolean>;
     tokenIsValid(token: string, deleteIfExpired?: boolean): Promise<IUserToken | IApplicationToken>;
     getProfileIdByToken(token: string): Promise<string>;
+    verifyToken(token: string, actor?: "user" | "app"): Promise<any>;
     private _generateString;
     private _getAllTokens;
     private _scheduleTokenPurge;

@@ -46,34 +46,72 @@ export class AuthentificationService {
         return this.instance;
     }
 
+    async init() {
+        return this.registerToAdmin().then(async () => {
+            await this.sendDataToAdmin();
+        })
+    }
+
     public async authenticate(info: IUserCredential | IAppCredential | IOAuth2Credential): Promise<{ code: number; data: string | IApplicationToken | IUserToken }> {
         const isUser = "userName" in info && "password" in info ? true : false;
 
-        if (isUser) {
-            return UserListService.getInstance().authenticateUser(<IUserCredential>info);
-        }
+        if (!isUser) return { code: HTTP_CODES.BAD_REQUEST, data: "Invalid userName and/or password" };
+        return UserListService.getInstance().authenticateUser(<IUserCredential>info);
 
-        const appInfo: any = this._formatInfo(<any>info);
 
-        return AppListService.getInstance().authenticateApplication(appInfo)
+
+
+
+        // const appInfo: any = this._formatInfo(<any>info);
+
+        // return AppListService.getInstance().authenticateApplication(appInfo)
     }
 
 
     // PAM Credential
-    public registerToAdmin(pamInfo: IPamInfo, adminInfo: IAdmin): Promise<IPamCredential> {
-        if (adminInfo.urlAdmin[adminInfo.urlAdmin.length - 1] === "/") {
-            adminInfo.urlAdmin = adminInfo.urlAdmin.substring(0, adminInfo.urlAdmin.lastIndexOf('/'))
+    // public registerToAdmin(pamInfo: IPamInfo): Promise<IPamCredential> {
+    public registerToAdmin(): Promise<IPamCredential> {
+
+        let urlAdmin = process.env.AUTH_SERVER_URL;
+        const clientId = process.env.AUTH_CLIENT_ID;
+        const clientSecret = process.env.AUTH_CLIENT_SECRET;
+
+        if (!urlAdmin || !(/^https?:\/\//.test(urlAdmin))) throw new Error("AUTH_SERVER_URL is not valid in .env file");
+        if (!clientId) throw new Error("AUTH_CLIENT_ID is not valid in .env file");
+        if (!clientSecret) throw new Error("AUTH_CLIENT_SECRET is not valid in .env file");
+
+
+        if (urlAdmin[urlAdmin.length - 1] === "/") {
+            urlAdmin = urlAdmin.substring(0, urlAdmin.lastIndexOf('/'))
         }
 
-        return axios.post(`${adminInfo.urlAdmin}/register`, {
-            platformCreationParms: pamInfo,
-            registerKey: adminInfo.registerKey
+        return axios.post(`${urlAdmin}/register`, {
+            // platformCreationParms: pamInfo,
+            clientId,
+            clientSecret
         }).then((result) => {
-            result.data.url = adminInfo.urlAdmin;
-            result.data.registerKey = adminInfo.registerKey;
+            result.data.url = urlAdmin;
+            result.data.clientId = clientId;
             return this._editPamCredential(result.data)
         })
     }
+
+
+    // // PAM Credential
+    // public registerToAdmin(pamInfo: IPamInfo, adminInfo: IAdmin): Promise<IPamCredential> {
+    //     if (adminInfo.urlAdmin[adminInfo.urlAdmin.length - 1] === "/") {
+    //         adminInfo.urlAdmin = adminInfo.urlAdmin.substring(0, adminInfo.urlAdmin.lastIndexOf('/'))
+    //     }
+
+    //     return axios.post(`${adminInfo.urlAdmin}/register`, {
+    //         platformCreationParms: pamInfo,
+    //         registerKey: adminInfo.registerKey
+    //     }).then((result) => {
+    //         result.data.url = adminInfo.urlAdmin;
+    //         result.data.registerKey = adminInfo.registerKey;
+    //         return this._editPamCredential(result.data)
+    //     })
+    // }
 
     public async getPamToAdminCredential(): Promise<IPamCredential> {
         let context = await configServiceInstance.getContext(PAM_CREDENTIAL_CONTEXT_NAME);
@@ -139,6 +177,7 @@ export class AuthentificationService {
 
 
 
+
     // public async updateToken(oldToken: string) {
     //     const adminInfo = await this.getAdminCredential();
     //     const decodeToken = jwt.verify(oldToken, tokenKey);
@@ -190,7 +229,7 @@ export class AuthentificationService {
         if (bosCredential.name) contextInfo.mod_attr("pamName", bosCredential.name);
         if (bosCredential.id) contextInfo.mod_attr("idPlateform", bosCredential.id);
         if (bosCredential.url) contextInfo.mod_attr("urlAdmin", bosCredential.url);
-        if (bosCredential.registerKey) contextInfo.mod_attr("registerKey", bosCredential.registerKey);
+        if (bosCredential.clientId) contextInfo.mod_attr("clientId", bosCredential.clientId);
 
         return contextInfo.get();
     }
@@ -220,7 +259,7 @@ export class AuthentificationService {
     }
 
     private _formatInfo(info: IAppCredential | IOAuth2Credential): IAppCredential {
-        const obj: any = {clientId : undefined, clientSecret: undefined};
+        const obj: any = { clientId: undefined, clientSecret: undefined };
         if ("client_id" in info) {
             // info["clientId"] = info["client_id"]
             // delete info.client_id;

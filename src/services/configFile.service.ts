@@ -33,7 +33,8 @@ import {
     OrganListService, RoleService,
     UserProfileService, PortofolioService,
     DigitalTwinService, TokenService, UserListService,
-    AppListService, LogService
+    AppListService, LogService,
+    AuthentificationService
 } from ".";
 import { createDefaultAdminApps } from '../adminApps';
 
@@ -57,10 +58,11 @@ export default class ConfigFileService {
         return ConfigFileService.instance;
     }
 
-    public init(connect: spinal.FileSystem): Promise<SpinalContext[]> {
+    public init(connect: spinal.FileSystem): Promise<(SpinalContext | void)[]> {
         return this.loadOrMakeConfigFile(connect).then((graph: SpinalGraph) => {
             this.hubConnect = connect;
             this.graph = graph;
+            console.log("graph._server_id", graph._server_id)
             return this._initServices().then(async (result) => {
                 await DigitalTwinService.getInstance().createDigitalTwin("PAM DigitalTwin", CONFIG_DEFAULT_DIRECTORY_PATH)
                 await createDefaultAdminApps();
@@ -109,7 +111,8 @@ export default class ConfigFileService {
             // DigitalTwinService,
             PortofolioService,
             TokenService,
-            LogService
+            LogService,
+            AuthentificationService
         ];
 
         const promises = services.map(service => {

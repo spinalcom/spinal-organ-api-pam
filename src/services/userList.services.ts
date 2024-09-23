@@ -65,10 +65,10 @@ export class UserListService {
     public async authenticateUser(user: IUserCredential): Promise<{ code: number; data: string | IUserToken }> {
         let data: any = await this.authAdmin(user);
         let isAdmin = true;
-        if (data.code === HTTP_CODES.INTERNAL_ERROR) {
-            data = await this.authUserViaAuthPlateform(user);
-            isAdmin = false;
-        }
+        // if (data.code === HTTP_CODES.INTERNAL_ERROR) {
+        //     data = await this.authUserViaAuthPlateform(user);
+        //     isAdmin = false;
+        // }
 
         if (data.code === HTTP_CODES.OK) {
             const type = isAdmin ? USER_TYPES.ADMIN : USER_TYPES.USER;
@@ -198,9 +198,7 @@ export class UserListService {
 
         const url = `${adminCredential.urlAdmin}/users/login`;
         return axios.post(url, user).then(async (result) => {
-            const data = result.data;
-            data.profile = await this._getProfileInfo(data.token, adminCredential);
-            data.userInfo = await this._getUserInfo(data.userId, adminCredential, data.token);
+            const data = this.getUserDataFormatted(result.data, adminCredential);
 
             return {
                 code: HTTP_CODES.OK,
@@ -213,6 +211,16 @@ export class UserListService {
                 data: "bad credential"
             }
         })
+    }
+
+
+    public async getUserDataFormatted(data: any, adminCredential?: any) {
+        adminCredential = adminCredential || await this._getAuthPlateformInfo();
+
+        data.profile = await this._getProfileInfo(data.token, adminCredential);
+        data.userInfo = await this._getUserInfo(data.userId, adminCredential, data.token);
+
+        return data;
     }
 
     //////////////////////////////////////////////////
@@ -263,7 +271,7 @@ export class UserListService {
             : userProfileInstance.getAuthorizedPortofolioApp(userProfileId, portofolioId)
     }
 
-    private _getProfileInfo(userToken: string, adminCredential: IPamCredential, isUser: boolean = true) {
+    public _getProfileInfo(userToken: string, adminCredential: IPamCredential, isUser: boolean = true) {
         let urlAdmin = adminCredential.urlAdmin;
         let endpoint = "/tokens/getUserProfileByToken";
         return axios.post(urlAdmin + endpoint, {
@@ -279,7 +287,7 @@ export class UserListService {
         })
     }
 
-    private _getUserInfo(userId: string, adminCredential: IPamCredential, userToken: string) {
+    public _getUserInfo(userId: string, adminCredential: IPamCredential, userToken: string) {
         const config = {
             headers: {
                 'Content-Type': 'application/json',

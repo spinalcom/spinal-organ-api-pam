@@ -45,7 +45,7 @@ const routes_1 = require("./routes");
 const AuthError_1 = require("./security/AuthError");
 const websocket_1 = require("./proxy/websocket");
 const webSocketLogs_service_1 = require("./services/webSocketLogs.service");
-// import { webSocketProxy } from './proxy/websocketProxy';
+const login_1 = require("./proxy/login");
 function initExpress(conn) {
     return __awaiter(this, void 0, void 0, function* () {
         var app = express();
@@ -55,6 +55,7 @@ function initExpress(conn) {
         (0, bos_1.default)(app, true);
         useApiMiddleWare(app);
         useHubProxy(app);
+        (0, login_1.useLoginProxy)(app);
         useClientMiddleWare(app);
         initSwagger(app);
         (0, routes_1.RegisterRoutes)(app);
