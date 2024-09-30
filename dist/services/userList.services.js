@@ -67,10 +67,10 @@ class UserListService {
         return __awaiter(this, void 0, void 0, function* () {
             let data = yield this.authAdmin(user);
             let isAdmin = true;
-            if (data.code === constant_1.HTTP_CODES.INTERNAL_ERROR) {
-                data = yield this.authUserViaAuthPlateform(user);
-                isAdmin = false;
-            }
+            // if (data.code === HTTP_CODES.INTERNAL_ERROR) {
+            //     data = await this.authUserViaAuthPlateform(user);
+            //     isAdmin = false;
+            // }
             if (data.code === constant_1.HTTP_CODES.OK) {
                 const type = isAdmin ? constant_1.USER_TYPES.ADMIN : constant_1.USER_TYPES.USER;
                 const info = { name: user.userName, userName: user.userName, type, userType: type, userId: data.data.userId };

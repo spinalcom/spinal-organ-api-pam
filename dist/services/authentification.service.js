@@ -41,7 +41,6 @@ const uuid_1 = require("uuid");
 const userProfile_service_1 = require("./userProfile.service");
 const appProfile_service_1 = require("./appProfile.service");
 const userList_services_1 = require("./userList.services");
-const appConnectedList_services_1 = require("./appConnectedList.services");
 const tokenKey = '9b1deb4d-3b7d-4bad-9bdd-2b0d7b3dcb6d';
 class AuthentificationService {
     constructor() { }
@@ -52,27 +51,36 @@ class AuthentificationService {
     }
     init() {
         return __awaiter(this, void 0, void 0, function* () {
-            return this.registerToAdmin().then(() => __awaiter(this, void 0, void 0, function* () {
+            let urlAdmin = process.env.AUTH_SERVER_URL;
+            const clientId = process.env.AUTH_CLIENT_ID;
+            const clientSecret = process.env.AUTH_CLIENT_SECRET;
+            if (!urlAdmin || !clientId || !clientSecret) {
+                console.info("There is not all the information needed to connect an auth platform in the .env file, so you can only login as admin");
+                return;
+            }
+            return this.registerToAdmin(urlAdmin, clientId, clientSecret)
+                .then(() => __awaiter(this, void 0, void 0, function* () {
+                console.info("Connected to the auth platform");
                 yield this.sendDataToAdmin();
-            }));
+            })).catch((e) => {
+                console.error("Impossible to connect to the auth platform, please check the information in the .env file");
+                console.error("error message", e.message);
+            });
         });
     }
     authenticate(info) {
         return __awaiter(this, void 0, void 0, function* () {
             const isUser = "userName" in info && "password" in info ? true : false;
-            if (isUser) {
-                return userList_services_1.UserListService.getInstance().authenticateUser(info);
-            }
-            const appInfo = this._formatInfo(info);
-            return appConnectedList_services_1.AppListService.getInstance().authenticateApplication(appInfo);
+            if (!isUser)
+                return { code: constant_1.HTTP_CODES.BAD_REQUEST, data: "Invalid userName and/or password" };
+            return userList_services_1.UserListService.getInstance().authenticateUser(info);
+            // const appInfo: any = this._formatInfo(<any>info);
+            // return AppListService.getInstance().authenticateApplication(appInfo)
         });
     }
     // PAM Credential
     // public registerToAdmin(pamInfo: IPamInfo): Promise<IPamCredential> {
-    registerToAdmin() {
-        let urlAdmin = process.env.AUTH_SERVER_URL;
-        const clientId = process.env.AUTH_CLIENT_ID;
-        const clientSecret = process.env.AUTH_CLIENT_SECRET;
+    registerToAdmin(urlAdmin, clientId, clientSecret) {
         if (!urlAdmin || !(/^https?:\/\//.test(urlAdmin)))
             throw new Error("AUTH_SERVER_URL is not valid in .env file");
         if (!clientId)

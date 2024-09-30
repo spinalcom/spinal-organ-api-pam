@@ -8,7 +8,7 @@ export declare class AuthentificationService {
         code: number;
         data: string | IApplicationToken | IUserToken;
     }>;
-    registerToAdmin(): Promise<IPamCredential>;
+    registerToAdmin(urlAdmin: string, clientId: string, clientSecret: string): Promise<IPamCredential>;
     getPamToAdminCredential(): Promise<IPamCredential>;
     deleteCredentials(): Promise<{
         removed: boolean;

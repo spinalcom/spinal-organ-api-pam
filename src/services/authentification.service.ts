@@ -34,6 +34,7 @@ import { AppProfileService } from "./appProfile.service";
 
 import { UserListService } from "./userList.services";
 import { AppListService } from "./appConnectedList.services";
+import { error } from "console";
 const tokenKey = '9b1deb4d-3b7d-4bad-9bdd-2b0d7b3dcb6d';
 
 
@@ -47,9 +48,23 @@ export class AuthentificationService {
     }
 
     async init() {
-        return this.registerToAdmin().then(async () => {
-            await this.sendDataToAdmin();
-        })
+        let urlAdmin = process.env.AUTH_SERVER_URL;
+        const clientId = process.env.AUTH_CLIENT_ID;
+        const clientSecret = process.env.AUTH_CLIENT_SECRET;
+
+        if (!urlAdmin || !clientId || !clientSecret) {
+            console.info("There is not all the information needed to connect an auth platform in the .env file, so you can only login as admin");
+            return;
+        }
+
+        return this.registerToAdmin(urlAdmin, clientId, clientSecret)
+            .then(async () => {
+                console.info("Connected to the auth platform");
+                await this.sendDataToAdmin();
+            }).catch((e) => {
+                console.error("Impossible to connect to the auth platform, please check the information in the .env file");
+                console.error("error message", e.message);
+            })
     }
 
     public async authenticate(info: IUserCredential | IAppCredential | IOAuth2Credential): Promise<{ code: number; data: string | IApplicationToken | IUserToken }> {
@@ -70,11 +85,7 @@ export class AuthentificationService {
 
     // PAM Credential
     // public registerToAdmin(pamInfo: IPamInfo): Promise<IPamCredential> {
-    public registerToAdmin(): Promise<IPamCredential> {
-
-        let urlAdmin = process.env.AUTH_SERVER_URL;
-        const clientId = process.env.AUTH_CLIENT_ID;
-        const clientSecret = process.env.AUTH_CLIENT_SECRET;
+    public registerToAdmin(urlAdmin: string, clientId: string, clientSecret: string): Promise<IPamCredential> {
 
         if (!urlAdmin || !(/^https?:\/\//.test(urlAdmin))) throw new Error("AUTH_SERVER_URL is not valid in .env file");
         if (!clientId) throw new Error("AUTH_CLIENT_ID is not valid in .env file");
