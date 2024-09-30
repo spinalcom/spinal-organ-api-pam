@@ -1,6 +1,7 @@
 import { IAdminCredential, IPamCredential, IUserCredential, IAppCredential, IApplicationToken, IUserToken, IOAuth2Credential } from "../interfaces";
 export declare class AuthentificationService {
     private static instance;
+    authPlatformIsConnected: boolean;
     private constructor();
     static getInstance(): AuthentificationService;
     init(): Promise<void>;

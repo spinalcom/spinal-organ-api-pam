@@ -43,7 +43,9 @@ const appProfile_service_1 = require("./appProfile.service");
 const userList_services_1 = require("./userList.services");
 const tokenKey = '9b1deb4d-3b7d-4bad-9bdd-2b0d7b3dcb6d';
 class AuthentificationService {
-    constructor() { }
+    constructor() {
+        this.authPlatformIsConnected = false;
+    }
     static getInstance() {
         if (!this.instance)
             this.instance = new AuthentificationService();
@@ -56,15 +58,18 @@ class AuthentificationService {
             const clientSecret = process.env.AUTH_CLIENT_SECRET;
             if (!urlAdmin || !clientId || !clientSecret) {
                 console.info("There is not all the information needed to connect an auth platform in the .env file, so you can only login as admin");
+                this.authPlatformIsConnected = false;
                 return;
             }
             return this.registerToAdmin(urlAdmin, clientId, clientSecret)
                 .then(() => __awaiter(this, void 0, void 0, function* () {
                 console.info("Connected to the auth platform");
                 yield this.sendDataToAdmin();
+                this.authPlatformIsConnected = true;
             })).catch((e) => {
                 console.error("Impossible to connect to the auth platform, please check the information in the .env file");
                 console.error("error message", e.message);
+                this.authPlatformIsConnected = false;
             });
         });
     }

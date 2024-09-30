@@ -40,6 +40,8 @@ const tokenKey = '9b1deb4d-3b7d-4bad-9bdd-2b0d7b3dcb6d';
 
 export class AuthentificationService {
     private static instance: AuthentificationService;
+    public authPlatformIsConnected: boolean = false;
+
     private constructor() { }
 
     public static getInstance(): AuthentificationService {
@@ -54,6 +56,7 @@ export class AuthentificationService {
 
         if (!urlAdmin || !clientId || !clientSecret) {
             console.info("There is not all the information needed to connect an auth platform in the .env file, so you can only login as admin");
+            this.authPlatformIsConnected = false;
             return;
         }
 
@@ -61,11 +64,14 @@ export class AuthentificationService {
             .then(async () => {
                 console.info("Connected to the auth platform");
                 await this.sendDataToAdmin();
+                this.authPlatformIsConnected = true;
             }).catch((e) => {
                 console.error("Impossible to connect to the auth platform, please check the information in the .env file");
                 console.error("error message", e.message);
+                this.authPlatformIsConnected = false;
             })
     }
+
 
     public async authenticate(info: IUserCredential | IAppCredential | IOAuth2Credential): Promise<{ code: number; data: string | IApplicationToken | IUserToken }> {
         const isUser = "userName" in info && "password" in info ? true : false;

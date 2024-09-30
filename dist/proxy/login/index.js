@@ -11,11 +11,17 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.useLoginProxy = void 0;
 const services_1 = require("../../services");
+const constant_1 = require("../../constant");
 function useLoginProxy(app) {
     return __awaiter(this, void 0, void 0, function* () {
         app.get('/login', (req, res, next) => __awaiter(this, void 0, void 0, function* () {
-            const url = getAuthServerUrl();
-            res.redirect(url);
+            const authPlatformIsConnected = yield services_1.AuthentificationService.getInstance().authPlatformIsConnected;
+            if (authPlatformIsConnected) {
+                const url = getAuthServerUrl();
+                res.redirect(url);
+                return;
+            }
+            res.send({ status: constant_1.HTTP_CODES.BAD_REQUEST, message: "No Authentification server url found, use /admin endpoint to connect as admin" });
         }));
         app.post("/callback", (req, res, next) => __awaiter(this, void 0, void 0, function* () {
             try {

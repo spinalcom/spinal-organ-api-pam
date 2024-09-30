@@ -1,14 +1,22 @@
 import * as express from "express";
 import { AuthentificationService, UserListService } from "../../services";
 import { formatUri } from "../bos/utils";
+import { HTTP_CODES } from "../../constant";
 
 
 
 export async function useLoginProxy(app: express.Application) {
 
     app.get('/login', async (req: express.Request, res: express.Response, next: express.NextFunction) => {
-        const url = getAuthServerUrl();
-        res.redirect(url);
+        const authPlatformIsConnected = await AuthentificationService.getInstance().authPlatformIsConnected;
+
+        if (authPlatformIsConnected) {
+            const url = getAuthServerUrl();
+            res.redirect(url);
+            return;
+        }
+
+        res.send({ status: HTTP_CODES.BAD_REQUEST, message: "No Authentification server url found, use /admin endpoint to connect as admin" });
     });
 
     app.post("/callback", async (req: express.Request, res: express.Response, next: express.NextFunction) => {
