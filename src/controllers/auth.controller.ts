@@ -72,6 +72,23 @@ export class AuthController extends Controller {
     // }
 
     @Security(SECURITY_NAME.bearerAuth)
+    @Post("/register_admin")
+    public async registerToAdmin(@Request() req: express.Request, @Body() data: IAdmin): Promise<IPamCredential | { message: string }> {
+        try {
+            const isAdmin = await checkIfItIsAdmin(req);
+            if (!isAdmin) throw new AuthError(SECURITY_MESSAGES.UNAUTHORIZED);
+
+            const registeredData = await serviceInstance.registerToAdmin(data.urlAdmin, data.clientId, data.clientSecret);
+            await serviceInstance.sendDataToAdmin();
+            this.setStatus(HTTP_CODES.OK)
+            return registeredData;
+        } catch (error) {
+            this.setStatus(error.code || HTTP_CODES.INTERNAL_ERROR);
+            return { message: error.message };
+        }
+    }
+
+    @Security(SECURITY_NAME.bearerAuth)
     @Get("/get_pam_to_auth_credential")
     public async getBosToAdminCredential(@Request() req: express.Request): Promise<IPamCredential | { message: string }> {
         try {

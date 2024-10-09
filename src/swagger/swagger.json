@@ -457,6 +457,9 @@
 					},
 					"urlAdmin": {
 						"type": "string"
+					},
+					"clientId": {
+						"type": "string"
 					}
 				},
 				"required": [
@@ -466,6 +469,30 @@
 					"statusPlatform",
 					"address",
 					"tokenPamToAdmin"
+				],
+				"type": "object",
+				"additionalProperties": false
+			},
+			"IAdmin": {
+				"properties": {
+					"name": {
+						"type": "string"
+					},
+					"urlAdmin": {
+						"type": "string"
+					},
+					"clientId": {
+						"type": "string"
+					},
+					"clientSecret": {
+						"type": "string"
+					}
+				},
+				"required": [
+					"name",
+					"urlAdmin",
+					"clientId",
+					"clientSecret"
 				],
 				"type": "object",
 				"additionalProperties": false
@@ -495,7 +522,8 @@
 					401,
 					403,
 					404,
-					500
+					500,
+					302
 				],
 				"type": "number"
 			},
@@ -3575,6 +3603,57 @@
 										"$ref": "#/components/schemas/IOAuth2Credential"
 									}
 								]
+							}
+						}
+					}
+				}
+			}
+		},
+		"/api/v1/pam/register_admin": {
+			"post": {
+				"operationId": "RegisterToAdmin",
+				"responses": {
+					"200": {
+						"description": "Ok",
+						"content": {
+							"application/json": {
+								"schema": {
+									"anyOf": [
+										{
+											"$ref": "#/components/schemas/IPamCredential"
+										},
+										{
+											"properties": {
+												"message": {
+													"type": "string"
+												}
+											},
+											"required": [
+												"message"
+											],
+											"type": "object"
+										}
+									]
+								}
+							}
+						}
+					}
+				},
+				"tags": [
+					"Auth"
+				],
+				"security": [
+					{
+						"bearerAuth": []
+					}
+				],
+				"parameters": [],
+				"requestBody": {
+					"required": true,
+					"content": {
+						"application/json": {
+							"schema": {
+								"$ref": "#/components/schemas/IAdmin"
 							}
 						}
 					}

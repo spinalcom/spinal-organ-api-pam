@@ -62,7 +62,7 @@ export default class ConfigFileService {
         return this.loadOrMakeConfigFile(connect).then((graph: SpinalGraph) => {
             this.hubConnect = connect;
             this.graph = graph;
-            console.log("graph._server_id", graph._server_id)
+
             return this._initServices().then(async (result) => {
                 await DigitalTwinService.getInstance().createDigitalTwin("PAM DigitalTwin", CONFIG_DEFAULT_DIRECTORY_PATH)
                 await createDefaultAdminApps();

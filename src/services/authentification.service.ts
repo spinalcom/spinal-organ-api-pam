@@ -34,7 +34,6 @@ import { AppProfileService } from "./appProfile.service";
 
 import { UserListService } from "./userList.services";
 import { AppListService } from "./appConnectedList.services";
-import { error } from "console";
 const tokenKey = '9b1deb4d-3b7d-4bad-9bdd-2b0d7b3dcb6d';
 
 
@@ -50,26 +49,27 @@ export class AuthentificationService {
     }
 
     async init() {
-        let urlAdmin = process.env.AUTH_SERVER_URL;
-        const clientId = process.env.AUTH_CLIENT_ID;
-        const clientSecret = process.env.AUTH_CLIENT_SECRET;
 
-        if (!urlAdmin || !clientId || !clientSecret) {
-            console.info("There is not all the information needed to connect an auth platform in the .env file, so you can only login as admin");
-            this.authPlatformIsConnected = false;
-            return;
-        }
+        // let urlAdmin = process.env.AUTH_SERVER_URL;
+        // const clientId = process.env.AUTH_CLIENT_ID;
+        // const clientSecret = process.env.AUTH_CLIENT_SECRET;
 
-        return this.registerToAdmin(urlAdmin, clientId, clientSecret)
-            .then(async () => {
-                console.info("Connected to the auth platform");
-                await this.sendDataToAdmin();
-                this.authPlatformIsConnected = true;
-            }).catch((e) => {
-                console.error("Impossible to connect to the auth platform, please check the information in the .env file");
-                console.error("error message", e.message);
-                this.authPlatformIsConnected = false;
-            })
+        // if (!urlAdmin || !clientId || !clientSecret) {
+        //     console.info("There is not all the information needed to connect an auth platform in the .env file, so you can only login as admin");
+        //     this.authPlatformIsConnected = false;
+        //     return;
+        // }
+
+        // return this.registerToAdmin(urlAdmin, clientId, clientSecret)
+        //     .then(async () => {
+        //         console.info("Connected to the auth platform");
+        //         await this.sendDataToAdmin();
+        //         this.authPlatformIsConnected = true;
+        //     }).catch((e) => {
+        //         console.error("Impossible to connect to the auth platform, please check the information in the .env file");
+        //         console.error("error message", e.message);
+        //         this.authPlatformIsConnected = false;
+        //     })
     }
 
 
@@ -90,12 +90,11 @@ export class AuthentificationService {
 
 
     // PAM Credential
-    // public registerToAdmin(pamInfo: IPamInfo): Promise<IPamCredential> {
     public registerToAdmin(urlAdmin: string, clientId: string, clientSecret: string): Promise<IPamCredential> {
 
-        if (!urlAdmin || !(/^https?:\/\//.test(urlAdmin))) throw new Error("AUTH_SERVER_URL is not valid in .env file");
-        if (!clientId) throw new Error("AUTH_CLIENT_ID is not valid in .env file");
-        if (!clientSecret) throw new Error("AUTH_CLIENT_SECRET is not valid in .env file");
+        if (!urlAdmin || !(/^https?:\/\//.test(urlAdmin))) throw new Error("AUTH_SERVER_URL is not valid!");
+        if (!clientId) throw new Error("AUTH_CLIENT_ID is not valid!");
+        if (!clientSecret) throw new Error("AUTH_CLIENT_SECRET is not valid!");
 
 
         if (urlAdmin[urlAdmin.length - 1] === "/") {
@@ -109,7 +108,11 @@ export class AuthentificationService {
         }).then((result) => {
             result.data.url = urlAdmin;
             result.data.clientId = clientId;
+            this.authPlatformIsConnected = true;
             return this._editPamCredential(result.data)
+        }).catch((e) => {
+            this.authPlatformIsConnected = false;
+            throw new Error(e.message);
         })
     }
 
@@ -147,8 +150,8 @@ export class AuthentificationService {
         return { removed: true }
     }
 
-    // Admin credential
 
+    // admin credential is token and id of the admin in PAM 
     public createAdminCredential(): Promise<IAdminCredential> {
         const clientId = uuidv4();
         const token = jwt.sign({ clientId, type: 'ADMIN SERVER' }, tokenKey);

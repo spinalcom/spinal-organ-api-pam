@@ -1,10 +1,13 @@
 import * as express from "express";
 import { HTTP_CODES } from "../constant";
 import { Controller } from "tsoa";
-import { IAdminCredential, IAppCredential, IApplicationToken, IOAuth2Credential, IPamCredential, IUserCredential, IUserToken } from "../interfaces";
+import { IAdmin, IAdminCredential, IAppCredential, IApplicationToken, IOAuth2Credential, IPamCredential, IUserCredential, IUserToken } from "../interfaces";
 export declare class AuthController extends Controller {
     constructor();
     authenticate(credential: IUserCredential | IAppCredential | IOAuth2Credential): Promise<string | IApplicationToken | IUserToken | {
+        message: string;
+    }>;
+    registerToAdmin(req: express.Request, data: IAdmin): Promise<IPamCredential | {
         message: string;
     }>;
     getBosToAdminCredential(req: express.Request): Promise<IPamCredential | {

@@ -114,7 +114,8 @@ export declare enum HTTP_CODES {
     UNAUTHORIZED = 401,
     FORBIDDEN = 403,
     NOT_FOUND = 404,
-    INTERNAL_ERROR = 500
+    INTERNAL_ERROR = 500,
+    REDIRECT = 302
 }
 export declare enum SECURITY_MESSAGES {
     INVALID_TOKEN = "Invalid or expired token !",

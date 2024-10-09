@@ -1,7 +1,8 @@
 export interface IAdmin {
     name: string;
     urlAdmin: string;
-    registerKey: string;
+    clientId: string;
+    clientSecret: string;
 }
 export interface IPamInfo {
     name: string;
@@ -19,6 +20,7 @@ export interface IPamCredential {
     pamName?: string;
     idPlateform?: string;
     urlAdmin?: string;
+    clientId?: string;
 }
 export interface IAdminCredential {
     TokenAdminToPam: string;

@@ -26,7 +26,7 @@ import {
   SPINAL_RELATION_LST_PTR_TYPE,
   SPINAL_RELATION_PTR_LST_TYPE,
 } from 'spinal-env-viewer-graph-service';
-import {HTTP_METHODS} from './interfaces';
+import { HTTP_METHODS } from './interfaces';
 
 export const CONFIG_FILE_MODEl_TYPE = 'SpinalPAM';
 export const CONFIG_DEFAULT_NAME = 'PAMConfig';
@@ -147,7 +147,7 @@ export const PTR_LST_TYPE = SPINAL_RELATION_PTR_LST_TYPE;
 export const LST_PTR_TYPE = SPINAL_RELATION_LST_PTR_TYPE;
 
 export const DEFAULT_ROLES = Object.freeze(['Read', 'Write', 'Delete']);
-export const ROLE_METHODS: {[key: string]: HTTP_METHODS[]} = Object.freeze({
+export const ROLE_METHODS: { [key: string]: HTTP_METHODS[] } = Object.freeze({
   Read: [HTTP_METHODS.GET],
   Write: [HTTP_METHODS.POST, HTTP_METHODS.PUT, HTTP_METHODS.PATCH],
   Delete: [HTTP_METHODS.DELETE],
@@ -191,6 +191,7 @@ export enum HTTP_CODES {
   FORBIDDEN = 403,
   NOT_FOUND = 404,
   INTERNAL_ERROR = 500,
+  REDIRECT = 302
 }
 
 export enum SECURITY_MESSAGES {

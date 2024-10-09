@@ -35,8 +35,6 @@ const conn = spinalCore.connect(`${process.env.HUB_PROTOCOL}://${process.env.USE
 
 
 configServiceInstance.init(conn).then(async () => {
-
-
   const { app } = await expressServer(conn);
   await ConfigFile.init(conn, process.env.ORGAN_NAME, "PAM_API", process.env.HUB_HOST, parseInt(process.env.HUB_PORT));
 
