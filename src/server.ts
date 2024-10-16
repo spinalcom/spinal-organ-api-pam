@@ -38,7 +38,22 @@ import { WebSocketServer } from './proxy/websocket';
 import { WebsocketLogsService } from './services/webSocketLogs.service';
 import { useLoginProxy } from './proxy/login';
 
+import * as https from "https";
+import * as fs from "fs";
+
 export default async function initExpress(conn: spinal.FileSystem) {
+
+  const sslOptions = {
+    key: fs.readFileSync(process.env.SSL_KEY_PATH),
+    cert: fs.readFileSync(process.env.SSL_CERT_PATH)
+  };
+
+  // const sslOptions = {
+  // key: fs.readFileSync(path.resolve(__dirname, '../cert/key.pem')),
+  // cert: fs.readFileSync(path.resolve(__dirname, '../cert/cert.pem'))
+  // };
+
+
   var app = express();
   app.use(morgan('dev'));
   app.use(cors({ origin: '*' }));
@@ -68,9 +83,11 @@ export default async function initExpress(conn: spinal.FileSystem) {
   // app.use(errorHandler);
 
   const server_port = process.env.SERVER_PORT || 2022;
-  const server = app.listen(server_port, () =>
-    console.log(`api server listening on port ${server_port}!`)
-  );
+  // const server = app.listen(server_port, () =>
+  //   console.log(`api server listening on port ${server_port}!`)
+  // );
+
+  const server = https.createServer(sslOptions, app).listen(server_port, () => console.log(`app listening at https://localhost:${server_port} ....`));
   await WebsocketLogsService.getInstance().init(conn);
   const ws = new WebSocketServer(server);
 

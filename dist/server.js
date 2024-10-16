@@ -46,8 +46,14 @@ const AuthError_1 = require("./security/AuthError");
 const websocket_1 = require("./proxy/websocket");
 const webSocketLogs_service_1 = require("./services/webSocketLogs.service");
 const login_1 = require("./proxy/login");
+const https = require("https");
+const fs = require("fs");
 function initExpress(conn) {
     return __awaiter(this, void 0, void 0, function* () {
+        const sslOptions = {
+            key: fs.readFileSync(path.resolve(__dirname, '../cert/key.pem')),
+            cert: fs.readFileSync(path.resolve(__dirname, '../cert/cert.pem'))
+        };
         var app = express();
         app.use(morgan('dev'));
         app.use(cors({ origin: '*' }));
@@ -69,7 +75,10 @@ function initExpress(conn) {
         // RegisterRoutes(app);
         // app.use(errorHandler);
         const server_port = process.env.SERVER_PORT || 2022;
-        const server = app.listen(server_port, () => console.log(`api server listening on port ${server_port}!`));
+        // const server = app.listen(server_port, () =>
+        //   console.log(`api server listening on port ${server_port}!`)
+        // );
+        const server = https.createServer(sslOptions, app).listen(server_port, () => console.log(`app listening at https://localhost:${server_port} ....`));
         yield webSocketLogs_service_1.WebsocketLogsService.getInstance().init(conn);
         const ws = new websocket_1.WebSocketServer(server);
         yield ws.init();
