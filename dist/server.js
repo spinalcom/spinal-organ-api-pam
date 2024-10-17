@@ -51,9 +51,13 @@ const fs = require("fs");
 function initExpress(conn) {
     return __awaiter(this, void 0, void 0, function* () {
         const sslOptions = {
-            key: fs.readFileSync(path.resolve(__dirname, '../cert/key.pem')),
-            cert: fs.readFileSync(path.resolve(__dirname, '../cert/cert.pem'))
+            key: fs.readFileSync(process.env.SSL_KEY_PATH),
+            cert: fs.readFileSync(process.env.SSL_CERT_PATH)
         };
+        // const sslOptions = {
+        // key: fs.readFileSync(path.resolve(__dirname, '../cert/key.pem')),
+        // cert: fs.readFileSync(path.resolve(__dirname, '../cert/cert.pem'))
+        // };
         var app = express();
         app.use(morgan('dev'));
         app.use(cors({ origin: '*' }));
