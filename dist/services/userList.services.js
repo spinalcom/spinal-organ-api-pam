@@ -208,11 +208,11 @@ class UserListService {
             });
         });
     }
-    getUserDataFormatted(data, adminCredential) {
+    getUserDataFormatted(data, adminCredential, useToken = false) {
         return __awaiter(this, void 0, void 0, function* () {
             adminCredential = adminCredential || (yield this._getAuthPlateformInfo());
             data.profile = yield this._getProfileInfo(data.token, adminCredential);
-            data.userInfo = yield this._getUserInfo(data.userId, adminCredential, data.token);
+            data.userInfo = yield (useToken ? this._getUserInfoByToken(adminCredential, data.token) : this._getUserInfo(data.userId, adminCredential, data.token));
             return data;
         });
     }
@@ -283,6 +283,16 @@ class UserListService {
             },
         };
         return axios_1.default.get(`${adminCredential.urlAdmin}/users/${userId}`, config).then((result) => {
+            return result.data;
+        }).catch((err) => {
+            console.error(err);
+        });
+    }
+    _getUserInfoByToken(adminCredential, userToken) {
+        const data = {
+            token: userToken
+        };
+        return axios_1.default.post(`${adminCredential.urlAdmin}/users/userInfo`, data).then((result) => {
             return result.data;
         }).catch((err) => {
             console.error(err);

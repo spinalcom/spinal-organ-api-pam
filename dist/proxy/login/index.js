@@ -42,7 +42,7 @@ function useLoginProxy(app) {
         app.post("/callback", (req, res, next) => __awaiter(this, void 0, void 0, function* () {
             try {
                 const data = JSON.parse(req.body.data);
-                const formatData = yield services_1.UserListService.getInstance().getUserDataFormatted(data);
+                const formatData = yield services_1.UserListService.getInstance().getUserDataFormatted(data, null, true);
                 const profileId = formatData.profile.userProfileBosConfigId || data.profile.profileId;
                 const token = formatData.token;
                 const user = btoa(JSON.stringify(formatData.userInfo));

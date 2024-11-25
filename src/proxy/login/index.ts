@@ -47,7 +47,7 @@ export async function useLoginProxy(app: express.Application) {
     app.post("/callback", async (req: express.Request, res: express.Response, next: express.NextFunction) => {
         try {
             const data = JSON.parse(req.body.data);
-            const formatData = await UserListService.getInstance().getUserDataFormatted(data);
+            const formatData = await UserListService.getInstance().getUserDataFormatted(data, null, true);
 
 
             const profileId = formatData.profile.userProfileBosConfigId || data.profile.profileId;

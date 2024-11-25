@@ -214,11 +214,11 @@ export class UserListService {
     }
 
 
-    public async getUserDataFormatted(data: any, adminCredential?: any) {
+    public async getUserDataFormatted(data: any, adminCredential?: any, useToken: boolean = false) {
         adminCredential = adminCredential || await this._getAuthPlateformInfo();
 
         data.profile = await this._getProfileInfo(data.token, adminCredential);
-        data.userInfo = await this._getUserInfo(data.userId, adminCredential, data.token);
+        data.userInfo = await (useToken ? this._getUserInfoByToken(adminCredential, data.token) : this._getUserInfo(data.userId, adminCredential, data.token));
 
         return data;
     }
@@ -296,6 +296,17 @@ export class UserListService {
             },
         }
         return axios.get(`${adminCredential.urlAdmin}/users/${userId}`, config).then((result) => {
+            return result.data;
+        }).catch((err) => {
+            console.error(err);
+        })
+    }
+
+    public _getUserInfoByToken(adminCredential: IPamCredential, userToken: string) {
+        const data = {
+            token: userToken
+        }
+        return axios.post(`${adminCredential.urlAdmin}/users/userInfo`, data).then((result) => {
             return result.data;
         }).catch((err) => {
             console.error(err);
