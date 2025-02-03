@@ -3660,6 +3660,60 @@
                 }
             }
         },
+        "/api/v1/pam/update_platform_token": {
+            "post": {
+                "operationId": "UpdatePlatformTokenData",
+                "responses": {
+                    "200": {
+                        "description": "Ok",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "anyOf": [
+                                        {
+                                            "properties": {
+                                                "code": {
+                                                    "type": "number",
+                                                    "format": "double"
+                                                },
+                                                "token": {
+                                                    "type": "string"
+                                                }
+                                            },
+                                            "required": [
+                                                "code",
+                                                "token"
+                                            ],
+                                            "type": "object"
+                                        },
+                                        {
+                                            "properties": {
+                                                "message": {
+                                                    "type": "string"
+                                                }
+                                            },
+                                            "required": [
+                                                "message"
+                                            ],
+                                            "type": "object"
+                                        }
+                                    ]
+                                }
+                            }
+                        }
+                    }
+                },
+                "tags": [
+                    "Auth"
+                ],
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ],
+                "parameters": []
+            }
+        },
         "/api/v1/pam/get_pam_to_auth_credential": {
             "get": {
                 "operationId": "GetBosToAdminCredential",

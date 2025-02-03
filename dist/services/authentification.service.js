@@ -199,7 +199,7 @@ class AuthentificationService {
                     throw new Error(result.data.error);
                 const { token } = result.data;
                 context.info.mod_attr("tokenPamToAdmin", token);
-            }).catch((err) => {
+                return result.data;
             });
         });
     }

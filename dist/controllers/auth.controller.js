@@ -102,6 +102,22 @@ let AuthController = class AuthController extends tsoa_1.Controller {
             }
         });
     }
+    updatePlatformTokenData(req) {
+        return __awaiter(this, void 0, void 0, function* () {
+            try {
+                const isAdmin = yield (0, authentication_1.checkIfItIsAdmin)(req);
+                if (!isAdmin)
+                    throw new AuthError_1.AuthError(constant_1.SECURITY_MESSAGES.UNAUTHORIZED);
+                const data = yield serviceInstance.updatePlatformTokenData();
+                this.setStatus(constant_1.HTTP_CODES.OK);
+                return data;
+            }
+            catch (error) {
+                this.setStatus(error.code || constant_1.HTTP_CODES.INTERNAL_ERROR);
+                return { message: error.message };
+            }
+        });
+    }
     getBosToAdminCredential(req) {
         return __awaiter(this, void 0, void 0, function* () {
             try {
@@ -214,6 +230,14 @@ __decorate([
     __metadata("design:paramtypes", [Object, Object]),
     __metadata("design:returntype", Promise)
 ], AuthController.prototype, "registerToAdmin", null);
+__decorate([
+    (0, tsoa_1.Security)(constant_1.SECURITY_NAME.bearerAuth),
+    (0, tsoa_1.Post)("/update_platform_token"),
+    __param(0, (0, tsoa_1.Request)()),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [Object]),
+    __metadata("design:returntype", Promise)
+], AuthController.prototype, "updatePlatformTokenData", null);
 __decorate([
     (0, tsoa_1.Security)(constant_1.SECURITY_NAME.bearerAuth),
     (0, tsoa_1.Get)("/get_pam_to_auth_credential"),
