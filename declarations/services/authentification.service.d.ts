@@ -18,6 +18,7 @@ export declare class AuthentificationService {
     editAdminCredential(admin: IAdminCredential): Promise<IAdminCredential>;
     getAdminCredential(): Promise<IAdminCredential>;
     sendDataToAdmin(update?: boolean): Promise<import("axios").AxiosResponse<any, any>>;
+    updatePlatformTokenData(): Promise<void>;
     private _getOrCreateAdminCredential;
     private getJsonData;
     private _getRequestBody;

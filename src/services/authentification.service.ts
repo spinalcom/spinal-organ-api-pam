@@ -196,6 +196,29 @@ export class AuthentificationService {
     }
 
 
+    public async updatePlatformTokenData() {
+        let context = await configServiceInstance.getContext(PAM_CREDENTIAL_CONTEXT_NAME);
+        const bosCredential = context?.info?.get();
+
+        if (!bosCredential) throw new Error("No admin registered, register an admin and retry !");
+
+        const { urlAdmin, clientId, tokenPamToAdmin } = bosCredential;
+
+        return axios.put(`${urlAdmin}/platforms/updatePlatformToken`, { clientId, token: tokenPamToAdmin }, {
+            headers: {
+                'Content-Type': 'application/json',
+            },
+        }).then((result) => {
+            if (result.data.error) throw new Error(result.data.error);
+
+            const { token } = result.data;
+            context.info.mod_attr("tokenPamToAdmin", token);
+        }).catch((err) => {
+
+        });
+    }
+
+
 
 
     // public async updateToken(oldToken: string) {

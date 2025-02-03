@@ -182,6 +182,27 @@ class AuthentificationService {
             });
         });
     }
+    updatePlatformTokenData() {
+        var _a;
+        return __awaiter(this, void 0, void 0, function* () {
+            let context = yield configFile_service_1.configServiceInstance.getContext(constant_1.PAM_CREDENTIAL_CONTEXT_NAME);
+            const bosCredential = (_a = context === null || context === void 0 ? void 0 : context.info) === null || _a === void 0 ? void 0 : _a.get();
+            if (!bosCredential)
+                throw new Error("No admin registered, register an admin and retry !");
+            const { urlAdmin, clientId, tokenPamToAdmin } = bosCredential;
+            return axios_1.default.put(`${urlAdmin}/platforms/updatePlatformToken`, { clientId, token: tokenPamToAdmin }, {
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+            }).then((result) => {
+                if (result.data.error)
+                    throw new Error(result.data.error);
+                const { token } = result.data;
+                context.info.mod_attr("tokenPamToAdmin", token);
+            }).catch((err) => {
+            });
+        });
+    }
     // public async updateToken(oldToken: string) {
     //     const adminInfo = await this.getAdminCredential();
     //     const decodeToken = jwt.verify(oldToken, tokenKey);

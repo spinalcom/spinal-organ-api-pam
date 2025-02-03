@@ -50,14 +50,6 @@ const https = require("https");
 const fs = require("fs");
 function initExpress(conn) {
     return __awaiter(this, void 0, void 0, function* () {
-        const sslOptions = {
-            key: fs.readFileSync(process.env.SSL_KEY_PATH),
-            cert: fs.readFileSync(process.env.SSL_CERT_PATH)
-        };
-        // const sslOptions = {
-        // key: fs.readFileSync(path.resolve(__dirname, '../cert/key.pem')),
-        // cert: fs.readFileSync(path.resolve(__dirname, '../cert/cert.pem'))
-        // };
         var app = express();
         app.use(morgan('dev'));
         app.use(cors({ origin: '*' }));
@@ -70,26 +62,21 @@ function initExpress(conn) {
         initSwagger(app);
         (0, routes_1.RegisterRoutes)(app);
         app.use(errorHandler);
-        // configureBosProxy(app);
-        // configureBosProxy(app, true);
-        // useHubProxy(app);
-        // useClientMiddleWare(app);
-        // initSwagger(app);
-        // useApiMiddleWare(app);
-        // RegisterRoutes(app);
-        // app.use(errorHandler);
         const server_port = process.env.SERVER_PORT || 2022;
-        // const server = app.listen(server_port, () =>
-        //   console.log(`api server listening on port ${server_port}!`)
-        // );
-        const server = https.createServer(sslOptions, app).listen(server_port, () => console.log(`app listening at https://localhost:${server_port} ....`));
+        let server;
+        if (process.env.SERVER_PROTOCOL === "https") {
+            const sslOptions = {
+                key: fs.readFileSync(process.env.SSL_KEY_PATH),
+                cert: fs.readFileSync(process.env.SSL_CERT_PATH)
+            };
+            server = https.createServer(sslOptions, app).listen(server_port, () => console.log(`app listening at https://localhost:${server_port} ....`));
+        }
+        else if (process.env.SERVER_PROTOCOL === "http") {
+            server = app.listen(server_port, () => console.log(`app listening at http://localhost:${server_port} ....`));
+        }
         yield webSocketLogs_service_1.WebsocketLogsService.getInstance().init(conn);
         const ws = new websocket_1.WebSocketServer(server);
         yield ws.init();
-        // const wsProxy = webSocketProxy(app)
-        // server.on("upgrade", (req: any, socket: any, head) => {
-        //   wsProxy.upgrade(req, socket, head)
-        // });
         return { server, app };
     });
 }
@@ -131,13 +118,6 @@ function initSwagger(app) {
 function useApiMiddleWare(app) {
     app.use(express.json({ limit: '500mb' }));
     app.use(express.urlencoded({ extended: true, limit: '500mb' }));
-    // const bodyParserDefault = bodyParser.json();
-    // const bodyParserTicket = bodyParser.json({ limit: '500mb' });
-    // app.use((req, res, next) => {
-    //   if (req.originalUrl === '/api/v1/node/convert_base_64' || req.originalUrl === '/api/v1/ticket/create_ticket')
-    //     return bodyParserTicket(req, res, next);
-    //   return bodyParserDefault(req, res, next);
-    // });
 }
 function errorHandler(err, req, res, next) {
     if (err instanceof tsoa_1.ValidateError) {
