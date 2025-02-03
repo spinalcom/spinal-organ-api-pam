@@ -204,7 +204,7 @@ export class AuthentificationService {
 
         const { urlAdmin, clientId, tokenPamToAdmin } = bosCredential;
 
-        return axios.put(`${urlAdmin}/platforms/updatePlatformToken`, { clientId, token: tokenPamToAdmin }, {
+        return axios.post(`${urlAdmin}/platforms/updatePlatformToken`, { clientId, token: tokenPamToAdmin }, {
             headers: {
                 'Content-Type': 'application/json',
             },

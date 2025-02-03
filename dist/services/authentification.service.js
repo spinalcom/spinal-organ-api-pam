@@ -190,7 +190,7 @@ class AuthentificationService {
             if (!bosCredential)
                 throw new Error("No admin registered, register an admin and retry !");
             const { urlAdmin, clientId, tokenPamToAdmin } = bosCredential;
-            return axios_1.default.put(`${urlAdmin}/platforms/updatePlatformToken`, { clientId, token: tokenPamToAdmin }, {
+            return axios_1.default.post(`${urlAdmin}/platforms/updatePlatformToken`, { clientId, token: tokenPamToAdmin }, {
                 headers: {
                     'Content-Type': 'application/json',
                 },
