@@ -43,17 +43,6 @@ import * as fs from "fs";
 
 export default async function initExpress(conn: spinal.FileSystem) {
 
-  const sslOptions = {
-    key: fs.readFileSync(process.env.SSL_KEY_PATH),
-    cert: fs.readFileSync(process.env.SSL_CERT_PATH)
-  };
-
-  // const sslOptions = {
-  // key: fs.readFileSync(path.resolve(__dirname, '../cert/key.pem')),
-  // cert: fs.readFileSync(path.resolve(__dirname, '../cert/cert.pem'))
-  // };
-
-
   var app = express();
   app.use(morgan('dev'));
   app.use(cors({ origin: '*' }));
@@ -87,7 +76,19 @@ export default async function initExpress(conn: spinal.FileSystem) {
   //   console.log(`api server listening on port ${server_port}!`)
   // );
 
-  const server = https.createServer(sslOptions, app).listen(server_port, () => console.log(`app listening at https://localhost:${server_port} ....`));
+  let server;
+
+  if (process.env.SERVER_PROTOCOL === "https") {
+    const sslOptions = {
+      key: fs.readFileSync(process.env.SSL_KEY_PATH),
+      cert: fs.readFileSync(process.env.SSL_CERT_PATH)
+    };
+    server = https.createServer(sslOptions, app).listen(server_port, () => console.log(`app listening at https://localhost:${server_port} ....`));
+  } else if (process.env.SERVER_PROTOCOL === "http") {
+    server = app.listen(server_port, () => console.log(`app listening at http://localhost:${server_port} ....`));
+  }
+
+
   await WebsocketLogsService.getInstance().init(conn);
   const ws = new WebSocketServer(server);
 
