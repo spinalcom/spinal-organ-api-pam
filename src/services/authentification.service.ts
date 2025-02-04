@@ -137,6 +137,27 @@ export class AuthentificationService {
         })
     }
 
+    public async updatePlatformTokenData() {
+        let context = await configServiceInstance.getContext(PAM_CREDENTIAL_CONTEXT_NAME);
+        const bosCredential = context?.info?.get();
+
+        if (!bosCredential) throw new Error("No admin registered, register an admin and retry !");
+
+        const { urlAdmin, idPlateform: clientId, tokenPamToAdmin } = bosCredential;
+
+        return axios.post(`${urlAdmin}/platforms/updatePlatformToken`, { clientId, token: tokenPamToAdmin }, {
+            headers: {
+                'Content-Type': 'application/json',
+            },
+        }).then((result) => {
+            if (result.data.error) throw new Error(result.data.error);
+
+            const { token } = result.data;
+            context.info.mod_attr("tokenPamToAdmin", token);
+            return result.data;
+        })
+    }
+
 
 
     // public async updateToken(oldToken: string) {
@@ -220,7 +241,7 @@ export class AuthentificationService {
     }
 
     private _formatInfo(info: IAppCredential | IOAuth2Credential): IAppCredential {
-        const obj: any = {clientId : undefined, clientSecret: undefined};
+        const obj: any = { clientId: undefined, clientSecret: undefined };
         if ("client_id" in info) {
             // info["clientId"] = info["client_id"]
             // delete info.client_id;
