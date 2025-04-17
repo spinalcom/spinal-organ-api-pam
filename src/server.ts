@@ -61,10 +61,11 @@ export default async function initExpress(conn: spinal.FileSystem) {
   app.use(errorHandler);
 
   const server_port = process.env.SERVER_PORT || 2022;
+  const protocol = process.env.SERVER_PROTOCOL || "http";
 
   let server;
 
-  if (process.env.SERVER_PROTOCOL === "https") {
+  if (protocol === "https") {
     const sslOptions = {
       key: fs.readFileSync(process.env.SSL_KEY_PATH),
       cert: fs.readFileSync(process.env.SSL_CERT_PATH)
