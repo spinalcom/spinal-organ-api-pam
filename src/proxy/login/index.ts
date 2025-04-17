@@ -9,6 +9,7 @@ export async function useLoginProxy(app: express.Application) {
 
     app.get('/login', async (req: express.Request, res: express.Response, next: express.NextFunction) => {
         try {
+
             const authPlatformInfo = await AuthentificationService.getInstance().getPamToAdminCredential();
 
             if (authPlatformInfo) {
@@ -19,29 +20,32 @@ export async function useLoginProxy(app: express.Application) {
                     return res.send({ status: HTTP_CODES.BAD_REQUEST, message: "Invalid auth server details" });
                 }
 
-                server_url = server_url.endsWith("/") ? server_url : server_url + "/"
+                let endpoint = server_url.endsWith("/") ? `login/${client_id}` : `/login/${client_id}`;
 
-                const url = server_url + `login/${client_id}`;
-
-                return res.status(HTTP_CODES.REDIRECT).redirect(url);
+                return res.status(HTTP_CODES.REDIRECT).redirect(server_url + endpoint);
             }
 
-            res.status(HTTP_CODES.BAD_REQUEST).send({ status: HTTP_CODES.BAD_REQUEST, message: "No Authentification server url found, use /admin endpoint to connect as admin" });
 
+            /* 
+            * If no auth server is found, redirect to the admin connect page
+            * Comment this part if you don't want to redirect to the admin page
+            */
+            let client_uri = process.env.VUE_CLIENT_URI;
+            let endpoint = client_uri.endsWith("/") ? "admin" : "/admin";
+            return res.status(HTTP_CODES.REDIRECT).redirect(client_uri + endpoint);
+
+
+            /*
+            * Discomment this part if you comment the above part
+            * This will return a bad request if no auth server is found
+            */
+            // res.status(HTTP_CODES.BAD_REQUEST).send({ status: HTTP_CODES.BAD_REQUEST, message: "No Authentification server url found, use /admin endpoint to connect as admin" });
 
         } catch (error) {
             console.error(error.message);
             res.status(HTTP_CODES.INTERNAL_ERROR).send({ status: HTTP_CODES.INTERNAL_ERROR, message: error.message });
         }
 
-        // let clientUrl = process.env.VUE_CLIENT_URI;
-
-        // if (!clientUrl || !(/^https?:\/\//.test(clientUrl)))
-        //     return res.send({ status: HTTP_CODES.BAD_REQUEST, message: "No Authentification server url found, use /admin endpoint to connect as admin" });
-
-        // clientUrl = clientUrl.endsWith("/") ? clientUrl : clientUrl + "/";
-
-        // return res.redirect(clientUrl + "admin");
     });
 
     app.post("/callback", async (req: express.Request, res: express.Response, next: express.NextFunction) => {
