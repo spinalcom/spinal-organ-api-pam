@@ -73,17 +73,16 @@ class AuthentificationService {
             //     })
         });
     }
+    // Authenticate the user
     authenticate(info) {
         return __awaiter(this, void 0, void 0, function* () {
             const isUser = "userName" in info && "password" in info ? true : false;
             if (!isUser)
                 return { code: constant_1.HTTP_CODES.BAD_REQUEST, data: "Invalid userName and/or password" };
             return userList_services_1.UserListService.getInstance().authenticateUser(info);
-            // const appInfo: any = this._formatInfo(<any>info);
-            // return AppListService.getInstance().authenticateApplication(appInfo)
         });
     }
-    // PAM Credential
+    // register PAM in authAdmin platform
     registerToAdmin(urlAdmin, clientId, clientSecret) {
         if (!urlAdmin || !(/^https?:\/\//.test(urlAdmin)))
             throw new Error("AUTH_SERVER_URL is not valid!");
@@ -102,26 +101,34 @@ class AuthentificationService {
             result.data.url = urlAdmin;
             result.data.clientId = clientId;
             this.authPlatformIsConnected = true;
+            // save PAM credential in the graph, it will be used to send data to authAdmin platform
             return this._editPamCredential(result.data);
         }).catch((e) => {
             this.authPlatformIsConnected = false;
             throw new Error(e.message);
         });
     }
-    // // PAM Credential
-    // public registerToAdmin(pamInfo: IPamInfo, adminInfo: IAdmin): Promise<IPamCredential> {
-    //     if (adminInfo.urlAdmin[adminInfo.urlAdmin.length - 1] === "/") {
-    //         adminInfo.urlAdmin = adminInfo.urlAdmin.substring(0, adminInfo.urlAdmin.lastIndexOf('/'))
-    //     }
-    //     return axios.post(`${adminInfo.urlAdmin}/register`, {
-    //         platformCreationParms: pamInfo,
-    //         registerKey: adminInfo.registerKey
-    //     }).then((result) => {
-    //         result.data.url = adminInfo.urlAdmin;
-    //         result.data.registerKey = adminInfo.registerKey;
-    //         return this._editPamCredential(result.data)
-    //     })
-    // }
+    // update the token of the platform in authAdmin
+    updatePlatformTokenData() {
+        var _a;
+        return __awaiter(this, void 0, void 0, function* () {
+            let context = yield configFile_service_1.configServiceInstance.getContext(constant_1.PAM_CREDENTIAL_CONTEXT_NAME);
+            const bosCredential = (_a = context === null || context === void 0 ? void 0 : context.info) === null || _a === void 0 ? void 0 : _a.get();
+            if (!bosCredential)
+                throw new Error("No admin registered, register an admin and retry !");
+            const { urlAdmin, clientId, tokenPamToAdmin } = bosCredential;
+            return axios_1.default.post(`${urlAdmin}/platforms/updatePlatformToken`, { clientId, token: tokenPamToAdmin }, {
+                headers: { 'Content-Type': 'application/json' },
+            }).then((result) => {
+                if (result.data.error)
+                    throw new Error(result.data.error);
+                const { token } = result.data;
+                context.info.mod_attr("tokenPamToAdmin", token);
+                return result.data;
+            });
+        });
+    }
+    // get PAM credential from the graph
     getPamToAdminCredential() {
         return __awaiter(this, void 0, void 0, function* () {
             let context = yield configFile_service_1.configServiceInstance.getContext(constant_1.PAM_CREDENTIAL_CONTEXT_NAME);
@@ -130,6 +137,7 @@ class AuthentificationService {
             return context.info.get();
         });
     }
+    // remove PAM credential from the graph
     deleteCredentials() {
         return __awaiter(this, void 0, void 0, function* () {
             let context = yield configFile_service_1.configServiceInstance.getContext(constant_1.PAM_CREDENTIAL_CONTEXT_NAME);
@@ -141,7 +149,7 @@ class AuthentificationService {
             return { removed: true };
         });
     }
-    // admin credential is token and id of the admin in PAM 
+    // Create Admin credential in graph, it will be used to authenticate the authAdmin platform
     createAdminCredential() {
         const clientId = (0, uuid_1.v4)();
         const token = jwt.sign({ clientId, type: 'ADMIN SERVER' }, tokenKey);
@@ -150,6 +158,7 @@ class AuthentificationService {
             TokenAdminToPam: token
         });
     }
+    // Edit Admin credential in graph
     editAdminCredential(admin) {
         return __awaiter(this, void 0, void 0, function* () {
             const context = yield this._getOrCreateContext(constant_1.ADMIN_CREDENTIAL_CONTEXT_NAME, constant_1.ADMIN_CREDENTIAL_CONTEXT_TYPE);
@@ -158,6 +167,7 @@ class AuthentificationService {
             return admin;
         });
     }
+    // get Admin credential from the graph
     getAdminCredential() {
         return __awaiter(this, void 0, void 0, function* () {
             let context = yield configFile_service_1.configServiceInstance.getContext(constant_1.ADMIN_CREDENTIAL_CONTEXT_NAME);
@@ -166,6 +176,7 @@ class AuthentificationService {
             return context.info.get();
         });
     }
+    // Send updated data (profiles, organs, ...) to authAdmin platform
     sendDataToAdmin(update = false) {
         return __awaiter(this, void 0, void 0, function* () {
             const bosCredential = yield this.getPamToAdminCredential();
@@ -175,32 +186,18 @@ class AuthentificationService {
             const endpoint = "register";
             const adminCredential = !update ? yield this._getOrCreateAdminCredential(true) : {};
             const data = yield this._getRequestBody(update, bosCredential, adminCredential);
-            return axios_1.default.put(`${bosCredential.urlAdmin}/${endpoint}`, data, {
+            // return axios.put(`${bosCredential.urlAdmin}/${endpoint}`, data, {
+            return axios_1.default.put(`${bosCredential.urlAdmin}/register`, data, {
                 headers: {
                     'Content-Type': 'application/json',
                 },
-            });
-        });
-    }
-    updatePlatformTokenData() {
-        var _a;
-        return __awaiter(this, void 0, void 0, function* () {
-            let context = yield configFile_service_1.configServiceInstance.getContext(constant_1.PAM_CREDENTIAL_CONTEXT_NAME);
-            const bosCredential = (_a = context === null || context === void 0 ? void 0 : context.info) === null || _a === void 0 ? void 0 : _a.get();
-            if (!bosCredential)
-                throw new Error("No admin registered, register an admin and retry !");
-            const { urlAdmin, clientId, tokenPamToAdmin } = bosCredential;
-            return axios_1.default.post(`${urlAdmin}/platforms/updatePlatformToken`, { clientId, token: tokenPamToAdmin }, {
-                headers: {
-                    'Content-Type': 'application/json',
-                },
-            }).then((result) => {
-                if (result.data.error)
-                    throw new Error(result.data.error);
-                const { token } = result.data;
-                context.info.mod_attr("tokenPamToAdmin", token);
-                return result.data;
-            });
+            }).catch((err) => __awaiter(this, void 0, void 0, function* () {
+                if (err.response.status === constant_1.HTTP_CODES.UNAUTHORIZED) { // if the token is expired
+                    yield this.updatePlatformTokenData(); // update the token of the platform in authAdmin
+                    return this.sendDataToAdmin(update); // try again to send data
+                }
+                throw err;
+            }));
         });
     }
     // public async updateToken(oldToken: string) {
@@ -235,12 +232,13 @@ class AuthentificationService {
     _getRequestBody(update, bosCredential, adminCredential) {
         return __awaiter(this, void 0, void 0, function* () {
             return JSON.stringify(Object.assign({ TokenBosAdmin: bosCredential.tokenPamToAdmin, platformId: bosCredential.idPlateform, jsonData: yield this.getJsonData() }, (!update && {
-                URLBos: `http://localhost:8060`,
+                URLBos: ``,
                 TokenAdminBos: adminCredential.TokenAdminToPam,
                 idPlatformOfAdmin: adminCredential.idPlatformOfAdmin
             })));
         });
     }
+    // Save or Edit PAM credential in the graph, it will be used to send data to authAdmin platform
     _editPamCredential(bosCredential) {
         return __awaiter(this, void 0, void 0, function* () {
             const context = yield this._getOrCreateContext(constant_1.PAM_CREDENTIAL_CONTEXT_NAME, constant_1.PAM_CREDENTIAL_CONTEXT_TYPE);

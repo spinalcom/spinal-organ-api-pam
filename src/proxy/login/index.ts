@@ -71,11 +71,3 @@ export async function useLoginProxy(app: express.Application) {
         }
     });
 }
-
-
-function getAuthServerUrl() {
-    let server_url = process.env.AUTH_SERVER_URL;
-    let client_id = process.env.AUTH_CLIENT_ID;
-
-    return server_url.endsWith("/") ? `${server_url}login/${client_id}` : `${server_url}/login/${client_id}`;
-}

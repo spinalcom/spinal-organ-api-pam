@@ -32,7 +32,7 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
     });
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.checkAndGetTokenInfo = exports.getProfileNode = exports.getProfileId = exports.checkIfItIsAdmin = exports.expressAuthentication = void 0;
+exports.checkAndGetTokenInfo = exports.getProfileNode = exports.getProfileId = exports.checkIfItIsAuthPlateform = exports.checkIfItIsAdmin = exports.expressAuthentication = void 0;
 const constant_1 = require("../constant");
 const services_1 = require("../services");
 const utils_1 = require("./utils");
@@ -51,11 +51,26 @@ function expressAuthentication(request, securityName, scopes) {
 exports.expressAuthentication = expressAuthentication;
 function checkIfItIsAdmin(request) {
     return __awaiter(this, void 0, void 0, function* () {
-        let profileId = yield getProfileId(request);
-        return adminProfile_service_1.AdminProfileService.getInstance().isAdmin(profileId);
+        try {
+            let profileId = yield getProfileId(request);
+            return adminProfile_service_1.AdminProfileService.getInstance().isAdmin(profileId);
+        }
+        catch (error) {
+            return false;
+        }
     });
 }
 exports.checkIfItIsAdmin = checkIfItIsAdmin;
+function checkIfItIsAuthPlateform(request) {
+    return __awaiter(this, void 0, void 0, function* () {
+        const token = (0, utils_1.getToken)(request);
+        if (!token)
+            return false;
+        const authAdmin = yield services_1.AuthentificationService.getInstance().getAdminCredential();
+        return token === authAdmin.TokenAdminToPam;
+    });
+}
+exports.checkIfItIsAuthPlateform = checkIfItIsAuthPlateform;
 function getProfileId(request) {
     return __awaiter(this, void 0, void 0, function* () {
         const tokenInfo = yield checkAndGetTokenInfo(request);

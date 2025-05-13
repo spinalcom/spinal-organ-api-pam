@@ -64,9 +64,4 @@ function useLoginProxy(app) {
     });
 }
 exports.useLoginProxy = useLoginProxy;
-function getAuthServerUrl() {
-    let server_url = process.env.AUTH_SERVER_URL;
-    let client_id = process.env.AUTH_CLIENT_ID;
-    return server_url.endsWith("/") ? `${server_url}login/${client_id}` : `${server_url}/login/${client_id}`;
-}
 //# sourceMappingURL=index.js.map

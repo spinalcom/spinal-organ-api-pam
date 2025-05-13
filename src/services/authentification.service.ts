@@ -73,23 +73,17 @@ export class AuthentificationService {
     }
 
 
+    // Authenticate the user
     public async authenticate(info: IUserCredential | IAppCredential | IOAuth2Credential): Promise<{ code: number; data: string | IApplicationToken | IUserToken }> {
         const isUser = "userName" in info && "password" in info ? true : false;
 
         if (!isUser) return { code: HTTP_CODES.BAD_REQUEST, data: "Invalid userName and/or password" };
         return UserListService.getInstance().authenticateUser(<IUserCredential>info);
 
-
-
-
-
-        // const appInfo: any = this._formatInfo(<any>info);
-
-        // return AppListService.getInstance().authenticateApplication(appInfo)
     }
 
 
-    // PAM Credential
+    // register PAM in authAdmin platform
     public registerToAdmin(urlAdmin: string, clientId: string, clientSecret: string): Promise<IPamCredential> {
 
         if (!urlAdmin || !(/^https?:\/\//.test(urlAdmin))) throw new Error("AUTH_SERVER_URL is not valid!");
@@ -109,6 +103,8 @@ export class AuthentificationService {
             result.data.url = urlAdmin;
             result.data.clientId = clientId;
             this.authPlatformIsConnected = true;
+
+            // save PAM credential in the graph, it will be used to send data to authAdmin platform
             return this._editPamCredential(result.data)
         }).catch((e) => {
             this.authPlatformIsConnected = false;
@@ -116,23 +112,29 @@ export class AuthentificationService {
         })
     }
 
+    // update the token of the platform in authAdmin
+    public async updatePlatformTokenData() {
+        let context = await configServiceInstance.getContext(PAM_CREDENTIAL_CONTEXT_NAME);
+        const bosCredential = context?.info?.get();
 
-    // // PAM Credential
-    // public registerToAdmin(pamInfo: IPamInfo, adminInfo: IAdmin): Promise<IPamCredential> {
-    //     if (adminInfo.urlAdmin[adminInfo.urlAdmin.length - 1] === "/") {
-    //         adminInfo.urlAdmin = adminInfo.urlAdmin.substring(0, adminInfo.urlAdmin.lastIndexOf('/'))
-    //     }
+        if (!bosCredential) throw new Error("No admin registered, register an admin and retry !");
 
-    //     return axios.post(`${adminInfo.urlAdmin}/register`, {
-    //         platformCreationParms: pamInfo,
-    //         registerKey: adminInfo.registerKey
-    //     }).then((result) => {
-    //         result.data.url = adminInfo.urlAdmin;
-    //         result.data.registerKey = adminInfo.registerKey;
-    //         return this._editPamCredential(result.data)
-    //     })
-    // }
+        const { urlAdmin, clientId, tokenPamToAdmin } = bosCredential;
 
+        return axios.post(`${urlAdmin}/platforms/updatePlatformToken`, { clientId, token: tokenPamToAdmin }, {
+            headers: { 'Content-Type': 'application/json' },
+        }).then((result) => {
+            if (result.data.error) throw new Error(result.data.error);
+
+            const { token } = result.data;
+            context.info.mod_attr("tokenPamToAdmin", token);
+            return result.data;
+        })
+    }
+
+
+
+    // get PAM credential from the graph
     public async getPamToAdminCredential(): Promise<IPamCredential> {
         let context = await configServiceInstance.getContext(PAM_CREDENTIAL_CONTEXT_NAME);
         if (!context) return;
@@ -140,6 +142,7 @@ export class AuthentificationService {
         return context.info.get();
     }
 
+    // remove PAM credential from the graph
     public async deleteCredentials() {
         let context = await configServiceInstance.getContext(PAM_CREDENTIAL_CONTEXT_NAME);
         if (context) await context.removeFromGraph();
@@ -151,7 +154,7 @@ export class AuthentificationService {
     }
 
 
-    // admin credential is token and id of the admin in PAM 
+    // Create Admin credential in graph, it will be used to authenticate the authAdmin platform
     public createAdminCredential(): Promise<IAdminCredential> {
         const clientId = uuidv4();
         const token = jwt.sign({ clientId, type: 'ADMIN SERVER' }, tokenKey);
@@ -162,6 +165,7 @@ export class AuthentificationService {
         })
     }
 
+    // Edit Admin credential in graph
     public async editAdminCredential(admin: IAdminCredential): Promise<IAdminCredential> {
         const context = await this._getOrCreateContext(ADMIN_CREDENTIAL_CONTEXT_NAME, ADMIN_CREDENTIAL_CONTEXT_TYPE);
         context.info.mod_attr("idPlatformOfAdmin", admin.idPlatformOfAdmin);
@@ -169,6 +173,7 @@ export class AuthentificationService {
         return admin;
     }
 
+    // get Admin credential from the graph
     public async getAdminCredential(): Promise<IAdminCredential> {
         let context = await configServiceInstance.getContext(ADMIN_CREDENTIAL_CONTEXT_NAME);
         if (!context) return;
@@ -176,6 +181,8 @@ export class AuthentificationService {
         return context.info.get();
     }
 
+
+    // Send updated data (profiles, organs, ...) to authAdmin platform
     public async sendDataToAdmin(update: boolean = false) {
         const bosCredential = await this.getPamToAdminCredential();
         if (!bosCredential) throw new Error("No admin registered, register an admin and retry !");
@@ -188,34 +195,23 @@ export class AuthentificationService {
 
         const data = await this._getRequestBody(update, bosCredential, adminCredential);
 
-        return axios.put(`${bosCredential.urlAdmin}/${endpoint}`, data, {
+        // return axios.put(`${bosCredential.urlAdmin}/${endpoint}`, data, {
+        return axios.put(`${bosCredential.urlAdmin}/register`, data, {
             headers: {
                 'Content-Type': 'application/json',
             },
-        })
+        }).catch(async (err) => {
+            if (err.response.status === HTTP_CODES.UNAUTHORIZED) { // if the token is expired
+                await this.updatePlatformTokenData(); // update the token of the platform in authAdmin
+                return this.sendDataToAdmin(update); // try again to send data
+            }
+
+            throw err;
+        });
     }
 
 
-    public async updatePlatformTokenData() {
-        let context = await configServiceInstance.getContext(PAM_CREDENTIAL_CONTEXT_NAME);
-        const bosCredential = context?.info?.get();
 
-        if (!bosCredential) throw new Error("No admin registered, register an admin and retry !");
-
-        const { urlAdmin, clientId, tokenPamToAdmin } = bosCredential;
-
-        return axios.post(`${urlAdmin}/platforms/updatePlatformToken`, { clientId, token: tokenPamToAdmin }, {
-            headers: {
-                'Content-Type': 'application/json',
-            },
-        }).then((result) => {
-            if (result.data.error) throw new Error(result.data.error);
-
-            const { token } = result.data;
-            context.info.mod_attr("tokenPamToAdmin", token);
-            return result.data;
-        })
-    }
 
 
 
@@ -256,13 +252,14 @@ export class AuthentificationService {
             platformId: bosCredential.idPlateform,
             jsonData: await this.getJsonData(),
             ...(!update && {
-                URLBos: `http://localhost:8060`,
+                URLBos: ``,
                 TokenAdminBos: adminCredential.TokenAdminToPam,
                 idPlatformOfAdmin: adminCredential.idPlatformOfAdmin
             }),
         })
     }
 
+    // Save or Edit PAM credential in the graph, it will be used to send data to authAdmin platform
     private async _editPamCredential(bosCredential: any): Promise<IPamCredential> {
         const context = await this._getOrCreateContext(PAM_CREDENTIAL_CONTEXT_NAME, PAM_CREDENTIAL_CONTEXT_TYPE);
         const contextInfo = context.info;

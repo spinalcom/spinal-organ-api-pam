@@ -180,8 +180,11 @@ let AuthController = class AuthController extends tsoa_1.Controller {
         return __awaiter(this, void 0, void 0, function* () {
             try {
                 const isAdmin = yield (0, authentication_1.checkIfItIsAdmin)(req);
-                if (!isAdmin)
-                    throw new AuthError_1.AuthError(constant_1.SECURITY_MESSAGES.UNAUTHORIZED);
+                if (!isAdmin) {
+                    const isAuthPlatform = yield (0, authentication_1.checkIfItIsAuthPlateform)(req);
+                    if (!isAuthPlatform)
+                        throw new AuthError_1.AuthError(constant_1.SECURITY_MESSAGES.UNAUTHORIZED);
+                }
                 const resp = yield serviceInstance.sendDataToAdmin(true);
                 this.setStatus(constant_1.HTTP_CODES.OK);
                 return { message: "updated" };

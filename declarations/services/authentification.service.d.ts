@@ -10,6 +10,7 @@ export declare class AuthentificationService {
         data: string | IApplicationToken | IUserToken;
     }>;
     registerToAdmin(urlAdmin: string, clientId: string, clientSecret: string): Promise<IPamCredential>;
+    updatePlatformTokenData(): Promise<any>;
     getPamToAdminCredential(): Promise<IPamCredential>;
     deleteCredentials(): Promise<{
         removed: boolean;
@@ -17,8 +18,7 @@ export declare class AuthentificationService {
     createAdminCredential(): Promise<IAdminCredential>;
     editAdminCredential(admin: IAdminCredential): Promise<IAdminCredential>;
     getAdminCredential(): Promise<IAdminCredential>;
-    sendDataToAdmin(update?: boolean): Promise<import("axios").AxiosResponse<any, any>>;
-    updatePlatformTokenData(): Promise<any>;
+    sendDataToAdmin(update?: boolean): any;
     private _getOrCreateAdminCredential;
     private getJsonData;
     private _getRequestBody;

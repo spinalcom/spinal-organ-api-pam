@@ -27,7 +27,7 @@ import * as express from "express";
 import { HTTP_CODES, SECURITY_MESSAGES, SECURITY_NAME } from "../constant";
 import { Body, Route, Tags, Controller, Post, Get, Put, Delete, Security, Request } from "tsoa";
 import { IAdmin, IAdminCredential, IAppCredential, IApplicationToken, IOAuth2Credential, IPamCredential, IPamInfo, IUserCredential, IUserToken } from "../interfaces";
-import { checkIfItIsAdmin } from "../security/authentication";
+import { checkIfItIsAdmin, checkIfItIsAuthPlateform } from "../security/authentication";
 import { AuthError } from "../security/AuthError";
 
 const serviceInstance = AuthentificationService.getInstance();
@@ -174,7 +174,10 @@ export class AuthController extends Controller {
     public async syncDataToAdmin(@Request() req: express.Request): Promise<{ message: string }> {
         try {
             const isAdmin = await checkIfItIsAdmin(req);
-            if (!isAdmin) throw new AuthError(SECURITY_MESSAGES.UNAUTHORIZED);
+            if (!isAdmin) {
+                const isAuthPlatform = await checkIfItIsAuthPlateform(req);
+                if (!isAuthPlatform) throw new AuthError(SECURITY_MESSAGES.UNAUTHORIZED);
+            }
 
             const resp = await serviceInstance.sendDataToAdmin(true);
             this.setStatus(HTTP_CODES.OK)
