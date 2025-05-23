@@ -95,7 +95,7 @@ export class AppListService {
             for (const key in info) {
                 if (Object.prototype.hasOwnProperty.call(info, key)) {
                     const value = info[key];
-                    if(typeof found.info[key] === "undefined") found.info.add_attr({ [key]: value });
+                    if (typeof found.info[key] === "undefined") found.info.add_attr({ [key]: value });
                     if (found.info[key]) found.info[key].set(value);
                 }
             }

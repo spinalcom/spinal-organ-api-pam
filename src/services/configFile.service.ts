@@ -36,6 +36,7 @@ import {
     AppListService, LogService
 } from ".";
 import { createDefaultAdminApps } from '../adminApps';
+import { SpinalCodeUniqueService } from './codeUnique.service';
 
 // const { config: { directory_path, fileName } } = require("../../config");
 
@@ -109,7 +110,8 @@ export default class ConfigFileService {
             // DigitalTwinService,
             PortofolioService,
             TokenService,
-            LogService
+            LogService,
+            SpinalCodeUniqueService,
         ];
 
         const promises = services.map(service => {

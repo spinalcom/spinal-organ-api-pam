@@ -23,7 +23,7 @@
  * <http://resources.spinalcom.com/licenses.pdf>.
  */
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.AuthError = void 0;
+exports.OtherError = exports.AuthError = void 0;
 const constant_1 = require("../constant");
 class AuthError extends Error {
     constructor(message) {
@@ -43,4 +43,11 @@ class AuthError extends Error {
     }
 }
 exports.AuthError = AuthError;
+class OtherError extends Error {
+    constructor(code, message) {
+        super(message);
+        this.code = code;
+    }
+}
+exports.OtherError = OtherError;
 //# sourceMappingURL=AuthError.js.map

@@ -41,6 +41,7 @@ const adminProfile_service_1 = require("./adminProfile.service");
 const jwt = require("jsonwebtoken");
 const globalCache = require("global-cache");
 const cron = require("node-cron");
+const axios_1 = require("axios");
 class TokenService {
     constructor() { }
     static getInstance() {
@@ -155,6 +156,21 @@ class TokenService {
             return;
         });
     }
+    formatAndSaveOrganAuthToken(apiResponseData, adminCredential, actor) {
+        return __awaiter(this, void 0, void 0, function* () {
+            // à prendre en compte pour supprimer le paramère adminCredential
+            // const adminCredential = await this._getAuthPlateformInfo();
+            actor = actor || this._getActor(apiResponseData === null || apiResponseData === void 0 ? void 0 : apiResponseData.platformList);
+            if (!actor)
+                return;
+            apiResponseData.profile = yield this._getProfileInfo(apiResponseData, adminCredential, actor);
+            apiResponseData.userInfo = yield this._getConnexionInfo(adminCredential, apiResponseData.profile.profileId, apiResponseData.token, actor);
+            // const node = await this._addUserToContext(info);
+            // await TokenService.getInstance().addUserToken(node, token, playload);
+            yield this.addUserToken;
+            return apiResponseData;
+        });
+    }
     //////////////////////////////////////////////////
     //                        PRIVATE               //
     //////////////////////////////////////////////////
@@ -178,6 +194,54 @@ class TokenService {
             console.log(new Date().toUTCString(), "purge invalid tokens");
             yield this.purgeToken();
         }));
+    }
+    _getProfileInfo(body, adminCredential, actor) {
+        return __awaiter(this, void 0, void 0, function* () {
+            let endpoint = actor === "user" ? "/tokens/getUserProfileByToken" : "/tokens/getAppProfileByToken";
+            let urlAdmin = adminCredential.urlAdmin;
+            return axios_1.default.post(urlAdmin + endpoint, body).then((result) => __awaiter(this, void 0, void 0, function* () {
+                if (!result.data)
+                    return;
+                const data = result.data;
+                delete data.password;
+                return data;
+            })).catch((err) => {
+                return {};
+            });
+        });
+    }
+    _getConnexionInfo(adminCredential, id, token, actor) {
+        if (actor !== "code")
+            return this._getInfo(adminCredential, id, token, actor);
+        return {
+            name: ""
+        };
+    }
+    _getInfo(adminCredential, id, token, actor) {
+        const endpoint = actor === "user" ? "users" : "applications";
+        const config = {
+            headers: {
+                'Content-Type': 'application/json',
+                // "x-access-token": adminCredential.tokenBosAdmin
+                "x-access-token": token
+            },
+        };
+        return axios_1.default.get(`${adminCredential.urlAdmin}/${endpoint}/${id}`, config)
+            .then((result) => {
+            return result.data;
+        }).catch((err) => {
+            console.error(err);
+        });
+    }
+    _getActor(platformList) {
+        if (!platformList || platformList.length === 0)
+            return "code";
+        const platform = platformList && platformList[0];
+        if (platform === null || platform === void 0 ? void 0 : platform.userProfile)
+            return "user";
+        if (platform === null || platform === void 0 ? void 0 : platform.appProfile)
+            return "app";
+        return "code";
     }
 }
 exports.TokenService = TokenService;

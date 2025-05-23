@@ -42,6 +42,8 @@ const userProfile_service_1 = require("./userProfile.service");
 const appProfile_service_1 = require("./appProfile.service");
 const userList_services_1 = require("./userList.services");
 const appConnectedList_services_1 = require("./appConnectedList.services");
+const AuthError_1 = require("../security/AuthError");
+const codeUnique_service_1 = require("./codeUnique.service");
 const tokenKey = '9b1deb4d-3b7d-4bad-9bdd-2b0d7b3dcb6d';
 class AuthentificationService {
     constructor() { }
@@ -49,6 +51,14 @@ class AuthentificationService {
         if (!this.instance)
             this.instance = new AuthentificationService();
         return this.instance;
+    }
+    consumeCodeUnique(code) {
+        try {
+            return codeUnique_service_1.SpinalCodeUniqueService.getInstance().consumeCode(code);
+        }
+        catch (error) {
+            throw new AuthError_1.OtherError(constant_1.HTTP_CODES.BAD_REQUEST, "Code unique not valid");
+        }
     }
     authenticate(info) {
         return __awaiter(this, void 0, void 0, function* () {
