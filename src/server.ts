@@ -45,7 +45,7 @@ export default async function initExpress(conn: spinal.FileSystem) {
 
   var app = express();
   app.use(morgan('dev'));
-  app.use(cors({ origin: '*' }));
+  app.use(cors({ origin: "*", credentials: true }));
 
   configureBosProxy(app);
   configureBosProxy(app, true);

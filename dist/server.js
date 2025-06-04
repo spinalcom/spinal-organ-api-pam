@@ -52,7 +52,7 @@ function initExpress(conn) {
     return __awaiter(this, void 0, void 0, function* () {
         var app = express();
         app.use(morgan('dev'));
-        app.use(cors({ origin: '*' }));
+        app.use(cors({ origin: "*", credentials: true }));
         (0, bos_1.default)(app);
         (0, bos_1.default)(app, true);
         useApiMiddleWare(app);

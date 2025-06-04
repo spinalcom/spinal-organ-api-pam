@@ -22,10 +22,10 @@
  * <http://resources.spinalcom.com/licenses.pdf>.
  */
 
-import {NextFunction} from 'express';
-import {Server as HttpServer} from 'http';
-import {SpinalNode} from 'spinal-env-viewer-graph-service';
-import {SECURITY_MESSAGES} from '../../constant';
+import { NextFunction } from 'express';
+import { Server as HttpServer } from 'http';
+import { SpinalNode } from 'spinal-env-viewer-graph-service';
+import { SECURITY_MESSAGES } from '../../constant';
 import {
   WebsocketLogsService,
   AuthentificationService,
@@ -34,14 +34,14 @@ import {
   SEND_EVENT,
   RECEIVE_EVENT,
 } from '../../services';
-import {profileHasAccessToBuilding} from '../bos/utils';
-import {Server, Socket} from 'socket.io';
+import { profileHasAccessToBuilding } from '../bos/utils';
+import { Server, Socket } from 'socket.io';
 import {
   CONNECTION_EVENT,
   DISCONNECTION_EVENT,
 } from 'spinal-service-pubsub-logs';
-import {async} from 'q';
-import {isObject} from 'lodash';
+import { v4 as uuidv4 } from "uuid";
+
 const SocketClient = require('socket.io-client');
 
 const logInstance = WebsocketLogsService.getInstance();
@@ -60,6 +60,7 @@ export default class WebSocketServer {
   //   );
 
   constructor(server: HttpServer) {
+    console.log("modification 1")
     this._io = new Server(server);
     logInstance.setIo(this._io);
   }
@@ -70,9 +71,10 @@ export default class WebSocketServer {
   }
 
   private _initNameSpace() {
-    this._io.on('connection', (socket: Socket) => {
-      console.log(socket.id, 'is connected');
-    });
+
+    this._io.on("connection", (socket: Socket) => {
+      console.log(socket.id, "is connected");
+    })
 
     this._io.of(/.*/).use(async (socket: Socket, next: NextFunction) => {
       let err;
@@ -93,6 +95,7 @@ export default class WebSocketServer {
         err = error;
       }
 
+
       next(err);
     });
   }
@@ -104,7 +107,7 @@ export default class WebSocketServer {
   }
 
   private async _getToken(socket: Socket) {
-    const {header, auth, query} = <any>socket.handshake;
+    const { header, auth, query } = <any>socket.handshake;
     const token = auth?.token || header?.token || query?.token;
     if (!token) throw new Error(SECURITY_MESSAGES.INVALID_TOKEN);
 
@@ -152,7 +155,8 @@ export default class WebSocketServer {
     socket: Socket,
     tokenInfo: any
   ): Promise<Socket> {
-    const sessionId = tokenInfo.userInfo?.id;
+    // const sessionId = tokenInfo.userInfo?.id;
+    const sessionId = uuidv4();
     const token = tokenInfo.token;
 
     if (sessionId) this._sessionToUserInfo.set(sessionId, tokenInfo.userInfo);
@@ -160,17 +164,14 @@ export default class WebSocketServer {
     return new Promise((resolve, reject) => {
       const api_url = building.info.apiUrl.get();
       const client = SocketClient(api_url, {
-        auth: {token, sessionId, building: building?.info?.get()},
-        transports: ['websocket'],
-        reconnection: false,
+        auth: { token, sessionId, building: building?.info?.get() },
+        // transports: ['websocket'],
+        reconnection: false
       });
 
-      client.on('connect', () => {
-        console.log(
-          tokenInfo?.userInfo?.name || tokenInfo?.userInfo?.id,
-          'is connected'
-        );
-      });
+      client.on("connect", () => {
+        console.log(tokenInfo?.userInfo?.name || tokenInfo?.userInfo?.id, "is connected")
+      })
 
       client.on('session_created', async (id) => {
         this._sessionToUserInfo.set(id, tokenInfo.userInfo);
@@ -284,11 +285,7 @@ export default class WebSocketServer {
       );
       if (emitter) {
         const emitterInfo = this._sessionToUserInfo.get(emitter.sessionId);
-        console.log(
-          emitterInfo.userName || emitter.sessionId,
-          'is disconnected',
-          reason
-        );
+        console.log(emitterInfo.userName || emitter.sessionId, "is disconnected", reason);
         emitter.disconnect();
       }
     });
@@ -318,11 +315,7 @@ export default class WebSocketServer {
 
       if (emitter) {
         const emitterInfo = this._sessionToUserInfo.get(emitter.sessionId);
-        console.log(
-          emitterInfo.userName || emitter.sessionId,
-          'is disconnected',
-          reason
-        );
+        console.log(emitterInfo.userName || emitter.sessionId, "is disconnected", reason);
 
         emitter.disconnect();
 
@@ -347,7 +340,7 @@ export default class WebSocketServer {
     const buildingId = (socket as any).auth.building.id;
     const building = this._buildingMap.get(buildingId);
 
-    const targetInfo = {id: userInfo.id, name: userInfo.userName};
+    const targetInfo = { id: userInfo.id, name: userInfo.userName };
     // let type, action;
 
     // type = sendItToClient ? SEND_EVENT : RECEIVE_EVENT;
@@ -377,4 +370,4 @@ export default class WebSocketServer {
   }
 }
 
-export {WebSocketServer};
+export { WebSocketServer };
