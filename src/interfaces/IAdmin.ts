@@ -71,7 +71,7 @@ export interface IAdminOrgan {
     type: string;
 }
 
-export interface IJsonData {
+export interface IPlatformInfo {
     userProfileList?: IAdminUserProfile[];
     appProfileList?: IAdminAppProfile[];
     organList?: IAdminOrgan[];

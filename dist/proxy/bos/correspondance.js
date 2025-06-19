@@ -1,6 +1,4 @@
 "use strict";
-Object.defineProperty(exports, "__esModule", { value: true });
-exports.correspondanceObj = void 0;
 /*
  * Copyright 2022 SpinalCom - www.spinalcom.com
  *
@@ -24,6 +22,8 @@ exports.correspondanceObj = void 0;
  * with this file. If not, see
  * <http://resources.spinalcom.com/licenses.pdf>.
  */
+Object.defineProperty(exports, "__esModule", { value: true });
+exports.correspondanceObj = void 0;
 exports.correspondanceObj = {
     "context/{idContext}/nodeTypeList/{type}": "context/{id}/nodesOfType/{type}",
     "geographicContext": "geographicContext/tree",

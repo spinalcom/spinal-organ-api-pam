@@ -10,7 +10,7 @@ export async function useLoginProxy(app: express.Application) {
     app.get('/login', async (req: express.Request, res: express.Response, next: express.NextFunction) => {
         try {
 
-            const authPlatformInfo = await AuthentificationService.getInstance().getPamToAdminCredential();
+            const authPlatformInfo = await AuthentificationService.getInstance().getPamCredentials();
 
             if (authPlatformInfo) {
                 let server_url = authPlatformInfo.urlAdmin;

@@ -11,15 +11,6 @@ var __metadata = (this && this.__metadata) || function (k, v) {
 var __param = (this && this.__param) || function (paramIndex, decorator) {
     return function (target, key) { decorator(target, key, paramIndex); }
 };
-var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
-    function adopt(value) { return value instanceof P ? value : new P(function (resolve) { resolve(value); }); }
-    return new (P || (P = Promise))(function (resolve, reject) {
-        function fulfilled(value) { try { step(generator.next(value)); } catch (e) { reject(e); } }
-        function rejected(value) { try { step(generator["throw"](value)); } catch (e) { reject(e); } }
-        function step(result) { result.done ? resolve(result.value) : adopt(result.value).then(fulfilled, rejected); }
-        step((generator = generator.apply(thisArg, _arguments || [])).next());
-    });
-};
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.AppsController = void 0;
 /*
@@ -57,469 +48,421 @@ let AppsController = class AppsController extends tsoa_1.Controller {
     constructor() {
         super();
     }
-    createAdminApp(req, appInfo) {
-        return __awaiter(this, void 0, void 0, function* () {
-            try {
-                const isAdmin = yield (0, authentication_1.checkIfItIsAdmin)(req);
-                if (!isAdmin)
-                    throw new AuthError_1.AuthError(constant_1.SECURITY_MESSAGES.UNAUTHORIZED);
-                const node = yield appServiceInstance.createAdminApp(appInfo);
-                if (node) {
-                    this.setStatus(constant_1.HTTP_CODES.CREATED);
-                    return node.info.get();
-                }
-                this.setStatus(constant_1.HTTP_CODES.BAD_REQUEST);
-                return { message: "oops, something went wrong, please check your input data" };
+    async createAdminApp(req, appInfo) {
+        try {
+            const isAdmin = await (0, authentication_1.checkIfItIsAdmin)(req);
+            if (!isAdmin)
+                throw new AuthError_1.AuthError(constant_1.SECURITY_MESSAGES.UNAUTHORIZED);
+            const node = await appServiceInstance.createAdminApp(appInfo);
+            if (node) {
+                this.setStatus(constant_1.HTTP_CODES.CREATED);
+                return node.info.get();
             }
-            catch (error) {
-                this.setStatus(error.code || constant_1.HTTP_CODES.INTERNAL_ERROR);
-                return { message: error.message };
-            }
-        });
+            this.setStatus(constant_1.HTTP_CODES.BAD_REQUEST);
+            return { message: "oops, something went wrong, please check your input data" };
+        }
+        catch (error) {
+            this.setStatus(error.code || constant_1.HTTP_CODES.INTERNAL_ERROR);
+            return { message: error.message };
+        }
     }
-    createPortofolioApp(req, appInfo) {
-        return __awaiter(this, void 0, void 0, function* () {
-            try {
-                const isAdmin = yield (0, authentication_1.checkIfItIsAdmin)(req);
-                if (!isAdmin)
-                    throw new AuthError_1.AuthError(constant_1.SECURITY_MESSAGES.UNAUTHORIZED);
-                const node = yield appServiceInstance.createPortofolioApp(appInfo);
-                if (node) {
-                    this.setStatus(constant_1.HTTP_CODES.CREATED);
-                    return node.info.get();
-                }
-                this.setStatus(constant_1.HTTP_CODES.BAD_REQUEST);
-                return { message: "oops, something went wrong, please check your input data" };
+    async createPortofolioApp(req, appInfo) {
+        try {
+            const isAdmin = await (0, authentication_1.checkIfItIsAdmin)(req);
+            if (!isAdmin)
+                throw new AuthError_1.AuthError(constant_1.SECURITY_MESSAGES.UNAUTHORIZED);
+            const node = await appServiceInstance.createPortofolioApp(appInfo);
+            if (node) {
+                this.setStatus(constant_1.HTTP_CODES.CREATED);
+                return node.info.get();
             }
-            catch (error) {
-                this.setStatus(error.code || constant_1.HTTP_CODES.INTERNAL_ERROR);
-                return { message: error.message };
-            }
-        });
+            this.setStatus(constant_1.HTTP_CODES.BAD_REQUEST);
+            return { message: "oops, something went wrong, please check your input data" };
+        }
+        catch (error) {
+            this.setStatus(error.code || constant_1.HTTP_CODES.INTERNAL_ERROR);
+            return { message: error.message };
+        }
     }
-    createBuildingApp(req, appInfo) {
-        return __awaiter(this, void 0, void 0, function* () {
-            try {
-                const isAdmin = yield (0, authentication_1.checkIfItIsAdmin)(req);
-                if (!isAdmin)
-                    throw new AuthError_1.AuthError(constant_1.SECURITY_MESSAGES.UNAUTHORIZED);
-                const node = yield appServiceInstance.createBuildingApp(appInfo);
-                if (node) {
-                    this.setStatus(constant_1.HTTP_CODES.CREATED);
-                    return node.info.get();
-                }
-                this.setStatus(constant_1.HTTP_CODES.BAD_REQUEST);
-                return { message: "oops, something went wrong, please check your input data" };
+    async createBuildingApp(req, appInfo) {
+        try {
+            const isAdmin = await (0, authentication_1.checkIfItIsAdmin)(req);
+            if (!isAdmin)
+                throw new AuthError_1.AuthError(constant_1.SECURITY_MESSAGES.UNAUTHORIZED);
+            const node = await appServiceInstance.createBuildingApp(appInfo);
+            if (node) {
+                this.setStatus(constant_1.HTTP_CODES.CREATED);
+                return node.info.get();
             }
-            catch (error) {
-                this.setStatus(error.code || constant_1.HTTP_CODES.INTERNAL_ERROR);
-                return { message: error.message };
-            }
-        });
+            this.setStatus(constant_1.HTTP_CODES.BAD_REQUEST);
+            return { message: "oops, something went wrong, please check your input data" };
+        }
+        catch (error) {
+            this.setStatus(error.code || constant_1.HTTP_CODES.INTERNAL_ERROR);
+            return { message: error.message };
+        }
     }
-    getAllAdminApps(req) {
-        return __awaiter(this, void 0, void 0, function* () {
-            try {
-                const isAdmin = yield (0, authentication_1.checkIfItIsAdmin)(req);
-                if (!isAdmin)
-                    throw new AuthError_1.AuthError(constant_1.SECURITY_MESSAGES.UNAUTHORIZED);
-                const nodes = yield appServiceInstance.getAllAdminApps();
+    async getAllAdminApps(req) {
+        try {
+            const isAdmin = await (0, authentication_1.checkIfItIsAdmin)(req);
+            if (!isAdmin)
+                throw new AuthError_1.AuthError(constant_1.SECURITY_MESSAGES.UNAUTHORIZED);
+            const nodes = await appServiceInstance.getAllAdminApps();
+            this.setStatus(constant_1.HTTP_CODES.OK);
+            return nodes.map(el => el.info.get());
+        }
+        catch (error) {
+            this.setStatus(error.code || constant_1.HTTP_CODES.INTERNAL_ERROR);
+            return { message: error.message };
+        }
+    }
+    async getAllPortofolioApps(req) {
+        try {
+            const isAdmin = await (0, authentication_1.checkIfItIsAdmin)(req);
+            if (!isAdmin)
+                throw new AuthError_1.AuthError(constant_1.SECURITY_MESSAGES.UNAUTHORIZED);
+            const nodes = await appServiceInstance.getAllPortofolioApps();
+            this.setStatus(constant_1.HTTP_CODES.OK);
+            return nodes.map(el => el.info.get());
+        }
+        catch (error) {
+            this.setStatus(error.code || constant_1.HTTP_CODES.INTERNAL_ERROR);
+            return { message: error.message };
+        }
+    }
+    async getAllBuildingApps(req) {
+        try {
+            const isAdmin = await (0, authentication_1.checkIfItIsAdmin)(req);
+            if (!isAdmin)
+                throw new AuthError_1.AuthError(constant_1.SECURITY_MESSAGES.UNAUTHORIZED);
+            const nodes = await appServiceInstance.getAllBuildingApps();
+            this.setStatus(constant_1.HTTP_CODES.OK);
+            return nodes.map(el => el.info.get());
+        }
+        catch (error) {
+            this.setStatus(error.code || constant_1.HTTP_CODES.INTERNAL_ERROR);
+            return { message: error.message };
+        }
+    }
+    async getAdminApp(req, appId) {
+        try {
+            const isAdmin = await (0, authentication_1.checkIfItIsAdmin)(req);
+            if (!isAdmin)
+                throw new AuthError_1.AuthError(constant_1.SECURITY_MESSAGES.UNAUTHORIZED);
+            const node = await appServiceInstance.getAdminAppById(appId);
+            if (node) {
                 this.setStatus(constant_1.HTTP_CODES.OK);
-                return nodes.map(el => el.info.get());
+                return node.info.get();
             }
-            catch (error) {
-                this.setStatus(error.code || constant_1.HTTP_CODES.INTERNAL_ERROR);
-                return { message: error.message };
-            }
-        });
+            this.setStatus(constant_1.HTTP_CODES.NOT_FOUND);
+            return { message: `No application found for this id (${appId})` };
+        }
+        catch (error) {
+            this.setStatus(error.code || constant_1.HTTP_CODES.INTERNAL_ERROR);
+            return { message: error.message };
+        }
     }
-    getAllPortofolioApps(req) {
-        return __awaiter(this, void 0, void 0, function* () {
-            try {
-                const isAdmin = yield (0, authentication_1.checkIfItIsAdmin)(req);
-                if (!isAdmin)
-                    throw new AuthError_1.AuthError(constant_1.SECURITY_MESSAGES.UNAUTHORIZED);
-                const nodes = yield appServiceInstance.getAllPortofolioApps();
+    async getPortofolioApp(req, appId) {
+        try {
+            const profile = await (0, authentication_1.getProfileNode)(req);
+            const node = await authorization_service_1.default.getInstance().profileHasAccessToNode(profile, appId);
+            if (node) {
                 this.setStatus(constant_1.HTTP_CODES.OK);
-                return nodes.map(el => el.info.get());
+                return node.info.get();
             }
-            catch (error) {
-                this.setStatus(error.code || constant_1.HTTP_CODES.INTERNAL_ERROR);
-                return { message: error.message };
-            }
-        });
+            this.setStatus(constant_1.HTTP_CODES.NOT_FOUND);
+            return { message: `No application found for this id (${appId})` };
+        }
+        catch (error) {
+            this.setStatus(error.code || constant_1.HTTP_CODES.INTERNAL_ERROR);
+            return { message: error.message };
+        }
     }
-    getAllBuildingApps(req) {
-        return __awaiter(this, void 0, void 0, function* () {
-            try {
-                const isAdmin = yield (0, authentication_1.checkIfItIsAdmin)(req);
-                if (!isAdmin)
-                    throw new AuthError_1.AuthError(constant_1.SECURITY_MESSAGES.UNAUTHORIZED);
-                const nodes = yield appServiceInstance.getAllBuildingApps();
+    async getBuildingApp(req, appId) {
+        try {
+            const profile = await (0, authentication_1.getProfileNode)(req);
+            const node = await authorization_service_1.default.getInstance().profileHasAccessToNode(profile, appId);
+            // const node = await appServiceInstance.getBuildingApp(appId);
+            if (node) {
                 this.setStatus(constant_1.HTTP_CODES.OK);
-                return nodes.map(el => el.info.get());
+                return node.info.get();
             }
-            catch (error) {
-                this.setStatus(error.code || constant_1.HTTP_CODES.INTERNAL_ERROR);
-                return { message: error.message };
-            }
-        });
+            this.setStatus(constant_1.HTTP_CODES.NOT_FOUND);
+            return { message: `No application found for this id (${appId})` };
+        }
+        catch (error) {
+            this.setStatus(error.code || constant_1.HTTP_CODES.INTERNAL_ERROR);
+            return { message: error.message };
+        }
     }
-    getAdminApp(req, appId) {
-        return __awaiter(this, void 0, void 0, function* () {
-            try {
-                const isAdmin = yield (0, authentication_1.checkIfItIsAdmin)(req);
-                if (!isAdmin)
-                    throw new AuthError_1.AuthError(constant_1.SECURITY_MESSAGES.UNAUTHORIZED);
-                const node = yield appServiceInstance.getAdminApp(appId);
-                if (node) {
-                    this.setStatus(constant_1.HTTP_CODES.OK);
-                    return node.info.get();
-                }
-                this.setStatus(constant_1.HTTP_CODES.NOT_FOUND);
-                return { message: `No application found for this id (${appId})` };
+    async updateAdminApp(req, appId, newInfo) {
+        try {
+            const isAdmin = await (0, authentication_1.checkIfItIsAdmin)(req);
+            if (!isAdmin)
+                throw new AuthError_1.AuthError(constant_1.SECURITY_MESSAGES.UNAUTHORIZED);
+            const node = await appServiceInstance.updateAdminApp(appId, newInfo);
+            if (node) {
+                this.setStatus(constant_1.HTTP_CODES.OK);
+                return node.info.get();
             }
-            catch (error) {
-                this.setStatus(error.code || constant_1.HTTP_CODES.INTERNAL_ERROR);
-                return { message: error.message };
-            }
-        });
+            this.setStatus(constant_1.HTTP_CODES.BAD_REQUEST);
+            return { message: `Something went wrong, please check your input data.` };
+        }
+        catch (error) {
+            this.setStatus(error.code || constant_1.HTTP_CODES.INTERNAL_ERROR);
+            return { message: error.message };
+        }
     }
-    getPortofolioApp(req, appId) {
-        return __awaiter(this, void 0, void 0, function* () {
-            try {
-                const profile = yield (0, authentication_1.getProfileNode)(req);
-                const node = yield authorization_service_1.default.getInstance().profileHasAccess(profile, appId);
-                if (node) {
-                    this.setStatus(constant_1.HTTP_CODES.OK);
-                    return node.info.get();
-                }
-                this.setStatus(constant_1.HTTP_CODES.NOT_FOUND);
-                return { message: `No application found for this id (${appId})` };
+    async updatePortofolioApp(req, appId, newInfo) {
+        try {
+            const isAdmin = await (0, authentication_1.checkIfItIsAdmin)(req);
+            if (!isAdmin)
+                throw new AuthError_1.AuthError(constant_1.SECURITY_MESSAGES.UNAUTHORIZED);
+            const node = await appServiceInstance.updatePortofolioApp(appId, newInfo);
+            if (node) {
+                this.setStatus(constant_1.HTTP_CODES.OK);
+                return node.info.get();
             }
-            catch (error) {
-                this.setStatus(error.code || constant_1.HTTP_CODES.INTERNAL_ERROR);
-                return { message: error.message };
-            }
-        });
+            this.setStatus(constant_1.HTTP_CODES.BAD_REQUEST);
+            return { message: `Something went wrong, please check your input data.` };
+        }
+        catch (error) {
+            this.setStatus(error.code || constant_1.HTTP_CODES.INTERNAL_ERROR);
+            return { message: error.message };
+        }
     }
-    getBuildingApp(req, appId) {
-        return __awaiter(this, void 0, void 0, function* () {
-            try {
-                const profile = yield (0, authentication_1.getProfileNode)(req);
-                const node = yield authorization_service_1.default.getInstance().profileHasAccess(profile, appId);
-                // const node = await appServiceInstance.getBuildingApp(appId);
-                if (node) {
-                    this.setStatus(constant_1.HTTP_CODES.OK);
-                    return node.info.get();
-                }
-                this.setStatus(constant_1.HTTP_CODES.NOT_FOUND);
-                return { message: `No application found for this id (${appId})` };
+    async updateBuildingApp(req, appId, newInfo) {
+        try {
+            const isAdmin = await (0, authentication_1.checkIfItIsAdmin)(req);
+            if (!isAdmin)
+                throw new AuthError_1.AuthError(constant_1.SECURITY_MESSAGES.UNAUTHORIZED);
+            const node = await appServiceInstance.updateBuildingApp(appId, newInfo);
+            if (node) {
+                this.setStatus(constant_1.HTTP_CODES.OK);
+                return node.info.get();
             }
-            catch (error) {
-                this.setStatus(error.code || constant_1.HTTP_CODES.INTERNAL_ERROR);
-                return { message: error.message };
-            }
-        });
+            this.setStatus(constant_1.HTTP_CODES.BAD_REQUEST);
+            return { message: `Something went wrong, please check your input data.` };
+        }
+        catch (error) {
+            this.setStatus(error.code || constant_1.HTTP_CODES.INTERNAL_ERROR);
+            return { message: error.message };
+        }
     }
-    updateAdminApp(req, appId, newInfo) {
-        return __awaiter(this, void 0, void 0, function* () {
-            try {
-                const isAdmin = yield (0, authentication_1.checkIfItIsAdmin)(req);
-                if (!isAdmin)
-                    throw new AuthError_1.AuthError(constant_1.SECURITY_MESSAGES.UNAUTHORIZED);
-                const node = yield appServiceInstance.updateAdminApp(appId, newInfo);
-                if (node) {
-                    this.setStatus(constant_1.HTTP_CODES.OK);
-                    return node.info.get();
-                }
+    async deleteAdminApp(req, appId) {
+        try {
+            const isAdmin = await (0, authentication_1.checkIfItIsAdmin)(req);
+            if (!isAdmin)
+                throw new AuthError_1.AuthError(constant_1.SECURITY_MESSAGES.UNAUTHORIZED);
+            const isDeleted = await appServiceInstance.deleteAdminApp(appId);
+            const status = isDeleted ? constant_1.HTTP_CODES.OK : constant_1.HTTP_CODES.BAD_REQUEST;
+            const message = isDeleted ? `${appId} is deleted with success` : "something went wrong, please check your input data";
+            this.setStatus(status);
+            return { message };
+        }
+        catch (error) {
+            this.setStatus(error.code || constant_1.HTTP_CODES.INTERNAL_ERROR);
+            return { message: error.message };
+        }
+    }
+    async deletePortofolioApp(req, appId) {
+        try {
+            const isAdmin = await (0, authentication_1.checkIfItIsAdmin)(req);
+            if (!isAdmin)
+                throw new AuthError_1.AuthError(constant_1.SECURITY_MESSAGES.UNAUTHORIZED);
+            const isDeleted = await appServiceInstance.deletePortofolioApp(appId);
+            const status = isDeleted ? constant_1.HTTP_CODES.OK : constant_1.HTTP_CODES.BAD_REQUEST;
+            const message = isDeleted ? `${appId} is deleted with success` : "something went wrong, please check your input data";
+            this.setStatus(status);
+            return { message };
+        }
+        catch (error) {
+            this.setStatus(error.code || constant_1.HTTP_CODES.INTERNAL_ERROR);
+            return { message: error.message };
+        }
+    }
+    async deleteBuildingApp(req, appId) {
+        try {
+            const isAdmin = await (0, authentication_1.checkIfItIsAdmin)(req);
+            if (!isAdmin)
+                throw new AuthError_1.AuthError(constant_1.SECURITY_MESSAGES.UNAUTHORIZED);
+            const isDeleted = await appServiceInstance.deleteBuildingApp(appId);
+            const status = isDeleted ? constant_1.HTTP_CODES.OK : constant_1.HTTP_CODES.BAD_REQUEST;
+            const message = isDeleted ? `${appId} is deleted with success` : "something went wrong, please check your input data";
+            this.setStatus(status);
+            return { message };
+        }
+        catch (error) {
+            this.setStatus(error.code || constant_1.HTTP_CODES.INTERNAL_ERROR);
+            return { message: error.message };
+        }
+    }
+    async uploadAdminApp(req, file) {
+        try {
+            const isAdmin = await (0, authentication_1.checkIfItIsAdmin)(req);
+            if (!isAdmin)
+                throw new AuthError_1.AuthError(constant_1.SECURITY_MESSAGES.UNAUTHORIZED);
+            if (!file) {
                 this.setStatus(constant_1.HTTP_CODES.BAD_REQUEST);
-                return { message: `Something went wrong, please check your input data.` };
+                return { message: "No file uploaded" };
             }
-            catch (error) {
-                this.setStatus(error.code || constant_1.HTTP_CODES.INTERNAL_ERROR);
-                return { message: error.message };
-            }
-        });
-    }
-    updatePortofolioApp(req, appId, newInfo) {
-        return __awaiter(this, void 0, void 0, function* () {
-            try {
-                const isAdmin = yield (0, authentication_1.checkIfItIsAdmin)(req);
-                if (!isAdmin)
-                    throw new AuthError_1.AuthError(constant_1.SECURITY_MESSAGES.UNAUTHORIZED);
-                const node = yield appServiceInstance.updatePortofolioApp(appId, newInfo);
-                if (node) {
-                    this.setStatus(constant_1.HTTP_CODES.OK);
-                    return node.info.get();
-                }
+            // if (file && !(/.*\.json$/.test(file.originalname) || /.*\.xlsx$/.test(file.originalname))) {
+            if (file && !(/.*\.xlsx$/.test(file.originalname))) {
                 this.setStatus(constant_1.HTTP_CODES.BAD_REQUEST);
-                return { message: `Something went wrong, please check your input data.` };
+                return { message: "The selected file must be a json or excel file" };
             }
-            catch (error) {
-                this.setStatus(error.code || constant_1.HTTP_CODES.INTERNAL_ERROR);
-                return { message: error.message };
+            const isExcel = /.*\.xlsx$/.test(file.originalname);
+            const apps = await appServiceInstance.uploadApps(services_1.AppsType.admin, file.buffer, isExcel);
+            if (apps && apps.length > 0) {
+                this.setStatus(constant_1.HTTP_CODES.CREATED);
+                return apps.map(node => node.info.get());
             }
-        });
+            this.setStatus(constant_1.HTTP_CODES.BAD_REQUEST);
+            return { message: "oops, something went wrong, please check your input data" };
+        }
+        catch (error) {
+            this.setStatus(error.code || constant_1.HTTP_CODES.INTERNAL_ERROR);
+            return { message: error.message };
+        }
     }
-    updateBuildingApp(req, appId, newInfo) {
-        return __awaiter(this, void 0, void 0, function* () {
-            try {
-                const isAdmin = yield (0, authentication_1.checkIfItIsAdmin)(req);
-                if (!isAdmin)
-                    throw new AuthError_1.AuthError(constant_1.SECURITY_MESSAGES.UNAUTHORIZED);
-                const node = yield appServiceInstance.updateBuildingApp(appId, newInfo);
-                if (node) {
-                    this.setStatus(constant_1.HTTP_CODES.OK);
-                    return node.info.get();
-                }
+    async uploadPortofolioApp(req, file) {
+        try {
+            const isAdmin = await (0, authentication_1.checkIfItIsAdmin)(req);
+            if (!isAdmin)
+                throw new AuthError_1.AuthError(constant_1.SECURITY_MESSAGES.UNAUTHORIZED);
+            if (!file) {
                 this.setStatus(constant_1.HTTP_CODES.BAD_REQUEST);
-                return { message: `Something went wrong, please check your input data.` };
+                return { message: "No file uploaded" };
             }
-            catch (error) {
-                this.setStatus(error.code || constant_1.HTTP_CODES.INTERNAL_ERROR);
-                return { message: error.message };
-            }
-        });
-    }
-    deleteAdminApp(req, appId) {
-        return __awaiter(this, void 0, void 0, function* () {
-            try {
-                const isAdmin = yield (0, authentication_1.checkIfItIsAdmin)(req);
-                if (!isAdmin)
-                    throw new AuthError_1.AuthError(constant_1.SECURITY_MESSAGES.UNAUTHORIZED);
-                const isDeleted = yield appServiceInstance.deleteAdminApp(appId);
-                const status = isDeleted ? constant_1.HTTP_CODES.OK : constant_1.HTTP_CODES.BAD_REQUEST;
-                const message = isDeleted ? `${appId} is deleted with success` : "something went wrong, please check your input data";
-                this.setStatus(status);
-                return { message };
-            }
-            catch (error) {
-                this.setStatus(error.code || constant_1.HTTP_CODES.INTERNAL_ERROR);
-                return { message: error.message };
-            }
-        });
-    }
-    deletePortofolioApp(req, appId) {
-        return __awaiter(this, void 0, void 0, function* () {
-            try {
-                const isAdmin = yield (0, authentication_1.checkIfItIsAdmin)(req);
-                if (!isAdmin)
-                    throw new AuthError_1.AuthError(constant_1.SECURITY_MESSAGES.UNAUTHORIZED);
-                const isDeleted = yield appServiceInstance.deletePortofolioApp(appId);
-                const status = isDeleted ? constant_1.HTTP_CODES.OK : constant_1.HTTP_CODES.BAD_REQUEST;
-                const message = isDeleted ? `${appId} is deleted with success` : "something went wrong, please check your input data";
-                this.setStatus(status);
-                return { message };
-            }
-            catch (error) {
-                this.setStatus(error.code || constant_1.HTTP_CODES.INTERNAL_ERROR);
-                return { message: error.message };
-            }
-        });
-    }
-    deleteBuildingApp(req, appId) {
-        return __awaiter(this, void 0, void 0, function* () {
-            try {
-                const isAdmin = yield (0, authentication_1.checkIfItIsAdmin)(req);
-                if (!isAdmin)
-                    throw new AuthError_1.AuthError(constant_1.SECURITY_MESSAGES.UNAUTHORIZED);
-                const isDeleted = yield appServiceInstance.deleteBuildingApp(appId);
-                const status = isDeleted ? constant_1.HTTP_CODES.OK : constant_1.HTTP_CODES.BAD_REQUEST;
-                const message = isDeleted ? `${appId} is deleted with success` : "something went wrong, please check your input data";
-                this.setStatus(status);
-                return { message };
-            }
-            catch (error) {
-                this.setStatus(error.code || constant_1.HTTP_CODES.INTERNAL_ERROR);
-                return { message: error.message };
-            }
-        });
-    }
-    uploadAdminApp(req, file) {
-        return __awaiter(this, void 0, void 0, function* () {
-            try {
-                const isAdmin = yield (0, authentication_1.checkIfItIsAdmin)(req);
-                if (!isAdmin)
-                    throw new AuthError_1.AuthError(constant_1.SECURITY_MESSAGES.UNAUTHORIZED);
-                if (!file) {
-                    this.setStatus(constant_1.HTTP_CODES.BAD_REQUEST);
-                    return { message: "No file uploaded" };
-                }
-                // if (file && !(/.*\.json$/.test(file.originalname) || /.*\.xlsx$/.test(file.originalname))) {
-                if (file && !(/.*\.xlsx$/.test(file.originalname))) {
-                    this.setStatus(constant_1.HTTP_CODES.BAD_REQUEST);
-                    return { message: "The selected file must be a json or excel file" };
-                }
-                const isExcel = /.*\.xlsx$/.test(file.originalname);
-                const apps = yield appServiceInstance.uploadApps(services_1.AppsType.admin, file.buffer, isExcel);
-                if (apps && apps.length > 0) {
-                    this.setStatus(constant_1.HTTP_CODES.CREATED);
-                    return apps.map(node => node.info.get());
-                }
+            if (file && !(/.*\.json$/.test(file.originalname) || /.*\.xlsx$/.test(file.originalname))) {
                 this.setStatus(constant_1.HTTP_CODES.BAD_REQUEST);
-                return { message: "oops, something went wrong, please check your input data" };
+                return { message: "The selected file must be a json or excel file" };
             }
-            catch (error) {
-                this.setStatus(error.code || constant_1.HTTP_CODES.INTERNAL_ERROR);
-                return { message: error.message };
+            const isExcel = /.*\.xlsx$/.test(file.originalname);
+            const apps = await appServiceInstance.uploadApps(services_1.AppsType.portofolio, file.buffer, isExcel);
+            if (apps && apps.length > 0) {
+                this.setStatus(constant_1.HTTP_CODES.CREATED);
+                return apps.map(node => node.info.get());
             }
-        });
+            this.setStatus(constant_1.HTTP_CODES.BAD_REQUEST);
+            return { message: "oops, something went wrong, please check your input data" };
+        }
+        catch (error) {
+            this.setStatus(error.code || constant_1.HTTP_CODES.INTERNAL_ERROR);
+            return { message: error.message };
+        }
     }
-    uploadPortofolioApp(req, file) {
-        return __awaiter(this, void 0, void 0, function* () {
-            try {
-                const isAdmin = yield (0, authentication_1.checkIfItIsAdmin)(req);
-                if (!isAdmin)
-                    throw new AuthError_1.AuthError(constant_1.SECURITY_MESSAGES.UNAUTHORIZED);
-                if (!file) {
-                    this.setStatus(constant_1.HTTP_CODES.BAD_REQUEST);
-                    return { message: "No file uploaded" };
-                }
-                if (file && !(/.*\.json$/.test(file.originalname) || /.*\.xlsx$/.test(file.originalname))) {
-                    this.setStatus(constant_1.HTTP_CODES.BAD_REQUEST);
-                    return { message: "The selected file must be a json or excel file" };
-                }
-                const isExcel = /.*\.xlsx$/.test(file.originalname);
-                const apps = yield appServiceInstance.uploadApps(services_1.AppsType.portofolio, file.buffer, isExcel);
-                if (apps && apps.length > 0) {
-                    this.setStatus(constant_1.HTTP_CODES.CREATED);
-                    return apps.map(node => node.info.get());
-                }
+    async uploadBuildingApp(req, file) {
+        try {
+            const isAdmin = await (0, authentication_1.checkIfItIsAdmin)(req);
+            if (!isAdmin)
+                throw new AuthError_1.AuthError(constant_1.SECURITY_MESSAGES.UNAUTHORIZED);
+            if (!file) {
                 this.setStatus(constant_1.HTTP_CODES.BAD_REQUEST);
-                return { message: "oops, something went wrong, please check your input data" };
+                return { message: "No file uploaded" };
             }
-            catch (error) {
-                this.setStatus(error.code || constant_1.HTTP_CODES.INTERNAL_ERROR);
-                return { message: error.message };
-            }
-        });
-    }
-    uploadBuildingApp(req, file) {
-        return __awaiter(this, void 0, void 0, function* () {
-            try {
-                const isAdmin = yield (0, authentication_1.checkIfItIsAdmin)(req);
-                if (!isAdmin)
-                    throw new AuthError_1.AuthError(constant_1.SECURITY_MESSAGES.UNAUTHORIZED);
-                if (!file) {
-                    this.setStatus(constant_1.HTTP_CODES.BAD_REQUEST);
-                    return { message: "No file uploaded" };
-                }
-                if (file && !(/.*\.json$/.test(file.originalname) || /.*\.xlsx$/.test(file.originalname))) {
-                    this.setStatus(constant_1.HTTP_CODES.BAD_REQUEST);
-                    return { message: "The selected file must be a json or excel file" };
-                }
-                const isExcel = /.*\.xlsx$/.test(file.originalname);
-                const apps = yield appServiceInstance.uploadApps(services_1.AppsType.building, file.buffer, isExcel);
-                if (apps && apps.length > 0) {
-                    this.setStatus(constant_1.HTTP_CODES.CREATED);
-                    return apps.map(node => node.info.get());
-                }
+            if (file && !(/.*\.json$/.test(file.originalname) || /.*\.xlsx$/.test(file.originalname))) {
                 this.setStatus(constant_1.HTTP_CODES.BAD_REQUEST);
-                return { message: "oops, something went wrong, please check your input data" };
+                return { message: "The selected file must be a json or excel file" };
             }
-            catch (error) {
-                this.setStatus(error.code || constant_1.HTTP_CODES.INTERNAL_ERROR);
-                return { message: error.message };
+            const isExcel = /.*\.xlsx$/.test(file.originalname);
+            const apps = await appServiceInstance.uploadApps(services_1.AppsType.building, file.buffer, isExcel);
+            if (apps && apps.length > 0) {
+                this.setStatus(constant_1.HTTP_CODES.CREATED);
+                return apps.map(node => node.info.get());
             }
-        });
+            this.setStatus(constant_1.HTTP_CODES.BAD_REQUEST);
+            return { message: "oops, something went wrong, please check your input data" };
+        }
+        catch (error) {
+            this.setStatus(error.code || constant_1.HTTP_CODES.INTERNAL_ERROR);
+            return { message: error.message };
+        }
     }
     /////////////////////////////////////////////////////////
     //                      FAVORIS                        //
     /////////////////////////////////////////////////////////
-    addPortofolioAppToFavoris(request, portofolioId, data) {
-        return __awaiter(this, void 0, void 0, function* () {
-            try {
-                const tokenInfo = yield (0, authentication_1.checkAndGetTokenInfo)(request);
-                let profileId = tokenInfo.profile.profileId || tokenInfo.profile.userProfileBosConfigId;
-                let userName = tokenInfo.userInfo.userName;
-                const nodes = yield services_1.UserListService.getInstance().addFavoriteApp(userName, profileId, data.appIds, portofolioId);
-                this.setStatus(constant_1.HTTP_CODES.OK);
-                return nodes.map(node => node.info.get());
-            }
-            catch (error) {
-                this.setStatus(error.code || constant_1.HTTP_CODES.INTERNAL_ERROR);
-                return { message: error.message };
-            }
-        });
+    async addPortofolioAppToFavoris(request, portofolioId, data) {
+        try {
+            const tokenInfo = await (0, authentication_1.checkAndGetTokenInfo)(request);
+            let profileId = tokenInfo.profile.profileId || tokenInfo.profile.userProfileBosConfigId;
+            let userName = tokenInfo.userInfo.userName;
+            const nodes = await services_1.UserListService.getInstance().addAppToUserFavorite(userName, profileId, data.appIds, portofolioId);
+            this.setStatus(constant_1.HTTP_CODES.OK);
+            return nodes.map(node => node.info.get());
+        }
+        catch (error) {
+            this.setStatus(error.code || constant_1.HTTP_CODES.INTERNAL_ERROR);
+            return { message: error.message };
+        }
     }
-    addBuildingAppToFavoris(request, portofolioId, bosId, data) {
-        return __awaiter(this, void 0, void 0, function* () {
-            try {
-                const tokenInfo = yield (0, authentication_1.checkAndGetTokenInfo)(request);
-                let profileId = tokenInfo.profile.profileId || tokenInfo.profile.userProfileBosConfigId;
-                let userName = tokenInfo.userInfo.userName;
-                const nodes = yield services_1.UserListService.getInstance().addFavoriteApp(userName, profileId, data.appIds, portofolioId, bosId);
-                this.setStatus(constant_1.HTTP_CODES.OK);
-                return nodes.map(node => node.info.get());
-            }
-            catch (error) {
-                this.setStatus(error.code || constant_1.HTTP_CODES.INTERNAL_ERROR);
-                return { message: error.message };
-            }
-        });
+    async addBuildingAppToFavoris(request, portofolioId, bosId, data) {
+        try {
+            const tokenInfo = await (0, authentication_1.checkAndGetTokenInfo)(request);
+            let profileId = tokenInfo.profile.profileId || tokenInfo.profile.userProfileBosConfigId;
+            let userName = tokenInfo.userInfo.userName;
+            const nodes = await services_1.UserListService.getInstance().addAppToUserFavorite(userName, profileId, data.appIds, portofolioId, bosId);
+            this.setStatus(constant_1.HTTP_CODES.OK);
+            return nodes.map(node => node.info.get());
+        }
+        catch (error) {
+            this.setStatus(error.code || constant_1.HTTP_CODES.INTERNAL_ERROR);
+            return { message: error.message };
+        }
     }
-    removePortofolioAppFromFavoris(request, portofolioId, data) {
-        return __awaiter(this, void 0, void 0, function* () {
-            try {
-                const tokenInfo = yield (0, authentication_1.checkAndGetTokenInfo)(request);
-                let profileId = tokenInfo.profile.profileId || tokenInfo.profile.userProfileBosConfigId;
-                let userName = tokenInfo.userInfo.userName;
-                const nodes = yield services_1.UserListService.getInstance().removeFavoriteApp(userName, profileId, data.appIds, portofolioId);
-                this.setStatus(constant_1.HTTP_CODES.OK);
-                return nodes.map(node => node.info.get());
-            }
-            catch (error) {
-                this.setStatus(error.code || constant_1.HTTP_CODES.INTERNAL_ERROR);
-                return { message: error.message };
-            }
-        });
+    async removePortofolioAppFromFavoris(request, portofolioId, data) {
+        try {
+            const tokenInfo = await (0, authentication_1.checkAndGetTokenInfo)(request);
+            let profileId = tokenInfo.profile.profileId || tokenInfo.profile.userProfileBosConfigId;
+            let userName = tokenInfo.userInfo.userName;
+            const nodes = await services_1.UserListService.getInstance().removeFavoriteApp(userName, profileId, data.appIds, portofolioId);
+            this.setStatus(constant_1.HTTP_CODES.OK);
+            return nodes.map(node => node.info.get());
+        }
+        catch (error) {
+            this.setStatus(error.code || constant_1.HTTP_CODES.INTERNAL_ERROR);
+            return { message: error.message };
+        }
     }
-    removeBuildingAppFromFavoris(request, portofolioId, bosId, data) {
-        return __awaiter(this, void 0, void 0, function* () {
-            try {
-                const tokenInfo = yield (0, authentication_1.checkAndGetTokenInfo)(request);
-                let profileId = tokenInfo.profile.profileId || tokenInfo.profile.userProfileBosConfigId;
-                let userName = tokenInfo.userInfo.userName;
-                const nodes = yield services_1.UserListService.getInstance().removeFavoriteApp(userName, profileId, data.appIds, portofolioId, bosId);
-                this.setStatus(constant_1.HTTP_CODES.OK);
-                return nodes.map(node => node.info.get());
-            }
-            catch (error) {
-                this.setStatus(error.code || constant_1.HTTP_CODES.INTERNAL_ERROR);
-                return { message: error.message };
-            }
-        });
+    async removeBuildingAppFromFavoris(request, portofolioId, bosId, data) {
+        try {
+            const tokenInfo = await (0, authentication_1.checkAndGetTokenInfo)(request);
+            let profileId = tokenInfo.profile.profileId || tokenInfo.profile.userProfileBosConfigId;
+            let userName = tokenInfo.userInfo.userName;
+            const nodes = await services_1.UserListService.getInstance().removeFavoriteApp(userName, profileId, data.appIds, portofolioId, bosId);
+            this.setStatus(constant_1.HTTP_CODES.OK);
+            return nodes.map(node => node.info.get());
+        }
+        catch (error) {
+            this.setStatus(error.code || constant_1.HTTP_CODES.INTERNAL_ERROR);
+            return { message: error.message };
+        }
     }
-    getPortofolioFavoriteApps(request, portofolioId) {
-        return __awaiter(this, void 0, void 0, function* () {
-            try {
-                const tokenInfo = yield (0, authentication_1.checkAndGetTokenInfo)(request);
-                let userName = tokenInfo.userInfo.userName;
-                const nodes = yield services_1.UserListService.getInstance().getFavoriteApps(userName, portofolioId);
-                this.setStatus(constant_1.HTTP_CODES.OK);
-                return nodes.map(node => node.info.get());
-            }
-            catch (error) {
-                this.setStatus(error.code || constant_1.HTTP_CODES.INTERNAL_ERROR);
-                return { message: error.message };
-            }
-        });
+    async getPortofolioFavoriteApps(request, portofolioId) {
+        try {
+            const tokenInfo = await (0, authentication_1.checkAndGetTokenInfo)(request);
+            let userName = tokenInfo.userInfo.userName;
+            const nodes = await services_1.UserListService.getInstance().getFavoriteApps(userName, portofolioId);
+            this.setStatus(constant_1.HTTP_CODES.OK);
+            return nodes.map(node => node.info.get());
+        }
+        catch (error) {
+            this.setStatus(error.code || constant_1.HTTP_CODES.INTERNAL_ERROR);
+            return { message: error.message };
+        }
     }
-    getBuildingFavoriteApps(request, portofolioId, bosId) {
-        return __awaiter(this, void 0, void 0, function* () {
-            try {
-                const tokenInfo = yield (0, authentication_1.checkAndGetTokenInfo)(request);
-                let userName = tokenInfo.userInfo.userName;
-                const nodes = yield services_1.UserListService.getInstance().getFavoriteApps(userName, portofolioId, bosId);
-                this.setStatus(constant_1.HTTP_CODES.OK);
-                return nodes.map(node => node.info.get());
-            }
-            catch (error) {
-                this.setStatus(error.code || constant_1.HTTP_CODES.INTERNAL_ERROR);
-                return { message: error.message };
-            }
-        });
+    async getBuildingFavoriteApps(request, portofolioId, bosId) {
+        try {
+            const tokenInfo = await (0, authentication_1.checkAndGetTokenInfo)(request);
+            let userName = tokenInfo.userInfo.userName;
+            const nodes = await services_1.UserListService.getInstance().getFavoriteApps(userName, portofolioId, bosId);
+            this.setStatus(constant_1.HTTP_CODES.OK);
+            return nodes.map(node => node.info.get());
+        }
+        catch (error) {
+            this.setStatus(error.code || constant_1.HTTP_CODES.INTERNAL_ERROR);
+            return { message: error.message };
+        }
     }
 };
 exports.AppsController = AppsController;

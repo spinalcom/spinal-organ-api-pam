@@ -26,10 +26,11 @@ import { HTTP_CODES, SECURITY_MESSAGES, SECURITY_NAME } from "../constant";
 import { IBosAuth, IBosData, IPortofolioData, IProfile, IProfileData, IProfileEdit } from "../interfaces";
 import { UserProfileService } from "../services";
 import { Route, Tags, Controller, Post, Get, Put, Delete, Body, Path, Security, Request } from "tsoa";
-import { _formatProfile, _getNodeListInfo, _formatProfileKeys, _formatAuthorizationData, _formatPortofolioAuthRes, _formatBosAuthRes } from '../utils/profileUtils'
+import { _formatProfile, _getNodeListInfo, _formatProfileKeys, _formatPortofolioAuthRes, _formatBosAuthRes } from '../utils/profileUtils'
 import { AuthError } from '../security/AuthError';
 import { checkIfItIsAdmin, getProfileId } from '../security/authentication';
 import { AdminProfileService } from '../services/adminProfile.service';
+
 const serviceInstance = UserProfileService.getInstance();
 
 @Route("/api/v1/pam/user_profile")
@@ -52,7 +53,7 @@ export class UserProfileController extends Controller {
                 return { message: "The profile name is required" };
             }
 
-            const profile = await serviceInstance.createUserProfile(data);
+            const profile = await serviceInstance.createProfile(data);
             this.setStatus(HTTP_CODES.CREATED)
             return _formatProfile(profile);
 
@@ -71,7 +72,7 @@ export class UserProfileController extends Controller {
 
             if (!isAdmin && profileId !== id) throw new AuthError(SECURITY_MESSAGES.UNAUTHORIZED);
 
-            const data = await serviceInstance.getUserProfile(id);
+            const data = await serviceInstance.getProfileWithAuthorizedPortofolio(id);
             if (data) {
                 this.setStatus(HTTP_CODES.OK)
                 return _formatProfile(data);
@@ -92,7 +93,7 @@ export class UserProfileController extends Controller {
             const isAdmin = await checkIfItIsAdmin(req);
             if (!isAdmin) throw new AuthError(SECURITY_MESSAGES.UNAUTHORIZED);
 
-            const nodes = await serviceInstance.getAllUserProfile() || [];
+            const nodes = await serviceInstance.getAllProfilesWithAuthorizedPortfolios() || [];
             this.setStatus(HTTP_CODES.OK);
             return nodes.map(el => _formatProfile(el));
         } catch (error) {
@@ -108,7 +109,7 @@ export class UserProfileController extends Controller {
             const isAdmin = await checkIfItIsAdmin(req);
             if (!isAdmin) throw new AuthError(SECURITY_MESSAGES.UNAUTHORIZED);
 
-            const node = await serviceInstance.updateUserProfile(id, data);
+            const node = await serviceInstance.updateProfile(id, data);
             if (node) {
                 this.setStatus(HTTP_CODES.OK);
                 return _formatProfile(node);
@@ -131,7 +132,7 @@ export class UserProfileController extends Controller {
             if (!isAdmin) throw new AuthError(SECURITY_MESSAGES.UNAUTHORIZED);
 
 
-            await serviceInstance.deleteUserProfile(id);
+            await serviceInstance.deleteProfile(id);
             this.setStatus(HTTP_CODES.OK);
             return { message: "user profile deleted" };
 
@@ -175,7 +176,7 @@ export class UserProfileController extends Controller {
             const isAdmin = await checkIfItIsAdmin(req);
             if (!isAdmin) throw new AuthError(SECURITY_MESSAGES.UNAUTHORIZED);
 
-            const nodes = await serviceInstance.authorizeToAccessPortofolioApp(profileId, data);
+            const nodes = await serviceInstance.authorizeProfileToAccessPortofolioApp(profileId, data);
             if (nodes) {
                 this.setStatus(HTTP_CODES.OK)
                 return nodes.map(value => _formatPortofolioAuthRes(value));
@@ -220,7 +221,7 @@ export class UserProfileController extends Controller {
             const isAdmin = await checkIfItIsAdmin(req);
             if (!isAdmin) throw new AuthError(SECURITY_MESSAGES.UNAUTHORIZED);
 
-            const nodes = await serviceInstance.unauthorizeToAccessPortofolioApp(profileId, data);
+            const nodes = await serviceInstance.unauthorizeProfileToAccessPortofolioApp(profileId, data);
             if (nodes) {
                 this.setStatus(HTTP_CODES.OK);
                 return nodes.reduce((liste: any[], item) => {
@@ -274,7 +275,7 @@ export class UserProfileController extends Controller {
             const isAdmin = await checkIfItIsAdmin(req);
             if (!isAdmin) throw new AuthError(SECURITY_MESSAGES.UNAUTHORIZED);
 
-            const nodes = await serviceInstance.authorizeToAccessBosApp(profileId, portofolioId, data);
+            const nodes = await serviceInstance.authorizeProfileToAccessBosApp(profileId, portofolioId, data);
             if (nodes) {
                 this.setStatus(HTTP_CODES.OK)
                 return nodes.map(node => _formatBosAuthRes(node));
@@ -320,7 +321,7 @@ export class UserProfileController extends Controller {
             const isAdmin = await checkIfItIsAdmin(req);
             if (!isAdmin) throw new AuthError(SECURITY_MESSAGES.UNAUTHORIZED);
 
-            const nodes = await serviceInstance.unauthorizeToAccessBosApp(profileId, portofolioId, data);
+            const nodes = await serviceInstance.unauthorizeProfileToAccessBosApp(profileId, portofolioId, data);
             if (nodes) {
                 this.setStatus(HTTP_CODES.OK)
                 return nodes.reduce((liste: any[], item) => {

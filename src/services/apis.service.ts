@@ -23,52 +23,88 @@
  */
 
 import { API_ROUTES_CONTEXT_NAME, API_ROUTES_CONTEXT_TYPE, API_RELATION_NAME, API_ROUTE_TYPE, BUILDING_API_GROUP_NAME, BUILDING_API_GROUP_TYPE, CONTEXT_TO_API_ROUTE_GROUP_RELATION_NAME, PORTOFOLIO_API_GROUP_NAME, PORTOFOLIO_API_GROUP_TYPE, PTR_LST_TYPE } from "../constant";
-import { SpinalContext, SpinalGraphService, SpinalNode } from "spinal-env-viewer-graph-service";
-import { configServiceInstance } from "./configFile.service";
+import { SpinalContext, SpinalGraph, SpinalGraphService, SpinalNode } from "spinal-env-viewer-graph-service";
 import { IApiRoute, ISwaggerFile, ISwaggerPath, ISwaggerPathData } from "../interfaces";
-import { removeNodeReferences } from "../utils/utils";
-import { AdminProfileService } from "./adminProfile.service";
+import { removeNodeReferences } from "../utils/authorizationUtils";
 
+
+/**
+ * Service for managing API routes in the SpinalCom system.
+ * Handles CRUD operations for API routes, Swagger file uploads, and context/group management.
+ * 
+ * The `parentType` parameter can be either `BUILDING_API_GROUP_TYPE` ("BuildingApis") or `PORTOFOLIO_API_GROUP_TYPE` ("PortofolioApis").
+ */
 export class APIService {
     private static instance: APIService;
     public context: SpinalContext;
 
+    // Private constructor for singleton pattern
     private constructor() { }
 
+    /**
+     * Returns the singleton instance of APIService.
+     */
     public static getInstance(): APIService {
         if (!this.instance) this.instance = new APIService();
-
         return this.instance;
     }
 
-    public async init(): Promise<SpinalContext> {
-        this.context = await configServiceInstance.getContext(API_ROUTES_CONTEXT_NAME);
-        if (!this.context) this.context = await configServiceInstance.addContext(API_ROUTES_CONTEXT_NAME, API_ROUTES_CONTEXT_TYPE);
+    /**
+     * Initializes the API routes context in the given graph.
+     * Creates the context if it does not exist.
+     * @param graph SpinalGraph instance
+     */
+    public async init(graph: SpinalGraph): Promise<SpinalContext> {
+        this.context = await graph.getContext(API_ROUTES_CONTEXT_NAME);
+        if (!this.context) {
+            const spinalContext = new SpinalContext(API_ROUTES_CONTEXT_NAME, API_ROUTES_CONTEXT_TYPE);
+            this.context = await graph.addContext(spinalContext);
+        }
         return this.context;
     }
 
-    public async createApiRoute(routeInfo: IApiRoute, parentType: string): Promise<SpinalNode> {
-        const apiExist = await this.getApiRouteByRoute(routeInfo, parentType);
-        if (apiExist) return apiExist;
-        delete routeInfo.id;
-        routeInfo.type = API_ROUTE_TYPE;
-        routeInfo.name = routeInfo.route;
-        const parent = await this._getOrGetRoutesGroup(parentType);
-        const routeId = SpinalGraphService.createNode(routeInfo, undefined);
-        const node = SpinalGraphService.getRealNode(routeId);
-        return parent.addChildInContext(node, API_RELATION_NAME, PTR_LST_TYPE, this.context);
+    /**
+     * Creates a new API route node under the specified group type ("BuildingApis" or "PortofolioApis").
+     * If the route already exists, returns the existing node.
+     * @param routeInfo Route information
+     * @param routeGroupType  group type ("BuildingApis" or "PortofolioApis")
+     */
+    public async createApiRoute(routeInfo: IApiRoute, routeGroupType: string): Promise<SpinalNode> {
+        const apiAlreadyExist = await this.getApiRouteByRoute(routeInfo, routeGroupType);
+        if (apiAlreadyExist) return apiAlreadyExist;
+
+        const routeGroup = await this._getOrCreateRoutesGroup(routeGroupType);
+        const { id, ...routeInfoWithoutId } = routeInfo; // Remove id from routeInfo
+
+        const routeInfoFormatted = Object.assign({}, routeInfoWithoutId, { type: API_ROUTE_TYPE, name: routeInfo.route });
+        const routeNode = new SpinalNode(routeInfoFormatted.name, routeInfoFormatted.type);
+
+        for (const key in routeInfoFormatted) {
+            if (Object.prototype.hasOwnProperty.call(routeInfoFormatted, key)) {
+                const element = routeInfoFormatted[key];
+                routeNode.info.mod_attr(key, element);
+            }
+        }
+        // routeNode.mod_attr("info", routeInfoFormatted);
+
+        return routeGroup.addChildInContext(routeNode, API_RELATION_NAME, PTR_LST_TYPE, this.context);
     }
 
-    public async updateApiRoute(routeId: string, newValue: IApiRoute, parentType) {
-        delete newValue.id;
-        delete newValue.type;
+    /**
+     * Updates an existing API route node with new values.
+     * @param routeId node Id of the route node
+     * @param newValue New route data
+     * @param routeGroupType  group type ("BuildingApis" or "PortofolioApis")
+     */
+    public async updateApiRoute(routeId: string, routeNewValue: IApiRoute, routeGroupType: string): Promise<SpinalNode> {
+        const { id, type, ...propertiesToUpdate } = routeNewValue; // Remove id and type from properties to update
 
-        const route = await this.getApiRouteById(routeId, parentType);
+        const route = await this.getApiRouteById(routeId, routeGroupType);
         if (!route) throw new Error(`no api route Found for ${routeId}`);
 
-        for (const key in newValue) {
-            if (Object.prototype.hasOwnProperty.call(newValue, key) && route.info[key]) {
-                const element = newValue[key];
+        for (const key in propertiesToUpdate) {
+            if (Object.prototype.hasOwnProperty.call(propertiesToUpdate, key) && route.info[key]) {
+                const element = propertiesToUpdate[key];
                 route.info[key].set(element);
             }
         }
@@ -76,56 +112,95 @@ export class APIService {
         return route;
     }
 
-    public async getApiRouteById(routeId: string, parentType: string): Promise<void | SpinalNode> {
-        // const node = SpinalGraphService.getRealNode(routeId);
-        // if (node) return node;
 
-        const parent = await this._getOrGetRoutesGroup(parentType);
+    /**
+     * Retrieves an API route node by its ID and group type.
+     * @param routeId Route node ID
+     * @param routeGroupType group type ("BuildingApis" or "PortofolioApis")
+     */
+    public async getApiRouteById(routeId: string, routeGroupType: string): Promise<void | SpinalNode> {
 
-        const children = await parent.getChildrenInContext(this.context);
-        return children.find(el => el.getId().get() === routeId);
+        const routeGroup = await this._getOrCreateRoutesGroup(routeGroupType);
+
+        const routes = await routeGroup.getChildrenInContext(this.context);
+        return routes.find(el => el.getId().get() === routeId);
     }
 
-    public async getApiRouteByRoute(apiRoute: IApiRoute, parentType: string): Promise<void | SpinalNode> {
-        const parent = await this._getOrGetRoutesGroup(parentType);
+    /**
+     * Retrieves an API route node by its route and method.
+     * @param apiRoute Route information
+     * @param routeGroupType Parent group type ("BuildingApis" or "PortofolioApis")
+     */
+    public async getApiRouteByRoute(apiRoute: IApiRoute, routeGroupType: string): Promise<void | SpinalNode> {
+        const routeGroup = await this._getOrCreateRoutesGroup(routeGroupType);
+
+        // Remove query parameters for matching
         if (apiRoute.route.includes("?")) apiRoute.route = apiRoute.route.substring(0, apiRoute.route.indexOf('?'));
 
-        const children = await parent.getChildrenInContext(this.context);
-        return children.find(el => {
-            const { route, method } = el.info.get();
-            if (route && method && method.toLowerCase() === apiRoute.method.toLowerCase()) {
-                const routeFormatted = this._formatRoute(route);
-                // return routeFormatted.toLowerCase() === apiRoute.route.toLowerCase() || apiRoute.route.match(routeFormatted);
+        const routesInGroup = await routeGroup.getChildrenInContext(this.context);
+
+        return routesInGroup.find(routeNode => {
+            const { route, method } = routeNode.info.get();
+            if (route && method && method.toLowerCase() === apiRoute.method.toLowerCase()) { // Check if method matches
+                // Format the route to a regular expression for matching
+                const routeFormatted = this._formatRouteAsRegexp(route);
                 return apiRoute.route.match(routeFormatted);
             }
+
             return false;
         });
     }
 
-    public async getAllApiRoute(parentType: string): Promise<SpinalNode[]> {
-        const parent = await this._getOrGetRoutesGroup(parentType);
-        return parent.getChildrenInContext(this.context);
+    /**
+     * Retrieves all API route nodes under the specified parent type group.
+     * @param routeGroupType group type ("BuildingApis" or "PortofolioApis")
+     */
+    public async getAllApiRoute(routeGroupType: string): Promise<SpinalNode[]> {
+        const routeGroup = await this._getOrCreateRoutesGroup(routeGroupType);
+        return routeGroup.getChildrenInContext(this.context);
     }
 
-    public async deleteApiRoute(routeId: string, parentType): Promise<string> {
-        const route = await this.getApiRouteById(routeId, parentType);
+    /**
+     * Deletes an API route node by its ID and group type.
+     * @param routeId Route node ID
+     * @param routeGroupType group type ("BuildingApis" or "PortofolioApis")
+     */
+    public async deleteApiRoute(routeId: string, routeGroupType: string): Promise<string> {
+        const route = await this.getApiRouteById(routeId, routeGroupType);
         if (!route) throw new Error(`no api route Found for ${routeId}`);
-        await removeNodeReferences(route)
+
+        await removeNodeReferences(route);
         await route.removeFromGraph();
         return routeId;
     }
 
-    public async uploadSwaggerFile(buffer: Buffer, parentType): Promise<any[]> {
+    /**
+     * Uploads and parses a Swagger file, creating API route nodes for each route defined.
+     * @param buffer Swagger file buffer
+     * @param routeGroupType Parent group type ("BuildingApis" or "PortofolioApis")
+     */
+    public async createRoutesFromSwaggerFile(buffer: Buffer, routeGroupType): Promise<SpinalNode[]> {
         const swaggerData = await this._readBuffer(buffer);
         const routes = await this._formatSwaggerFile(swaggerData);
-        return routes.reduce(async (prom, route) => {
-            const list = await prom
-            try {
-                const r = await this.createApiRoute(route, parentType);
-                list.push(r);
-            } catch (error) { }
-            return list;
-        }, Promise.resolve([]))
+        if (!routes || routes.length === 0) throw new Error("No routes found in the Swagger file");
+
+        const promises = [];
+
+        for (const route of routes) {
+            promises.push(this.createApiRoute(route, routeGroupType));
+        }
+
+        // Use Promise.allSettled to handle all promises and return only fulfilled ones
+        return Promise.allSettled(promises).then((results) => {
+            return results.reduce((validItems, result) => {
+                if (result.status === "fulfilled" && result.value) {
+                    validItems.push(result.value);
+                }
+                return validItems;
+            }, [])
+        }).catch((err) => {
+            return Promise.reject(new Error(`Error creating routes from Swagger file: ${err.message}`));
+        });
 
     }
 
@@ -134,19 +209,26 @@ export class APIService {
     //                  PRIVATE                 //
     //////////////////////////////////////////////
 
-
-    private async _getOrGetRoutesGroup(type: string) {
+    /**
+     * Gets or creates the API routes group node for the given type.
+     * @param type Group type ("BuildingApis" or "PortofolioApis")
+     */
+    private async _getOrCreateRoutesGroup(groupType: string) {
         const children = await this.context.getChildren([CONTEXT_TO_API_ROUTE_GROUP_RELATION_NAME]);
-        let found = children.find(el => el.getType().get() === type);
+        let groupFound = children.find(el => el.getType().get() === groupType);
 
-        if (found) return found;
+        if (groupFound) return groupFound;
 
-        const name = type === BUILDING_API_GROUP_TYPE ? BUILDING_API_GROUP_NAME : PORTOFOLIO_API_GROUP_NAME;
+        const name = groupType === BUILDING_API_GROUP_TYPE ? BUILDING_API_GROUP_NAME : PORTOFOLIO_API_GROUP_NAME;
 
-        let node = new SpinalNode(name, type);
+        let node = new SpinalNode(name, groupType);
         return this.context.addChildInContext(node, CONTEXT_TO_API_ROUTE_GROUP_RELATION_NAME, PTR_LST_TYPE, this.context);
     }
 
+    /**
+     * Formats a Swagger file into an array of IApiRoute objects.
+     * @param swaggerFile Swagger file object
+     */
     private _formatSwaggerFile(swaggerFile: ISwaggerFile): Promise<IApiRoute[]> {
         try {
             const paths = swaggerFile.paths || [];
@@ -154,15 +236,14 @@ export class APIService {
 
             for (const key in paths) {
                 if (Object.prototype.hasOwnProperty.call(paths, key)) {
-                    const method = this._getMethod(paths[key]);
-                    let item = {
+                    const method = this._getRequestMethod(paths[key]);
+
+                    data.push({
                         route: key,
                         method: method && method.toUpperCase(),
-                        tag: this._getTags(paths[key][method]),
-                        scope: this._getScope(paths[key][method])
-                    };
-
-                    data.push(item);
+                        tag: this._getRequestTags(paths[key][method]),
+                        scope: this._getRequestScope(paths[key][method])
+                    })
                 }
             }
 
@@ -172,16 +253,28 @@ export class APIService {
         }
     }
 
-    private _getMethod(path: ISwaggerPath): string {
+    /**
+     * Gets the HTTP method from a Swagger path object.
+     * @param path Swagger path object
+     */
+    private _getRequestMethod(path: ISwaggerPath): string {
         const keys = Object.keys(path);
         return keys.length > 0 && keys[0];
     }
 
-    private _getTags(item: ISwaggerPathData): string {
+    /**
+     * Gets the first tag from a Swagger path data object.
+     * @param item Swagger path data
+     */
+    private _getRequestTags(item: ISwaggerPathData): string {
         return (item.tags && item.tags[0]) || "";
     }
 
-    private _getScope(item: ISwaggerPathData): string {
+    /**
+     * Gets the OAuth scope from a Swagger path data object.
+     * @param item Swagger path data
+     */
+    private _getRequestScope(item: ISwaggerPathData): string {
         return (
             (item.security &&
                 item.security[0] &&
@@ -190,16 +283,22 @@ export class APIService {
         );
     }
 
+    /**
+     * Reads and parses a buffer as a Swagger file object.
+     * @param buffer Buffer containing Swagger JSON
+     */
     private _readBuffer(buffer: Buffer): Promise<ISwaggerFile> {
         return JSON.parse(buffer.toString())
     }
 
-
-    private _formatRoute(route: string): RegExp {
+    /**
+     * Formats a route string into a regular expression for matching.
+     * @param route Route string
+     */
+    private _formatRouteAsRegexp(route: string): RegExp {
         if (route.includes("?")) route = route.substring(0, route.indexOf('?'));
 
         const routeFormatted = route.replace(/\{(.*?)\}/g, (el) => '(.*?)')
         return new RegExp(`^${routeFormatted}$`);
     }
-
 }

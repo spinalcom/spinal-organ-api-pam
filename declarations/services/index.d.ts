@@ -1,4 +1,4 @@
-export * from './configFile.service';
+export * from '../utils/servervicesInitializer';
 export * from './apis.service';
 export * from './apps.service';
 export * from './appProfile.service';
@@ -10,7 +10,7 @@ export * from './digitalTwin.service';
 export * from './authentification.service';
 export * from './portofolio.service';
 export * from './userList.services';
-export * from './appConnectedList.services';
+export * from './appConnectedList.service';
 export * from './token.service';
 export * from './log.service';
 export * from './webSocketLogs.service';

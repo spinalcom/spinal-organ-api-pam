@@ -1,16 +1,16 @@
 import * as express from "express";
 import { HTTP_CODES } from "../constant";
 import { Controller } from "tsoa";
-import { IAdmin, IAdminCredential, IAppCredential, IApplicationToken, IOAuth2Credential, IPamCredential, IUserCredential, IUserToken } from "../interfaces";
+import { IAdmin, IAdminCredential, IApplicationToken, IPamCredential, IUserCredential, IUserToken } from "../interfaces";
 export declare class AuthController extends Controller {
     constructor();
-    authenticate(credential: IUserCredential | IAppCredential | IOAuth2Credential): Promise<string | IApplicationToken | IUserToken | {
+    authenticate(credential: IUserCredential): Promise<string | IUserToken | {
         message: string;
     }>;
-    registerToAdmin(req: express.Request, data: IAdmin): Promise<IPamCredential | {
+    registerPamInAuthPlatform(req: express.Request, data: IAdmin): Promise<IPamCredential | {
         message: string;
     }>;
-    updatePlatformTokenData(req: express.Request): Promise<{
+    updatePamTokenInAuthPlatform(req: express.Request): Promise<{
         token: string;
         code: number;
     } | {

@@ -11,15 +11,6 @@ var __metadata = (this && this.__metadata) || function (k, v) {
 var __param = (this && this.__param) || function (paramIndex, decorator) {
     return function (target, key) { decorator(target, key, paramIndex); }
 };
-var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
-    function adopt(value) { return value instanceof P ? value : new P(function (resolve) { resolve(value); }); }
-    return new (P || (P = Promise))(function (resolve, reject) {
-        function fulfilled(value) { try { step(generator.next(value)); } catch (e) { reject(e); } }
-        function rejected(value) { try { step(generator["throw"](value)); } catch (e) { reject(e); } }
-        function step(result) { result.done ? resolve(result.value) : adopt(result.value).then(fulfilled, rejected); }
-        step((generator = generator.apply(thisArg, _arguments || [])).next());
-    });
-};
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.WebsocketLogsController = void 0;
 /*
@@ -59,138 +50,126 @@ let WebsocketLogsController = class WebsocketLogsController extends tsoa_1.Contr
         super();
         this._websocketLogService = webSocketLogs_service_1.WebsocketLogsService.getInstance();
     }
-    getWebsocketState(req, buildingId) {
-        return __awaiter(this, void 0, void 0, function* () {
-            try {
-                const isAdmin = yield (0, authentication_1.checkIfItIsAdmin)(req);
-                if (!isAdmin)
-                    throw new AuthError_1.AuthError(constant_1.SECURITY_MESSAGES.UNAUTHORIZED);
-                const building = yield buildingInstance.getBuildingById(buildingId);
-                if (!building) {
-                    throw {
-                        code: constant_1.HTTP_CODES.NOT_FOUND,
-                        message: `No building found for ${buildingId}`,
-                    };
-                }
-                this.setStatus(constant_1.HTTP_CODES.OK);
-                return this._websocketLogService.getWebsocketState(building);
+    async getWebsocketState(req, buildingId) {
+        try {
+            const isAdmin = await (0, authentication_1.checkIfItIsAdmin)(req);
+            if (!isAdmin)
+                throw new AuthError_1.AuthError(constant_1.SECURITY_MESSAGES.UNAUTHORIZED);
+            const building = await buildingInstance.getBuildingById(buildingId);
+            if (!building) {
+                throw {
+                    code: constant_1.HTTP_CODES.NOT_FOUND,
+                    message: `No building found for ${buildingId}`,
+                };
             }
-            catch (error) {
-                this.setStatus(error.code || constant_1.HTTP_CODES.INTERNAL_ERROR);
-                return { message: error.message };
-            }
-        });
+            this.setStatus(constant_1.HTTP_CODES.OK);
+            return this._websocketLogService.getWebsocketState(building);
+        }
+        catch (error) {
+            this.setStatus(error.code || constant_1.HTTP_CODES.INTERNAL_ERROR);
+            return { message: error.message };
+        }
     }
-    getNbClientConnected(req, buildingId) {
-        return __awaiter(this, void 0, void 0, function* () {
-            try {
-                const isAdmin = yield (0, authentication_1.checkIfItIsAdmin)(req);
-                if (!isAdmin)
-                    throw new AuthError_1.AuthError(constant_1.SECURITY_MESSAGES.UNAUTHORIZED);
-                const building = yield buildingInstance.getBuildingById(buildingId);
-                if (!building) {
-                    throw {
-                        code: constant_1.HTTP_CODES.NOT_FOUND,
-                        message: `No building found for ${buildingId}`,
-                    };
-                }
-                this.setStatus(constant_1.HTTP_CODES.OK);
-                return this._websocketLogService.getClientConnected(buildingId);
+    async getNbClientConnected(req, buildingId) {
+        try {
+            const isAdmin = await (0, authentication_1.checkIfItIsAdmin)(req);
+            if (!isAdmin)
+                throw new AuthError_1.AuthError(constant_1.SECURITY_MESSAGES.UNAUTHORIZED);
+            const building = await buildingInstance.getBuildingById(buildingId);
+            if (!building) {
+                throw {
+                    code: constant_1.HTTP_CODES.NOT_FOUND,
+                    message: `No building found for ${buildingId}`,
+                };
             }
-            catch (error) {
-                this.setStatus(error.code || constant_1.HTTP_CODES.INTERNAL_ERROR);
-                return { message: error.message };
-            }
-        });
+            this.setStatus(constant_1.HTTP_CODES.OK);
+            return this._websocketLogService.getClientConnected(buildingId);
+        }
+        catch (error) {
+            this.setStatus(error.code || constant_1.HTTP_CODES.INTERNAL_ERROR);
+            return { message: error.message };
+        }
     }
-    readWebsocketLogs(req, buildingId, begin, end) {
-        return __awaiter(this, void 0, void 0, function* () {
-            try {
-                const isAdmin = yield (0, authentication_1.checkIfItIsAdmin)(req);
-                if (!isAdmin)
-                    throw new AuthError_1.AuthError(constant_1.SECURITY_MESSAGES.UNAUTHORIZED);
-                const building = yield buildingInstance.getBuildingById(buildingId);
-                if (!building) {
-                    throw {
-                        code: constant_1.HTTP_CODES.NOT_FOUND,
-                        message: `No building found for ${buildingId}`,
-                    };
-                }
-                this.setStatus(constant_1.HTTP_CODES.OK);
-                const t = yield this._websocketLogService.getFromIntervalTime(building, begin, end);
-                return t;
+    async readWebsocketLogs(req, buildingId, begin, end) {
+        try {
+            const isAdmin = await (0, authentication_1.checkIfItIsAdmin)(req);
+            if (!isAdmin)
+                throw new AuthError_1.AuthError(constant_1.SECURITY_MESSAGES.UNAUTHORIZED);
+            const building = await buildingInstance.getBuildingById(buildingId);
+            if (!building) {
+                throw {
+                    code: constant_1.HTTP_CODES.NOT_FOUND,
+                    message: `No building found for ${buildingId}`,
+                };
             }
-            catch (error) {
-                this.setStatus(error.code || constant_1.HTTP_CODES.INTERNAL_ERROR);
-                return { message: error.message };
-            }
-        });
+            this.setStatus(constant_1.HTTP_CODES.OK);
+            const t = await this._websocketLogService.getFromIntervalTime(building, begin, end);
+            return t;
+        }
+        catch (error) {
+            this.setStatus(error.code || constant_1.HTTP_CODES.INTERNAL_ERROR);
+            return { message: error.message };
+        }
     }
-    readCurrentWeekLogs(req, buildingId) {
-        return __awaiter(this, void 0, void 0, function* () {
-            try {
-                const isAdmin = yield (0, authentication_1.checkIfItIsAdmin)(req);
-                if (!isAdmin)
-                    throw new AuthError_1.AuthError(constant_1.SECURITY_MESSAGES.UNAUTHORIZED);
-                const building = yield buildingInstance.getBuildingById(buildingId);
-                if (!building) {
-                    throw {
-                        code: constant_1.HTTP_CODES.NOT_FOUND,
-                        message: `No building found for ${buildingId}`,
-                    };
-                }
-                const { end, start } = spinal_service_pubsub_logs_1.SpinalServiceLog.getInstance().getDateFromLastDays(7);
-                return this._websocketLogService.getFromIntervalTime(building, start, end);
+    async readCurrentWeekLogs(req, buildingId) {
+        try {
+            const isAdmin = await (0, authentication_1.checkIfItIsAdmin)(req);
+            if (!isAdmin)
+                throw new AuthError_1.AuthError(constant_1.SECURITY_MESSAGES.UNAUTHORIZED);
+            const building = await buildingInstance.getBuildingById(buildingId);
+            if (!building) {
+                throw {
+                    code: constant_1.HTTP_CODES.NOT_FOUND,
+                    message: `No building found for ${buildingId}`,
+                };
             }
-            catch (error) {
-                this.setStatus(error.code || constant_1.HTTP_CODES.INTERNAL_ERROR);
-                return { message: error.message };
-            }
-        });
+            const { end, start } = spinal_service_pubsub_logs_1.SpinalServiceLog.getInstance().getDateFromLastDays(7);
+            return this._websocketLogService.getFromIntervalTime(building, start, end);
+        }
+        catch (error) {
+            this.setStatus(error.code || constant_1.HTTP_CODES.INTERNAL_ERROR);
+            return { message: error.message };
+        }
     }
-    readCurrentYearLogs(req, buildingId) {
-        return __awaiter(this, void 0, void 0, function* () {
-            try {
-                const isAdmin = yield (0, authentication_1.checkIfItIsAdmin)(req);
-                if (!isAdmin)
-                    throw new AuthError_1.AuthError(constant_1.SECURITY_MESSAGES.UNAUTHORIZED);
-                const building = yield buildingInstance.getBuildingById(buildingId);
-                if (!building) {
-                    throw {
-                        code: constant_1.HTTP_CODES.NOT_FOUND,
-                        message: `No building found for ${buildingId}`,
-                    };
-                }
-                const { end, start } = spinal_service_pubsub_logs_1.SpinalServiceLog.getInstance().getDateFromLastDays(365);
-                return this._websocketLogService.getFromIntervalTime(building, start, end);
+    async readCurrentYearLogs(req, buildingId) {
+        try {
+            const isAdmin = await (0, authentication_1.checkIfItIsAdmin)(req);
+            if (!isAdmin)
+                throw new AuthError_1.AuthError(constant_1.SECURITY_MESSAGES.UNAUTHORIZED);
+            const building = await buildingInstance.getBuildingById(buildingId);
+            if (!building) {
+                throw {
+                    code: constant_1.HTTP_CODES.NOT_FOUND,
+                    message: `No building found for ${buildingId}`,
+                };
             }
-            catch (error) {
-                this.setStatus(error.code || constant_1.HTTP_CODES.INTERNAL_ERROR);
-                return { message: error.message };
-            }
-        });
+            const { end, start } = spinal_service_pubsub_logs_1.SpinalServiceLog.getInstance().getDateFromLastDays(365);
+            return this._websocketLogService.getFromIntervalTime(building, start, end);
+        }
+        catch (error) {
+            this.setStatus(error.code || constant_1.HTTP_CODES.INTERNAL_ERROR);
+            return { message: error.message };
+        }
     }
-    readLast24hLogs(req, buildingId) {
-        return __awaiter(this, void 0, void 0, function* () {
-            try {
-                const isAdmin = yield (0, authentication_1.checkIfItIsAdmin)(req);
-                if (!isAdmin)
-                    throw new AuthError_1.AuthError(constant_1.SECURITY_MESSAGES.UNAUTHORIZED);
-                const building = yield buildingInstance.getBuildingById(buildingId);
-                if (!building) {
-                    throw {
-                        code: constant_1.HTTP_CODES.NOT_FOUND,
-                        message: `No building found for ${buildingId}`,
-                    };
-                }
-                this.setStatus(constant_1.HTTP_CODES.OK);
-                return yield this._websocketLogService.getDataFromLast24Hours(building);
+    async readLast24hLogs(req, buildingId) {
+        try {
+            const isAdmin = await (0, authentication_1.checkIfItIsAdmin)(req);
+            if (!isAdmin)
+                throw new AuthError_1.AuthError(constant_1.SECURITY_MESSAGES.UNAUTHORIZED);
+            const building = await buildingInstance.getBuildingById(buildingId);
+            if (!building) {
+                throw {
+                    code: constant_1.HTTP_CODES.NOT_FOUND,
+                    message: `No building found for ${buildingId}`,
+                };
             }
-            catch (error) {
-                this.setStatus(error.code || constant_1.HTTP_CODES.INTERNAL_ERROR);
-                return { message: error.message };
-            }
-        });
+            this.setStatus(constant_1.HTTP_CODES.OK);
+            return await this._websocketLogService.getDataFromLast24Hours(building);
+        }
+        catch (error) {
+            this.setStatus(error.code || constant_1.HTTP_CODES.INTERNAL_ERROR);
+            return { message: error.message };
+        }
     }
 };
 exports.WebsocketLogsController = WebsocketLogsController;

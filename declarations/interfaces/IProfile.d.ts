@@ -3,16 +3,18 @@ export interface IProfile {
     name: string;
     authorize: IPortofolioAuth[];
 }
-export interface IPortofolioAuth {
-    portofolioId: string;
+export interface ItemsIds {
     appsIds?: string[];
     apisIds?: string[];
+    unauthorizeAppsIds?: string[];
+    unauthorizeApisIds?: string[];
+}
+export interface IPortofolioAuth extends ItemsIds {
+    portofolioId: string;
     building?: IBosAuth[];
 }
-export interface IBosAuth {
+export interface IBosAuth extends ItemsIds {
     buildingId: string;
-    appsIds?: string[];
-    apisIds?: string[];
 }
 export interface IProfileRes {
     node: SpinalNode;
@@ -29,21 +31,8 @@ export interface IBosAuthRes {
     apps?: SpinalNode[];
     apis?: SpinalNode[];
 }
-export interface IPortofolioAuthEdit {
-    portofolioId: string;
-    appsIds?: string[];
-    apisIds?: string[];
-    unauthorizeAppsIds?: string[];
-    unauthorizeApisIds?: string[];
-    building?: IBosAuthEdit[];
-}
-export interface IBosAuthEdit {
-    buildingId: string;
-    appsIds?: string[];
-    apisIds?: string[];
-    unauthorizeAppsIds?: string[];
-    unauthorizeApisIds?: string[];
-}
+export type IPortofolioAuthEdit = IPortofolioAuth;
+export type IBosAuthEdit = IBosAuth;
 export interface IProfileEdit {
     name?: string;
     authorize?: IPortofolioAuthEdit[];

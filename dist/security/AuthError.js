@@ -26,9 +26,12 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.AuthError = void 0;
 const constant_1 = require("../constant");
 class AuthError extends Error {
-    constructor(message) {
+    constructor(message, code) {
         super(message);
-        this.setCode(message);
+        if (code)
+            this.code = code;
+        else
+            this.setCode(message);
     }
     setCode(message) {
         switch (message) {
@@ -39,6 +42,8 @@ class AuthError extends Error {
             case constant_1.SECURITY_MESSAGES.NO_PROFILE_FOUND:
                 this.code = constant_1.HTTP_CODES.NOT_FOUND;
                 break;
+            default:
+                this.code = constant_1.HTTP_CODES.BAD_REQUEST;
         }
     }
 }

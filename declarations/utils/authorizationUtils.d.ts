@@ -1,0 +1,14 @@
+import { SpinalContext, SpinalNode } from "spinal-env-viewer-graph-service";
+export declare function getOriginalNodeFromReference(referenceNode: SpinalNode): Promise<SpinalNode>;
+export declare function getNodeReferences(originalNode: SpinalNode): Promise<SpinalNode[]>;
+export declare function removeNodeReferences(originalNode: SpinalNode): Promise<SpinalNode[]>;
+export declare function getNodeReferencesAsSpinalLst(originalNode: SpinalNode): Promise<SpinalNode[]>;
+export declare function getReferenceFromOriginalNode(node: SpinalNode, referenceId: string): Promise<SpinalNode | null>;
+export declare function referenceIsMatchingToNode(referenceNode: SpinalNode, originalNodeId: string): Promise<boolean>;
+export declare function findNodeReferenceInProfileTree(profileContext: SpinalContext, startNode: SpinalNode, originalNodeId: string): Promise<SpinalNode>;
+export declare function createNodeReference(originalNode: SpinalNode): Promise<SpinalNode>;
+export declare function removeReferenceNode(referenceNode: SpinalNode): Promise<SpinalNode>;
+export declare function removeReferenceFromOriginalNode(referenceNode: SpinalNode): Promise<SpinalNode>;
+export declare function removeRelationFromReference(parentNode: SpinalNode, childNode: SpinalNode, relationName: string, relationType: string): Promise<any[]>;
+export declare function _getAuthorizedPortofolioContext(profile: SpinalNode, createIfNotExist?: boolean): Promise<SpinalContext>;
+export declare function CleanReferenceTree(context: SpinalContext, startReferenceNode: SpinalNode): Promise<SpinalNode<any>[]>;

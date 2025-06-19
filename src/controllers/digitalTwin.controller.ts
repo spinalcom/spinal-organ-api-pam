@@ -52,7 +52,7 @@ export class DigitaltwinController extends Controller {
                 return { message: "The file name is mandatory" };
             }
 
-            const graph = await serviceInstance.createDigitalTwin(data.name, data.folderPath);
+            const graph = await serviceInstance.initDigitalTwin(data.name, data.folderPath);
             this.setStatus(HTTP_CODES.CREATED);
             return graph.getId().get();
         } catch (error) {

@@ -29,6 +29,7 @@ import { profileHasAccessToApi, getToken } from "./utils";
 import { AuthError } from "./AuthError";
 import { AdminProfileService } from "../services/adminProfile.service";
 import { SpinalNode } from "spinal-env-viewer-graph-service";
+import { IApplicationToken, IUserToken } from "../interfaces";
 
 
 export async function expressAuthentication(request: express.Request, securityName?: string, scopes?: string[]) {
@@ -55,7 +56,7 @@ export async function checkIfItIsAuthPlateform(request: express.Request): Promis
     const token = getToken(request);
     if (!token) return false;
 
-    const authAdmin = await AuthentificationService.getInstance().getAdminCredential();
+    const authAdmin = await AuthentificationService.getInstance().getAuthCredentials();
     return token === authAdmin.TokenAdminToPam;
 }
 
@@ -76,7 +77,9 @@ export async function getProfileNode(req: express.Request): Promise<SpinalNode> 
     const profileId = tokenInfo.profile.profileId || tokenInfo.profile.userProfileBosConfigId;
     const isApp = tokenInfo.profile.profileId || tokenInfo.profile.userProfileBosConfigId ? false : true;
 
-    return isApp ? AppProfileService.getInstance()._getAppProfileNode(profileId) : UserProfileService.getInstance()._getUserProfileNode(profileId);
+    const instance = isApp ? AppProfileService.getInstance() : UserProfileService.getInstance();
+
+    return instance.getProfileNode(profileId);
 }
 
 

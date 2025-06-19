@@ -22,27 +22,43 @@
  * with this file. If not, see
  * <http://resources.spinalcom.com/licenses.pdf>.
  */
-var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
-    function adopt(value) { return value instanceof P ? value : new P(function (resolve) { resolve(value); }); }
-    return new (P || (P = Promise))(function (resolve, reject) {
-        function fulfilled(value) { try { step(generator.next(value)); } catch (e) { reject(e); } }
-        function rejected(value) { try { step(generator["throw"](value)); } catch (e) { reject(e); } }
-        function step(result) { result.done ? resolve(result.value) : adopt(result.value).then(fulfilled, rejected); }
-        step((generator = generator.apply(thisArg, _arguments || [])).next());
-    });
-};
 Object.defineProperty(exports, "__esModule", { value: true });
 const path = require("path");
-require("dotenv").config({ path: path.resolve(__dirname, "../.env") });
 const spinal_core_connectorjs_type_1 = require("spinal-core-connectorjs_type");
-const configFile_service_1 = require("./services/configFile.service");
-const server_1 = require("./server");
+const servervicesInitializer_1 = require("./utils/servervicesInitializer");
+const express_1 = require("./express");
 const spinal_lib_organ_monitoring_1 = require("spinal-lib-organ-monitoring");
-const conn = spinal_core_connectorjs_type_1.spinalCore.connect(`${process.env.HUB_PROTOCOL}://${process.env.USER_ID}:${process.env.USER_MDP}@${process.env.HUB_HOST}:${process.env.HUB_PORT}/`);
-configFile_service_1.configServiceInstance.init(conn).then(() => __awaiter(void 0, void 0, void 0, function* () {
-    const { app } = yield (0, server_1.default)(conn);
-    yield spinal_lib_organ_monitoring_1.default.init(conn, process.env.ORGAN_NAME, "PAM_API", process.env.HUB_HOST, parseInt(process.env.HUB_PORT));
-})).catch((err) => {
+const initializeDatabase_1 = require("./utils/initializeDatabase");
+const constant_1 = require("./constant");
+const services_1 = require("./services");
+const adminApps_1 = require("./adminApps");
+require("dotenv").config({ path: path.resolve(__dirname, "../.env") });
+const organType = "PAM_API"; // The type of the organ, can be changed if needed
+const protocol = process.env.HUB_PROTOCOL;
+const hubHost = process.env.HUB_HOST;
+const hubPort = parseInt(process.env.HUB_PORT);
+const userId = process.env.USER_ID;
+const userPwd = process.env.USER_MDP;
+const config_directory_path = process.env.CONFIG_DIRECTORY_PATH || constant_1.CONFIG_DEFAULT_DIRECTORY_PATH;
+const configFileName = process.env.CONFIG_FILE_NAME || constant_1.CONFIG_DEFAULT_NAME;
+const express_server_port = process.env.SERVER_PORT || "2022";
+const express_server_protocol = process.env.SERVER_PROTOCOL || "http";
+const connectionUrl = `${protocol}://${userId}:${userPwd}@${hubHost}:${hubPort}/`;
+const hubSession = spinal_core_connectorjs_type_1.spinalCore.connect(connectionUrl); // Connect to the hub
+(0, initializeDatabase_1.initializeDatabase)(hubSession, config_directory_path, configFileName)
+    .then(async (graph) => {
+    await servervicesInitializer_1.default.getInstance().initAllService(graph); // Initialize services
+    console.log("All services initialized successfully.");
+    const digitalTwinServiceInstance = services_1.DigitalTwinService.getInstance();
+    digitalTwinServiceInstance.setConnectSession(hubSession); // Set the session for DigitalTwinService
+    await digitalTwinServiceInstance.initDigitalTwin("PAM DigitalTwin", constant_1.CONFIG_DEFAULT_DIRECTORY_PATH); // initialize the default Digital Twin
+    console.log("Default Digital Twin initialized successfully.");
+    await (0, adminApps_1.createDefaultAdminApps)(); // create administration apps
+    console.log("Default admin apps initialized successfully.");
+    await (0, express_1.default)(express_server_port, express_server_protocol); // launch express server
+    await spinal_lib_organ_monitoring_1.default.init(hubSession, process.env.ORGAN_NAME, organType, hubHost, hubPort); // initialize connector in monitoring plateform
+}).catch((err) => {
     console.error(err);
+    process.exit(1);
 });
 //# sourceMappingURL=index.js.map

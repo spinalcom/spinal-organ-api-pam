@@ -22,17 +22,8 @@
  * with this file. If not, see
  * <http://resources.spinalcom.com/licenses.pdf>.
  */
-var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
-    function adopt(value) { return value instanceof P ? value : new P(function (resolve) { resolve(value); }); }
-    return new (P || (P = Promise))(function (resolve, reject) {
-        function fulfilled(value) { try { step(generator.next(value)); } catch (e) { reject(e); } }
-        function rejected(value) { try { step(generator["throw"](value)); } catch (e) { reject(e); } }
-        function step(result) { result.done ? resolve(result.value) : adopt(result.value).then(fulfilled, rejected); }
-        step((generator = generator.apply(thisArg, _arguments || [])).next());
-    });
-};
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.createDefaultAdminApps = void 0;
+exports.createDefaultAdminApps = createDefaultAdminApps;
 const services_1 = require("./services");
 const ADMIN_APPS = [
     {
@@ -100,12 +91,11 @@ const ADMIN_APPS = [
     },
 ];
 function createDefaultAdminApps() {
-    return ADMIN_APPS.reduce((prom, app) => __awaiter(this, void 0, void 0, function* () {
-        const liste = yield prom;
-        const node = yield services_1.AppService.getInstance().createAdminApp(app);
+    return ADMIN_APPS.reduce(async (prom, app) => {
+        const liste = await prom;
+        const node = await services_1.AppService.getInstance().createAdminApp(app);
         liste.push(node);
         return liste;
-    }), Promise.resolve([]));
+    }, Promise.resolve([]));
 }
-exports.createDefaultAdminApps = createDefaultAdminApps;
 //# sourceMappingURL=adminApps.js.map

@@ -22,19 +22,9 @@
  * with this file. If not, see
  * <http://resources.spinalcom.com/licenses.pdf>.
  */
-var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
-    function adopt(value) { return value instanceof P ? value : new P(function (resolve) { resolve(value); }); }
-    return new (P || (P = Promise))(function (resolve, reject) {
-        function fulfilled(value) { try { step(generator.next(value)); } catch (e) { reject(e); } }
-        function rejected(value) { try { step(generator["throw"](value)); } catch (e) { reject(e); } }
-        function step(result) { result.done ? resolve(result.value) : adopt(result.value).then(fulfilled, rejected); }
-        step((generator = generator.apply(thisArg, _arguments || [])).next());
-    });
-};
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.DigitalTwinService = void 0;
 const spinal_env_viewer_graph_service_1 = require("spinal-env-viewer-graph-service");
-const configFile_service_1 = require("./configFile.service");
 const spinal_core_connectorjs_type_1 = require("spinal-core-connectorjs_type");
 const path = require("path");
 const constant_1 = require("../constant");
@@ -48,32 +38,37 @@ class DigitalTwinService {
             this.instance = new DigitalTwinService();
         return this.instance;
     }
-    // public async init(): Promise<SpinalContext> {
-    //     this.context = await PortofolioService.getInstance().
-    //     // if (!this.context) this.context = await configServiceInstance.addContext(DIGITALTWIN_CONTEXT_NAME, DIGITALTWIN_CONTEXT_TYPE);
-    //     // await this.getActualDigitalTwin();
-    //     return this.context;
-    // }
-    createDigitalTwin(name, directoryPath = "/__users__/admin/PAM DigitalTwin") {
-        return this._getOrCreateDigitalTwin(name, directoryPath).then((graph) => __awaiter(this, void 0, void 0, function* () {
+    /**
+     * Set session to connect to the digital twin.
+     * @param {spinal.FileSystem} session
+     * @memberof DigitalTwinService
+     */
+    setConnectSession(session) {
+        this.connectSession = session;
+    }
+    /**
+     * Creates or retrieves a Digital Twin graph.
+     * If the graph does not exist, it will be created in the specified directory.
+     * Also ensures the Portofolio context is added to the graph if not already present.
+     *
+     * @param {string} name - The name of the digital twin.
+     * @param {string} [directoryPath="/__users__/admin/PAM DigitalTwin"] - The directory path where the digital twin is stored.
+     * @returns {Promise<SpinalGraph>} - The created or retrieved SpinalGraph instance.
+     */
+    initDigitalTwin(name, directoryPath = "/__users__/admin/PAM DigitalTwin") {
+        return this._getOrCreateDigitalTwin(name, directoryPath).then(async (graph) => {
             const portofolioContext = portofolio_service_1.PortofolioService.getInstance().context;
-            const _temp = yield graph.getContext(portofolioContext.getName().get());
-            if (!_temp)
-                yield graph.addContext(portofolioContext);
+            const portofolioContextIsLinked = await graph.getContext(portofolioContext.getName().get());
+            if (!portofolioContextIsLinked)
+                await graph.addContext(portofolioContext);
             return graph;
-            // const info = { name, path: path.resolve(`${directoryPath}/${name}`), type: DIGITALTWIN_TYPE, graph: new Ptr(graph) };
-            // const digitalTwinId = SpinalGraphService.createNode(info, undefined);
-            // const node = SpinalGraphService.getRealNode(digitalTwinId);
-            // await this.context.addChildInContext(node, CONTEXT_TO_DIGITALTWIN_RELATION_NAME, PTR_LST_TYPE, this.context);
-            // return node;
-        }));
+        });
     }
     _getOrCreateDigitalTwin(name, directoryPath) {
-        const connect = configFile_service_1.configServiceInstance.hubConnect;
         return new Promise((resolve, reject) => {
-            spinal_core_connectorjs_type_1.spinalCore.load(connect, path.resolve(`${directoryPath}/${name}`), (graph) => {
+            spinal_core_connectorjs_type_1.spinalCore.load(this.connectSession, path.resolve(`${directoryPath}/${name}`), (graph) => {
                 resolve(graph);
-            }, () => connect.load_or_make_dir(directoryPath, (directory) => {
+            }, () => this.connectSession.load_or_make_dir(directoryPath, (directory) => {
                 resolve(this._createFile(directory, name, directoryPath));
             }));
         });

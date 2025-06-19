@@ -56,7 +56,7 @@ export class AppProfileController extends Controller {
                 return { message: "The profile name is required" };
             }
 
-            const profile = await serviceInstance.createAppProfile(data);
+            const profile = await serviceInstance.createProfile(data);
             this.setStatus(HTTP_CODES.CREATED)
             return _formatProfile(profile);
 
@@ -73,7 +73,7 @@ export class AppProfileController extends Controller {
             const isAdmin = await checkIfItIsAdmin(req);
             if (!isAdmin) throw new AuthError(SECURITY_MESSAGES.UNAUTHORIZED);
 
-            const data = await serviceInstance.getAppProfile(id);
+            const data = await serviceInstance.getProfileWithAuthorizedPortofolio(id);
             if (data) {
                 this.setStatus(HTTP_CODES.OK)
                 return _formatProfile(data);
@@ -94,7 +94,7 @@ export class AppProfileController extends Controller {
             const isAdmin = await checkIfItIsAdmin(req);
             if (!isAdmin) throw new AuthError(SECURITY_MESSAGES.UNAUTHORIZED);
 
-            const nodes = await serviceInstance.getAllAppProfile() || [];
+            const nodes = await serviceInstance.getAllProfilesWithAuthorizedPortfolios() || [];
             this.setStatus(HTTP_CODES.OK);
             return nodes.map(el => _formatProfile(el));
         } catch (error) {
@@ -110,7 +110,7 @@ export class AppProfileController extends Controller {
             const isAdmin = await checkIfItIsAdmin(req);
             if (!isAdmin) throw new AuthError(SECURITY_MESSAGES.UNAUTHORIZED);
 
-            const node = await serviceInstance.updateAppProfile(id, data);
+            const node = await serviceInstance.updateProfile(id, data);
             if (node) {
                 this.setStatus(HTTP_CODES.OK);
                 return _formatProfile(node);
@@ -132,7 +132,7 @@ export class AppProfileController extends Controller {
             const isAdmin = await checkIfItIsAdmin(req);
             if (!isAdmin) throw new AuthError(SECURITY_MESSAGES.UNAUTHORIZED);
 
-            await serviceInstance.deleteAppProfile(id);
+            await serviceInstance.deleteProfile(id);
             this.setStatus(HTTP_CODES.OK);
             return { message: "user profile deleted" };
 
@@ -176,7 +176,7 @@ export class AppProfileController extends Controller {
             const isAdmin = await checkIfItIsAdmin(req);
             if (!isAdmin) throw new AuthError(SECURITY_MESSAGES.UNAUTHORIZED);
 
-            const nodes = await serviceInstance.authorizeToAccessPortofolioApisRoute(profileId, data);
+            const nodes = await serviceInstance.authorizeProfileToAccessPortofolioApisRoute(profileId, data);
             if (nodes) {
 
                 this.setStatus(HTTP_CODES.OK)
@@ -229,7 +229,7 @@ export class AppProfileController extends Controller {
             const isAdmin = await checkIfItIsAdmin(req);
             if (!isAdmin) throw new AuthError(SECURITY_MESSAGES.UNAUTHORIZED);
 
-            const nodes = await serviceInstance.unauthorizeToAccessPortofolioApisRoute(profileId, data);
+            const nodes = await serviceInstance.unauthorizeProfileToAccessPortofolioApisRoute(profileId, data);
             if (nodes) {
                 this.setStatus(HTTP_CODES.OK)
                 return nodes.filter(el => el);
@@ -281,7 +281,7 @@ export class AppProfileController extends Controller {
             const isAdmin = await checkIfItIsAdmin(req);
             if (!isAdmin) throw new AuthError(SECURITY_MESSAGES.UNAUTHORIZED);
 
-            const nodes = await serviceInstance.authorizeToAccessBosApiRoute(profileId, portofolioId, data);
+            const nodes = await serviceInstance.authorizeProfileToAccessBosApiRoute(profileId, portofolioId, data);
             if (nodes) {
 
                 this.setStatus(HTTP_CODES.OK)
@@ -334,7 +334,7 @@ export class AppProfileController extends Controller {
             const isAdmin = await checkIfItIsAdmin(req);
             if (!isAdmin) throw new AuthError(SECURITY_MESSAGES.UNAUTHORIZED);
 
-            const nodes = await serviceInstance.unauthorizeToAccessBosApiRoute(profileId, portofolioId, data);
+            const nodes = await serviceInstance.unauthorizeProfileToAccessBosApiRoute(profileId, portofolioId, data);
             if (nodes) {
                 this.setStatus(HTTP_CODES.OK)
                 return nodes.filter(el => el);

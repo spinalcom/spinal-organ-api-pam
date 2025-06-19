@@ -23,23 +23,22 @@
  */
 
 import {
-    BUILDING_CONTEXT_NAME, BUILDING_CONTEXT_TYPE, BUILDING_TYPE, BUILDING_RELATION_NAME, PTR_LST_TYPE, APP_RELATION_NAME, BUILDING_API_GROUP_TYPE, API_RELATION_NAME
+    BUILDING_CONTEXT_NAME, BUILDING_CONTEXT_TYPE,
+    BUILDING_RELATION_NAME, PTR_LST_TYPE, APP_RELATION_NAME,
+    BUILDING_API_GROUP_TYPE, API_RELATION_NAME
 } from "../constant";
-import { SpinalContext, SpinalGraphService, SpinalNode } from "spinal-env-viewer-graph-service";
-import { IBuilding, IEditBuilding, ILocation, IBuildingCreation, IBuildingDetails } from "../interfaces";
-import * as openGeocoder from "node-open-geocoder";
-// const { config: { server_port } } = require("../../config");
 
-import axios from "axios";
+import { SpinalContext, SpinalGraph, SpinalNode } from "spinal-env-viewer-graph-service";
+import { IEditBuilding, IBuildingCreation, IBuildingDetails } from "../interfaces";
+
 import { PortofolioService } from "./portofolio.service";
-import { APIService, AppService, configServiceInstance } from ".";
+import { APIService, AppService } from ".";
 import { AdminProfileService } from "./adminProfile.service";
-import { removeNodeReferences, removeRelationFromReference } from "../utils/utils";
-// const axiosInstance = axios.create({ baseURL: `http://localhost:${process.env.SERVER_PORT}` });
+import { createBuildingNode, getBuildingGeoPosition } from "../utils/buildingUtils";
+import { removeNodeReferences, removeRelationFromReference } from "../utils/authorizationUtils";
 
-// import * as NodeGeocoder from "node-geocoder";
+
 const adminProfileInstance = AdminProfileService.getInstance();
-
 
 export class BuildingService {
     private static instance: BuildingService;
@@ -53,208 +52,197 @@ export class BuildingService {
         return this.instance;
     }
 
-    public async init(): Promise<SpinalContext> {
-        this.context = await configServiceInstance.getContext(BUILDING_CONTEXT_NAME);
-        if (!this.context) this.context = await configServiceInstance.addContext(BUILDING_CONTEXT_NAME, BUILDING_CONTEXT_TYPE);
+    public async init(graph: SpinalGraph): Promise<SpinalContext> {
+        this.context = await graph.getContext(BUILDING_CONTEXT_NAME);
+        if (!this.context) {
+            const spinalContext = new SpinalContext(BUILDING_CONTEXT_NAME, BUILDING_CONTEXT_TYPE);
+            this.context = await graph.addContext(spinalContext);
+        }
         return this.context;
     }
 
+    /**
+     * Creates a new building node with the provided building information, including geolocation coord, applications, and APIs.
+     * If the location is not specified, it attempts to retrieve the geographical position based on the address.
+     * Links the specified applications and APIs to the newly created building node, and adds the node to the context.
+     *
+     * @param buildingInfo - The information required to create the building, including address, location, appIds, and apiIds.
+     * @returns A promise that resolves to the details of the created building, including the node, linked applications, and APIs.
+     */
     public async createBuilding(buildingInfo: IBuildingCreation): Promise<IBuildingDetails> {
+        if (!buildingInfo.location || !buildingInfo.location.latlng) {
+            const coord = await getBuildingGeoPosition(buildingInfo.address);
+            buildingInfo.location = coord || {};
+        }
 
-        await this.setLocation(buildingInfo);
-        buildingInfo.type = BUILDING_TYPE;
         const appIds = Object.assign([], buildingInfo.appIds);
         const apiIds = Object.assign([], buildingInfo.apiIds);
 
-        delete buildingInfo.appIds;
-        delete buildingInfo.apiIds;
+        const buildingNode = await createBuildingNode(buildingInfo);
 
-        buildingInfo.apiUrl = buildingInfo.apiUrl.replace(/\/$/, el => "");
-
-        const id = SpinalGraphService.createNode(buildingInfo, undefined);
-        const detail = await this.getBuildingDetails(buildingInfo.apiUrl);
-
-        const building = SpinalGraphService.getRealNode(id);
-
-        building.info.add_attr({ detail });
-
-        return Promise.all([this.addAppToBuilding(building, appIds || []), this.addApiToBuilding(building, apiIds || [])])
+        return Promise.all([this.linkApplicationToBuilding(buildingNode, appIds || []), this.linkApiToBuilding(buildingNode, apiIds || [])])
             .then(async ([apps, apis]) => {
-                await this.context.addChildInContext(building, BUILDING_RELATION_NAME, PTR_LST_TYPE, this.context);
+                await this.context.addChildInContext(buildingNode, BUILDING_RELATION_NAME, PTR_LST_TYPE, this.context);
 
-                return { node: building, apps, apis };
+                return { node: buildingNode, apps, apis };
             })
-
     }
 
+    /**
+     * Retrieves all buildings nodes from the context.
+     *
+     * @return {*}  {Promise<SpinalNode[]>}
+     * @memberof BuildingService
+     */
     public async getAllBuildings(): Promise<SpinalNode[]> {
         return this.context.getChildren([BUILDING_RELATION_NAME]);
     }
 
-    public async getAllBuildingsApps(): Promise<{ node: SpinalNode, apps: SpinalNode[] }[]> {
-        const buildings = await this.getAllBuildings();
-        return buildings.reduce(async (prom, el) => {
-            const liste = await prom;
-            const apps = await this.getAppsFromBuilding(el);
-            if (apps) {
-                liste.push({
-                    node: el,
-                    apps
-                })
-            }
-            return liste;
-        }, Promise.resolve([]))
-    }
 
+    /**
+     * gets a building node by its ID.
+     *
+     * @param {string} id
+     * @return {*}  {Promise<SpinalNode>}
+     * @memberof BuildingService
+     */
     public async getBuildingById(id: string): Promise<SpinalNode> {
         const children = await this.context.getChildren([BUILDING_RELATION_NAME]);
         return children.find(el => el.getId().get() === id);
     }
 
-    public async deleteBuilding(id: string): Promise<boolean> {
-        const building = await this.getBuildingById(id);
-        if (building) {
-            await building.removeFromGraph();
-            await removeNodeReferences(building);
-            return true
-        }
+    /**
+     * Deletes a building node by its ID.
+     *
+     * @param {string} id
+     * @return {*}  {Promise<boolean>}
+     * @memberof BuildingService
+     */
+    public async deleteBuildingById(id: string): Promise<boolean> {
+        const buildingNode = await this.getBuildingById(id);
+        if (!buildingNode) return false;
 
-        return false;
+        await buildingNode.removeFromGraph();
+        await removeNodeReferences(buildingNode);
+        return true
     }
 
-    public async addBuildingToPortofolio(portfolioId: string, building: IBuildingCreation): Promise<IBuildingDetails> {
-        const data = await PortofolioService.getInstance().addBuildingToPortofolio(portfolioId, building);
-        return data;
+
+    /**
+     * Retrieves all buildings and their associated applications.
+     *
+     * @return {*}  {Promise<{ buildingNode: SpinalNode, apps: SpinalNode[] }[]>}
+     * @memberof BuildingService
+     */
+    public async getAllBuildingsAndTheirApps(): Promise<{ buildingNode: SpinalNode, apps: SpinalNode[] }[]> {
+        const buildings = await this.getAllBuildings();
+
+        const promises = buildings.map(async (building: SpinalNode) => {
+            const apps = await this.getAppsLinkedToBuilding(building);
+            return {
+                buildingNode: building,
+                apps
+            };
+        })
+
+        return Promise.all(promises);
     }
 
+
+    /**
+     * Links a building to a portfolio.
+     *
+     * @param {string} portfolioId
+     * @param {IBuildingCreation} building
+     * @return {*}  {Promise<IBuildingDetails>}
+     * @memberof BuildingService
+     */
+    public async linkBuildingToPortofolio(portfolioId: string, building: IBuildingCreation): Promise<IBuildingDetails> {
+        return PortofolioService.getInstance().linkBuildingToPortofolio(portfolioId, building);
+    }
+
+    /**
+     * Retrieves a building from a portfolio by its ID.
+     *
+     * @param {string} portofolioId
+     * @param {string} buildingId
+     * @return {*}  {(Promise<void | SpinalNode>)}
+     * @memberof BuildingService
+     */
     public async getBuildingFromPortofolio(portofolioId: string, buildingId: string): Promise<void | SpinalNode> {
         return PortofolioService.getInstance().getBuildingFromPortofolio(portofolioId, buildingId);
     }
 
+
+    /**
+     * Retrieves all buildings from a portfolio by its ID.
+     *
+     * @param {string} portfolioId
+     * @return {*}  {Promise<SpinalNode[]>}
+     * @memberof BuildingService
+     */
     public async getAllBuildingsFromPortofolio(portfolioId: string): Promise<SpinalNode[]> {
         return PortofolioService.getInstance().getPortofolioBuildings(portfolioId);
-        // const context = await this.getContext();
-        // if (!context) throw new Error("Make sure you set a default digitalTwin");
-
-        // return context.getChildrenInContext();
     }
 
-    public async updateBuilding(buildingId: string, newData: IEditBuilding): Promise<IBuildingDetails> {
-        const node = await this.getBuildingById(buildingId);
-        if (!node) throw new Error(`no Building found for ${buildingId}`);
+    /**
+     * Updates a building's information and its linked applications and APIs.
+     *
+     * @param {string} buildingId - The ID of the building to update.
+     * @param {IEditBuilding} newData - The new data to update the building with.
+     * @return {*}  {Promise<IBuildingDetails>} - The updated building details.
+     * @memberof BuildingService
+     */
+    public async updateBuilding(buildingId: string, buildingNewData: IEditBuilding): Promise<IBuildingDetails> {
+        const buildingNode = await this.getBuildingById(buildingId);
+        if (!buildingNode) throw new Error(`no Building found for ${buildingId}`);
 
-        const apps = newData.authorizeAppIds || [];
-        const apis = newData.authorizeApiIds || [];
-        const unauthorizeAppIds = newData.unauthorizeAppIds || [];
-        const unauthorizeApiIds = newData.unauthorizeApiIds || [];
+        // link the new apps and apis
+        await this._linkNewAppsAndApis(buildingNewData, buildingNode);
+        // unlink the unauthorized apps and apis
+        await this._unlinkUnauthorizedAppsAndApis(buildingNewData, buildingNode);
 
-        await Promise.all([this.addAppToBuilding(node, apps), this.addApiToBuilding(node, apis)])
+        const { appIds, apiIds, unauthorizeAppIds, unauthorizeApiIds, ...dataToUpdate } = buildingNewData; // Destructure to remove appIds and apiIds
 
-        return Promise.all([this.removeAppFromBuilding(node, unauthorizeAppIds), this.removeApisFromBuilding(node, unauthorizeApiIds)])
-            .then((result) => {
-                delete newData.appIds
-                delete newData.apiIds
-                delete newData.unauthorizeAppIds
-                delete newData.unauthorizeApiIds
 
-                for (const key in newData) {
-                    if (Object.prototype.hasOwnProperty.call(newData, key) && node.info[key]) {
-                        const element = newData[key];
-                        node.info[key].set(element);
-                    }
-                }
+        if (buildingNewData.address !== buildingNode.info.address.get()) {
+            // If the address has changed, we need to update the location
+            buildingNewData.location = await getBuildingGeoPosition(buildingNewData.address);
+        }
 
-                return this.getBuildingStructure(node);
-            })
+        // update buildingNode info
+        for (const key in buildingNewData) {
+            if (Object.prototype.hasOwnProperty.call(buildingNewData, key)) {
+                const newValue = buildingNewData[key];
+                buildingNode.info.mod_attr(key, newValue);
+
+            }
+        }
+
+        return this.getBuildingStructure(buildingNode);
     }
 
+
+
+    /**
+     * Retrieves the structure of a building, including its applications and APIs.
+     *
+     * @param {(string | SpinalNode)} building
+     * @return {*}  {Promise<IBuildingDetails>}
+     * @memberof BuildingService
+     */
     public async getBuildingStructure(building: string | SpinalNode): Promise<IBuildingDetails> {
         if (typeof building === "string") building = await this.getBuildingById(building);
         if (!(building instanceof SpinalNode)) return;
 
-        return Promise.all([this.getAppsFromBuilding(building), this.getApisFromBuilding(building)]).then(([apps, apis]) => {
-            return {
-                node: <SpinalNode>building,
-                apps,
-                apis
-            }
-        })
-
-    }
-
-    public formatBuildingStructure(building: IBuildingDetails) {
-        const details = building.node.info.get();
-
-        // delete details.bosUrl;
-        // delete details.apiUrl;
+        const buildingApps = await this.getAppsLinkedToBuilding(building);
+        const buildingApis = await this.getApisFromBuilding(building);
 
         return {
-            ...(details),
-            apps: building.apps.map(el => el.info.get()),
-            apis: building.apis.map(el => el.info.get())
+            node: building,
+            apps: buildingApps,
+            apis: buildingApis
         }
-    }
-
-    // public async deleteBuildingFromPortofolio(portofolioId: string, buildingId: string | string[]): Promise<string> {
-    // const node = await this.getBuildingFromPortofolio(portofolioId, buildingId);
-    // if (!node) throw new Error(`no building found for ${buildingId}`);
-    // await node.removeFromGraph();
-    // return buildingId;
-    // }
-
-    public validateBuilding(buildingInfo: IBuilding): { isValid: boolean; message?: string } {
-        if (!buildingInfo.name) return { isValid: false, message: "The name is required" };
-        if (!buildingInfo.address) return { isValid: false, message: "The address is required" };
-
-        return { isValid: true }
-    }
-
-    public async setLocation(buildingInfo: IBuildingCreation): Promise<IBuildingCreation> {
-        if (!buildingInfo.address) return;
-
-        if (!buildingInfo.location || !buildingInfo.location.latlng) {
-            const { lat, lng } = await this.getLatLngViaAddress(buildingInfo.address);
-            if (!buildingInfo.location) buildingInfo.location = { lat, lng };
-            else {
-                buildingInfo.location.lat = lat;
-                buildingInfo.location.lng = lng;
-            }
-        }
-
-        return buildingInfo;
-    }
-
-    public getLatLngViaAddress(address: string): Promise<ILocation> {
-        return new Promise((resolve, reject) => {
-            openGeocoder().geocode(address).end((err: any, res: any) => {
-                if (err) return reject(err);
-                if (res.length === 0) return reject(new Error("Address not found"))
-
-                resolve({
-                    lat: res[0].lat,
-                    lng: res[0].lon
-                })
-            })
-        });
-    }
-
-
-    public async getBuildingDetails(batimentUrl: string): Promise<{ [key: string]: number }> {
-        const detail: any = await this._getBuildingTypeCount(batimentUrl);
-        detail.area = await this._getBuildingArea(batimentUrl);
-
-        return detail;
-    }
-
-
-    public async formatBuilding(data: IBuilding): Promise<IBuilding> {
-
-        data.details = await this.getBuildingDetails(data.id);
-
-        // delete data.bosUrl;
-        // delete data.apiUrl;
-
-        return data;
     }
 
 
@@ -262,66 +250,107 @@ export class BuildingService {
     //                      APPS                        //
     //////////////////////////////////////////////////////
 
-    public async addAppToBuilding(building: string | SpinalNode, applicationId: string | string[]): Promise<SpinalNode[]> {
-        if (typeof building === "string") building = await this.getBuildingById(building);
-        if (!(building instanceof SpinalNode)) throw new Error(`No building found for ${building}`);
+    /**
+     * Links applications to a building.
+     *
+     * @param {(string | SpinalNode)} building
+     * @param {(string | string[])} applicationIds
+     * @return {*}  {Promise<SpinalNode[]>}
+     * @memberof BuildingService
+     */
+    public async linkApplicationToBuilding(building: string | SpinalNode, applicationIds: string | string[]): Promise<SpinalNode[]> {
+        const buildingNode = building instanceof SpinalNode ? building : await this.getBuildingById(building);
 
-        if (!Array.isArray(applicationId)) applicationId = [applicationId];
+        // if (typeof building === "string") building = await this.getBuildingById(building);
+        if (!(buildingNode instanceof SpinalNode)) throw new Error(`No building found for ${building}`);
+        if (!Array.isArray(applicationIds)) applicationIds = [applicationIds];
 
-        const data = await applicationId.reduce(async (prom, appId: string) => {
-            const liste = await prom;
-            const appNode = await AppService.getInstance().getBuildingApp(appId);
-            if (!(appNode instanceof SpinalNode)) return liste;
+        const getOnlyAppNotLinked = async (appId: string): Promise<boolean> => {
+            const appIsAlreadyLinked = await this.buildingHasApp(buildingNode, appId);
+            return !appIsAlreadyLinked;
+        }
 
-            const childrenIds = (<SpinalNode>building).getChildrenIds();
-            const isChild = childrenIds.find(el => el === appId);
+        const appsToLink = await this._filterApps(applicationIds, getOnlyAppNotLinked);
 
-            if (!isChild) await (<SpinalNode>building).addChildInContext(appNode, APP_RELATION_NAME, PTR_LST_TYPE, this.context);
-            liste.push(appNode);
-            return liste;
-        }, Promise.resolve([]));
+        const promises = appsToLink.map(async (appNode) => buildingNode.addChildInContext(appNode, APP_RELATION_NAME, PTR_LST_TYPE, this.context));
 
-        await adminProfileInstance.syncAdminProfile();
-        return data;
+        return Promise.all(promises).then(async (appsLinked) => {
+            await adminProfileInstance.syncAdminProfile(); // Sync the admin profile after linking apps
+            return appsLinked;
+        })
+
     }
 
-    public async getAppsFromBuilding(building: string | SpinalNode): Promise<SpinalNode[]> {
+    /**
+     * Retrieves all applications linked to a building.
+     *
+     * @param {(string | SpinalNode)} building
+     * @return {*}  {Promise<SpinalNode[]>}
+     * @memberof BuildingService
+     */
+    public async getAppsLinkedToBuilding(building: string | SpinalNode): Promise<SpinalNode[]> {
         if (typeof building === "string") building = await this.getBuildingById(building);
         if (!(building instanceof SpinalNode)) return [];
 
         return building.getChildren([APP_RELATION_NAME]);
     }
 
+    /**
+     * Retrieves a specific application linked to a building by its ID.
+     *
+     * @param {(string | SpinalNode)} building
+     * @param {string} appId
+     * @return {*}  {Promise<SpinalNode>}
+     * @memberof BuildingService
+     */
     public async getAppFromBuilding(building: string | SpinalNode, appId: string): Promise<SpinalNode> {
-        const children = await this.getAppsFromBuilding(building);
-        return children.find(el => el.getId().get() === appId);
+        const applicationsLinked = await this.getAppsLinkedToBuilding(building);
+        return applicationsLinked.find(app => app.getId().get() === appId);
     }
 
+
+    /**
+     * Removes applications from a building.
+     *
+     * @param {(string | SpinalNode)} building
+     * @param {(string | string[])} applicationId
+     * @return {*}  {Promise<string[]>}
+     * @memberof BuildingService
+     */
     public async removeAppFromBuilding(building: string | SpinalNode, applicationId: string | string[]): Promise<string[]> {
-        if (typeof building === "string") building = await this.getBuildingById(building);
-        if (!(building instanceof SpinalNode)) return [];
+        const buildingNode = building instanceof SpinalNode ? building : await this.getBuildingById(building);
+        // if (typeof building === "string") building = await this.getBuildingById(building);
+        if (!(buildingNode instanceof SpinalNode)) return [];
         if (!Array.isArray(applicationId)) applicationId = [applicationId];
 
-        return applicationId.reduce(async (prom, appId: string) => {
+        const getOnlyAppLinked = async (appId: string): Promise<boolean> => {
+            const appIsLinked = await this.buildingHasApp(buildingNode, appId);
+            return appIsLinked;
+        }
 
-            const liste = await prom;
-            const appNode = await this.getAppFromBuilding(building, appId);
-            if (!(appNode instanceof SpinalNode)) return liste;
+        const appsToUnlink = await this._filterApps(applicationId, getOnlyAppLinked);
 
-            try {
-                await (<SpinalNode>building).removeChild(appNode, APP_RELATION_NAME, PTR_LST_TYPE);
-                await removeRelationFromReference(<SpinalNode>building, appNode, APP_RELATION_NAME, PTR_LST_TYPE);
+        const promises = appsToUnlink.map(async (appNode) => {
+            await buildingNode.removeChild(appNode, APP_RELATION_NAME, PTR_LST_TYPE);
+            await removeRelationFromReference(buildingNode, appNode, APP_RELATION_NAME, PTR_LST_TYPE);
+            return appNode.getId().get();
+        })
 
-                liste.push(appId);
-            } catch (error) { }
-
-            return liste;
-
-
-        }, Promise.resolve([]))
+        return Promise.all(promises).then(async (result) => {
+            await adminProfileInstance.syncAdminProfile(); // Sync the admin profile after unlinking apps
+            return result;
+        })
 
     }
 
+    /**
+     * Checks if a building has a specific application linked to it.
+     *
+     * @param {(string | SpinalNode)} building
+     * @param {string} appId
+     * @return {*}  {Promise<boolean>}
+     * @memberof BuildingService
+     */
     public async buildingHasApp(building: string | SpinalNode, appId: string): Promise<boolean> {
         const app = await this.getAppFromBuilding(building, appId);
         return app ? true : false;
@@ -331,30 +360,80 @@ export class BuildingService {
     //                      APIS                        //
     //////////////////////////////////////////////////////
 
-    public async addApiToBuilding(building: string | SpinalNode, apisIds: string | string[]): Promise<SpinalNode[]> {
-        if (typeof building === "string") building = await this.getBuildingById(building);
-        if (!(building instanceof SpinalNode)) throw new Error(`No building found for ${building}`);
-
+    /**
+     * Links APIs to a building.
+     *
+     * @param {(string | SpinalNode)} building
+     * @param {(string | string[])} apisIds
+     * @return {*}  {Promise<SpinalNode[]>}
+     * @memberof BuildingService
+     */
+    public async linkApiToBuilding(building: string | SpinalNode, apisIds: string | string[]): Promise<SpinalNode[]> {
+        const buildingNode = building instanceof SpinalNode ? building : await this.getBuildingById(building);
+        // if (typeof building === "string") building = await this.getBuildingById(building);
+        if (!(buildingNode instanceof SpinalNode)) throw new Error(`No building found for ${building}`);
         if (!Array.isArray(apisIds)) apisIds = [apisIds];
 
-        const data = await apisIds.reduce(async (prom, appId: string) => {
-            const liste = await prom;
-            const apiNode = await APIService.getInstance().getApiRouteById(appId, BUILDING_API_GROUP_TYPE);
-            if (!(apiNode instanceof SpinalNode)) return liste;
+        const getOnlyApisNotLinked = async (apiId: string): Promise<boolean> => {
+            const apiIsAlreadyLinked = await this.buildingHasApi(buildingNode, apiId);
+            return !apiIsAlreadyLinked;
+        }
 
-            const childrenIds = (<SpinalNode>building).getChildrenIds();
-            const isChild = childrenIds.find(el => el === appId);
+        const apisToLink = await this._filterApis(apisIds, getOnlyApisNotLinked);
 
-            if (!isChild) await (<SpinalNode>building).addChildInContext(apiNode, API_RELATION_NAME, PTR_LST_TYPE, this.context);
-            liste.push(apiNode);
-            return liste;
-        }, Promise.resolve([]));
+        const promises = apisToLink.map(async (apiNode) => buildingNode.addChildInContext(apiNode, API_RELATION_NAME, PTR_LST_TYPE, this.context));
 
-        await adminProfileInstance.syncAdminProfile();
-        return data;
+        return Promise.all(promises).then(async (apisLinked) => {
+            await adminProfileInstance.syncAdminProfile(); // Sync the admin profile after linking apps
+            return apisLinked;
+        })
 
     }
 
+
+    /**
+     * Removes APIs from a building.
+     *
+     * @param {(string | SpinalNode)} building
+     * @param {(string | string[])} apisIds
+     * @return {*}  {Promise<string[]>}
+     * @memberof BuildingService
+     */
+    public async removeApisFromBuilding(building: string | SpinalNode, apisIds: string | string[]): Promise<string[]> {
+        // if (typeof building === "string") building = await this.getBuildingById(building);
+        const buildingNode = building instanceof SpinalNode ? building : await this.getBuildingById(building);
+        if (!(buildingNode instanceof SpinalNode)) return [];
+        if (!Array.isArray(apisIds)) apisIds = [apisIds];
+
+
+        const getOnlyApisLinked = async (apiId: string): Promise<boolean> => {
+            const apiIsLinked = await this.buildingHasApi(building, apiId);
+            return apiIsLinked;
+        }
+
+        const apisToUnlink = await this._filterApis(apisIds, getOnlyApisLinked);
+
+        const promises = apisToUnlink.map(async (apiNode) => {
+            await buildingNode.removeChild(apiNode, APP_RELATION_NAME, PTR_LST_TYPE);
+            await removeRelationFromReference(buildingNode, apiNode, APP_RELATION_NAME, PTR_LST_TYPE);
+            return apiNode.getId().get();
+        })
+
+        return Promise.all(promises).then(async (result) => {
+            await adminProfileInstance.syncAdminProfile(); // Sync the admin profile after unlinking apps
+            return result;
+        })
+
+    }
+
+
+    /**
+     * Retrieves all APIs linked to a building.
+     *
+     * @param {(string | SpinalNode)} building
+     * @return {*}  {Promise<SpinalNode[]>}
+     * @memberof BuildingService
+     */
     public async getApisFromBuilding(building: string | SpinalNode): Promise<SpinalNode[]> {
         if (typeof building === "string") building = await this.getBuildingById(building);
         if (!(building instanceof SpinalNode)) return [];
@@ -362,101 +441,101 @@ export class BuildingService {
         return building.getChildren([API_RELATION_NAME]);
     }
 
+
+    /**
+     * Retrieves a specific API linked to a building by its ID.
+     *
+     * @param {(string | SpinalNode)} building
+     * @param {string} apiId
+     * @return {*}  {Promise<SpinalNode>}
+     * @memberof BuildingService
+     */
     public async getApiFromBuilding(building: string | SpinalNode, apiId: string): Promise<SpinalNode> {
         const children = await this.getApisFromBuilding(building);
         return children.find(el => el.getId().get() === apiId);
     }
 
-    public async removeApisFromBuilding(building: string | SpinalNode, apisIds: string | string[]): Promise<string[]> {
-        if (typeof building === "string") building = await this.getBuildingById(building);
-        if (!(building instanceof SpinalNode)) return [];
-        if (!Array.isArray(apisIds)) apisIds = [apisIds];
 
-        return apisIds.reduce(async (prom, apiId: string) => {
-
-            const liste = await prom;
-            const apiNode = await this.getApiFromBuilding(building, apiId);
-            if (!(apiNode instanceof SpinalNode)) return liste;
-
-            try {
-                await (<SpinalNode>building).removeChild(apiNode, API_RELATION_NAME, PTR_LST_TYPE);
-                await removeRelationFromReference(<SpinalNode>building, apiNode, API_RELATION_NAME, PTR_LST_TYPE);
-                liste.push(apiId);
-            } catch (error) { }
-
-            return liste;
-
-
-        }, Promise.resolve([]))
-
-    }
-
+    /**
+     * Checks if a building has a specific API linked to it.
+     *
+     * @param {(string | SpinalNode)} building
+     * @param {string} apiId
+     * @return {*}  {Promise<boolean>}
+     * @memberof BuildingService
+     */
     public async buildingHasApi(building: string | SpinalNode, apiId: string): Promise<boolean> {
         const app = await this.getApiFromBuilding(building, apiId);
         return app ? true : false;
     }
 
+
+
+    /**
+     * Uploads a Swagger file to create routes for a building.
+     *
+     * @param {Buffer} buffer
+     * @return {*}  {Promise<any[]>}
+     * @memberof BuildingService
+     */
     public async uploadSwaggerFile(buffer: Buffer): Promise<any[]> {
-        return APIService.getInstance().uploadSwaggerFile(buffer, BUILDING_API_GROUP_TYPE);
+        return APIService.getInstance().createRoutesFromSwaggerFile(buffer, BUILDING_API_GROUP_TYPE);
     }
+
 
     /////////////////////////////////////////////////////
     //                  PRIVATES                       //
     /////////////////////////////////////////////////////
 
-    private async _findChildInContext(startNode: SpinalNode, nodeIdOrName: string, context: SpinalContext): Promise<SpinalNode> {
-        const children = await startNode.getChildrenInContext(context);
-        return children.find(el => {
-            if (el.getId().get() === nodeIdOrName || el.getName().get() === nodeIdOrName) {
-                //@ts-ignore
-                SpinalGraphService._addNode(el);
-                return true;
-            }
-            return false;
-        })
+
+    private _unlinkUnauthorizedAppsAndApis(buildingNewData: IEditBuilding, buildingNode: SpinalNode<any>) {
+        const unlinlinkPromises = [];
+        if (buildingNewData.unauthorizeAppIds?.length > 0)
+            unlinlinkPromises.push(this.removeAppFromBuilding(buildingNode, buildingNewData.unauthorizeAppIds));
+
+        if (buildingNewData.unauthorizeApiIds?.length > 0)
+            unlinlinkPromises.push(this.removeApisFromBuilding(buildingNode, buildingNewData.unauthorizeApiIds));
+
+        return Promise.all(unlinlinkPromises);
     }
 
-    private _getBuildingTypeCount(batimentUrl: string): Promise<{ [key: string]: number }> {
-        return axios
-            .get(`${batimentUrl}/api/v1/geographicContext/tree`)
-            .then(res => {
-                return this._countTypeHelper(res.data);
-            })
-            .catch(error => {
-                // console.error("try to get Building details, but got", error.message);
-                return {}
-            });
-    }
+    private _linkNewAppsAndApis(buildingNewData: IEditBuilding, buildingNode: SpinalNode) {
+        const linkingPromises = [];
 
-    private _getBuildingArea(batimentUrl: string): Promise<number> {
-        return axios
-            .get(`${batimentUrl}/api/v1/building/read`)
-            .then((response) => {
-                return response.data.area;
-            })
-            .catch((err) => {
-                return 0
-            });
+        if (buildingNewData.authorizeAppIds?.length > 0)
+            linkingPromises.push(this.linkApplicationToBuilding(buildingNode, buildingNewData.authorizeAppIds));
+
+        if (buildingNewData.authorizeApiIds?.length > 0)
+            linkingPromises.push(this.linkApiToBuilding(buildingNode, buildingNewData.authorizeApiIds));
+
+        return Promise.all(linkingPromises);
     }
 
 
-    private _countTypeHelper(building: { [key: string]: any }): { [key: string]: number } {
-        const obj: { [key: string]: number } = {};
+    private async _filterApps(applicationIds: string[], predicate: (node) => Promise<boolean>): Promise<SpinalNode[]> {
+        const promises = applicationIds.map(async (appId) => {
+            const conditions = await predicate(appId);
+            if (!conditions) return null;
 
-        const countType = (item: any) => {
-            if (!item) return;
-            if (!obj[item.type]) obj[item.type] = 1;
-            else obj[item.type] = obj[item.type] + 1;
-            (item.children || []).forEach((element: any) => {
-                countType(element);
-            });
-        }
+            const appNode = await AppService.getInstance().getBuildingAppById(appId);
+            return appNode ? appNode : null;
+        });
 
-        countType(building);
-        return obj;
+        const appNodes = await Promise.all(promises);
+        return appNodes.filter(Boolean); // Filter out nulls
     }
 
-    // private _getDigitalTwinGraph(): Promise<SpinalGraph | void> {
-    //     return DigitalTwinService.getInstance().getActualDigitalTwinGraph();
-    // }
+    private async _filterApis(apisIds: string[], predicate: (node) => Promise<boolean>): Promise<SpinalNode[]> {
+        const promises = apisIds.map(async (apiId) => {
+            const conditions = await predicate(apiId);
+            if (!conditions) return null;
+
+            const appNode = await AppService.getInstance().getBuildingAppById(apiId);
+            return appNode ? appNode : null;
+        });
+
+        const apiNodes = await Promise.all(promises);
+        return apiNodes.filter(Boolean); // Filter out nulls
+    }
+
 }

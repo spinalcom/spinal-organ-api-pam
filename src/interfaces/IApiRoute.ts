@@ -34,10 +34,10 @@
 
 
 export interface IApiRoute {
-    group: string;
+    group?: string;
     method: string;
     route: string;
-    scoped: string;
-    tag: string;
+    scoped?: string;
+    tag?: string;
     [key: string]: string;
 }

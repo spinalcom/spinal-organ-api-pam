@@ -112,6 +112,7 @@ export const TOKEN_TYPE = 'token';
 
 export const BUILDING_API_GROUP_TYPE = 'BuildingApis';
 export const PORTOFOLIO_API_GROUP_TYPE = 'PortofolioApis';
+
 export const ADMIN_PROFILE_TYPE = 'AdminProfile';
 export const ADMIN_PROFILE_NAME = 'AdminProfile';
 

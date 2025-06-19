@@ -27,7 +27,7 @@ import * as express from "express";
 import { AuthentificationService, BuildingService } from "../../services";
 import * as proxy from "express-http-proxy";
 import { checkAndGetTokenInfo } from "../../security/authentication";
-import { _formatBuildingRes, canAccess, formatUri, getProfileBuildings, proxyOptions, tryToDownloadSvf } from "./utils";
+import { _formatBuildingResponse, canAccess, formatUri, getBuildingsAuthorizedToProfile, proxyOptions, isTryingToDownloadSvf } from "./utils";
 import { Utils } from "../../utils/pam_v1_utils/utils";
 import axios from "axios";
 import { AuthError } from "../../security/AuthError";
@@ -63,7 +63,7 @@ export default function configureProxy(app: express.Express, useV1: boolean = fa
 				//////////////////////////////////////////////
 				//   Condition to skip .svf file downloading
 				//////////////////////////////////////////////
-				if (tryToDownloadSvf(req)) return next();
+				if (isTryingToDownloadSvf(req)) return next();
 
 				const tokenInfo = await checkAndGetTokenInfo(req);
 
@@ -80,7 +80,7 @@ export default function configureProxy(app: express.Express, useV1: boolean = fa
 				const reqWithOutApi = (<any>req).endpoint.replace("/api/v1", "");
 				if (reqWithOutApi === "/" || reqWithOutApi.length == 0) {
 					let data = building.info.get();
-					if (useV1) data = Utils.getReturnObj(null, _formatBuildingRes(data), req.method, "READ");
+					if (useV1) data = Utils.getReturnObj(null, _formatBuildingResponse(data), req.method, "READ");
 
 					return res.status(HTTP_CODES.OK).send(data);
 				}
@@ -99,89 +99,63 @@ export default function configureProxy(app: express.Express, useV1: boolean = fa
 		proxy((req: express.Request) => apiData.url, proxyOptions(useV1))
 	);
 
-	buildingListMiddleware(app, useV1);
+	if (useV1) _useV1Routes(app);
 }
 
-function buildingListMiddleware(app: express.Application, useV1: boolean = false) {
-	if (useV1) {
-		app.get("/v1/building_list", async (req: express.Request, res: express.Response) => {
-			try {
-				const tokenInfo = await checkAndGetTokenInfo(req);
-				let isApp;
-				let profileId;
-				if (tokenInfo.profile.appProfileBosConfigId) {
-					isApp = true;
-					profileId = tokenInfo.profile.appProfileBosConfigId;
-				} else if (tokenInfo.profile.userProfileBosConfigId || tokenInfo.profile.profileId) {
-					isApp = false;
-					profileId = tokenInfo.profile.userProfileBosConfigId || tokenInfo.profile.profileId;
-				}
-
-				const buildings = await getProfileBuildings(profileId, isApp);
-
-				const data = Utils.getReturnObj(null, buildings, "READ");
-				return res.send(data);
-			} catch (error) {
-				return res.status(HTTP_CODES.UNAUTHORIZED).send({
-					statusCode: HTTP_CODES.UNAUTHORIZED,
-					status: HTTP_CODES.UNAUTHORIZED,
-					code: HTTP_CODES.UNAUTHORIZED,
-					message: error.message,
-				});
-			}
-		});
-
-		app.get("/v1/building/:building_id", (req: express.Request, res: express.Response) => {
-			const { building_id } = req.params;
-		});
-
-		app.post("/v1/oauth/token", bodyParser.json(), bodyParser.urlencoded({ extended: true }), async (req: express.Request, res: express.Response) => {
-			// res.redirect(307, `${PAM_BASE_URI}/auth`)
-
-			try {
-				let credential = req.body;
-				if (Object.keys(credential).length <= 0) credential = formatViaHeader(req);
-
-				if (!credential || Object.keys(credential).length <= 0) throw { code: HTTP_CODES.BAD_REQUEST, message: "Bad request", description: "Bad request, please check your request" };
-
-				const { code, data } = await AuthentificationService.getInstance().authenticate(credential);
-
-				return res.status(code).send(formatResponse(data, credential));
-			} catch (error) {
-				res.status(error.code || HTTP_CODES.UNAUTHORIZED).send({
-					code: error.code || HTTP_CODES.UNAUTHORIZED,
-					message: error.code || "Invalid  client_id or client_secret",
-					description: error.description || "Invalid credential",
-				});
-			}
-
-			// {
-			//     "client": {
-			//         "grants": [
-			//         "authorization_code",
-			//         "password",
-			//         "refresh_token",
-			//         "client_credentials"
-			//         ],
-			//         "_id": "6045f0456ca4c532c16eecc9",
-			//         "name": "Mon Building",
-			//         "scope": "read-write",
-			//         "redirect_uri": "",
-			//         "User": "5f7dbd62c2b33acaa6941a0b",
-			//         "client_secret": "jsVsl4KLnzGYPcHWrSFo8TbmoL1ERs",
-			//         "client_id": "tpqHG6ycrY",
-			//         "created_at": "2021-03-08T09:37:09.072Z",
-			//         "updated_at": "2021-03-08T09:37:09.072Z",
-			//         "__v": 0
-			//     },
-			//     "user": "5f7dbd62c2b33acaa6941a0b",
-			//     "access_token": "48ed6c62a3f0d060fbb36795d728653d7967c5b3",
-			//     "accessToken": "48ed6c62a3f0d060fbb36795d728653d7967c5b3",
-			//     "accessTokenExpiresAt": "2023-09-26T18:51:04.384Z",
-			//     "scope": "read-write"
+function _useV1Routes(app: express.Application) {
+	app.get("/v1/building_list", async (req: express.Request, res: express.Response) => {
+		try {
+			const tokenInfo = await checkAndGetTokenInfo(req);
+			// let isApp;
+			// let profileId;
+			// if (tokenInfo.profile.appProfileBosConfigId) {
+			// 	isApp = true;
+			// 	profileId = tokenInfo.profile.appProfileBosConfigId;
+			// } else if (tokenInfo.profile.userProfileBosConfigId || tokenInfo.profile.profileId) {
+			// 	isApp = false;
+			// 	profileId = tokenInfo.profile.userProfileBosConfigId || tokenInfo.profile.profileId;
 			// }
-		});
-	}
+
+			const buildings = await getBuildingsAuthorizedToProfile(tokenInfo);
+
+			const data = Utils.getReturnObj(null, buildings, "READ");
+			return res.send(data);
+		} catch (error) {
+			return res.status(HTTP_CODES.UNAUTHORIZED).send({
+				statusCode: HTTP_CODES.UNAUTHORIZED,
+				status: HTTP_CODES.UNAUTHORIZED,
+				code: HTTP_CODES.UNAUTHORIZED,
+				message: error.message,
+			});
+		}
+	});
+
+	app.get("/v1/building/:building_id", (req: express.Request, res: express.Response) => {
+		const { building_id } = req.params;
+	});
+
+	app.post("/v1/oauth/token", bodyParser.json(), bodyParser.urlencoded({ extended: true }), async (req: express.Request, res: express.Response) => {
+		// res.redirect(307, `${PAM_BASE_URI}/auth`)
+
+		try {
+			let credential = req.body;
+			if (Object.keys(credential).length <= 0) credential = formatViaHeader(req);
+
+			if (!credential || Object.keys(credential).length <= 0) throw { code: HTTP_CODES.BAD_REQUEST, message: "Bad request", description: "Bad request, please check your request" };
+
+			const { code, data } = await AuthentificationService.getInstance().authenticate(credential);
+
+			return res.status(code).send(formatResponse(data, credential));
+		} catch (error) {
+			res.status(error.code || HTTP_CODES.UNAUTHORIZED).send({
+				code: error.code || HTTP_CODES.UNAUTHORIZED,
+				message: error.code || "Invalid  client_id or client_secret",
+				description: error.description || "Invalid credential",
+			});
+		}
+
+	});
+
 }
 
 function formatResponse(data: any, credential: any) {

@@ -157,7 +157,7 @@ export class AppsController extends Controller {
             const isAdmin = await checkIfItIsAdmin(req);
             if (!isAdmin) throw new AuthError(SECURITY_MESSAGES.UNAUTHORIZED);
 
-            const node = await appServiceInstance.getAdminApp(appId);
+            const node = await appServiceInstance.getAdminAppById(appId);
             if (node) {
                 this.setStatus(HTTP_CODES.OK);
                 return node.info.get();
@@ -178,7 +178,7 @@ export class AppsController extends Controller {
         try {
 
             const profile = await getProfileNode(req);
-            const node = await AuthorizationService.getInstance().profileHasAccess(profile, appId);
+            const node = await AuthorizationService.getInstance().profileHasAccessToNode(profile, appId);
 
             if (node) {
                 this.setStatus(HTTP_CODES.OK);
@@ -200,7 +200,7 @@ export class AppsController extends Controller {
         try {
 
             const profile = await getProfileNode(req);
-            const node = await AuthorizationService.getInstance().profileHasAccess(profile, appId);
+            const node = await AuthorizationService.getInstance().profileHasAccessToNode(profile, appId);
 
             // const node = await appServiceInstance.getBuildingApp(appId);
             if (node) {
@@ -455,7 +455,7 @@ export class AppsController extends Controller {
             let profileId = tokenInfo.profile.profileId || tokenInfo.profile.userProfileBosConfigId;
             let userName = tokenInfo.userInfo.userName;
 
-            const nodes = await UserListService.getInstance().addFavoriteApp(userName, profileId, data.appIds, portofolioId);
+            const nodes = await UserListService.getInstance().addAppToUserFavorite(userName, profileId, data.appIds, portofolioId);
             this.setStatus(HTTP_CODES.OK);
             return nodes.map(node => node.info.get());
 
@@ -474,7 +474,7 @@ export class AppsController extends Controller {
             let profileId = tokenInfo.profile.profileId || tokenInfo.profile.userProfileBosConfigId;
             let userName = tokenInfo.userInfo.userName;
 
-            const nodes = await UserListService.getInstance().addFavoriteApp(userName, profileId, data.appIds, portofolioId, bosId);
+            const nodes = await UserListService.getInstance().addAppToUserFavorite(userName, profileId, data.appIds, portofolioId, bosId);
             this.setStatus(HTTP_CODES.OK);
             return nodes.map(node => node.info.get());
 

@@ -34,15 +34,6 @@ var __metadata = (this && this.__metadata) || function (k, v) {
 var __param = (this && this.__param) || function (paramIndex, decorator) {
     return function (target, key) { decorator(target, key, paramIndex); }
 };
-var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
-    function adopt(value) { return value instanceof P ? value : new P(function (resolve) { resolve(value); }); }
-    return new (P || (P = Promise))(function (resolve, reject) {
-        function fulfilled(value) { try { step(generator.next(value)); } catch (e) { reject(e); } }
-        function rejected(value) { try { step(generator["throw"](value)); } catch (e) { reject(e); } }
-        function step(result) { result.done ? resolve(result.value) : adopt(result.value).then(fulfilled, rejected); }
-        step((generator = generator.apply(thisArg, _arguments || [])).next());
-    });
-};
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.AuthController = void 0;
 const services_1 = require("../services");
@@ -57,163 +48,132 @@ let AuthController = class AuthController extends tsoa_1.Controller {
         super();
     }
     // @Security(SECURITY_NAME.all)
-    authenticate(credential) {
-        return __awaiter(this, void 0, void 0, function* () {
-            try {
-                const { code, data } = yield serviceInstance.authenticate(credential);
-                this.setStatus(code);
-                return data;
-            }
-            catch (error) {
-                this.setStatus(error.code || constant_1.HTTP_CODES.INTERNAL_ERROR);
-                return { message: error.message };
-            }
-        });
+    async authenticate(credential) {
+        try {
+            const { code, data } = await serviceInstance.authenticate(credential);
+            this.setStatus(code);
+            return data;
+        }
+        catch (error) {
+            this.setStatus(error.code || constant_1.HTTP_CODES.INTERNAL_ERROR);
+            return { message: error.message };
+        }
     }
-    // @Security(SECURITY_NAME.bearerAuth)
-    // @Post("/register_admin")
-    // public async registerToAdmin(@Request() req: express.Request, @Body() data: { pamInfo: IPamInfo, adminInfo: IAdmin }): Promise<IPamCredential | { message: string }> {
-    //     try {
-    //         const isAdmin = await checkIfItIsAdmin(req);
-    //         if (!isAdmin) throw new AuthError(SECURITY_MESSAGES.UNAUTHORIZED);
-    //         const registeredData = await serviceInstance.registerToAdmin(data.pamInfo, data.adminInfo);
-    //         await serviceInstance.sendDataToAdmin();
-    //         this.setStatus(HTTP_CODES.OK)
-    //         return registeredData;
-    //     } catch (error) {
-    //         this.setStatus(error.code || HTTP_CODES.INTERNAL_ERROR);
-    //         return { message: error.message };
-    //     }
-    // }
-    registerToAdmin(req, data) {
-        return __awaiter(this, void 0, void 0, function* () {
-            try {
-                const isAdmin = yield (0, authentication_1.checkIfItIsAdmin)(req);
-                if (!isAdmin)
-                    throw new AuthError_1.AuthError(constant_1.SECURITY_MESSAGES.UNAUTHORIZED);
-                const registeredData = yield serviceInstance.registerToAdmin(data.urlAdmin, data.clientId, data.clientSecret);
-                yield serviceInstance.sendDataToAdmin();
+    async registerPamInAuthPlatform(req, data) {
+        try {
+            const isAdmin = await (0, authentication_1.checkIfItIsAdmin)(req);
+            if (!isAdmin)
+                throw new AuthError_1.AuthError(constant_1.SECURITY_MESSAGES.UNAUTHORIZED);
+            const registeredData = await serviceInstance.registerPamInAuthPlatform(data.urlAdmin, data.clientId, data.clientSecret);
+            await serviceInstance.sendPamInfoToAuth();
+            this.setStatus(constant_1.HTTP_CODES.OK);
+            return registeredData;
+        }
+        catch (error) {
+            this.setStatus(error.code || constant_1.HTTP_CODES.INTERNAL_ERROR);
+            return { message: error.message };
+        }
+    }
+    async updatePamTokenInAuthPlatform(req) {
+        try {
+            const isAdmin = await (0, authentication_1.checkIfItIsAdmin)(req);
+            if (!isAdmin)
+                throw new AuthError_1.AuthError(constant_1.SECURITY_MESSAGES.UNAUTHORIZED);
+            const data = await serviceInstance.updatePamTokenInAuthPlatform();
+            this.setStatus(constant_1.HTTP_CODES.OK);
+            return data;
+        }
+        catch (error) {
+            this.setStatus(error.code || constant_1.HTTP_CODES.INTERNAL_ERROR);
+            return { message: error.message };
+        }
+    }
+    async getBosToAdminCredential(req) {
+        try {
+            const isAdmin = await (0, authentication_1.checkIfItIsAdmin)(req);
+            if (!isAdmin)
+                throw new AuthError_1.AuthError(constant_1.SECURITY_MESSAGES.UNAUTHORIZED);
+            const bosCredential = await serviceInstance.getPamCredentials();
+            if (bosCredential) {
                 this.setStatus(constant_1.HTTP_CODES.OK);
-                return registeredData;
+                return bosCredential;
             }
-            catch (error) {
-                this.setStatus(error.code || constant_1.HTTP_CODES.INTERNAL_ERROR);
-                return { message: error.message };
-            }
-        });
+            this.setStatus(constant_1.HTTP_CODES.NOT_FOUND);
+            return { message: "No admin registered" };
+        }
+        catch (error) {
+            this.setStatus(error.code || constant_1.HTTP_CODES.INTERNAL_ERROR);
+            return { message: error.message };
+        }
     }
-    updatePlatformTokenData(req) {
-        return __awaiter(this, void 0, void 0, function* () {
-            try {
-                const isAdmin = yield (0, authentication_1.checkIfItIsAdmin)(req);
-                if (!isAdmin)
-                    throw new AuthError_1.AuthError(constant_1.SECURITY_MESSAGES.UNAUTHORIZED);
-                const data = yield serviceInstance.updatePlatformTokenData();
+    async deleteAdmin(req) {
+        try {
+            const isAdmin = await (0, authentication_1.checkIfItIsAdmin)(req);
+            if (!isAdmin)
+                throw new AuthError_1.AuthError(constant_1.SECURITY_MESSAGES.UNAUTHORIZED);
+            const deleted = await serviceInstance.disconnectPamFromAuthPlateform();
+            const status = deleted ? constant_1.HTTP_CODES.OK : constant_1.HTTP_CODES.BAD_REQUEST;
+            const message = deleted ? "deleted with success" : "something went wrong, please check your input data";
+            this.setStatus(status);
+            return { message };
+        }
+        catch (error) {
+            this.setStatus(error.code || constant_1.HTTP_CODES.INTERNAL_ERROR);
+            return { message: error.message };
+        }
+    }
+    async getAdminCredential(req) {
+        try {
+            const isAdmin = await (0, authentication_1.checkIfItIsAdmin)(req);
+            if (!isAdmin)
+                throw new AuthError_1.AuthError(constant_1.SECURITY_MESSAGES.UNAUTHORIZED);
+            const adminCredential = await serviceInstance.getAuthCredentials();
+            if (adminCredential) {
                 this.setStatus(constant_1.HTTP_CODES.OK);
-                return data;
+                return adminCredential;
             }
-            catch (error) {
-                this.setStatus(error.code || constant_1.HTTP_CODES.INTERNAL_ERROR);
-                return { message: error.message };
-            }
-        });
+            this.setStatus(constant_1.HTTP_CODES.NOT_FOUND);
+            return { message: "No admin registered" };
+        }
+        catch (error) {
+            this.setStatus(error.code || constant_1.HTTP_CODES.INTERNAL_ERROR);
+            return { message: error.message };
+        }
     }
-    getBosToAdminCredential(req) {
-        return __awaiter(this, void 0, void 0, function* () {
-            try {
-                const isAdmin = yield (0, authentication_1.checkIfItIsAdmin)(req);
-                if (!isAdmin)
+    async syncDataToAdmin(req) {
+        try {
+            const isAdmin = await (0, authentication_1.checkIfItIsAdmin)(req);
+            if (!isAdmin) {
+                const isAuthPlatform = await (0, authentication_1.checkIfItIsAuthPlateform)(req);
+                if (!isAuthPlatform)
                     throw new AuthError_1.AuthError(constant_1.SECURITY_MESSAGES.UNAUTHORIZED);
-                const bosCredential = yield serviceInstance.getPamToAdminCredential();
-                if (bosCredential) {
-                    this.setStatus(constant_1.HTTP_CODES.OK);
-                    return bosCredential;
-                }
-                this.setStatus(constant_1.HTTP_CODES.NOT_FOUND);
-                return { message: "No admin registered" };
             }
-            catch (error) {
-                this.setStatus(error.code || constant_1.HTTP_CODES.INTERNAL_ERROR);
-                return { message: error.message };
-            }
-        });
+            const resp = await serviceInstance.sendPamInfoToAuth(true);
+            this.setStatus(constant_1.HTTP_CODES.OK);
+            return { message: "updated" };
+        }
+        catch (error) {
+            this.setStatus(error.code || constant_1.HTTP_CODES.INTERNAL_ERROR);
+            return { message: error.message };
+        }
     }
-    deleteAdmin(req) {
-        return __awaiter(this, void 0, void 0, function* () {
-            try {
-                const isAdmin = yield (0, authentication_1.checkIfItIsAdmin)(req);
-                if (!isAdmin)
-                    throw new AuthError_1.AuthError(constant_1.SECURITY_MESSAGES.UNAUTHORIZED);
-                const deleted = yield serviceInstance.deleteCredentials();
-                const status = deleted ? constant_1.HTTP_CODES.OK : constant_1.HTTP_CODES.BAD_REQUEST;
-                const message = deleted ? "deleted with success" : "something went wrong, please check your input data";
-                this.setStatus(status);
-                return { message };
-            }
-            catch (error) {
-                this.setStatus(error.code || constant_1.HTTP_CODES.INTERNAL_ERROR);
-                return { message: error.message };
-            }
-        });
-    }
-    getAdminCredential(req) {
-        return __awaiter(this, void 0, void 0, function* () {
-            try {
-                const isAdmin = yield (0, authentication_1.checkIfItIsAdmin)(req);
-                if (!isAdmin)
-                    throw new AuthError_1.AuthError(constant_1.SECURITY_MESSAGES.UNAUTHORIZED);
-                const adminCredential = yield serviceInstance.getAdminCredential();
-                if (adminCredential) {
-                    this.setStatus(constant_1.HTTP_CODES.OK);
-                    return adminCredential;
-                }
-                this.setStatus(constant_1.HTTP_CODES.NOT_FOUND);
-                return { message: "No admin registered" };
-            }
-            catch (error) {
-                this.setStatus(error.code || constant_1.HTTP_CODES.INTERNAL_ERROR);
-                return { message: error.message };
-            }
-        });
-    }
-    syncDataToAdmin(req) {
-        return __awaiter(this, void 0, void 0, function* () {
-            try {
-                const isAdmin = yield (0, authentication_1.checkIfItIsAdmin)(req);
-                if (!isAdmin) {
-                    const isAuthPlatform = yield (0, authentication_1.checkIfItIsAuthPlateform)(req);
-                    if (!isAuthPlatform)
-                        throw new AuthError_1.AuthError(constant_1.SECURITY_MESSAGES.UNAUTHORIZED);
-                }
-                const resp = yield serviceInstance.sendDataToAdmin(true);
-                this.setStatus(constant_1.HTTP_CODES.OK);
-                return { message: "updated" };
-            }
-            catch (error) {
-                this.setStatus(error.code || constant_1.HTTP_CODES.INTERNAL_ERROR);
-                return { message: error.message };
-            }
-        });
-    }
-    tokenIsValid(data) {
-        return __awaiter(this, void 0, void 0, function* () {
-            try {
-                const token = yield services_1.TokenService.getInstance().tokenIsValid(data.token);
-                const code = token ? constant_1.HTTP_CODES.OK : constant_1.HTTP_CODES.UNAUTHORIZED;
-                this.setStatus(code);
-                return {
-                    code,
-                    data: token
-                };
-            }
-            catch (error) {
-                this.setStatus(constant_1.HTTP_CODES.UNAUTHORIZED);
-                return {
-                    code: constant_1.HTTP_CODES.UNAUTHORIZED,
-                    message: "Token is expired or invalid"
-                };
-            }
-        });
+    async tokenIsValid(data) {
+        try {
+            const token = await services_1.TokenService.getInstance().tokenIsValid(data.token);
+            const code = token ? constant_1.HTTP_CODES.OK : constant_1.HTTP_CODES.UNAUTHORIZED;
+            this.setStatus(code);
+            return {
+                code,
+                data: token
+            };
+        }
+        catch (error) {
+            this.setStatus(constant_1.HTTP_CODES.UNAUTHORIZED);
+            return {
+                code: constant_1.HTTP_CODES.UNAUTHORIZED,
+                message: "Token is expired or invalid"
+            };
+        }
     }
 };
 exports.AuthController = AuthController;
@@ -232,7 +192,7 @@ __decorate([
     __metadata("design:type", Function),
     __metadata("design:paramtypes", [Object, Object]),
     __metadata("design:returntype", Promise)
-], AuthController.prototype, "registerToAdmin", null);
+], AuthController.prototype, "registerPamInAuthPlatform", null);
 __decorate([
     (0, tsoa_1.Security)(constant_1.SECURITY_NAME.bearerAuth),
     (0, tsoa_1.Post)("/update_platform_token"),
@@ -240,7 +200,7 @@ __decorate([
     __metadata("design:type", Function),
     __metadata("design:paramtypes", [Object]),
     __metadata("design:returntype", Promise)
-], AuthController.prototype, "updatePlatformTokenData", null);
+], AuthController.prototype, "updatePamTokenInAuthPlatform", null);
 __decorate([
     (0, tsoa_1.Security)(constant_1.SECURITY_NAME.bearerAuth),
     (0, tsoa_1.Get)("/get_pam_to_auth_credential"),

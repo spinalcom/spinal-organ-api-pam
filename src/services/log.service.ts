@@ -22,8 +22,7 @@
  * <http://resources.spinalcom.com/licenses.pdf>.
  */
 
-import { SpinalContext } from "spinal-env-viewer-graph-service";
-import { configServiceInstance } from "./configFile.service";
+import { SpinalContext, SpinalGraph } from "spinal-env-viewer-graph-service";
 import { LOG_CONTEXT_NAME, LOG_CONTEXT_TYPE } from "../constant";
 
 export class LogService {
@@ -40,9 +39,12 @@ export class LogService {
         return this.instance;
     }
 
-    public async init(): Promise<SpinalContext> {
-        this.context = await configServiceInstance.getContext(LOG_CONTEXT_NAME);
-        if (!this.context) this.context = await configServiceInstance.addContext(LOG_CONTEXT_NAME, LOG_CONTEXT_TYPE);
+    public async init(graph: SpinalGraph): Promise<SpinalContext> {
+        this.context = await graph.getContext(LOG_CONTEXT_NAME);
+        if (!this.context) {
+            const spinalContext = new SpinalContext(LOG_CONTEXT_NAME, LOG_CONTEXT_TYPE);
+            this.context = await graph.addContext(spinalContext);
+        }
         return this.context;
     }
 

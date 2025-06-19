@@ -25,11 +25,8 @@
 					}
 				},
 				"required": [
-					"group",
 					"method",
-					"route",
-					"scoped",
-					"tag"
+					"route"
 				],
 				"type": "object",
 				"additionalProperties": {
@@ -142,9 +139,6 @@
 			},
 			"IBosAuth": {
 				"properties": {
-					"buildingId": {
-						"type": "string"
-					},
 					"appsIds": {
 						"items": {
 							"type": "string"
@@ -156,6 +150,21 @@
 							"type": "string"
 						},
 						"type": "array"
+					},
+					"unauthorizeAppsIds": {
+						"items": {
+							"type": "string"
+						},
+						"type": "array"
+					},
+					"unauthorizeApisIds": {
+						"items": {
+							"type": "string"
+						},
+						"type": "array"
+					},
+					"buildingId": {
+						"type": "string"
 					}
 				},
 				"required": [
@@ -166,9 +175,6 @@
 			},
 			"IPortofolioAuth": {
 				"properties": {
-					"portofolioId": {
-						"type": "string"
-					},
 					"appsIds": {
 						"items": {
 							"type": "string"
@@ -180,6 +186,21 @@
 							"type": "string"
 						},
 						"type": "array"
+					},
+					"unauthorizeAppsIds": {
+						"items": {
+							"type": "string"
+						},
+						"type": "array"
+					},
+					"unauthorizeApisIds": {
+						"items": {
+							"type": "string"
+						},
+						"type": "array"
+					},
+					"portofolioId": {
+						"type": "string"
 					},
 					"building": {
 						"items": {
@@ -213,83 +234,8 @@
 				"type": "object",
 				"additionalProperties": false
 			},
-			"IBosAuthEdit": {
-				"properties": {
-					"buildingId": {
-						"type": "string"
-					},
-					"appsIds": {
-						"items": {
-							"type": "string"
-						},
-						"type": "array"
-					},
-					"apisIds": {
-						"items": {
-							"type": "string"
-						},
-						"type": "array"
-					},
-					"unauthorizeAppsIds": {
-						"items": {
-							"type": "string"
-						},
-						"type": "array"
-					},
-					"unauthorizeApisIds": {
-						"items": {
-							"type": "string"
-						},
-						"type": "array"
-					}
-				},
-				"required": [
-					"buildingId"
-				],
-				"type": "object",
-				"additionalProperties": false
-			},
 			"IPortofolioAuthEdit": {
-				"properties": {
-					"portofolioId": {
-						"type": "string"
-					},
-					"appsIds": {
-						"items": {
-							"type": "string"
-						},
-						"type": "array"
-					},
-					"apisIds": {
-						"items": {
-							"type": "string"
-						},
-						"type": "array"
-					},
-					"unauthorizeAppsIds": {
-						"items": {
-							"type": "string"
-						},
-						"type": "array"
-					},
-					"unauthorizeApisIds": {
-						"items": {
-							"type": "string"
-						},
-						"type": "array"
-					},
-					"building": {
-						"items": {
-							"$ref": "#/components/schemas/IBosAuthEdit"
-						},
-						"type": "array"
-					}
-				},
-				"required": [
-					"portofolioId"
-				],
-				"type": "object",
-				"additionalProperties": false
+				"$ref": "#/components/schemas/IPortofolioAuth"
 			},
 			"IProfileEdit": {
 				"properties": {
@@ -299,38 +245,6 @@
 					"authorize": {
 						"items": {
 							"$ref": "#/components/schemas/IPortofolioAuthEdit"
-						},
-						"type": "array"
-					}
-				},
-				"type": "object",
-				"additionalProperties": false
-			},
-			"IApplicationToken": {
-				"properties": {
-					"name": {
-						"type": "string"
-					},
-					"type": {
-						"type": "string"
-					},
-					"token": {
-						"type": "string"
-					},
-					"createdToken": {
-						"type": "number",
-						"format": "double"
-					},
-					"expieredToken": {
-						"type": "number",
-						"format": "double"
-					},
-					"applicationId": {
-						"type": "string"
-					},
-					"applicationProfileList": {
-						"items": {
-							"type": "string"
 						},
 						"type": "array"
 					}
@@ -394,40 +308,6 @@
 				],
 				"type": "object",
 				"additionalProperties": false
-			},
-			"IAppCredential": {
-				"properties": {
-					"clientId": {
-						"type": "string"
-					},
-					"clientSecret": {
-						"type": "string"
-					}
-				},
-				"required": [
-					"clientId",
-					"clientSecret"
-				],
-				"type": "object",
-				"additionalProperties": false
-			},
-			"IOAuth2Credential": {
-				"properties": {
-					"client_id": {
-						"type": "string"
-					},
-					"client_secret": {
-						"type": "string"
-					}
-				},
-				"required": [
-					"client_id",
-					"client_secret"
-				],
-				"type": "object",
-				"additionalProperties": {
-					"type": "string"
-				}
 			},
 			"IPamCredential": {
 				"properties": {
@@ -526,6 +406,38 @@
 					302
 				],
 				"type": "number"
+			},
+			"IApplicationToken": {
+				"properties": {
+					"name": {
+						"type": "string"
+					},
+					"type": {
+						"type": "string"
+					},
+					"token": {
+						"type": "string"
+					},
+					"createdToken": {
+						"type": "number",
+						"format": "double"
+					},
+					"expieredToken": {
+						"type": "number",
+						"format": "double"
+					},
+					"applicationId": {
+						"type": "string"
+					},
+					"applicationProfileList": {
+						"items": {
+							"type": "string"
+						},
+						"type": "array"
+					}
+				},
+				"type": "object",
+				"additionalProperties": false
 			},
 			"ILocation": {
 				"properties": {
@@ -642,7 +554,7 @@
 				"type": "object",
 				"additionalProperties": false
 			},
-			"IEditProtofolio": {
+			"IEditPortofolio": {
 				"properties": {
 					"name": {
 						"type": "string"
@@ -3560,9 +3472,6 @@
 											"type": "string"
 										},
 										{
-											"$ref": "#/components/schemas/IApplicationToken"
-										},
-										{
 											"$ref": "#/components/schemas/IUserToken"
 										},
 										{
@@ -3592,17 +3501,7 @@
 					"content": {
 						"application/json": {
 							"schema": {
-								"anyOf": [
-									{
-										"$ref": "#/components/schemas/IUserCredential"
-									},
-									{
-										"$ref": "#/components/schemas/IAppCredential"
-									},
-									{
-										"$ref": "#/components/schemas/IOAuth2Credential"
-									}
-								]
+								"$ref": "#/components/schemas/IUserCredential"
 							}
 						}
 					}
@@ -3611,7 +3510,7 @@
 		},
 		"/api/v1/pam/register_admin": {
 			"post": {
-				"operationId": "RegisterToAdmin",
+				"operationId": "RegisterPamInAuthPlatform",
 				"responses": {
 					"200": {
 						"description": "Ok",
@@ -3662,7 +3561,7 @@
 		},
 		"/api/v1/pam/update_platform_token": {
 			"post": {
-				"operationId": "UpdatePlatformTokenData",
+				"operationId": "UpdatePamTokenInAuthPlatform",
 				"responses": {
 					"200": {
 						"description": "Ok",
@@ -3880,10 +3779,10 @@
 												"data": {
 													"anyOf": [
 														{
-															"$ref": "#/components/schemas/IApplicationToken"
+															"$ref": "#/components/schemas/IUserToken"
 														},
 														{
-															"$ref": "#/components/schemas/IUserToken"
+															"$ref": "#/components/schemas/IApplicationToken"
 														}
 													]
 												},
@@ -3950,7 +3849,7 @@
 		},
 		"/api/v1/pam/get_building/{id}": {
 			"post": {
-				"operationId": "GetBuildingByIdByPost",
+				"operationId": "GetBuildingByIdUsingPostMethod",
 				"responses": {
 					"200": {
 						"description": "Ok",
@@ -4048,7 +3947,7 @@
 		},
 		"/api/v1/pam/get_all_buildings_apps": {
 			"get": {
-				"operationId": "GetAllBuildingsApps",
+				"operationId": "GetAllBuildingsAndTheirApps",
 				"responses": {
 					"200": {
 						"description": "Ok",
@@ -4984,7 +4883,7 @@
 					"content": {
 						"application/json": {
 							"schema": {
-								"$ref": "#/components/schemas/IEditProtofolio"
+								"$ref": "#/components/schemas/IEditPortofolio"
 							}
 						}
 					}

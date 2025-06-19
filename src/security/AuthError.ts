@@ -22,13 +22,14 @@
  * <http://resources.spinalcom.com/licenses.pdf>.
  */
 
-import {HTTP_CODES, SECURITY_MESSAGES} from '../constant';
+import { HTTP_CODES, SECURITY_MESSAGES } from '../constant';
 
 export class AuthError extends Error {
   code: number;
-  constructor(message: string) {
+  constructor(message: string, code?: number) {
     super(message);
-    this.setCode(message);
+    if (code) this.code = code;
+    else this.setCode(message);
   }
 
   setCode(message) {
@@ -40,6 +41,8 @@ export class AuthError extends Error {
       case SECURITY_MESSAGES.NO_PROFILE_FOUND:
         this.code = HTTP_CODES.NOT_FOUND;
         break;
+      default:
+        this.code = HTTP_CODES.BAD_REQUEST;
     }
   }
 }

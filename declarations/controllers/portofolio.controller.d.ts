@@ -1,4 +1,4 @@
-import { IApiRoute, IApp, IBuilding, IBuildingCreation, IEditProtofolio, IPortofolioData, IPortofolioInfo } from "../interfaces";
+import { IApiRoute, IApp, IBuilding, IBuildingCreation, IEditPortofolio, IPortofolioData, IPortofolioInfo } from "../interfaces";
 import { Controller } from "tsoa";
 import * as express from 'express';
 export declare class PortofolioController extends Controller {
@@ -6,7 +6,7 @@ export declare class PortofolioController extends Controller {
     addPortofolio(req: express.Request, data: IPortofolioInfo): Promise<IPortofolioData | {
         message: string;
     }>;
-    updatePortofolio(req: express.Request, portofolioId: string, data: IEditProtofolio): Promise<IPortofolioData | {
+    updatePortofolio(req: express.Request, portofolioId: string, data: IEditPortofolio): Promise<IPortofolioData | {
         message: string;
     }>;
     renamePortofolio(req: express.Request, id: string, data: {

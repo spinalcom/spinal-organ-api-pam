@@ -26,7 +26,7 @@ import { Route, Get, Post, Delete, Body, Controller, Tags, Put, Path, UploadedFi
 import { APIService, AppProfileService, BuildingService, PortofolioService, UserProfileService } from "../services";
 import { BUILDING_API_GROUP_TYPE, HTTP_CODES, PORTOFOLIO_API_GROUP_TYPE, SECURITY_MESSAGES, SECURITY_NAME } from "../constant";
 import { IApiRoute } from "../interfaces";
-import { checkAndGetTokenInfo, checkIfItIsAdmin, getProfileId, getProfileNode } from "../security/authentication";
+import { checkAndGetTokenInfo, checkIfItIsAdmin, getProfileNode } from "../security/authentication";
 import { AuthError } from "../security/AuthError";
 
 import * as express from "express";
@@ -87,7 +87,7 @@ export class APIController extends Controller {
         try {
             const profile = await getProfileNode(req);
 
-            const node = await AuthorizationService.getInstance().profileHasAccess(profile, id);
+            const node = await AuthorizationService.getInstance().profileHasAccessToNode(profile, id);
             if (node) {
                 this.setStatus(HTTP_CODES.OK)
                 return node.info.get();
@@ -213,9 +213,10 @@ export class APIController extends Controller {
             const profileId = tokenInfo.profile.profileId || tokenInfo.profile.userProfileBosConfigId;
             const isApp = tokenInfo.profile.profileId || tokenInfo.profile.userProfileBosConfigId ? false : true;
 
-            let profile = await (isApp ? AppProfileService.getInstance()._getAppProfileNode(profileId) : UserProfileService.getInstance()._getUserProfileNode(profileId))
+            const instance = isApp ? AppProfileService.getInstance() : UserProfileService.getInstance();
+            const profile = await instance.getProfileNode(profileId);
 
-            const node = await AuthorizationService.getInstance().profileHasAccess(profile, id);
+            const node = await AuthorizationService.getInstance().profileHasAccessToNode(profile, id);
 
             if (node) {
                 this.setStatus(HTTP_CODES.OK)

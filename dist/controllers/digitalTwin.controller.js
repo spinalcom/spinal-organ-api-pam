@@ -34,15 +34,6 @@ var __metadata = (this && this.__metadata) || function (k, v) {
 var __param = (this && this.__param) || function (paramIndex, decorator) {
     return function (target, key) { decorator(target, key, paramIndex); }
 };
-var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
-    function adopt(value) { return value instanceof P ? value : new P(function (resolve) { resolve(value); }); }
-    return new (P || (P = Promise))(function (resolve, reject) {
-        function fulfilled(value) { try { step(generator.next(value)); } catch (e) { reject(e); } }
-        function rejected(value) { try { step(generator["throw"](value)); } catch (e) { reject(e); } }
-        function step(result) { result.done ? resolve(result.value) : adopt(result.value).then(fulfilled, rejected); }
-        step((generator = generator.apply(thisArg, _arguments || [])).next());
-    });
-};
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.DigitaltwinController = void 0;
 const express = require("express");
@@ -56,25 +47,23 @@ let DigitaltwinController = class DigitaltwinController extends tsoa_1.Controlle
     constructor() {
         super();
     }
-    createDigitalTwin(req, data) {
-        return __awaiter(this, void 0, void 0, function* () {
-            try {
-                const isAdmin = yield (0, authentication_1.checkIfItIsAdmin)(req);
-                if (!isAdmin)
-                    throw new AuthError_1.AuthError(constant_1.SECURITY_MESSAGES.UNAUTHORIZED);
-                if (!data.name || !data.name.trim()) {
-                    this.setStatus(constant_1.HTTP_CODES.BAD_REQUEST);
-                    return { message: "The file name is mandatory" };
-                }
-                const graph = yield serviceInstance.createDigitalTwin(data.name, data.folderPath);
-                this.setStatus(constant_1.HTTP_CODES.CREATED);
-                return graph.getId().get();
+    async createDigitalTwin(req, data) {
+        try {
+            const isAdmin = await (0, authentication_1.checkIfItIsAdmin)(req);
+            if (!isAdmin)
+                throw new AuthError_1.AuthError(constant_1.SECURITY_MESSAGES.UNAUTHORIZED);
+            if (!data.name || !data.name.trim()) {
+                this.setStatus(constant_1.HTTP_CODES.BAD_REQUEST);
+                return { message: "The file name is mandatory" };
             }
-            catch (error) {
-                this.setStatus(error.code || constant_1.HTTP_CODES.INTERNAL_ERROR);
-                return { message: error.message };
-            }
-        });
+            const graph = await serviceInstance.initDigitalTwin(data.name, data.folderPath);
+            this.setStatus(constant_1.HTTP_CODES.CREATED);
+            return graph.getId().get();
+        }
+        catch (error) {
+            this.setStatus(error.code || constant_1.HTTP_CODES.INTERNAL_ERROR);
+            return { message: error.message };
+        }
     }
 };
 exports.DigitaltwinController = DigitaltwinController;

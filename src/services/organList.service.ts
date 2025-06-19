@@ -23,8 +23,7 @@
  */
 
 import { ORGAN_LIST_CONTEXT_NAME, ORGAN_LIST_CONTEXT_TYPE } from "../constant";
-import { SpinalContext } from "spinal-env-viewer-graph-service";
-import { configServiceInstance } from "./configFile.service";
+import { SpinalContext, SpinalGraph } from "spinal-env-viewer-graph-service";
 
 export class OrganListService {
     private static instance: OrganListService;
@@ -38,9 +37,12 @@ export class OrganListService {
         return this.instance;
     }
 
-    public async init(): Promise<SpinalContext> {
-        this.context = await configServiceInstance.getContext(ORGAN_LIST_CONTEXT_NAME);
-        if (!this.context) this.context = await configServiceInstance.addContext(ORGAN_LIST_CONTEXT_NAME, ORGAN_LIST_CONTEXT_TYPE);
+    public async init(graph: SpinalGraph): Promise<SpinalContext> {
+        this.context = await graph.getContext(ORGAN_LIST_CONTEXT_NAME);
+        if (!this.context) {
+            const spinalContext = new SpinalContext(ORGAN_LIST_CONTEXT_NAME, ORGAN_LIST_CONTEXT_TYPE);
+            this.context = await graph.addContext(spinalContext);
+        }
         return this.context;
     }
 

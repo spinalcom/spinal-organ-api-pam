@@ -34,15 +34,6 @@ var __metadata = (this && this.__metadata) || function (k, v) {
 var __param = (this && this.__param) || function (paramIndex, decorator) {
     return function (target, key) { decorator(target, key, paramIndex); }
 };
-var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
-    function adopt(value) { return value instanceof P ? value : new P(function (resolve) { resolve(value); }); }
-    return new (P || (P = Promise))(function (resolve, reject) {
-        function fulfilled(value) { try { step(generator.next(value)); } catch (e) { reject(e); } }
-        function rejected(value) { try { step(generator["throw"](value)); } catch (e) { reject(e); } }
-        function step(result) { result.done ? resolve(result.value) : adopt(result.value).then(fulfilled, rejected); }
-        step((generator = generator.apply(thisArg, _arguments || [])).next());
-    });
-};
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.AppProfileController = void 0;
 const express = require("express");
@@ -58,279 +49,253 @@ let AppProfileController = class AppProfileController extends tsoa_1.Controller 
     constructor() {
         super();
     }
-    createAppProfile(req, data) {
-        return __awaiter(this, void 0, void 0, function* () {
-            try {
-                const isAdmin = yield (0, authentication_1.checkIfItIsAdmin)(req);
-                if (!isAdmin)
-                    throw new AuthError_1.AuthError(constant_1.SECURITY_MESSAGES.UNAUTHORIZED);
-                if (!data.name) {
-                    this.setStatus(constant_1.HTTP_CODES.BAD_REQUEST);
-                    return { message: "The profile name is required" };
-                }
-                const profile = yield serviceInstance.createAppProfile(data);
-                this.setStatus(constant_1.HTTP_CODES.CREATED);
-                return (0, profileUtils_1._formatProfile)(profile);
+    async createAppProfile(req, data) {
+        try {
+            const isAdmin = await (0, authentication_1.checkIfItIsAdmin)(req);
+            if (!isAdmin)
+                throw new AuthError_1.AuthError(constant_1.SECURITY_MESSAGES.UNAUTHORIZED);
+            if (!data.name) {
+                this.setStatus(constant_1.HTTP_CODES.BAD_REQUEST);
+                return { message: "The profile name is required" };
             }
-            catch (error) {
-                this.setStatus(error.code || constant_1.HTTP_CODES.INTERNAL_ERROR);
-                return { message: error.message };
-            }
-        });
+            const profile = await serviceInstance.createProfile(data);
+            this.setStatus(constant_1.HTTP_CODES.CREATED);
+            return (0, profileUtils_1._formatProfile)(profile);
+        }
+        catch (error) {
+            this.setStatus(error.code || constant_1.HTTP_CODES.INTERNAL_ERROR);
+            return { message: error.message };
+        }
     }
-    getAppProfile(req, id) {
-        return __awaiter(this, void 0, void 0, function* () {
-            try {
-                const isAdmin = yield (0, authentication_1.checkIfItIsAdmin)(req);
-                if (!isAdmin)
-                    throw new AuthError_1.AuthError(constant_1.SECURITY_MESSAGES.UNAUTHORIZED);
-                const data = yield serviceInstance.getAppProfile(id);
-                if (data) {
-                    this.setStatus(constant_1.HTTP_CODES.OK);
-                    return (0, profileUtils_1._formatProfile)(data);
-                }
-                this.setStatus(constant_1.HTTP_CODES.NOT_FOUND);
-                return { message: `no profile found for ${id}` };
-            }
-            catch (error) {
-                this.setStatus(error.code || constant_1.HTTP_CODES.INTERNAL_ERROR);
-                return { message: error.message };
-            }
-        });
-    }
-    getAllAppProfile(req) {
-        return __awaiter(this, void 0, void 0, function* () {
-            try {
-                const isAdmin = yield (0, authentication_1.checkIfItIsAdmin)(req);
-                if (!isAdmin)
-                    throw new AuthError_1.AuthError(constant_1.SECURITY_MESSAGES.UNAUTHORIZED);
-                const nodes = (yield serviceInstance.getAllAppProfile()) || [];
+    async getAppProfile(req, id) {
+        try {
+            const isAdmin = await (0, authentication_1.checkIfItIsAdmin)(req);
+            if (!isAdmin)
+                throw new AuthError_1.AuthError(constant_1.SECURITY_MESSAGES.UNAUTHORIZED);
+            const data = await serviceInstance.getProfileWithAuthorizedPortofolio(id);
+            if (data) {
                 this.setStatus(constant_1.HTTP_CODES.OK);
-                return nodes.map(el => (0, profileUtils_1._formatProfile)(el));
+                return (0, profileUtils_1._formatProfile)(data);
             }
-            catch (error) {
-                this.setStatus(error.code || constant_1.HTTP_CODES.INTERNAL_ERROR);
-                return { message: error.message };
-            }
-        });
+            this.setStatus(constant_1.HTTP_CODES.NOT_FOUND);
+            return { message: `no profile found for ${id}` };
+        }
+        catch (error) {
+            this.setStatus(error.code || constant_1.HTTP_CODES.INTERNAL_ERROR);
+            return { message: error.message };
+        }
     }
-    updateAppProfile(req, id, data) {
-        return __awaiter(this, void 0, void 0, function* () {
-            try {
-                const isAdmin = yield (0, authentication_1.checkIfItIsAdmin)(req);
-                if (!isAdmin)
-                    throw new AuthError_1.AuthError(constant_1.SECURITY_MESSAGES.UNAUTHORIZED);
-                const node = yield serviceInstance.updateAppProfile(id, data);
-                if (node) {
-                    this.setStatus(constant_1.HTTP_CODES.OK);
-                    return (0, profileUtils_1._formatProfile)(node);
-                }
-                this.setStatus(constant_1.HTTP_CODES.NOT_FOUND);
-                return { message: `no profile found for ${id}` };
-            }
-            catch (error) {
-                this.setStatus(error.code || constant_1.HTTP_CODES.INTERNAL_ERROR);
-                return { message: error.message };
-            }
-        });
+    async getAllAppProfile(req) {
+        try {
+            const isAdmin = await (0, authentication_1.checkIfItIsAdmin)(req);
+            if (!isAdmin)
+                throw new AuthError_1.AuthError(constant_1.SECURITY_MESSAGES.UNAUTHORIZED);
+            const nodes = await serviceInstance.getAllProfilesWithAuthorizedPortfolios() || [];
+            this.setStatus(constant_1.HTTP_CODES.OK);
+            return nodes.map(el => (0, profileUtils_1._formatProfile)(el));
+        }
+        catch (error) {
+            this.setStatus(error.code || constant_1.HTTP_CODES.INTERNAL_ERROR);
+            return { message: error.message };
+        }
     }
-    deleteAppProfile(req, id) {
-        return __awaiter(this, void 0, void 0, function* () {
-            try {
-                const isAdmin = yield (0, authentication_1.checkIfItIsAdmin)(req);
-                if (!isAdmin)
-                    throw new AuthError_1.AuthError(constant_1.SECURITY_MESSAGES.UNAUTHORIZED);
-                yield serviceInstance.deleteAppProfile(id);
+    async updateAppProfile(req, id, data) {
+        try {
+            const isAdmin = await (0, authentication_1.checkIfItIsAdmin)(req);
+            if (!isAdmin)
+                throw new AuthError_1.AuthError(constant_1.SECURITY_MESSAGES.UNAUTHORIZED);
+            const node = await serviceInstance.updateProfile(id, data);
+            if (node) {
                 this.setStatus(constant_1.HTTP_CODES.OK);
-                return { message: "user profile deleted" };
+                return (0, profileUtils_1._formatProfile)(node);
             }
-            catch (error) {
-                this.setStatus(error.code || constant_1.HTTP_CODES.INTERNAL_ERROR);
-                return { message: error.message };
-            }
-        });
+            this.setStatus(constant_1.HTTP_CODES.NOT_FOUND);
+            return { message: `no profile found for ${id}` };
+        }
+        catch (error) {
+            this.setStatus(error.code || constant_1.HTTP_CODES.INTERNAL_ERROR);
+            return { message: error.message };
+        }
+    }
+    async deleteAppProfile(req, id) {
+        try {
+            const isAdmin = await (0, authentication_1.checkIfItIsAdmin)(req);
+            if (!isAdmin)
+                throw new AuthError_1.AuthError(constant_1.SECURITY_MESSAGES.UNAUTHORIZED);
+            await serviceInstance.deleteProfile(id);
+            this.setStatus(constant_1.HTTP_CODES.OK);
+            return { message: "user profile deleted" };
+        }
+        catch (error) {
+            this.setStatus(error.code || constant_1.HTTP_CODES.INTERNAL_ERROR);
+            return { message: error.message };
+        }
     }
     ///////////////////
     //   PORTOFOLIO  //
     ///////////////////
-    getAuthorizedPortofolio(req, profileId) {
-        return __awaiter(this, void 0, void 0, function* () {
-            try {
-                const id = yield (0, authentication_1.getProfileId)(req);
-                const isAdmin = adminProfile_service_1.AdminProfileService.getInstance().isAdmin(id);
-                if (!isAdmin && profileId !== id)
-                    throw new AuthError_1.AuthError(constant_1.SECURITY_MESSAGES.UNAUTHORIZED);
-                const nodes = yield serviceInstance.getPortofolioAuthStructure(profileId);
-                if (nodes) {
-                    this.setStatus(constant_1.HTTP_CODES.OK);
-                    return nodes.map(value => (0, profileUtils_1._formatPortofolioAuthRes)(value));
-                }
-                this.setStatus(constant_1.HTTP_CODES.NOT_FOUND);
-                return { message: `no profile found for ${profileId}` };
+    async getAuthorizedPortofolio(req, profileId) {
+        try {
+            const id = await (0, authentication_1.getProfileId)(req);
+            const isAdmin = adminProfile_service_1.AdminProfileService.getInstance().isAdmin(id);
+            if (!isAdmin && profileId !== id)
+                throw new AuthError_1.AuthError(constant_1.SECURITY_MESSAGES.UNAUTHORIZED);
+            const nodes = await serviceInstance.getPortofolioAuthStructure(profileId);
+            if (nodes) {
+                this.setStatus(constant_1.HTTP_CODES.OK);
+                return nodes.map(value => (0, profileUtils_1._formatPortofolioAuthRes)(value));
             }
-            catch (error) {
-                this.setStatus(error.code || constant_1.HTTP_CODES.INTERNAL_ERROR);
-                return { message: error.message };
-            }
-        });
+            this.setStatus(constant_1.HTTP_CODES.NOT_FOUND);
+            return { message: `no profile found for ${profileId}` };
+        }
+        catch (error) {
+            this.setStatus(error.code || constant_1.HTTP_CODES.INTERNAL_ERROR);
+            return { message: error.message };
+        }
     }
-    authorizeToAccessPortofolioApis(req, profileId, data) {
-        return __awaiter(this, void 0, void 0, function* () {
-            try {
-                const isAdmin = yield (0, authentication_1.checkIfItIsAdmin)(req);
-                if (!isAdmin)
-                    throw new AuthError_1.AuthError(constant_1.SECURITY_MESSAGES.UNAUTHORIZED);
-                const nodes = yield serviceInstance.authorizeToAccessPortofolioApisRoute(profileId, data);
-                if (nodes) {
-                    this.setStatus(constant_1.HTTP_CODES.OK);
-                    return nodes.reduce((liste, { apis }) => {
-                        apis.forEach((node) => {
-                            if (node)
-                                liste.push(...(0, profileUtils_1._getNodeListInfo)([node]));
-                        });
-                        return liste;
-                    }, []);
-                }
-                this.setStatus(constant_1.HTTP_CODES.NOT_FOUND);
-                return { message: `no profile found for ${profileId}` };
+    async authorizeToAccessPortofolioApis(req, profileId, data) {
+        try {
+            const isAdmin = await (0, authentication_1.checkIfItIsAdmin)(req);
+            if (!isAdmin)
+                throw new AuthError_1.AuthError(constant_1.SECURITY_MESSAGES.UNAUTHORIZED);
+            const nodes = await serviceInstance.authorizeProfileToAccessPortofolioApisRoute(profileId, data);
+            if (nodes) {
+                this.setStatus(constant_1.HTTP_CODES.OK);
+                return nodes.reduce((liste, { apis }) => {
+                    apis.forEach((node) => {
+                        if (node)
+                            liste.push(...(0, profileUtils_1._getNodeListInfo)([node]));
+                    });
+                    return liste;
+                }, []);
             }
-            catch (error) {
-                this.setStatus(error.code || constant_1.HTTP_CODES.INTERNAL_ERROR);
-                return { message: error.message };
-            }
-        });
+            this.setStatus(constant_1.HTTP_CODES.NOT_FOUND);
+            return { message: `no profile found for ${profileId}` };
+        }
+        catch (error) {
+            this.setStatus(error.code || constant_1.HTTP_CODES.INTERNAL_ERROR);
+            return { message: error.message };
+        }
     }
-    getAuthorizedPortofolioApis(req, profileId, portofolioId) {
-        return __awaiter(this, void 0, void 0, function* () {
-            try {
-                const id = yield (0, authentication_1.getProfileId)(req);
-                const isAdmin = adminProfile_service_1.AdminProfileService.getInstance().isAdmin(id);
-                if (!isAdmin && profileId !== id)
-                    throw new AuthError_1.AuthError(constant_1.SECURITY_MESSAGES.UNAUTHORIZED);
-                const nodes = yield serviceInstance.getAuthorizedPortofolioApis(profileId, portofolioId);
-                if (nodes) {
-                    this.setStatus(constant_1.HTTP_CODES.OK);
-                    return (0, profileUtils_1._getNodeListInfo)(nodes);
-                }
-                this.setStatus(constant_1.HTTP_CODES.NOT_FOUND);
-                return { message: `no profile found for ${profileId}` };
+    async getAuthorizedPortofolioApis(req, profileId, portofolioId) {
+        try {
+            const id = await (0, authentication_1.getProfileId)(req);
+            const isAdmin = adminProfile_service_1.AdminProfileService.getInstance().isAdmin(id);
+            if (!isAdmin && profileId !== id)
+                throw new AuthError_1.AuthError(constant_1.SECURITY_MESSAGES.UNAUTHORIZED);
+            const nodes = await serviceInstance.getAuthorizedPortofolioApis(profileId, portofolioId);
+            if (nodes) {
+                this.setStatus(constant_1.HTTP_CODES.OK);
+                return (0, profileUtils_1._getNodeListInfo)(nodes);
             }
-            catch (error) {
-                this.setStatus(error.code || constant_1.HTTP_CODES.INTERNAL_ERROR);
-                return { message: error.message };
-            }
-        });
+            this.setStatus(constant_1.HTTP_CODES.NOT_FOUND);
+            return { message: `no profile found for ${profileId}` };
+        }
+        catch (error) {
+            this.setStatus(error.code || constant_1.HTTP_CODES.INTERNAL_ERROR);
+            return { message: error.message };
+        }
     }
-    unauthorizeToAccessPortofolioApis(req, profileId, data) {
-        return __awaiter(this, void 0, void 0, function* () {
-            try {
-                const isAdmin = yield (0, authentication_1.checkIfItIsAdmin)(req);
-                if (!isAdmin)
-                    throw new AuthError_1.AuthError(constant_1.SECURITY_MESSAGES.UNAUTHORIZED);
-                const nodes = yield serviceInstance.unauthorizeToAccessPortofolioApisRoute(profileId, data);
-                if (nodes) {
-                    this.setStatus(constant_1.HTTP_CODES.OK);
-                    return nodes.filter(el => el);
-                }
-                this.setStatus(constant_1.HTTP_CODES.NOT_FOUND);
-                return { message: `no profile found for ${profileId}` };
+    async unauthorizeToAccessPortofolioApis(req, profileId, data) {
+        try {
+            const isAdmin = await (0, authentication_1.checkIfItIsAdmin)(req);
+            if (!isAdmin)
+                throw new AuthError_1.AuthError(constant_1.SECURITY_MESSAGES.UNAUTHORIZED);
+            const nodes = await serviceInstance.unauthorizeProfileToAccessPortofolioApisRoute(profileId, data);
+            if (nodes) {
+                this.setStatus(constant_1.HTTP_CODES.OK);
+                return nodes.filter(el => el);
             }
-            catch (error) {
-                this.setStatus(error.code || constant_1.HTTP_CODES.INTERNAL_ERROR);
-                return { message: error.message };
-            }
-        });
+            this.setStatus(constant_1.HTTP_CODES.NOT_FOUND);
+            return { message: `no profile found for ${profileId}` };
+        }
+        catch (error) {
+            this.setStatus(error.code || constant_1.HTTP_CODES.INTERNAL_ERROR);
+            return { message: error.message };
+        }
     }
     ////////////
     //   BOS  //
     ////////////
-    getAuthorizedBos(req, profileId, portofolioId) {
-        return __awaiter(this, void 0, void 0, function* () {
-            try {
-                const id = yield (0, authentication_1.getProfileId)(req);
-                const isAdmin = adminProfile_service_1.AdminProfileService.getInstance().isAdmin(id);
-                if (!isAdmin && profileId !== id)
-                    throw new AuthError_1.AuthError(constant_1.SECURITY_MESSAGES.UNAUTHORIZED);
-                const nodes = yield serviceInstance.getBosAuthStructure(profileId, portofolioId);
-                if (nodes) {
-                    this.setStatus(constant_1.HTTP_CODES.OK);
-                    return nodes.map(node => (0, profileUtils_1._formatBosAuthRes)(node));
-                }
-                this.setStatus(constant_1.HTTP_CODES.NOT_FOUND);
-                return { message: `no profile found for ${profileId}` };
+    async getAuthorizedBos(req, profileId, portofolioId) {
+        try {
+            const id = await (0, authentication_1.getProfileId)(req);
+            const isAdmin = adminProfile_service_1.AdminProfileService.getInstance().isAdmin(id);
+            if (!isAdmin && profileId !== id)
+                throw new AuthError_1.AuthError(constant_1.SECURITY_MESSAGES.UNAUTHORIZED);
+            const nodes = await serviceInstance.getBosAuthStructure(profileId, portofolioId);
+            if (nodes) {
+                this.setStatus(constant_1.HTTP_CODES.OK);
+                return nodes.map(node => (0, profileUtils_1._formatBosAuthRes)(node));
             }
-            catch (error) {
-                this.setStatus(error.code || constant_1.HTTP_CODES.INTERNAL_ERROR);
-                return { message: error.message };
-            }
-        });
+            this.setStatus(constant_1.HTTP_CODES.NOT_FOUND);
+            return { message: `no profile found for ${profileId}` };
+        }
+        catch (error) {
+            this.setStatus(error.code || constant_1.HTTP_CODES.INTERNAL_ERROR);
+            return { message: error.message };
+        }
     }
-    authorizeToAccessBosApis(req, profileId, portofolioId, data) {
-        return __awaiter(this, void 0, void 0, function* () {
-            try {
-                const isAdmin = yield (0, authentication_1.checkIfItIsAdmin)(req);
-                if (!isAdmin)
-                    throw new AuthError_1.AuthError(constant_1.SECURITY_MESSAGES.UNAUTHORIZED);
-                const nodes = yield serviceInstance.authorizeToAccessBosApiRoute(profileId, portofolioId, data);
-                if (nodes) {
-                    this.setStatus(constant_1.HTTP_CODES.OK);
-                    return nodes.reduce((liste, { apis }) => {
-                        apis.forEach((node) => {
-                            if (node)
-                                liste.push(...(0, profileUtils_1._getNodeListInfo)([node]));
-                        });
-                        return liste;
-                    }, []);
-                }
-                this.setStatus(constant_1.HTTP_CODES.NOT_FOUND);
-                return { message: `no profile found for ${profileId}` };
+    async authorizeToAccessBosApis(req, profileId, portofolioId, data) {
+        try {
+            const isAdmin = await (0, authentication_1.checkIfItIsAdmin)(req);
+            if (!isAdmin)
+                throw new AuthError_1.AuthError(constant_1.SECURITY_MESSAGES.UNAUTHORIZED);
+            const nodes = await serviceInstance.authorizeProfileToAccessBosApiRoute(profileId, portofolioId, data);
+            if (nodes) {
+                this.setStatus(constant_1.HTTP_CODES.OK);
+                return nodes.reduce((liste, { apis }) => {
+                    apis.forEach((node) => {
+                        if (node)
+                            liste.push(...(0, profileUtils_1._getNodeListInfo)([node]));
+                    });
+                    return liste;
+                }, []);
             }
-            catch (error) {
-                this.setStatus(error.code || constant_1.HTTP_CODES.INTERNAL_ERROR);
-                return { message: error.message };
-            }
-        });
+            this.setStatus(constant_1.HTTP_CODES.NOT_FOUND);
+            return { message: `no profile found for ${profileId}` };
+        }
+        catch (error) {
+            this.setStatus(error.code || constant_1.HTTP_CODES.INTERNAL_ERROR);
+            return { message: error.message };
+        }
     }
-    getAuthorizedBosApis(req, profileId, portofolioId, bosId) {
-        return __awaiter(this, void 0, void 0, function* () {
-            try {
-                const id = yield (0, authentication_1.getProfileId)(req);
-                const isAdmin = adminProfile_service_1.AdminProfileService.getInstance().isAdmin(id);
-                if (!isAdmin && profileId !== id)
-                    throw new AuthError_1.AuthError(constant_1.SECURITY_MESSAGES.UNAUTHORIZED);
-                const nodes = yield serviceInstance.getAuthorizedBosApis(profileId, portofolioId, bosId);
-                if (nodes) {
-                    this.setStatus(constant_1.HTTP_CODES.OK);
-                    return (0, profileUtils_1._getNodeListInfo)(nodes);
-                }
-                this.setStatus(constant_1.HTTP_CODES.NOT_FOUND);
-                return { message: `no profile found for ${profileId}` };
+    async getAuthorizedBosApis(req, profileId, portofolioId, bosId) {
+        try {
+            const id = await (0, authentication_1.getProfileId)(req);
+            const isAdmin = adminProfile_service_1.AdminProfileService.getInstance().isAdmin(id);
+            if (!isAdmin && profileId !== id)
+                throw new AuthError_1.AuthError(constant_1.SECURITY_MESSAGES.UNAUTHORIZED);
+            const nodes = await serviceInstance.getAuthorizedBosApis(profileId, portofolioId, bosId);
+            if (nodes) {
+                this.setStatus(constant_1.HTTP_CODES.OK);
+                return (0, profileUtils_1._getNodeListInfo)(nodes);
             }
-            catch (error) {
-                this.setStatus(error.code || constant_1.HTTP_CODES.INTERNAL_ERROR);
-                return { message: error.message };
-            }
-        });
+            this.setStatus(constant_1.HTTP_CODES.NOT_FOUND);
+            return { message: `no profile found for ${profileId}` };
+        }
+        catch (error) {
+            this.setStatus(error.code || constant_1.HTTP_CODES.INTERNAL_ERROR);
+            return { message: error.message };
+        }
     }
-    unauthorizeToAccessBosApis(req, profileId, portofolioId, data) {
-        return __awaiter(this, void 0, void 0, function* () {
-            try {
-                const isAdmin = yield (0, authentication_1.checkIfItIsAdmin)(req);
-                if (!isAdmin)
-                    throw new AuthError_1.AuthError(constant_1.SECURITY_MESSAGES.UNAUTHORIZED);
-                const nodes = yield serviceInstance.unauthorizeToAccessBosApiRoute(profileId, portofolioId, data);
-                if (nodes) {
-                    this.setStatus(constant_1.HTTP_CODES.OK);
-                    return nodes.filter(el => el);
-                }
-                this.setStatus(constant_1.HTTP_CODES.NOT_FOUND);
-                return { message: `no profile found for ${profileId}` };
+    async unauthorizeToAccessBosApis(req, profileId, portofolioId, data) {
+        try {
+            const isAdmin = await (0, authentication_1.checkIfItIsAdmin)(req);
+            if (!isAdmin)
+                throw new AuthError_1.AuthError(constant_1.SECURITY_MESSAGES.UNAUTHORIZED);
+            const nodes = await serviceInstance.unauthorizeProfileToAccessBosApiRoute(profileId, portofolioId, data);
+            if (nodes) {
+                this.setStatus(constant_1.HTTP_CODES.OK);
+                return nodes.filter(el => el);
             }
-            catch (error) {
-                this.setStatus(error.code || constant_1.HTTP_CODES.INTERNAL_ERROR);
-                return { message: error.message };
-            }
-        });
+            this.setStatus(constant_1.HTTP_CODES.NOT_FOUND);
+            return { message: `no profile found for ${profileId}` };
+        }
+        catch (error) {
+            this.setStatus(error.code || constant_1.HTTP_CODES.INTERNAL_ERROR);
+            return { message: error.message };
+        }
     }
 };
 exports.AppProfileController = AppProfileController;

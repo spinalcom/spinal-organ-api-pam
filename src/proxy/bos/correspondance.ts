@@ -21,6 +21,8 @@
  * with this file. If not, see
  * <http://resources.spinalcom.com/licenses.pdf>.
  */
+
+
 export const correspondanceObj = {
     "context/{idContext}/nodeTypeList/{type}": "context/{id}/nodesOfType/{type}",
     "geographicContext": "geographicContext/tree",

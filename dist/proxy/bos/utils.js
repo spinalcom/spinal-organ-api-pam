@@ -22,32 +22,35 @@
  * with this file. If not, see
  * <http://resources.spinalcom.com/licenses.pdf>.
  */
-var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
-    function adopt(value) { return value instanceof P ? value : new P(function (resolve) { resolve(value); }); }
-    return new (P || (P = Promise))(function (resolve, reject) {
-        function fulfilled(value) { try { step(generator.next(value)); } catch (e) { reject(e); } }
-        function rejected(value) { try { step(generator["throw"](value)); } catch (e) { reject(e); } }
-        function step(result) { result.done ? resolve(result.value) : adopt(result.value).then(fulfilled, rejected); }
-        step((generator = generator.apply(thisArg, _arguments || [])).next());
-    });
-};
 Object.defineProperty(exports, "__esModule", { value: true });
-exports._get_method = exports.profileHasAccessToBuilding = exports.proxyOptions = exports.tryToAccessBuildingInfo = exports.canAccess = exports.formatUri = exports.getProfileBuildings = exports._formatBuildingRes = exports.tryToDownloadSvf = void 0;
+exports.proxyOptions = void 0;
+exports.isTryingToDownloadSvf = isTryingToDownloadSvf;
+exports._formatBuildingResponse = _formatBuildingResponse;
+exports.getBuildingsAuthorizedToProfile = getBuildingsAuthorizedToProfile;
+exports.getAppProfileBuildings = getAppProfileBuildings;
+exports.getUserProfileBuildings = getUserProfileBuildings;
+exports.formatUri = formatUri;
+exports.canAccess = canAccess;
+exports.tryToAccessBuildingInfo = tryToAccessBuildingInfo;
+exports.profileHasAccessToBuilding = profileHasAccessToBuilding;
+exports.profileHasAccessToApi = profileHasAccessToApi;
+exports._get_method = _get_method;
+exports.getProfileIdInTokenInfo = getProfileIdInTokenInfo;
 const constant_1 = require("../../constant");
 const services_1 = require("../../services");
 const utils_1 = require("../../utils/pam_v1_utils/utils");
 const correspondance_1 = require("./correspondance");
 const api_exception_1 = require("../../utils/pam_v1_utils/api_exception");
+const authorization_service_1 = require("../../services/authorization.service");
 const apiServerEndpoint = "/api/v1/";
-function tryToDownloadSvf(req) {
+function isTryingToDownloadSvf(req) {
     if (/\BIM\/file/.test(req.endpoint)) {
         req["endpoint"] = req.endpoint.replace("/api/v1", "");
         return true;
     }
     return false;
 }
-exports.tryToDownloadSvf = tryToDownloadSvf;
-function _formatBuildingRes(building) {
+function _formatBuildingResponse(building) {
     return {
         name: building.name,
         _id: building.id,
@@ -59,50 +62,67 @@ function _formatBuildingRes(building) {
         localisation: building.location,
     };
 }
-exports._formatBuildingRes = _formatBuildingRes;
-function getProfileBuildings(profileId, isApp) {
-    return __awaiter(this, void 0, void 0, function* () {
-        const instance = isApp ? services_1.AppProfileService.getInstance() : services_1.UserProfileService.getInstance();
-        const buildings = yield instance.getAllAuthorizedBos(profileId);
-        return buildings.map((el) => el.info.get());
-    });
+async function getBuildingsAuthorizedToProfile(tokenInfo) {
+    if (services_1.TokenService.getInstance().isAppToken(tokenInfo))
+        return getAppProfileBuildings(tokenInfo);
+    return getUserProfileBuildings(tokenInfo);
 }
-exports.getProfileBuildings = getProfileBuildings;
+async function getAppProfileBuildings(tokenInfo) {
+    const instance = services_1.AppProfileService.getInstance();
+    const profileId = tokenInfo.profile.appProfileBosConfigId;
+    const buildings = await instance.getAllAuthorizedBos(profileId);
+    return buildings.map((el) => el.info.get());
+}
+async function getUserProfileBuildings(tokenInfo) {
+    const instance = services_1.UserProfileService.getInstance();
+    const profileId = tokenInfo.profile.userProfileBosConfigId || tokenInfo.profile.profileId;
+    const buildings = await instance.getAllAuthorizedBos(profileId);
+    return buildings.map((el) => el.info.get());
+}
 function formatUri(argUrl, uri) {
-    const base = argUrl.replace(new RegExp(`^${uri}*/`), (el) => "");
-    let url = base.split("/").slice(1).join("/");
+    const base = argUrl.replace(new RegExp(`^${uri}*/`), (el) => ""); // Remove the base URI from the start of the URL
+    let url = base.split("/").slice(1).join("/"); // Remove the first segment of the URL, which is the building ID
     let query = "";
+    // If the URL contains a query string, separate it from the path
     if (url.includes("?")) {
         query = url.slice(url.indexOf("?"));
         url = url.substring(0, url.indexOf("?"));
     }
-    const correspondance = _getCorrespondance(url);
+    const correspondance = _getCorrespondance(url); // Get the corresponding path from the correspondance object
+    // Reconstruct the URL with the base path and query string if it exists
     return (/^api\/v1/.test(correspondance) ? "/" + correspondance : apiServerEndpoint + correspondance) + query;
 }
-exports.formatUri = formatUri;
-function canAccess(buildingId, api, profileId, isAppProfile) {
-    return __awaiter(this, void 0, void 0, function* () {
-        const buildingAccess = yield profileHasAccessToBuilding(profileId, buildingId, isAppProfile);
-        if (!buildingAccess)
-            return false;
-        if (!isAppProfile || tryToAccessBuildingInfo(api))
-            return true;
-        if (api.route.includes("?"))
-            api.route = api.route.substring(0, api.route.indexOf("?"));
-        const routeFound = _hasAccessToApiRoute(buildingAccess, api);
-        if (!routeFound)
-            return false;
+async function canAccess(buildingId, api, profileId, isAppProfile) {
+    const buildingAccess = await profileHasAccessToBuilding(profileId, buildingId, isAppProfile);
+    if (!buildingAccess)
+        return false;
+    if (!isAppProfile || tryToAccessBuildingInfo(api))
         return true;
-    });
+    const apiNode = await services_1.APIService.getInstance().getApiRouteByRoute(api, constant_1.BUILDING_API_GROUP_NAME);
+    if (!apiNode)
+        return false;
+    const buildingHasApi = await services_1.BuildingService.getInstance().buildingHasApi(buildingId, apiNode.getId().get());
+    if (!buildingHasApi)
+        return false;
+    const access = await profileHasAccessToApi(profileId, apiNode.getId().get(), isAppProfile);
+    return Boolean(access);
+    // const buildingAccess = await profileHasAccessToBuilding(profileId, buildingId, isAppProfile);
+    // if (!buildingAccess) return false;
+    // if (!isAppProfile || tryToAccessBuildingInfo(api)) return true;
+    // if (!apiNode) return false;
+    // const hasApi = await BuildingService.getInstance().buildingHasApi(buildingId, apiNode.getId().get());
+    // if (!hasApi) return false;
+    // const apiAccess = profileHasAccessToApi(profileId, apiNode.getId().get(), isAppProfile);
+    // const routeFound = _hasAccessToApiRoute(buildingAccess, api);
+    // if (!routeFound) return false;
+    // return true;
 }
-exports.canAccess = canAccess;
 function tryToAccessBuildingInfo(api) {
     if (api.method.toUpperCase() !== "GET")
         return false;
     const reqWithOutApi = api.route.replace("/api/v1", "");
     return reqWithOutApi === "/" || reqWithOutApi.length == 0;
 }
-exports.tryToAccessBuildingInfo = tryToAccessBuildingInfo;
 const proxyOptions = (useV1) => {
     return {
         memoizeHost: false,
@@ -133,13 +153,18 @@ const proxyOptions = (useV1) => {
     };
 };
 exports.proxyOptions = proxyOptions;
-function profileHasAccessToBuilding(profileId, buildingId, isAppProfile) {
-    return __awaiter(this, void 0, void 0, function* () {
-        const profile = isAppProfile ? yield services_1.AppProfileService.getInstance().getAppProfile(profileId) : yield services_1.UserProfileService.getInstance().getUserProfile(profileId);
-        return _hasAccessToBuilding(profile, buildingId);
-    });
+async function profileHasAccessToBuilding(profileId, buildingId, isAppProfile) {
+    const instance = isAppProfile ? services_1.AppProfileService.getInstance() : services_1.UserProfileService.getInstance();
+    const profile = await instance.getProfileNode(profileId);
+    // return _hasAccessToBuilding(profile, buildingId);
+    return authorization_service_1.default.getInstance().profileHasAccessToNode(profile, buildingId);
 }
-exports.profileHasAccessToBuilding = profileHasAccessToBuilding;
+async function profileHasAccessToApi(profileId, buildingId, isAppProfile) {
+    const instance = isAppProfile ? services_1.AppProfileService.getInstance() : services_1.UserProfileService.getInstance();
+    const profile = await instance.getProfileNode(profileId);
+    // return _hasAccessToBuilding(profile, buildingId);
+    return authorization_service_1.default.getInstance().profileHasAccessToNode(profile, buildingId);
+}
 ///////////////////////////////////
 //            PRIVATES           //
 ///////////////////////////////////
@@ -198,5 +223,11 @@ function _get_method(method, statusCode) {
             return "READ";
     }
 }
-exports._get_method = _get_method;
+function getProfileIdInTokenInfo(tokenInfo) {
+    if (services_1.TokenService.getInstance().isAppToken(tokenInfo))
+        return tokenInfo.profile.appProfileBosConfigId;
+    if (services_1.TokenService.getInstance().isUserToken(tokenInfo))
+        return tokenInfo.profile.userProfileBosConfigId;
+    return tokenInfo.profile.profileId;
+}
 //# sourceMappingURL=utils.js.map

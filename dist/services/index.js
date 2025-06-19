@@ -37,7 +37,7 @@ var __exportStar = (this && this.__exportStar) || function(m, exports) {
     for (var p in m) if (p !== "default" && !Object.prototype.hasOwnProperty.call(exports, p)) __createBinding(exports, m, p);
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-__exportStar(require("./configFile.service"), exports);
+__exportStar(require("../utils/servervicesInitializer"), exports);
 __exportStar(require("./apis.service"), exports);
 __exportStar(require("./apps.service"), exports);
 __exportStar(require("./appProfile.service"), exports);
@@ -49,9 +49,8 @@ __exportStar(require("./digitalTwin.service"), exports);
 __exportStar(require("./authentification.service"), exports);
 __exportStar(require("./portofolio.service"), exports);
 __exportStar(require("./userList.services"), exports);
-__exportStar(require("./appConnectedList.services"), exports);
+__exportStar(require("./appConnectedList.service"), exports);
 __exportStar(require("./token.service"), exports);
 __exportStar(require("./log.service"), exports);
 __exportStar(require("./webSocketLogs.service"), exports);
-// export * from "./graph.service";
 //# sourceMappingURL=index.js.map

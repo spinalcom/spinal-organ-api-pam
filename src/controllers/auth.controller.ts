@@ -42,7 +42,7 @@ export class AuthController extends Controller {
 
     // @Security(SECURITY_NAME.all)
     @Post("/auth")
-    public async authenticate(@Body() credential: IUserCredential | IAppCredential | IOAuth2Credential): Promise<string | IApplicationToken | IUserToken | { message: string }> {
+    public async authenticate(@Body() credential: IUserCredential): Promise<string | IUserToken | { message: string }> {
         try {
             const { code, data } = await serviceInstance.authenticate(credential);
             this.setStatus(code);
@@ -54,32 +54,16 @@ export class AuthController extends Controller {
     }
 
 
-    // @Security(SECURITY_NAME.bearerAuth)
-    // @Post("/register_admin")
-    // public async registerToAdmin(@Request() req: express.Request, @Body() data: { pamInfo: IPamInfo, adminInfo: IAdmin }): Promise<IPamCredential | { message: string }> {
-    //     try {
-    //         const isAdmin = await checkIfItIsAdmin(req);
-    //         if (!isAdmin) throw new AuthError(SECURITY_MESSAGES.UNAUTHORIZED);
-
-    //         const registeredData = await serviceInstance.registerToAdmin(data.pamInfo, data.adminInfo);
-    //         await serviceInstance.sendDataToAdmin();
-    //         this.setStatus(HTTP_CODES.OK)
-    //         return registeredData;
-    //     } catch (error) {
-    //         this.setStatus(error.code || HTTP_CODES.INTERNAL_ERROR);
-    //         return { message: error.message };
-    //     }
-    // }
 
     @Security(SECURITY_NAME.bearerAuth)
     @Post("/register_admin")
-    public async registerToAdmin(@Request() req: express.Request, @Body() data: IAdmin): Promise<IPamCredential | { message: string }> {
+    public async registerPamInAuthPlatform(@Request() req: express.Request, @Body() data: IAdmin): Promise<IPamCredential | { message: string }> {
         try {
             const isAdmin = await checkIfItIsAdmin(req);
             if (!isAdmin) throw new AuthError(SECURITY_MESSAGES.UNAUTHORIZED);
 
-            const registeredData = await serviceInstance.registerToAdmin(data.urlAdmin, data.clientId, data.clientSecret);
-            await serviceInstance.sendDataToAdmin();
+            const registeredData = await serviceInstance.registerPamInAuthPlatform(data.urlAdmin, data.clientId, data.clientSecret);
+            await serviceInstance.sendPamInfoToAuth();
             this.setStatus(HTTP_CODES.OK)
             return registeredData;
         } catch (error) {
@@ -90,12 +74,12 @@ export class AuthController extends Controller {
 
     @Security(SECURITY_NAME.bearerAuth)
     @Post("/update_platform_token")
-    public async updatePlatformTokenData(@Request() req: express.Request): Promise<{ token: string; code: number } | { message: string }> {
+    public async updatePamTokenInAuthPlatform(@Request() req: express.Request): Promise<{ token: string; code: number } | { message: string }> {
         try {
             const isAdmin = await checkIfItIsAdmin(req);
             if (!isAdmin) throw new AuthError(SECURITY_MESSAGES.UNAUTHORIZED);
 
-            const data = await serviceInstance.updatePlatformTokenData();
+            const data = await serviceInstance.updatePamTokenInAuthPlatform();
 
             this.setStatus(HTTP_CODES.OK)
             return data;
@@ -113,7 +97,7 @@ export class AuthController extends Controller {
             if (!isAdmin) throw new AuthError(SECURITY_MESSAGES.UNAUTHORIZED);
 
 
-            const bosCredential = await serviceInstance.getPamToAdminCredential();
+            const bosCredential = await serviceInstance.getPamCredentials();
             if (bosCredential) {
                 this.setStatus(HTTP_CODES.OK)
                 return bosCredential;
@@ -135,7 +119,7 @@ export class AuthController extends Controller {
             if (!isAdmin) throw new AuthError(SECURITY_MESSAGES.UNAUTHORIZED);
 
 
-            const deleted = await serviceInstance.deleteCredentials();
+            const deleted = await serviceInstance.disconnectPamFromAuthPlateform();
             const status = deleted ? HTTP_CODES.OK : HTTP_CODES.BAD_REQUEST;
             const message = deleted ? "deleted with success" : "something went wrong, please check your input data";
             this.setStatus(status);
@@ -154,7 +138,7 @@ export class AuthController extends Controller {
             if (!isAdmin) throw new AuthError(SECURITY_MESSAGES.UNAUTHORIZED);
 
 
-            const adminCredential = await serviceInstance.getAdminCredential();
+            const adminCredential = await serviceInstance.getAuthCredentials();
             if (adminCredential) {
                 this.setStatus(HTTP_CODES.OK)
                 return adminCredential;
@@ -179,7 +163,7 @@ export class AuthController extends Controller {
                 if (!isAuthPlatform) throw new AuthError(SECURITY_MESSAGES.UNAUTHORIZED);
             }
 
-            const resp = await serviceInstance.sendDataToAdmin(true);
+            const resp = await serviceInstance.sendPamInfoToAuth(true);
             this.setStatus(HTTP_CODES.OK)
             return { message: "updated" };
         } catch (error) {

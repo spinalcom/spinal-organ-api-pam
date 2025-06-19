@@ -34,15 +34,6 @@ var __metadata = (this && this.__metadata) || function (k, v) {
 var __param = (this && this.__param) || function (paramIndex, decorator) {
     return function (target, key) { decorator(target, key, paramIndex); }
 };
-var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
-    function adopt(value) { return value instanceof P ? value : new P(function (resolve) { resolve(value); }); }
-    return new (P || (P = Promise))(function (resolve, reject) {
-        function fulfilled(value) { try { step(generator.next(value)); } catch (e) { reject(e); } }
-        function rejected(value) { try { step(generator["throw"](value)); } catch (e) { reject(e); } }
-        function step(result) { result.done ? resolve(result.value) : adopt(result.value).then(fulfilled, rejected); }
-        step((generator = generator.apply(thisArg, _arguments || [])).next());
-    });
-};
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.PortofolioController = void 0;
 const services_1 = require("../services");
@@ -52,431 +43,388 @@ const express = require("express");
 const authentication_1 = require("../security/authentication");
 const AuthError_1 = require("../security/AuthError");
 const authorization_service_1 = require("../services/authorization.service");
-const serviceInstance = services_1.BuildingService.getInstance();
+const buildingUtils_1 = require("../utils/buildingUtils");
+const buildingServiceInstance = services_1.BuildingService.getInstance();
 const portofolioInstance = services_1.PortofolioService.getInstance();
 let PortofolioController = class PortofolioController extends tsoa_1.Controller {
     constructor() {
         super();
     }
-    addPortofolio(req, data) {
-        return __awaiter(this, void 0, void 0, function* () {
-            try {
-                const isAdmin = yield (0, authentication_1.checkIfItIsAdmin)(req);
-                if (!isAdmin)
-                    throw new AuthError_1.AuthError(constant_1.SECURITY_MESSAGES.UNAUTHORIZED);
-                const { name, appIds, apiIds } = data;
-                const res = yield portofolioInstance.addPortofolio(name, appIds, apiIds);
-                const details = portofolioInstance._formatDetails(res);
-                this.setStatus(constant_1.HTTP_CODES.CREATED);
-                return details;
-            }
-            catch (error) {
-                this.setStatus(error.code || constant_1.HTTP_CODES.INTERNAL_ERROR);
-                return { message: error.message };
-            }
-        });
+    async addPortofolio(req, data) {
+        try {
+            const isAdmin = await (0, authentication_1.checkIfItIsAdmin)(req);
+            if (!isAdmin)
+                throw new AuthError_1.AuthError(constant_1.SECURITY_MESSAGES.UNAUTHORIZED);
+            const { name, appIds, apiIds } = data;
+            const res = await portofolioInstance.createPortofolio(name, appIds, apiIds);
+            const details = portofolioInstance._formatDetails(res);
+            this.setStatus(constant_1.HTTP_CODES.CREATED);
+            return details;
+        }
+        catch (error) {
+            this.setStatus(error.code || constant_1.HTTP_CODES.INTERNAL_ERROR);
+            return { message: error.message };
+        }
     }
-    updatePortofolio(req, portofolioId, data) {
-        return __awaiter(this, void 0, void 0, function* () {
-            try {
-                const isAdmin = yield (0, authentication_1.checkIfItIsAdmin)(req);
-                if (!isAdmin)
-                    throw new AuthError_1.AuthError(constant_1.SECURITY_MESSAGES.UNAUTHORIZED);
-                const res = yield portofolioInstance.updateProtofolio(portofolioId, data);
-                const details = portofolioInstance._formatDetails(res);
-                this.setStatus(constant_1.HTTP_CODES.OK);
-                return details;
-            }
-            catch (error) {
-                this.setStatus(error.code || constant_1.HTTP_CODES.INTERNAL_ERROR);
-                return { message: error.message };
-            }
-        });
+    async updatePortofolio(req, portofolioId, data) {
+        try {
+            const isAdmin = await (0, authentication_1.checkIfItIsAdmin)(req);
+            if (!isAdmin)
+                throw new AuthError_1.AuthError(constant_1.SECURITY_MESSAGES.UNAUTHORIZED);
+            const res = await portofolioInstance.updatePortofolio(portofolioId, data);
+            const details = portofolioInstance._formatDetails(res);
+            this.setStatus(constant_1.HTTP_CODES.OK);
+            return details;
+        }
+        catch (error) {
+            this.setStatus(error.code || constant_1.HTTP_CODES.INTERNAL_ERROR);
+            return { message: error.message };
+        }
     }
-    renamePortofolio(req, id, data) {
-        return __awaiter(this, void 0, void 0, function* () {
-            try {
-                const isAdmin = yield (0, authentication_1.checkIfItIsAdmin)(req);
-                if (!isAdmin)
-                    throw new AuthError_1.AuthError(constant_1.SECURITY_MESSAGES.UNAUTHORIZED);
-                const success = yield services_1.PortofolioService.getInstance().renamePortofolio(id, data.name);
-                const status = success ? constant_1.HTTP_CODES.OK : constant_1.HTTP_CODES.BAD_REQUEST;
-                const message = success ? "renamed with success" : "Something went wrong, please check your input data";
-                this.setStatus(status);
-                return { message };
-            }
-            catch (error) {
-                this.setStatus(error.code || constant_1.HTTP_CODES.INTERNAL_ERROR);
-                return { message: error.message };
-            }
-        });
+    async renamePortofolio(req, id, data) {
+        try {
+            const isAdmin = await (0, authentication_1.checkIfItIsAdmin)(req);
+            if (!isAdmin)
+                throw new AuthError_1.AuthError(constant_1.SECURITY_MESSAGES.UNAUTHORIZED);
+            const success = await services_1.PortofolioService.getInstance().renamePortofolio(id, data.name);
+            const status = success ? constant_1.HTTP_CODES.OK : constant_1.HTTP_CODES.BAD_REQUEST;
+            const message = success ? "renamed with success" : "Something went wrong, please check your input data";
+            this.setStatus(status);
+            return { message };
+        }
+        catch (error) {
+            this.setStatus(error.code || constant_1.HTTP_CODES.INTERNAL_ERROR);
+            return { message: error.message };
+        }
     }
-    getAllPortofolio(req) {
-        return __awaiter(this, void 0, void 0, function* () {
-            try {
-                const isAdmin = yield (0, authentication_1.checkIfItIsAdmin)(req);
-                if (!isAdmin)
-                    throw new AuthError_1.AuthError(constant_1.SECURITY_MESSAGES.UNAUTHORIZED);
-                const portofolios = yield portofolioInstance.getAllPortofolio();
-                this.setStatus(constant_1.HTTP_CODES.OK);
-                return portofolios.map(el => el.info.get());
-            }
-            catch (error) {
-                this.setStatus(error.code || constant_1.HTTP_CODES.INTERNAL_ERROR);
-                return { message: error.message };
-            }
-        });
+    async getAllPortofolio(req) {
+        try {
+            const isAdmin = await (0, authentication_1.checkIfItIsAdmin)(req);
+            if (!isAdmin)
+                throw new AuthError_1.AuthError(constant_1.SECURITY_MESSAGES.UNAUTHORIZED);
+            const portofolios = await portofolioInstance.getAllPortofolio();
+            this.setStatus(constant_1.HTTP_CODES.OK);
+            return portofolios.map(el => el.info.get());
+        }
+        catch (error) {
+            this.setStatus(error.code || constant_1.HTTP_CODES.INTERNAL_ERROR);
+            return { message: error.message };
+        }
     }
-    getPortofolio(req, id) {
-        return __awaiter(this, void 0, void 0, function* () {
-            try {
-                const profile = yield (0, authentication_1.getProfileNode)(req);
-                const portofolio = yield authorization_service_1.default.getInstance().profileHasAccess(profile, id);
-                if (!portofolio)
-                    throw new AuthError_1.AuthError(constant_1.SECURITY_MESSAGES.UNAUTHORIZED);
-                // const portofolio = await portofolioInstance.getPortofolio(id);
-                this.setStatus(constant_1.HTTP_CODES.OK);
-                return portofolio.info.get();
-            }
-            catch (error) {
-                this.setStatus(error.code || constant_1.HTTP_CODES.INTERNAL_ERROR);
-                return { message: error.message };
-            }
-        });
+    async getPortofolio(req, id) {
+        try {
+            const profile = await (0, authentication_1.getProfileNode)(req);
+            const portofolio = await authorization_service_1.default.getInstance().profileHasAccessToNode(profile, id);
+            if (!portofolio)
+                throw new AuthError_1.AuthError(constant_1.SECURITY_MESSAGES.UNAUTHORIZED);
+            // const portofolio = await portofolioInstance.getPortofolio(id);
+            this.setStatus(constant_1.HTTP_CODES.OK);
+            return portofolio.info.get();
+        }
+        catch (error) {
+            this.setStatus(error.code || constant_1.HTTP_CODES.INTERNAL_ERROR);
+            return { message: error.message };
+        }
     }
-    getPortofolioDetails(req, id) {
-        return __awaiter(this, void 0, void 0, function* () {
-            try {
-                const isAdmin = yield (0, authentication_1.checkIfItIsAdmin)(req);
-                if (!isAdmin)
-                    throw new AuthError_1.AuthError(constant_1.SECURITY_MESSAGES.UNAUTHORIZED);
-                const res = yield portofolioInstance.getPortofolioDetails(id);
-                const details = portofolioInstance._formatDetails(res);
-                this.setStatus(constant_1.HTTP_CODES.OK);
-                return details;
-            }
-            catch (error) {
-                this.setStatus(error.code || constant_1.HTTP_CODES.INTERNAL_ERROR);
-                return { message: error.message };
-            }
-        });
+    async getPortofolioDetails(req, id) {
+        try {
+            const isAdmin = await (0, authentication_1.checkIfItIsAdmin)(req);
+            if (!isAdmin)
+                throw new AuthError_1.AuthError(constant_1.SECURITY_MESSAGES.UNAUTHORIZED);
+            const res = await portofolioInstance.getPortofolioDetails(id);
+            const details = portofolioInstance._formatDetails(res);
+            this.setStatus(constant_1.HTTP_CODES.OK);
+            return details;
+        }
+        catch (error) {
+            this.setStatus(error.code || constant_1.HTTP_CODES.INTERNAL_ERROR);
+            return { message: error.message };
+        }
     }
-    getAllPortofoliosDetails(req) {
-        return __awaiter(this, void 0, void 0, function* () {
-            try {
-                const isAdmin = yield (0, authentication_1.checkIfItIsAdmin)(req);
-                if (!isAdmin)
-                    throw new AuthError_1.AuthError(constant_1.SECURITY_MESSAGES.UNAUTHORIZED);
-                const portofolios = yield portofolioInstance.getAllPortofoliosDetails();
-                const details = portofolios.map((res) => portofolioInstance._formatDetails(res));
-                this.setStatus(constant_1.HTTP_CODES.OK);
-                return details;
-            }
-            catch (error) {
-                this.setStatus(error.code || constant_1.HTTP_CODES.INTERNAL_ERROR);
-                return { message: error.message };
-            }
-        });
+    async getAllPortofoliosDetails(req) {
+        try {
+            const isAdmin = await (0, authentication_1.checkIfItIsAdmin)(req);
+            if (!isAdmin)
+                throw new AuthError_1.AuthError(constant_1.SECURITY_MESSAGES.UNAUTHORIZED);
+            const portofolios = await portofolioInstance.getAllPortofoliosDetails();
+            const details = portofolios.map((res) => portofolioInstance._formatDetails(res));
+            this.setStatus(constant_1.HTTP_CODES.OK);
+            return details;
+        }
+        catch (error) {
+            this.setStatus(error.code || constant_1.HTTP_CODES.INTERNAL_ERROR);
+            return { message: error.message };
+        }
     }
-    removePortofolio(req, id) {
-        return __awaiter(this, void 0, void 0, function* () {
-            try {
-                const isAdmin = yield (0, authentication_1.checkIfItIsAdmin)(req);
-                if (!isAdmin)
-                    throw new AuthError_1.AuthError(constant_1.SECURITY_MESSAGES.UNAUTHORIZED);
-                const success = yield portofolioInstance.removePortofolio(id);
-                const status = success ? constant_1.HTTP_CODES.OK : constant_1.HTTP_CODES.BAD_REQUEST;
-                const message = success ? "deleted with success" : "Something went wrong, please check your input data";
-                this.setStatus(status);
-                return { message };
-            }
-            catch (error) {
-                this.setStatus(error.code || constant_1.HTTP_CODES.INTERNAL_ERROR);
-                return { message: error.message };
-            }
-        });
+    async removePortofolio(req, id) {
+        try {
+            const isAdmin = await (0, authentication_1.checkIfItIsAdmin)(req);
+            if (!isAdmin)
+                throw new AuthError_1.AuthError(constant_1.SECURITY_MESSAGES.UNAUTHORIZED);
+            const success = await portofolioInstance.removePortofolio(id);
+            const status = success ? constant_1.HTTP_CODES.OK : constant_1.HTTP_CODES.BAD_REQUEST;
+            const message = success ? "deleted with success" : "Something went wrong, please check your input data";
+            this.setStatus(status);
+            return { message };
+        }
+        catch (error) {
+            this.setStatus(error.code || constant_1.HTTP_CODES.INTERNAL_ERROR);
+            return { message: error.message };
+        }
     }
-    addBuilding(req, portofolioId, body) {
-        return __awaiter(this, void 0, void 0, function* () {
-            try {
-                const isAdmin = yield (0, authentication_1.checkIfItIsAdmin)(req);
-                if (!isAdmin)
-                    throw new AuthError_1.AuthError(constant_1.SECURITY_MESSAGES.UNAUTHORIZED);
-                const node = yield serviceInstance.addBuildingToPortofolio(portofolioId, body);
-                if (!node) {
-                    this.setStatus(constant_1.HTTP_CODES.BAD_REQUEST);
-                    return { message: "Something went wrong, please check your input data" };
-                }
-                this.setStatus(constant_1.HTTP_CODES.OK);
-                return services_1.BuildingService.getInstance().formatBuildingStructure(node);
+    async addBuilding(req, portofolioId, body) {
+        try {
+            const isAdmin = await (0, authentication_1.checkIfItIsAdmin)(req);
+            if (!isAdmin)
+                throw new AuthError_1.AuthError(constant_1.SECURITY_MESSAGES.UNAUTHORIZED);
+            const node = await buildingServiceInstance.linkBuildingToPortofolio(portofolioId, body);
+            if (!node) {
+                this.setStatus(constant_1.HTTP_CODES.BAD_REQUEST);
+                return { message: "Something went wrong, please check your input data" };
             }
-            catch (error) {
-                this.setStatus(error.code || constant_1.HTTP_CODES.INTERNAL_ERROR);
-                return { message: error.message };
-            }
-        });
+            this.setStatus(constant_1.HTTP_CODES.OK);
+            return (0, buildingUtils_1.formatBuildingStructure)(node);
+        }
+        catch (error) {
+            this.setStatus(error.code || constant_1.HTTP_CODES.INTERNAL_ERROR);
+            return { message: error.message };
+        }
     }
-    getBuilding(req, portofolioId, buildingId) {
-        return __awaiter(this, void 0, void 0, function* () {
-            try {
-                const profile = yield (0, authentication_1.getProfileNode)(req);
-                const node = yield serviceInstance.getBuildingFromPortofolio(portofolioId, buildingId);
-                if (node) {
-                    const hasAccess = yield authorization_service_1.default.getInstance().profileHasAccess(profile, node);
-                    if (!hasAccess)
-                        throw new AuthError_1.AuthError(constant_1.SECURITY_MESSAGES.UNAUTHORIZED);
-                    const data = yield serviceInstance.formatBuilding(node.info.get());
-                    this.setStatus(constant_1.HTTP_CODES.OK);
-                    return data;
-                }
-                ;
-                this.setStatus(constant_1.HTTP_CODES.NOT_FOUND);
-                return { message: `no Building found for ${buildingId}` };
-            }
-            catch (error) {
-                this.setStatus(error.code || constant_1.HTTP_CODES.INTERNAL_ERROR);
-                return { message: error.message };
-            }
-        });
-    }
-    getAllBuilding(req, portofolioId) {
-        return __awaiter(this, void 0, void 0, function* () {
-            try {
-                const isAdmin = yield (0, authentication_1.checkIfItIsAdmin)(req);
-                if (!isAdmin)
+    async getBuilding(req, portofolioId, buildingId) {
+        try {
+            const profile = await (0, authentication_1.getProfileNode)(req);
+            const node = await buildingServiceInstance.getBuildingFromPortofolio(portofolioId, buildingId);
+            if (node) {
+                const hasAccess = await authorization_service_1.default.getInstance().profileHasAccessToNode(profile, node);
+                if (!hasAccess)
                     throw new AuthError_1.AuthError(constant_1.SECURITY_MESSAGES.UNAUTHORIZED);
-                const nodes = (yield serviceInstance.getAllBuildingsFromPortofolio(portofolioId)) || [];
-                const promises = nodes.map(el => serviceInstance.formatBuilding(el.info.get()));
-                const data = yield Promise.all(promises);
+                const data = await (0, buildingUtils_1.formatBuildingNode)(node);
                 this.setStatus(constant_1.HTTP_CODES.OK);
                 return data;
             }
-            catch (error) {
-                this.setStatus(error.code || constant_1.HTTP_CODES.INTERNAL_ERROR);
-                return { message: error.message };
-            }
-        });
+            ;
+            this.setStatus(constant_1.HTTP_CODES.NOT_FOUND);
+            return { message: `no Building found for ${buildingId}` };
+        }
+        catch (error) {
+            this.setStatus(error.code || constant_1.HTTP_CODES.INTERNAL_ERROR);
+            return { message: error.message };
+        }
     }
-    deleteBuildingFromPortofolio(req, portofolioId, data) {
-        return __awaiter(this, void 0, void 0, function* () {
-            try {
-                const isAdmin = yield (0, authentication_1.checkIfItIsAdmin)(req);
-                if (!isAdmin)
-                    throw new AuthError_1.AuthError(constant_1.SECURITY_MESSAGES.UNAUTHORIZED);
-                const ids = yield portofolioInstance.removeBuildingFromPortofolio(portofolioId, data.buildingIds);
-                if (!ids || ids.length === 0) {
-                    this.setStatus(constant_1.HTTP_CODES.BAD_REQUEST);
-                    return { message: "Something went wrong, please check your input data" };
-                }
-                this.setStatus(constant_1.HTTP_CODES.OK);
-                return { message: "building deleted", ids };
-            }
-            catch (error) {
-                this.setStatus(error.code || constant_1.HTTP_CODES.INTERNAL_ERROR);
-                return { message: error.message };
-            }
-        });
+    async getAllBuilding(req, portofolioId) {
+        try {
+            const isAdmin = await (0, authentication_1.checkIfItIsAdmin)(req);
+            if (!isAdmin)
+                throw new AuthError_1.AuthError(constant_1.SECURITY_MESSAGES.UNAUTHORIZED);
+            const nodes = await buildingServiceInstance.getAllBuildingsFromPortofolio(portofolioId) || [];
+            const promises = nodes.map(el => (0, buildingUtils_1.formatBuildingNode)(el));
+            const data = await Promise.all(promises);
+            this.setStatus(constant_1.HTTP_CODES.OK);
+            return data;
+        }
+        catch (error) {
+            this.setStatus(error.code || constant_1.HTTP_CODES.INTERNAL_ERROR);
+            return { message: error.message };
+        }
     }
-    addAppToPortofolio(req, portofolioId, data) {
-        return __awaiter(this, void 0, void 0, function* () {
-            try {
-                const isAdmin = yield (0, authentication_1.checkIfItIsAdmin)(req);
-                if (!isAdmin)
-                    throw new AuthError_1.AuthError(constant_1.SECURITY_MESSAGES.UNAUTHORIZED);
-                const nodes = yield portofolioInstance.addAppToPortofolio(portofolioId, data.applicationsIds);
-                if (!nodes || nodes.length === 0) {
-                    this.setStatus(constant_1.HTTP_CODES.BAD_REQUEST);
-                    return { message: "Something wen wrong, please check your input data" };
-                }
-                this.setStatus(constant_1.HTTP_CODES.OK);
-                return nodes.map(el => el.info.get());
+    async deleteBuildingFromPortofolio(req, portofolioId, data) {
+        try {
+            const isAdmin = await (0, authentication_1.checkIfItIsAdmin)(req);
+            if (!isAdmin)
+                throw new AuthError_1.AuthError(constant_1.SECURITY_MESSAGES.UNAUTHORIZED);
+            const ids = await portofolioInstance.removeSeveralBuildingsFromPortofolio(portofolioId, data.buildingIds);
+            if (!ids || ids.length === 0) {
+                this.setStatus(constant_1.HTTP_CODES.BAD_REQUEST);
+                return { message: "Something went wrong, please check your input data" };
             }
-            catch (error) {
-                this.setStatus(error.code || constant_1.HTTP_CODES.INTERNAL_ERROR);
-                ;
-                return { message: error.message };
-            }
-        });
+            this.setStatus(constant_1.HTTP_CODES.OK);
+            return { message: "building deleted", ids };
+        }
+        catch (error) {
+            this.setStatus(error.code || constant_1.HTTP_CODES.INTERNAL_ERROR);
+            return { message: error.message };
+        }
     }
-    getPortofolioApps(req, portofolioId) {
-        return __awaiter(this, void 0, void 0, function* () {
-            try {
-                const isAdmin = yield (0, authentication_1.checkIfItIsAdmin)(req);
-                if (!isAdmin)
-                    throw new AuthError_1.AuthError(constant_1.SECURITY_MESSAGES.UNAUTHORIZED);
-                const node = yield portofolioInstance.getPortofolioApps(portofolioId);
-                if (!node) {
-                    this.setStatus(constant_1.HTTP_CODES.BAD_REQUEST);
-                    return { message: "Something wen wrong, please check your input data" };
-                }
-                this.setStatus(constant_1.HTTP_CODES.OK);
-                return node.map(el => el.info.get());
+    async addAppToPortofolio(req, portofolioId, data) {
+        try {
+            const isAdmin = await (0, authentication_1.checkIfItIsAdmin)(req);
+            if (!isAdmin)
+                throw new AuthError_1.AuthError(constant_1.SECURITY_MESSAGES.UNAUTHORIZED);
+            const nodes = await portofolioInstance.linkSeveralAppsToPortofolio(portofolioId, data.applicationsIds);
+            if (!nodes || nodes.length === 0) {
+                this.setStatus(constant_1.HTTP_CODES.BAD_REQUEST);
+                return { message: "Something wen wrong, please check your input data" };
             }
-            catch (error) {
-                this.setStatus(error.code || constant_1.HTTP_CODES.INTERNAL_ERROR);
-                ;
-                return { message: error.message };
-            }
-        });
+            this.setStatus(constant_1.HTTP_CODES.OK);
+            return nodes.map(el => el.info.get());
+        }
+        catch (error) {
+            this.setStatus(error.code || constant_1.HTTP_CODES.INTERNAL_ERROR);
+            ;
+            return { message: error.message };
+        }
     }
-    getAppFromPortofolio(req, portofolioId, applicationId) {
-        return __awaiter(this, void 0, void 0, function* () {
-            try {
-                const profile = yield (0, authentication_1.getProfileNode)(req);
-                const node = yield authorization_service_1.default.getInstance().profileHasAccess(profile, applicationId);
-                // const node = await portofolioInstance.getAppFromPortofolio(portofolioId, applicationId);
-                if (!node) {
-                    this.setStatus(constant_1.HTTP_CODES.BAD_REQUEST);
-                    return { message: "Something wen wrong, please check your input data" };
-                }
-                this.setStatus(constant_1.HTTP_CODES.OK);
-                return node.info.get();
+    async getPortofolioApps(req, portofolioId) {
+        try {
+            const isAdmin = await (0, authentication_1.checkIfItIsAdmin)(req);
+            if (!isAdmin)
+                throw new AuthError_1.AuthError(constant_1.SECURITY_MESSAGES.UNAUTHORIZED);
+            const node = await portofolioInstance.getPortofolioApps(portofolioId);
+            if (!node) {
+                this.setStatus(constant_1.HTTP_CODES.BAD_REQUEST);
+                return { message: "Something wen wrong, please check your input data" };
             }
-            catch (error) {
-                this.setStatus(error.code || constant_1.HTTP_CODES.INTERNAL_ERROR);
-                ;
-                return { message: error.message };
-            }
-        });
+            this.setStatus(constant_1.HTTP_CODES.OK);
+            return node.map(el => el.info.get());
+        }
+        catch (error) {
+            this.setStatus(error.code || constant_1.HTTP_CODES.INTERNAL_ERROR);
+            ;
+            return { message: error.message };
+        }
     }
-    removeAppFromPortofolio(req, portofolioId, data) {
-        return __awaiter(this, void 0, void 0, function* () {
-            try {
-                const isAdmin = yield (0, authentication_1.checkIfItIsAdmin)(req);
-                if (!isAdmin)
-                    throw new AuthError_1.AuthError(constant_1.SECURITY_MESSAGES.UNAUTHORIZED);
-                const ids = yield portofolioInstance.removeAppFromPortofolio(portofolioId, data.applicationId);
-                if (!ids || ids.length === 0) {
-                    this.setStatus(constant_1.HTTP_CODES.BAD_REQUEST);
-                    return { message: "Something went wrong, please check your input data" };
-                }
-                this.setStatus(constant_1.HTTP_CODES.OK);
-                return { message: "application removed from portofolio !", ids };
+    async getAppFromPortofolio(req, portofolioId, applicationId) {
+        try {
+            const profile = await (0, authentication_1.getProfileNode)(req);
+            const node = await authorization_service_1.default.getInstance().profileHasAccessToNode(profile, applicationId);
+            // const node = await portofolioInstance.getAppFromPortofolio(portofolioId, applicationId);
+            if (!node) {
+                this.setStatus(constant_1.HTTP_CODES.BAD_REQUEST);
+                return { message: "Something wen wrong, please check your input data" };
             }
-            catch (error) {
-                this.setStatus(error.code || constant_1.HTTP_CODES.INTERNAL_ERROR);
-                ;
-                return { message: error.message };
-            }
-        });
+            this.setStatus(constant_1.HTTP_CODES.OK);
+            return node.info.get();
+        }
+        catch (error) {
+            this.setStatus(error.code || constant_1.HTTP_CODES.INTERNAL_ERROR);
+            ;
+            return { message: error.message };
+        }
     }
-    portofolioHasApp(req, portofolioId, applicationId) {
-        return __awaiter(this, void 0, void 0, function* () {
-            try {
-                const isAdmin = yield (0, authentication_1.checkIfItIsAdmin)(req);
-                if (!isAdmin)
-                    throw new AuthError_1.AuthError(constant_1.SECURITY_MESSAGES.UNAUTHORIZED);
-                const exist = yield portofolioInstance.portofolioHasApp(portofolioId, applicationId);
-                this.setStatus(constant_1.HTTP_CODES.OK);
-                return exist ? true : false;
+    async removeAppFromPortofolio(req, portofolioId, data) {
+        try {
+            const isAdmin = await (0, authentication_1.checkIfItIsAdmin)(req);
+            if (!isAdmin)
+                throw new AuthError_1.AuthError(constant_1.SECURITY_MESSAGES.UNAUTHORIZED);
+            const ids = await portofolioInstance.removeSeveralAppsFromPortofolio(portofolioId, data.applicationId);
+            if (!ids || ids.length === 0) {
+                this.setStatus(constant_1.HTTP_CODES.BAD_REQUEST);
+                return { message: "Something went wrong, please check your input data" };
             }
-            catch (error) {
-                this.setStatus(error.code || constant_1.HTTP_CODES.INTERNAL_ERROR);
-                ;
-                return { message: error.message };
-            }
-        });
+            this.setStatus(constant_1.HTTP_CODES.OK);
+            return { message: "application removed from portofolio !", ids };
+        }
+        catch (error) {
+            this.setStatus(error.code || constant_1.HTTP_CODES.INTERNAL_ERROR);
+            ;
+            return { message: error.message };
+        }
     }
-    addApiToPortofolio(req, portofolioId, data) {
-        return __awaiter(this, void 0, void 0, function* () {
-            try {
-                const isAdmin = yield (0, authentication_1.checkIfItIsAdmin)(req);
-                if (!isAdmin)
-                    throw new AuthError_1.AuthError(constant_1.SECURITY_MESSAGES.UNAUTHORIZED);
-                const nodes = yield portofolioInstance.addApiToPortofolio(portofolioId, data.apisIds);
-                if (!nodes || nodes.length === 0) {
-                    this.setStatus(constant_1.HTTP_CODES.BAD_REQUEST);
-                    return { message: "Something wen wrong, please check your input data" };
-                }
-                this.setStatus(constant_1.HTTP_CODES.OK);
-                return nodes.map(el => el.info.get());
-            }
-            catch (error) {
-                this.setStatus(error.code || constant_1.HTTP_CODES.INTERNAL_ERROR);
-                ;
-                return { message: error.message };
-            }
-        });
+    async portofolioHasApp(req, portofolioId, applicationId) {
+        try {
+            const isAdmin = await (0, authentication_1.checkIfItIsAdmin)(req);
+            if (!isAdmin)
+                throw new AuthError_1.AuthError(constant_1.SECURITY_MESSAGES.UNAUTHORIZED);
+            const exist = await portofolioInstance.portofolioHasApp(portofolioId, applicationId);
+            this.setStatus(constant_1.HTTP_CODES.OK);
+            return exist ? true : false;
+        }
+        catch (error) {
+            this.setStatus(error.code || constant_1.HTTP_CODES.INTERNAL_ERROR);
+            ;
+            return { message: error.message };
+        }
     }
-    getPortofolioApis(req, portofolioId) {
-        return __awaiter(this, void 0, void 0, function* () {
-            try {
-                const isAdmin = yield (0, authentication_1.checkIfItIsAdmin)(req);
-                if (!isAdmin)
-                    throw new AuthError_1.AuthError(constant_1.SECURITY_MESSAGES.UNAUTHORIZED);
-                const node = yield portofolioInstance.getPortofolioApis(portofolioId);
-                if (!node) {
-                    this.setStatus(constant_1.HTTP_CODES.BAD_REQUEST);
-                    return { message: "Something wen wrong, please check your input data" };
-                }
-                this.setStatus(constant_1.HTTP_CODES.OK);
-                return node.map(el => el.info.get());
+    async addApiToPortofolio(req, portofolioId, data) {
+        try {
+            const isAdmin = await (0, authentication_1.checkIfItIsAdmin)(req);
+            if (!isAdmin)
+                throw new AuthError_1.AuthError(constant_1.SECURITY_MESSAGES.UNAUTHORIZED);
+            const nodes = await portofolioInstance.linkSeveralApisToPortofolio(portofolioId, data.apisIds);
+            if (!nodes || nodes.length === 0) {
+                this.setStatus(constant_1.HTTP_CODES.BAD_REQUEST);
+                return { message: "Something wen wrong, please check your input data" };
             }
-            catch (error) {
-                this.setStatus(error.code || constant_1.HTTP_CODES.INTERNAL_ERROR);
-                ;
-                return { message: error.message };
-            }
-        });
+            this.setStatus(constant_1.HTTP_CODES.OK);
+            return nodes.map(el => el.info.get());
+        }
+        catch (error) {
+            this.setStatus(error.code || constant_1.HTTP_CODES.INTERNAL_ERROR);
+            ;
+            return { message: error.message };
+        }
     }
-    getApiFromPortofolio(req, portofolioId, apiId) {
-        return __awaiter(this, void 0, void 0, function* () {
-            try {
-                const isAdmin = yield (0, authentication_1.checkIfItIsAdmin)(req);
-                if (!isAdmin)
-                    throw new AuthError_1.AuthError(constant_1.SECURITY_MESSAGES.UNAUTHORIZED);
-                const node = yield portofolioInstance.getApiFromPortofolio(portofolioId, apiId);
-                if (!node) {
-                    this.setStatus(constant_1.HTTP_CODES.BAD_REQUEST);
-                    return { message: "Something wen wrong, please check your input data" };
-                }
-                this.setStatus(constant_1.HTTP_CODES.OK);
-                return node.info.get();
+    async getPortofolioApis(req, portofolioId) {
+        try {
+            const isAdmin = await (0, authentication_1.checkIfItIsAdmin)(req);
+            if (!isAdmin)
+                throw new AuthError_1.AuthError(constant_1.SECURITY_MESSAGES.UNAUTHORIZED);
+            const node = await portofolioInstance.getPortofolioApis(portofolioId);
+            if (!node) {
+                this.setStatus(constant_1.HTTP_CODES.BAD_REQUEST);
+                return { message: "Something wen wrong, please check your input data" };
             }
-            catch (error) {
-                this.setStatus(error.code || constant_1.HTTP_CODES.INTERNAL_ERROR);
-                ;
-                return { message: error.message };
-            }
-        });
+            this.setStatus(constant_1.HTTP_CODES.OK);
+            return node.map(el => el.info.get());
+        }
+        catch (error) {
+            this.setStatus(error.code || constant_1.HTTP_CODES.INTERNAL_ERROR);
+            ;
+            return { message: error.message };
+        }
     }
-    removeApiFromPortofolio(req, portofolioId, data) {
-        return __awaiter(this, void 0, void 0, function* () {
-            try {
-                const isAdmin = yield (0, authentication_1.checkIfItIsAdmin)(req);
-                if (!isAdmin)
-                    throw new AuthError_1.AuthError(constant_1.SECURITY_MESSAGES.UNAUTHORIZED);
-                const ids = yield portofolioInstance.removeApiFromPortofolio(portofolioId, data.apisIds);
-                if (!ids || ids.length === 0) {
-                    this.setStatus(constant_1.HTTP_CODES.BAD_REQUEST);
-                    return { message: "Something went wrong, please check your input data" };
-                }
-                this.setStatus(constant_1.HTTP_CODES.OK);
-                return { message: "route removed from portofolio !", ids };
+    async getApiFromPortofolio(req, portofolioId, apiId) {
+        try {
+            const isAdmin = await (0, authentication_1.checkIfItIsAdmin)(req);
+            if (!isAdmin)
+                throw new AuthError_1.AuthError(constant_1.SECURITY_MESSAGES.UNAUTHORIZED);
+            const node = await portofolioInstance.getApiFromPortofolio(portofolioId, apiId);
+            if (!node) {
+                this.setStatus(constant_1.HTTP_CODES.BAD_REQUEST);
+                return { message: "Something wen wrong, please check your input data" };
             }
-            catch (error) {
-                this.setStatus(error.code || constant_1.HTTP_CODES.INTERNAL_ERROR);
-                ;
-                return { message: error.message };
-            }
-        });
+            this.setStatus(constant_1.HTTP_CODES.OK);
+            return node.info.get();
+        }
+        catch (error) {
+            this.setStatus(error.code || constant_1.HTTP_CODES.INTERNAL_ERROR);
+            ;
+            return { message: error.message };
+        }
     }
-    portofolioHasApi(req, portofolioId, apiId) {
-        return __awaiter(this, void 0, void 0, function* () {
-            try {
-                const isAdmin = yield (0, authentication_1.checkIfItIsAdmin)(req);
-                if (!isAdmin)
-                    throw new AuthError_1.AuthError(constant_1.SECURITY_MESSAGES.UNAUTHORIZED);
-                const exist = yield portofolioInstance.portofolioHasApi(portofolioId, apiId);
-                this.setStatus(constant_1.HTTP_CODES.OK);
-                return exist ? true : false;
+    async removeApiFromPortofolio(req, portofolioId, data) {
+        try {
+            const isAdmin = await (0, authentication_1.checkIfItIsAdmin)(req);
+            if (!isAdmin)
+                throw new AuthError_1.AuthError(constant_1.SECURITY_MESSAGES.UNAUTHORIZED);
+            const ids = await portofolioInstance.removeSeveralApisFromPortofolio(portofolioId, data.apisIds);
+            if (!ids || ids.length === 0) {
+                this.setStatus(constant_1.HTTP_CODES.BAD_REQUEST);
+                return { message: "Something went wrong, please check your input data" };
             }
-            catch (error) {
-                this.setStatus(error.code || constant_1.HTTP_CODES.INTERNAL_ERROR);
-                ;
-                return { message: error.message };
-            }
-        });
+            this.setStatus(constant_1.HTTP_CODES.OK);
+            return { message: "route removed from portofolio !", ids };
+        }
+        catch (error) {
+            this.setStatus(error.code || constant_1.HTTP_CODES.INTERNAL_ERROR);
+            ;
+            return { message: error.message };
+        }
+    }
+    async portofolioHasApi(req, portofolioId, apiId) {
+        try {
+            const isAdmin = await (0, authentication_1.checkIfItIsAdmin)(req);
+            if (!isAdmin)
+                throw new AuthError_1.AuthError(constant_1.SECURITY_MESSAGES.UNAUTHORIZED);
+            const exist = await portofolioInstance.portofolioHasApi(portofolioId, apiId);
+            this.setStatus(constant_1.HTTP_CODES.OK);
+            return exist ? true : false;
+        }
+        catch (error) {
+            this.setStatus(error.code || constant_1.HTTP_CODES.INTERNAL_ERROR);
+            ;
+            return { message: error.message };
+        }
     }
 };
 exports.PortofolioController = PortofolioController;

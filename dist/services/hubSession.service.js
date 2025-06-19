@@ -32,6 +32,12 @@ class HubSessionService {
             this.instance = new HubSessionService();
         return this.instance;
     }
+    /**
+     * Create a session on the hub
+     *
+     * @return {*}  {Promise<string>}
+     * @memberof HubSessionService
+     */
     createSession() {
         let hubUrl = `${process.env.HUB_PROTOCOL}://${process.env.HUB_HOST}:${process.env.HUB_PORT}`;
         let hubId = process.env.USER_ID;

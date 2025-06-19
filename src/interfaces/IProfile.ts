@@ -29,17 +29,20 @@ export interface IProfile {
   authorize: IPortofolioAuth[]
 }
 
-export interface IPortofolioAuth {
-  portofolioId: string;
+export interface ItemsIds {
   appsIds?: string[];
   apisIds?: string[];
+  unauthorizeAppsIds?: string[];
+  unauthorizeApisIds?: string[];
+}
+
+export interface IPortofolioAuth extends ItemsIds {
+  portofolioId: string;
   building?: IBosAuth[]
 }
 
-export interface IBosAuth {
+export interface IBosAuth extends ItemsIds {
   buildingId: string;
-  appsIds?: string[];
-  apisIds?: string[]
 }
 
 export interface IProfileRes {
@@ -64,45 +67,11 @@ export interface IBosAuthRes {
 //            EDIT               //
 //////////////////////////////////
 
-export interface IPortofolioAuthEdit {
-  portofolioId: string;
-  appsIds?: string[];
-  apisIds?: string[];
-  unauthorizeAppsIds?: string[];
-  unauthorizeApisIds?: string[];
-  building?: IBosAuthEdit[]
-}
+export type IPortofolioAuthEdit = IPortofolioAuth;
 
-export interface IBosAuthEdit {
-  buildingId: string;
-  appsIds?: string[];
-  apisIds?: string[];
-  unauthorizeAppsIds?: string[];
-  unauthorizeApisIds?: string[];
-}
+export type IBosAuthEdit = IBosAuth;
 
 export interface IProfileEdit {
   name?: string;
   authorize?: IPortofolioAuthEdit[]
 }
-// export interface IProfile {
-//   name?: string;
-//   autorize?: IPortofolioAuth[];
-//   // unauthorizePortofolio?: IPortofolioAuth[];
-//   // authorizeApis?: string[];
-//   // unauthorizeApis?: string[];
-//   // authorizeBos?: IBosAuth[];
-//   // unauthorizeBos?: IBosAuth[];
-// }
-
-
-
-// export interface IAuthRes {
-  // authorizedPortofolio?: IPortofolioAuthRes[];
-  // authorizedRoutes?: SpinalNode[];
-  // authorizedBos?: IBosAuthRes[];
-// }
-
-// export interface IProfileRes extends IAuthRes {
-  // node: SpinalNode;
-// }

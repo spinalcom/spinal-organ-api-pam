@@ -25,17 +25,24 @@
 import { SpinalContext, SpinalGraph, SpinalGraphService, SpinalNode } from 'spinal-env-viewer-graph-service';
 import { CANNOT_CREATE_INTERNAL_ERROR, ROLE_TYPE, ROLES_CONTEXT_NAME, ROLES_CONTEXT_TYPE, PTR_LST_TYPE, CONTEXT_TO_ROLE_RELATION_NAME, DEFAULT_ROLES, ROLE_METHODS } from '../constant';
 import { HTTP_METHODS, IRole } from '../interfaces';
-import { configServiceInstance } from './configFile.service';
 
 
 
+/**
+ * Service for managing roles within the SpinalGraph context.
+ * Implements singleton pattern to ensure a single instance.
+ */
 export class RoleService {
 
   private static instance: RoleService;
   public context: SpinalContext;
 
+  // Private constructor to enforce singleton pattern
   private constructor() { }
 
+  /**
+   * Returns the singleton instance of RoleService.
+   */
   public static getInstance(): RoleService {
     if (!this.instance) {
       this.instance = new RoleService();
@@ -44,9 +51,17 @@ export class RoleService {
     return this.instance;
   }
 
-  public async init() {
-    this.context = await configServiceInstance.getContext(ROLES_CONTEXT_NAME);
-    if (!this.context) this.context = await configServiceInstance.addContext(ROLES_CONTEXT_NAME, ROLES_CONTEXT_TYPE);
+  /**
+   * Initializes the roles context in the provided graph.
+   * Creates default roles if they do not exist.
+   * @param graph SpinalGraph instance
+   */
+  public async init(graph: SpinalGraph) {
+    this.context = await graph.getContext(ROLES_CONTEXT_NAME);
+    if (!this.context) {
+      const spinalContext = new SpinalContext(ROLES_CONTEXT_NAME, ROLES_CONTEXT_TYPE);
+      this.context = await graph.addContext(spinalContext);
+    }
 
     const promises = DEFAULT_ROLES.map(name => this.createRole({ name, methods: ROLE_METHODS[name] }));
     return Promise.all(promises).then(() => {
@@ -54,6 +69,11 @@ export class RoleService {
     })
   }
 
+  /**
+   * Creates a new role node if it does not already exist.
+   * @param argRole Role data
+   * @returns The created or existing SpinalNode
+   */
   public async createRole(argRole: IRole): Promise<SpinalNode> {
     let role = await this.getRole(argRole.name);
     if (role) return role;
@@ -63,18 +83,31 @@ export class RoleService {
     return this.context.addChildInContext(node, CONTEXT_TO_ROLE_RELATION_NAME, PTR_LST_TYPE, this.context);
   }
 
-
+  /**
+   * Retrieves all role nodes in the context.
+   * @returns Promise resolving to an array of SpinalNode
+   */
   public getAllRole(): Promise<SpinalNode[]> {
     return this.context.getChildrenInContext(this.context);
   }
 
-
+  /**
+   * Retrieves a role node by its ID or name.
+   * @param roleIdOrName Role ID or name
+   * @returns Promise resolving to the found SpinalNode or undefined
+   */
   public async getRole(roleIdOrName: string): Promise<void | SpinalNode> {
     const children = await this.context.getChildrenInContext(this.context);
     return children.find(node => node.getId().get() === roleIdOrName || node.getName().get() === roleIdOrName)
   }
 
-
+  /**
+   * Updates the name and/or methods of a role.
+   * @param roleId Role ID
+   * @param newName New name for the role
+   * @param roleMethods Optional new methods for the role
+   * @returns Promise resolving to the updated SpinalNode or void
+   */
   public async updateRole(roleId: string, newName: string, roleMethods?: HTTP_METHODS[]): Promise<SpinalNode | void> {
     const role = await this.getRole(roleId);
     if (!role) throw new Error(`no role found for ${roleId}`);
@@ -88,7 +121,11 @@ export class RoleService {
     return role;
   }
 
-
+  /**
+   * Deletes a role node from the graph.
+   * @param roleId Role ID
+   * @returns Promise resolving to the deleted role's ID
+   */
   public async deleteRole(roleId: string): Promise<string> {
     const role = await this.getRole(roleId);
     if (!role) throw new Error(`no role found for ${roleId}`);

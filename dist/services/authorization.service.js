@@ -22,557 +22,681 @@
  * with this file. If not, see
  * <http://resources.spinalcom.com/licenses.pdf>.
  */
-var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
-    function adopt(value) { return value instanceof P ? value : new P(function (resolve) { resolve(value); }); }
-    return new (P || (P = Promise))(function (resolve, reject) {
-        function fulfilled(value) { try { step(generator.next(value)); } catch (e) { reject(e); } }
-        function rejected(value) { try { step(generator["throw"](value)); } catch (e) { reject(e); } }
-        function step(result) { result.done ? resolve(result.value) : adopt(result.value).then(fulfilled, rejected); }
-        step((generator = generator.apply(thisArg, _arguments || [])).next());
-    });
-};
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.AuthorizationService = exports.authorizationInstance = void 0;
 const constant_1 = require("../constant");
-const spinal_env_viewer_graph_service_1 = require("spinal-env-viewer-graph-service");
-const spinal_core_connectorjs_type_1 = require("spinal-core-connectorjs_type");
 const building_service_1 = require("./building.service");
 const portofolio_service_1 = require("./portofolio.service");
+const authorizationUtils_1 = require("../utils/authorizationUtils");
 class AuthorizationService {
-    constructor() { }
+    constructor() {
+        this.profileToContext = {};
+    }
     static getInstance() {
         if (!this.instance)
             this.instance = new AuthorizationService();
         return this.instance;
     }
-    profileHasAccess(profile, argNode) {
-        return __awaiter(this, void 0, void 0, function* () {
-            const context = yield this._getAuthorizedPortofolioContext(profile, true);
-            if (!context)
-                return;
-            const id = typeof argNode === "string" ? argNode : argNode.getId().get();
-            const found = yield context.findInContextAsyncPredicate(context, ((node, stop) => __awaiter(this, void 0, void 0, function* () {
-                const element = yield node.getElement(true);
-                if (element && element.getId().get() === id) {
-                    stop();
-                    return true;
-                }
-                return false;
-            })));
-            return found && found[0].getElement();
-        });
-    }
-    // public async removePortofolioReferences(profile: SpinalNode, portofolioId: string): Promise<void> {
-    //     const promises = [this._getAuthorizedBosContext(profile, false), this._getAuthorizedPortofolioContext(profile, false)]
-    //     return Promise.all(promises).then(async ([bosContext, PortofolioContext]) => {
-    //         if (PortofolioContext) await this.unauthorizeProfileToAccessPortofolio(profile, portofolioId);
-    //     }).catch((err) => {
-    //     });
+    // async getContext(profileNode: SpinalNode, createContextIfNotExist: boolean = false): Promise<SpinalContext> {
+    //     const profileId = profileNode.getId().get();
+    //     if (this.profileToContext[profileId]) return this.profileToContext[profileId];
+    //     if (!createContextIfNotExist) return;
+    //     const context = await _getAuthorizedPortofolioContext(profileNode, createContextIfNotExist);
+    //     this.profileToContext[profileId] = context;
+    //     return context;
     // }
+    /**
+     * Checks if the given profile has access to the specified node.
+     * Traverses the authorized portofolio context of the profile to find a reference
+     * to the node (by id). Returns the real node if access is found, otherwise undefined.
+     *
+     * @param profile - The profile node to check access for.
+     * @param anySpinalNode - The node or node id to check access to.
+     * @returns The real SpinalNode if access exists, otherwise undefined.
+     */
+    async profileHasAccessToNode(profile, anySpinalNode) {
+        const createContextIfNotExist = true;
+        const context = await (0, authorizationUtils_1._getAuthorizedPortofolioContext)(profile, createContextIfNotExist);
+        if (!context)
+            return;
+        const anySpinalNodeId = typeof anySpinalNode === "string" ? anySpinalNode : anySpinalNode.getId().get();
+        const nodeAlreadyLinked = await (0, authorizationUtils_1.findNodeReferenceInProfileTree)(context, context, anySpinalNodeId);
+        return (nodeAlreadyLinked && (0, authorizationUtils_1.getOriginalNodeFromReference)(nodeAlreadyLinked)) || null;
+    }
     /////////////////////////////////////////////////////////
     //                  PORTOFOLIO AUTH                    //
     /////////////////////////////////////////////////////////
-    //Authorize
-    authorizeProfileToAccessPortofolio(profile, portofolioId) {
-        return __awaiter(this, void 0, void 0, function* () {
-            const context = yield this._getAuthorizedPortofolioContext(profile, true);
-            let reference = yield this._getReference(context, portofolioId);
-            if (reference) {
-                return this._getRealNode(reference);
-            }
-            const portofolio = yield portofolio_service_1.PortofolioService.getInstance().getPortofolio(portofolioId);
-            if (!portofolio)
-                return;
-            reference = yield this._createNodeReference(portofolio);
-            yield context.addChildInContext(reference, constant_1.PROFILE_TO_AUTHORIZED_PORTOFOLIO_RELATION, constant_1.PTR_LST_TYPE, context);
-            return portofolio;
-        });
+    /**
+     * Authorizes a profile to access a specific portofolio.
+     * If the profile is not already linked to the portofolio, creates a reference and links it.
+     *
+     * @param profile - The profile node to authorize.
+     * @param portofolioId - The ID of the portofolio to authorize access to.
+     * @returns The real SpinalNode of the portofolio if successful, otherwise undefined.
+     */
+    async authorizeProfileToAccessPortofolio(profile, portofolioId) {
+        const portofolioIsLinked = await this.profileHasAccessToNode(profile, portofolioId);
+        if (portofolioIsLinked)
+            return portofolioIsLinked;
+        const originalPortofolioNode = await portofolio_service_1.PortofolioService.getInstance().getPortofolioNode(portofolioId);
+        if (!originalPortofolioNode)
+            return;
+        const createContextIfNotExist = true;
+        const context = await (0, authorizationUtils_1._getAuthorizedPortofolioContext)(profile, createContextIfNotExist);
+        const portofolioReference = await (0, authorizationUtils_1.createNodeReference)(originalPortofolioNode);
+        await context.addChildInContext(portofolioReference, constant_1.PROFILE_TO_AUTHORIZED_PORTOFOLIO_RELATION, constant_1.PTR_LST_TYPE, context);
+        return originalPortofolioNode;
     }
-    authorizeProfileToAccessPortofolioApp(profile, portofolioId, appIds) {
-        return __awaiter(this, void 0, void 0, function* () {
-            if (!Array.isArray(appIds))
-                appIds = [appIds];
-            yield this.authorizeProfileToAccessPortofolio(profile, portofolioId);
-            const context = yield this._getAuthorizedPortofolioContext(profile, false);
-            const reference = yield this._getReference(context, portofolioId);
-            const data = yield appIds.reduce((prom, id) => __awaiter(this, void 0, void 0, function* () {
-                let liste = yield prom;
-                const app = yield portofolio_service_1.PortofolioService.getInstance().getAppFromPortofolio(portofolioId, id);
-                if (app) {
-                    let appExist = yield this._getReference(reference, app.getId().get(), [constant_1.APP_RELATION_NAME]);
-                    if (!appExist) {
-                        appExist = yield this._createNodeReference(app);
-                        yield reference.addChildInContext(appExist, constant_1.APP_RELATION_NAME, constant_1.PTR_LST_TYPE, context);
-                    }
-                    ;
-                    liste.push(app);
-                }
-                return liste;
-            }), Promise.resolve([]));
-            yield this._checkPortofolioValidity(profile, portofolioId, reference);
-            return data;
-        });
+    /**
+     * Authorizes a profile to access a specific app within a portofolio.
+     * If the app is not already linked to the portofolio reference, creates a reference and links it.
+     *
+     * @param profile - The profile node to authorize.
+     * @param portofolioId - The ID of the portofolio.
+     * @param appId - The ID of the app to authorize access to.
+     * @returns The real SpinalNode of the app if successful, otherwise null.
+     */
+    async authorizeProfileToAccessOnePortofolioApp(profile, portofolioId, appId) {
+        const app = await portofolio_service_1.PortofolioService.getInstance().portofolioHasApp(portofolioId, appId);
+        if (!app)
+            return null;
+        const originalPortofolioNode = await this.authorizeProfileToAccessPortofolio(profile, portofolioId);
+        if (!originalPortofolioNode)
+            return null;
+        const createContextIfNotExist = true;
+        const context = await (0, authorizationUtils_1._getAuthorizedPortofolioContext)(profile, createContextIfNotExist);
+        const portofolioRef = await (0, authorizationUtils_1.findNodeReferenceInProfileTree)(context, context, originalPortofolioNode.getId().get());
+        const appIsAleadyLinked = await (0, authorizationUtils_1.findNodeReferenceInProfileTree)(context, portofolioRef, appId);
+        if (appIsAleadyLinked)
+            return app;
+        const appReference = await (0, authorizationUtils_1.createNodeReference)(app);
+        portofolioRef.addChildInContext(appReference, constant_1.APP_RELATION_NAME, constant_1.PTR_LST_TYPE, context);
+        return app;
     }
-    // unauthorize
-    unauthorizeProfileToAccessPortofolio(profile, portofolioId) {
-        return __awaiter(this, void 0, void 0, function* () {
-            const { context, portofolioRef } = yield this._getRefTree(profile, portofolioId);
-            if (context && portofolioRef) {
-                try {
-                    yield context.removeChild(portofolioRef, constant_1.PROFILE_TO_AUTHORIZED_PORTOFOLIO_RELATION, constant_1.PTR_LST_TYPE);
-                }
-                catch (error) {
-                    return false;
-                }
-            }
-            return false;
-        });
-    }
-    unauthorizeProfileToAccessPortofolioApp(profile, portofolioId, appIds) {
-        return __awaiter(this, void 0, void 0, function* () {
-            if (!Array.isArray(appIds))
-                appIds = [appIds];
-            const { portofolioRef } = yield this._getRefTree(profile, portofolioId);
-            if (!portofolioRef)
-                return [];
-            const data = yield appIds.reduce((prom, id) => __awaiter(this, void 0, void 0, function* () {
-                let liste = yield prom;
-                const app = yield portofolio_service_1.PortofolioService.getInstance().getAppFromPortofolio(portofolioId, id);
-                if (app) {
-                    const appExist = yield this._getReference(portofolioRef, app.getId().get(), [constant_1.APP_RELATION_NAME]);
-                    try {
-                        yield portofolioRef.removeChild(appExist, constant_1.APP_RELATION_NAME, constant_1.PTR_LST_TYPE);
-                        liste.push(app);
-                    }
-                    catch (error) { }
-                }
-                return liste;
-            }), Promise.resolve([]));
-            yield this._checkPortofolioValidity(profile, portofolioId, portofolioRef);
-            return data;
-        });
-    }
-    // get
-    getAuthorizedPortofolioFromProfile(profile) {
-        return __awaiter(this, void 0, void 0, function* () {
-            const context = yield this._getAuthorizedPortofolioContext(profile, false);
-            if (!context)
-                return [];
-            const children = yield context.getChildren([constant_1.PROFILE_TO_AUTHORIZED_PORTOFOLIO_RELATION]);
-            return children.reduce((prom, item) => __awaiter(this, void 0, void 0, function* () {
-                const liste = yield prom;
-                if (item) {
-                    const element = yield this._getRealNode(item);
-                    liste.push(element);
-                }
-                return liste;
-            }), Promise.resolve([]));
-        });
-    }
-    getAuthorizedPortofolioAppFromProfile(profile, portofolioId) {
-        return __awaiter(this, void 0, void 0, function* () {
-            const { context, portofolioRef } = yield this._getRefTree(profile, portofolioId);
-            if (context && portofolioRef) {
-                const children = yield portofolioRef.getChildren(constant_1.APP_RELATION_NAME);
-                return children.reduce((prom, item) => __awaiter(this, void 0, void 0, function* () {
-                    const liste = yield prom;
-                    if (item) {
-                        const element = yield this._getRealNode(item);
-                        liste.push(element);
-                    }
-                    return liste;
-                }), Promise.resolve([]));
-            }
+    /**
+     * Authorizes a profile to access multiple apps within a portofolio.
+     * For each appId, if not already linked, creates a reference and links it to the portofolio reference.
+     *
+     * @param profile - The profile node to authorize.
+     * @param portofolioId - The ID of the portofolio.
+     * @param appIds - The IDs of the apps to authorize access to.
+     * @returns An array of real SpinalNode apps that were authorized.
+     */
+    async authorizeProfileToAccessPortofolioApps(profile, portofolioId, appIds) {
+        if (!Array.isArray(appIds))
+            appIds = [appIds];
+        if (!appIds.length)
             return [];
+        let index = 0;
+        let firstCreated;
+        // Try to authorize the first appId, if it fails, continue with the next ones until one succeeds
+        // This ensures to not have a duplicate portofolio reference in the profile tree
+        while (!firstCreated && index < appIds.length) {
+            firstCreated = await this.authorizeProfileToAccessOnePortofolioApp(profile, portofolioId, appIds[index]);
+            index++;
+        }
+        const restAppIds = appIds.slice(index);
+        const promises = restAppIds.map((appId) => this.authorizeProfileToAccessOnePortofolioApp(profile, portofolioId, appId));
+        return Promise.all(promises).then(async (apps) => {
+            await this._removeEmptyPortofolioFromProfile(profile, portofolioId);
+            return apps.filter(app => app !== undefined).concat(firstCreated ? [firstCreated] : []);
         });
+    }
+    /**
+     * Revokes a profile's authorization to access a specific portfolio.
+     *
+     * This method locates the portfolio reference within the profile's tree and removes
+     * the association, effectively revoking access. Returns `true` if the operation
+     * succeeds, or `false` if an error occurs during the process.
+     *
+     * @param profile - The profile node whose access is to be revoked.
+     * @param portofolioId - The unique identifier of the portfolio to unauthorize.
+     * @returns A promise that resolves to `true` if the profile was successfully unauthorized, or `false` otherwise.
+     */
+    async unauthorizeProfileToAccessPortofolio(profile, portofolioId) {
+        try {
+            const context = await (0, authorizationUtils_1._getAuthorizedPortofolioContext)(profile, false);
+            const portofolioReference = await (0, authorizationUtils_1.findNodeReferenceInProfileTree)(context, context, portofolioId);
+            await (0, authorizationUtils_1.CleanReferenceTree)(context, portofolioReference);
+            return true;
+        }
+        catch (error) {
+            return false;
+        }
+    }
+    /**
+     * Revokes a profile's authorization to access specific app(s) within a portfolio.
+     *
+     * For each appId, finds the reference node in the profile's portfolio tree and removes it.
+     * After removal, checks if the portfolio reference is still valid (has children), and if not,
+     * revokes the profile's access to the portfolio as well.
+     *
+     * @param profile - The profile node whose app access is to be revoked.
+     * @param portofolioOriginalId - The unique identifier of the original portfolio.
+     * @param appIds - The ID(s) of the app(s) to unauthorize.
+     * @returns A promise that resolves to an array of removed app references.
+     */
+    async unauthorizeProfileToAccessPortofolioApp(profile, portofolioOriginalId, appIds) {
+        if (!Array.isArray(appIds))
+            appIds = [appIds];
+        const context = await (0, authorizationUtils_1._getAuthorizedPortofolioContext)(profile, false);
+        const portofolioRef = await (0, authorizationUtils_1.findNodeReferenceInProfileTree)(context, context, portofolioOriginalId);
+        if (!portofolioRef)
+            return [];
+        const promises = appIds.map(async (appId) => {
+            const appReference = await (0, authorizationUtils_1.findNodeReferenceInProfileTree)(context, portofolioRef, appId);
+            if (!appReference)
+                return null;
+            return (0, authorizationUtils_1.removeReferenceNode)(appReference);
+        });
+        return Promise.all(promises).then(async (removedApps) => {
+            await this._removeEmptyPortofolioFromProfile(profile, portofolioOriginalId, portofolioRef);
+            return removedApps;
+        });
+    }
+    /**
+     * Retrieves the list of authorized portfolio nodes associated with a given profile.
+     *
+     * This method fetches the context for authorized portfolios related to the provided profile node.
+     * If the context exists, it retrieves all child nodes linked via the `PROFILE_TO_AUTHORIZED_PORTOFOLIO_RELATION`
+     * relation, resolves their original nodes, and returns an array of authorized portfolio nodes.
+     * If no context is found, an empty array is returned.
+     *
+     * @param profile - The profile node for which to retrieve authorized portfolios.
+     * @returns A promise that resolves to an array of authorized portfolio nodes (`SpinalNode[]`).
+     */
+    async getAuthorizedPortofolioFromProfile(profile) {
+        const createContextIfNotExist = true;
+        const context = await (0, authorizationUtils_1._getAuthorizedPortofolioContext)(profile, !createContextIfNotExist);
+        if (!context)
+            return [];
+        const portofolioLinked = await context.getChildren([constant_1.PROFILE_TO_AUTHORIZED_PORTOFOLIO_RELATION]);
+        const promises = portofolioLinked.map(async (portofolio) => (0, authorizationUtils_1.getOriginalNodeFromReference)(portofolio));
+        return Promise.all(promises).then((portofolios) => portofolios.filter(portofolio => portofolio !== undefined));
+    }
+    /**
+     * Retrieves the list of authorized app nodes within a specific portfolio for a given profile.
+     *
+     * This method locates the portfolio reference in the profile's authorization tree,
+     * fetches all child nodes linked via the `APP_RELATION_NAME` relation, resolves their
+     * original nodes, and returns an array of authorized app nodes.
+     * If the portfolio reference is not found, an empty array is returned.
+     *
+     * @param profile - The profile node for which to retrieve authorized apps.
+     * @param portofolioId - The ID of the portfolio to check.
+     * @returns A promise that resolves to an array of authorized app nodes (`SpinalNode[]`).
+     */
+    async getAuthorizedPortofolioAppFromProfile(profile, portofolioId) {
+        const createContextIfNotExist = true;
+        const context = await (0, authorizationUtils_1._getAuthorizedPortofolioContext)(profile, !createContextIfNotExist);
+        const portofolioRef = await (0, authorizationUtils_1.findNodeReferenceInProfileTree)(context, context, portofolioId);
+        if (!portofolioRef)
+            return [];
+        const appRefs = await portofolioRef.getChildren(constant_1.APP_RELATION_NAME);
+        const promises = appRefs.map(async (appRef) => (0, authorizationUtils_1.getOriginalNodeFromReference)(appRef));
+        return Promise.all(promises).then((apps) => apps.filter(app => app !== undefined));
+    }
+    /**
+ * Authorizes a profile to access a specific API route within a portfolio.
+ * If the API route is not already linked to the portfolio reference, creates a reference and links it.
+ *
+ * @param profile - The profile node to authorize.
+ * @param portofolioId - The ID of the portfolio.
+ * @param apiRouteId - The ID of the API route to authorize access to.
+ * @returns The real SpinalNode of the API route if successful, otherwise undefined.
+ */
+    async authorizeProfileToAccessOnePortofolioApiRoute(profile, portofolioId, apiRouteId) {
+        const createContextIfNotExist = true;
+        const context = await (0, authorizationUtils_1._getAuthorizedPortofolioContext)(profile, createContextIfNotExist);
+        const apiRoute = await portofolio_service_1.PortofolioService.getInstance().getApiFromPortofolio(portofolioId, apiRouteId);
+        if (!apiRoute)
+            return;
+        const portofolioOriginalNode = await this.authorizeProfileToAccessPortofolio(profile, portofolioId);
+        if (!portofolioOriginalNode)
+            return;
+        const portofolioRef = await (0, authorizationUtils_1.findNodeReferenceInProfileTree)(context, context, portofolioId);
+        const apiRouteAlreadyAuthorized = await (0, authorizationUtils_1.findNodeReferenceInProfileTree)(context, portofolioRef, apiRouteId);
+        if (apiRouteAlreadyAuthorized)
+            return apiRoute;
+        const apiRouteReference = await (0, authorizationUtils_1.createNodeReference)(apiRoute);
+        await portofolioRef.addChildInContext(apiRouteReference, constant_1.API_RELATION_NAME, constant_1.PTR_LST_TYPE, context);
+        return apiRoute;
+    }
+    /**
+     * Authorizes a profile to access multiple API routes within a portfolio.
+     * For each apiRouteId, if not already linked, creates a reference and links it to the portfolio reference.
+     *
+     * @param profile - The profile node to authorize.
+     * @param portofolioId - The ID of the portfolio.
+     * @param apiRoutesIds - The IDs of the API routes to authorize access to.
+     * @returns An array of real SpinalNode API routes that were authorized.
+     */
+    async authorizeProfileToAccessPortofolioApisRoutes(profile, portofolioId, apiRoutesIds) {
+        if (!Array.isArray(apiRoutesIds))
+            apiRoutesIds = [apiRoutesIds];
+        if (!apiRoutesIds.length)
+            return [];
+        let index = 0;
+        let firstCreated;
+        // Try to authorize the first apiRouteId, if it fails, continue with the next ones until one succeeds
+        // This ensures to not have a duplicate portofolio reference in the profile tree
+        while (!firstCreated && index < apiRoutesIds.length) {
+            firstCreated = await this.authorizeProfileToAccessOnePortofolioApiRoute(profile, portofolioId, apiRoutesIds[index]);
+            index++;
+        }
+        const restApiRoutesIds = apiRoutesIds.slice(index);
+        const promises = restApiRoutesIds.map((apiRouteId) => this.authorizeProfileToAccessOnePortofolioApiRoute(profile, portofolioId, apiRouteId));
+        return Promise.all(promises).then(async (apis) => {
+            await this._removeEmptyPortofolioFromProfile(profile, portofolioId);
+            return apis.filter(api => api !== undefined).concat(firstCreated ? [firstCreated] : []);
+        });
+    }
+    /**
+     * Revokes a profile's authorization to access specific API routes within a given portfolio.
+     *
+     * This method removes references to the specified API routes from the profile's authorization tree
+     * for the provided portfolio. If the portfolio or any of the API route references do not exist,
+     * they are skipped. After removal, the portfolio's validity is checked and updated if necessary.
+     *
+     * @param profile - The profile node from which to remove API route access.
+     * @param portofolioId - The ID of the portfolio whose API routes are being unauthorize.
+     * @param apiRoutesIds - A single API route ID or an array of API route IDs to revoke access for.
+     * @returns A promise that resolves to an array of the original API route nodes that were removed.
+     */
+    async unauthorizeProfileToAccessPortofolioApisRoutes(profile, portofolioId, apiRoutesIds) {
+        if (!Array.isArray(apiRoutesIds))
+            apiRoutesIds = [apiRoutesIds];
+        const createContextIfNotExist = true;
+        const context = await (0, authorizationUtils_1._getAuthorizedPortofolioContext)(profile, !createContextIfNotExist);
+        const portofolioRef = await (0, authorizationUtils_1.findNodeReferenceInProfileTree)(context, context, portofolioId);
+        if (!portofolioRef)
+            return [];
+        const promises = apiRoutesIds.map(async (apiRouteId) => {
+            const apiRouteReference = await (0, authorizationUtils_1.findNodeReferenceInProfileTree)(context, portofolioRef, apiRouteId);
+            if (!apiRouteReference)
+                return null;
+            await (0, authorizationUtils_1.removeReferenceNode)(apiRouteReference);
+            return (0, authorizationUtils_1.getOriginalNodeFromReference)(apiRouteReference);
+        });
+        return Promise.all(promises).then(async (removedApis) => {
+            await this._removeEmptyPortofolioFromProfile(profile, portofolioId, portofolioRef);
+            return removedApis.filter(api => api !== null);
+        });
+    }
+    /**
+    * Retrieves the list of authorized API route nodes within a specific portfolio for a given profile.
+    *
+    * This method locates the portfolio reference in the profile's authorization tree,
+    * fetches all child nodes linked via the `API_RELATION_NAME` relation, resolves their
+    * original nodes, and returns an array of authorized API route nodes.
+    * If the portfolio reference is not found, an empty array is returned.
+    *
+    * @param profile - The profile node for which to retrieve authorized API routes.
+    * @param portofolioId - The ID of the portfolio to check.
+    * @returns A promise that resolves to an array of authorized API route nodes (`SpinalNode[]`).
+    */
+    async getAuthorizedPortofolioApisRoutesFromProfile(profile, portofolioId) {
+        const createContextIfNotExist = true;
+        const context = await (0, authorizationUtils_1._getAuthorizedPortofolioContext)(profile, !createContextIfNotExist);
+        const portofolioRef = await (0, authorizationUtils_1.findNodeReferenceInProfileTree)(context, context, portofolioId);
+        if (!portofolioRef)
+            return [];
+        const apiRefs = await portofolioRef.getChildren(constant_1.API_RELATION_NAME);
+        const promises = apiRefs.map(async (apiRef) => (0, authorizationUtils_1.getOriginalNodeFromReference)(apiRef));
+        return Promise.all(promises).then((apis) => apis.filter(api => api !== undefined));
     }
     // //////////////////////////////////////////////////////////
     // //                  BOS AUTHORIZATION                   //
     // //////////////////////////////////////////////////////////
-    // authorize
-    authorizeProfileToAccessBos(profile, portofolioId, BosId) {
-        return __awaiter(this, void 0, void 0, function* () {
-            yield this.authorizeProfileToAccessPortofolio(profile, portofolioId);
-            const { context, portofolioRef } = yield this._getRefTree(profile, portofolioId);
-            const bos = yield portofolio_service_1.PortofolioService.getInstance().getBuildingFromPortofolio(portofolioId, BosId);
-            if (!bos)
-                return;
-            const bosExist = yield this._getReference(portofolioRef, BosId, [constant_1.PROFILE_TO_AUTHORIZED_BOS_RELATION]);
-            if (!bosExist) {
-                const reference = yield this._createNodeReference(bos);
-                yield portofolioRef.addChildInContext(reference, constant_1.PROFILE_TO_AUTHORIZED_BOS_RELATION, constant_1.PTR_LST_TYPE, context);
-            }
-            return bos;
+    /**
+     * Authorizes a profile to access a specific BOS (Building Operating System) within a portfolio.
+     * If the BOS is not already linked to the portfolio reference, creates a reference and links it.
+     *
+     * @param profile - The profile node to authorize.
+     * @param portofolioId - The ID of the portfolio.
+     * @param BosId - The ID of the BOS to authorize access to.
+     * @returns The real SpinalNode of the BOS if successful, otherwise undefined.
+     */
+    async authorizeProfileToAccessBos(profile, portofolioId, BosId) {
+        const originalPortofolioNode = await this.authorizeProfileToAccessPortofolio(profile, portofolioId);
+        if (!originalPortofolioNode)
+            return;
+        const createContextIfNotExist = true;
+        const context = await (0, authorizationUtils_1._getAuthorizedPortofolioContext)(profile, createContextIfNotExist);
+        const portofolioRef = await (0, authorizationUtils_1.findNodeReferenceInProfileTree)(context, context, portofolioId);
+        const bosOriginNalNode = await portofolio_service_1.PortofolioService.getInstance().getBuildingFromPortofolio(portofolioId, BosId);
+        if (!bosOriginNalNode)
+            return;
+        const bosAlreadyAuthorized = await (0, authorizationUtils_1.findNodeReferenceInProfileTree)(context, portofolioRef, BosId);
+        if (bosAlreadyAuthorized)
+            return bosOriginNalNode;
+        const bosReference = await (0, authorizationUtils_1.createNodeReference)(bosOriginNalNode);
+        await portofolioRef.addChildInContext(bosReference, constant_1.PROFILE_TO_AUTHORIZED_BOS_RELATION, constant_1.PTR_LST_TYPE, context);
+        return bosOriginNalNode;
+    }
+    /**
+     * Authorizes a profile to access a specific app within a BOS (Building Operating System).
+     * If the app is not already linked to the BOS reference, creates a reference and links it.
+     *
+     * @param profile - The profile node to authorize.
+     * @param portofolioId - The ID of the portfolio.
+     * @param BosId - The ID of the BOS.
+     * @param appId - The ID of the app to authorize access to.
+     * @returns The real SpinalNode of the app if successful, otherwise undefined.
+     */
+    async authorizeProfileToAccessOneBosApp(profile, portofolioId, BosId, appId) {
+        const bosNode = await this.authorizeProfileToAccessBos(profile, portofolioId, BosId);
+        const createContextIfNotExist = true;
+        const context = await (0, authorizationUtils_1._getAuthorizedPortofolioContext)(profile, createContextIfNotExist);
+        const portofolioRef = await (0, authorizationUtils_1.findNodeReferenceInProfileTree)(context, context, portofolioId);
+        const bosRef = await (0, authorizationUtils_1.findNodeReferenceInProfileTree)(context, portofolioRef, BosId);
+        const appOriginalNode = await building_service_1.BuildingService.getInstance().getAppFromBuilding(BosId, appId);
+        if (!appOriginalNode)
+            return;
+        const appAlreadyAuthorized = await (0, authorizationUtils_1.findNodeReferenceInProfileTree)(context, bosRef, appId);
+        if (appAlreadyAuthorized)
+            return appOriginalNode;
+        const appReference = await (0, authorizationUtils_1.createNodeReference)(appOriginalNode);
+        await bosRef.addChildInContext(appReference, constant_1.APP_RELATION_NAME, constant_1.PTR_LST_TYPE, context);
+        return appOriginalNode;
+    }
+    /**
+     * Authorizes a profile to access multiple apps within a BOS (Building Operating System).
+     * For each appId, if not already linked, creates a reference and links it to the BOS reference.
+     *
+     * @param profile - The profile node to authorize.
+     * @param portofolioId - The ID of the portfolio.
+     * @param BosId - The ID of the BOS.
+     * @param appIds - The IDs of the apps to authorize access to.
+     * @returns An array of real SpinalNode apps that were authorized.
+     */
+    async authorizeProfileToAccessBosApp(profile, portofolioId, BosId, appIds) {
+        if (!Array.isArray(appIds))
+            appIds = [appIds];
+        let index = 0;
+        let firstCreated;
+        // Try to authorize the first appId, if it fails, continue with the next ones until one succeeds
+        // This ensures to not have a duplicate bos reference in the profile tree
+        while (!firstCreated && index < appIds.length) {
+            firstCreated = await this.authorizeProfileToAccessOneBosApp(profile, portofolioId, BosId, appIds[index]);
+            index++;
+        }
+        const restAppIds = appIds.slice(index);
+        const promises = restAppIds.map((appId) => this.authorizeProfileToAccessOneBosApp(profile, portofolioId, BosId, appId));
+        return Promise.all(promises).then(async (apps) => {
+            await this._removeEmptyBosFromProfile(profile, portofolioId, BosId);
+            return apps.filter(app => app !== undefined).concat(firstCreated ? [firstCreated] : []);
         });
     }
-    authorizeProfileToAccessBosApp(profile, portofolioId, BosId, appIds) {
-        return __awaiter(this, void 0, void 0, function* () {
-            if (!Array.isArray(appIds))
-                appIds = [appIds];
-            yield this.authorizeProfileToAccessBos(profile, portofolioId, BosId);
-            const { context, bosRef, portofolioRef } = yield this._getRefTree(profile, portofolioId, BosId);
-            const d = yield appIds.reduce((prom, id) => __awaiter(this, void 0, void 0, function* () {
-                let liste = yield prom;
-                const app = yield building_service_1.BuildingService.getInstance().getAppFromBuilding(BosId, id);
-                if (app) {
-                    let appExist = yield this._getReference(bosRef, app.getId().get(), [constant_1.APP_RELATION_NAME]);
-                    if (!appExist) {
-                        appExist = yield this._createNodeReference(app);
-                        yield bosRef.addChildInContext(appExist, constant_1.APP_RELATION_NAME, constant_1.PTR_LST_TYPE, context);
-                    }
-                    ;
-                    liste.push(app);
-                }
-                return liste;
-            }), Promise.resolve([]));
-            yield this._checkBosValidity(profile, portofolioId, BosId, bosRef, portofolioRef);
-            return d;
-        });
-    }
-    // unauthorize
-    unauthorizeProfileToAccessBos(profile, portofolioId, BosId) {
-        return __awaiter(this, void 0, void 0, function* () {
-            const { portofolioRef, bosRef } = yield this._getRefTree(profile, portofolioId, BosId);
+    /**
+     * Revokes a profile's authorization to access a specific BOS (Building Operating System) within a given portfolio.
+     *
+     * This method attempts to locate the portfolio and BOS references within the profile's authorization context.
+     * If both references are found, it cleans the BOS reference tree and checks the validity of the portfolio.
+     * Returns `true` if the operation succeeds, otherwise returns `false`.
+     *
+     * @param profile - The profile node whose access is to be revoked.
+     * @param portofolioId - The unique identifier of the portfolio.
+     * @param BosId - The unique identifier of the BOS to unauthorize access to.
+     * @returns A promise that resolves to `true` if the profile was successfully unauthorized, or `false` otherwise.
+     */
+    async unauthorizeProfileToAccessBos(profile, portofolioId, BosId) {
+        try {
+            const createContextIfNotExist = true;
+            const context = await (0, authorizationUtils_1._getAuthorizedPortofolioContext)(profile, !createContextIfNotExist);
+            const portofolioRef = await (0, authorizationUtils_1.findNodeReferenceInProfileTree)(context, context, portofolioId);
+            const bosRef = await (0, authorizationUtils_1.findNodeReferenceInProfileTree)(context, portofolioRef, BosId);
             if (portofolioRef && bosRef) {
-                try {
-                    yield portofolioRef.removeChild(bosRef, constant_1.PROFILE_TO_AUTHORIZED_BOS_RELATION, constant_1.PTR_LST_TYPE);
-                    return true;
-                }
-                catch (error) { }
+                await (0, authorizationUtils_1.CleanReferenceTree)(context, bosRef);
+                await this._removeEmptyPortofolioFromProfile(profile, portofolioId, portofolioRef);
+                return true;
             }
             return false;
+        }
+        catch (error) {
+            return false;
+        }
+    }
+    /**
+     * Revokes a profile's authorization to access specific app(s) within a BOS (Building Operating System).
+     *
+     * For each appId, finds the reference node in the profile's BOS tree and removes it.
+     * After removal, checks if the BOS reference is still valid (has children), and if not,
+     * revokes the profile's access to the BOS as well.
+     *
+     * @param profile - The profile node whose app access is to be revoked.
+     * @param portofolioId - The unique identifier of the portfolio.
+     * @param BosId - The unique identifier of the BOS.
+     * @param appIds - The ID(s) of the app(s) to unauthorize.
+     * @returns A promise that resolves to an array of removed app references.
+     */
+    async unauthorizeProfileToAccessBosApp(profile, portofolioId, BosId, appIds) {
+        if (!Array.isArray(appIds))
+            appIds = [appIds];
+        // const { bosRef, portofolioRef } = await this._getRefTree(profile, portofolioId, BosId)
+        const createContextIfNotExist = true;
+        const context = await (0, authorizationUtils_1._getAuthorizedPortofolioContext)(profile, !createContextIfNotExist);
+        const bosRef = await (0, authorizationUtils_1.findNodeReferenceInProfileTree)(context, context, BosId);
+        if (!bosRef)
+            return;
+        const promises = appIds.map(async (appId) => {
+            const appReference = await (0, authorizationUtils_1.findNodeReferenceInProfileTree)(context, bosRef, appId);
+            if (!appReference)
+                return null;
+            await (0, authorizationUtils_1.removeReferenceNode)(appReference);
+            return (0, authorizationUtils_1.getOriginalNodeFromReference)(appReference);
+        });
+        return Promise.all(promises).then(async (removedApps) => {
+            await this._removeEmptyBosFromProfile(profile, portofolioId, BosId, bosRef);
+            return removedApps.filter(app => app !== null);
         });
     }
-    unauthorizeProfileToAccessBosApp(profile, portofolioId, BosId, appIds) {
-        return __awaiter(this, void 0, void 0, function* () {
-            if (!Array.isArray(appIds))
-                appIds = [appIds];
-            const { bosRef, portofolioRef } = yield this._getRefTree(profile, portofolioId, BosId);
-            if (!bosRef)
-                return;
-            const data = yield appIds.reduce((prom, id) => __awaiter(this, void 0, void 0, function* () {
-                let liste = yield prom;
-                const app = yield building_service_1.BuildingService.getInstance().getAppFromBuilding(BosId, id);
-                if (app) {
-                    const appRef = yield this._getReference(bosRef, app.getId().get(), [constant_1.APP_RELATION_NAME]);
-                    if (appRef) {
-                        yield bosRef.removeChild(appRef, constant_1.APP_RELATION_NAME, constant_1.PTR_LST_TYPE);
-                        liste.push(app);
-                    }
-                }
-                return liste;
-            }), Promise.resolve([]));
-            yield this._checkBosValidity(profile, portofolioId, BosId, bosRef, portofolioRef);
-            return data;
-        });
+    /**
+     * Retrieves the list of authorized BOS (Building Operating System) nodes within a specific portfolio for a given profile.
+     *
+     * This method locates the portfolio reference in the profile's authorization tree,
+     * fetches all child nodes linked via the `PROFILE_TO_AUTHORIZED_BOS_RELATION` relation, resolves their
+     * original nodes, and returns an array of authorized BOS nodes.
+     * If the portfolio reference is not found, an empty array is returned.
+     *
+     * @param profile - The profile node for which to retrieve authorized BOS nodes.
+     * @param portofolioId - The ID of the portfolio to check.
+     * @returns A promise that resolves to an array of authorized BOS nodes (`SpinalNode[]`).
+     */
+    async getAuthorizedBosFromProfile(profile, portofolioId) {
+        // const { portofolioRef } = await this._getRefTree(profile, portofolioId);
+        const context = await (0, authorizationUtils_1._getAuthorizedPortofolioContext)(profile, false);
+        if (!context)
+            return [];
+        const portofolioRef = await (0, authorizationUtils_1.findNodeReferenceInProfileTree)(context, context, portofolioId);
+        if (!portofolioRef)
+            return [];
+        const bosRefs = await portofolioRef.getChildren([constant_1.PROFILE_TO_AUTHORIZED_BOS_RELATION]);
+        const promises = bosRefs.map(async (bosRef) => (0, authorizationUtils_1.getOriginalNodeFromReference)(bosRef));
+        return Promise.all(promises).then((bosNodes) => bosNodes.filter(bos => bos !== undefined));
     }
-    // get
-    getAuthorizedBosFromProfile(profile, portofolioId) {
-        return __awaiter(this, void 0, void 0, function* () {
-            const { portofolioRef } = yield this._getRefTree(profile, portofolioId);
-            const children = yield portofolioRef.getChildren(constant_1.PROFILE_TO_AUTHORIZED_BOS_RELATION);
-            return children.reduce((prom, item) => __awaiter(this, void 0, void 0, function* () {
-                const liste = yield prom;
-                if (item) {
-                    const element = yield this._getRealNode(item);
-                    liste.push(element);
-                }
-                return liste;
-            }), Promise.resolve([]));
-        });
-    }
-    getAuthorizedBosAppFromProfile(profile, portofolioId, BosId) {
-        return __awaiter(this, void 0, void 0, function* () {
-            const { bosRef } = yield this._getRefTree(profile, portofolioId, BosId);
-            if (!bosRef)
-                return [];
-            const children = yield bosRef.getChildren(constant_1.APP_RELATION_NAME);
-            return children.reduce((prom, item) => __awaiter(this, void 0, void 0, function* () {
-                const liste = yield prom;
-                if (item) {
-                    const element = yield this._getRealNode(item);
-                    liste.push(element);
-                }
-                return liste;
-            }), Promise.resolve([]));
-        });
+    /**
+     * Retrieves the list of authorized BOS application nodes for a given profile, portfolio, and BOS ID.
+     *
+     * This method navigates the profile tree to find the specified portfolio and BOS references,
+     * then fetches all application nodes related to the BOS. Only valid application nodes are returned.
+     *
+     * @param profile - The root profile node from which to start the search.
+     * @param portofolioId - The unique identifier of the portfolio to search within the profile tree.
+     * @param BosId - The unique identifier of the BOS (Business Operating System) node.
+     * @returns A promise that resolves to an array of authorized application nodes (`SpinalNode[]`).
+     */
+    async getAuthorizedBosAppFromProfile(profile, portofolioId, BosId) {
+        const createContextIfNotExist = true;
+        const context = await (0, authorizationUtils_1._getAuthorizedPortofolioContext)(profile, !createContextIfNotExist);
+        const portofolioRef = await (0, authorizationUtils_1.findNodeReferenceInProfileTree)(context, context, portofolioId);
+        if (!portofolioRef)
+            return [];
+        const bosRef = await (0, authorizationUtils_1.findNodeReferenceInProfileTree)(context, portofolioRef, BosId);
+        if (!bosRef)
+            return [];
+        const appRefs = await bosRef.getChildren(constant_1.APP_RELATION_NAME);
+        const promises = appRefs.map(async (appRef) => (0, authorizationUtils_1.getOriginalNodeFromReference)(appRef));
+        return Promise.all(promises).then((apps) => apps.filter(app => app !== undefined));
     }
     //////////////////////////////////////////////////////////
     //            API's ROUTES AUTHORIZATION                //
     //////////////////////////////////////////////////////////
-    //authorize
-    authorizeProfileToAccessPortofolioApisRoutes(profile, portofolioId, apiRoutesIds) {
-        return __awaiter(this, void 0, void 0, function* () {
-            if (!Array.isArray(apiRoutesIds))
-                apiRoutesIds = [apiRoutesIds];
-            // const authApicontext = await this._getAuthorizedApisRoutesContext(profile, true);
-            // if (!authApicontext) return;
-            yield this.authorizeProfileToAccessPortofolio(profile, portofolioId);
-            const { context, portofolioRef } = yield this._getRefTree(profile, portofolioId);
-            const data = yield apiRoutesIds.reduce((prom, id) => __awaiter(this, void 0, void 0, function* () {
-                const liste = yield prom;
-                const node = yield portofolio_service_1.PortofolioService.getInstance().getApiFromPortofolio(portofolioId, id);
-                if (node) {
-                    let apiExist = yield this._getReference(portofolioRef, id, [constant_1.API_RELATION_NAME]);
-                    if (!apiExist) {
-                        const _temp = yield this._createNodeReference(node);
-                        apiExist = yield portofolioRef.addChildInContext(_temp, constant_1.API_RELATION_NAME, constant_1.PTR_LST_TYPE, context);
-                    }
-                    liste.push(node);
-                }
-                return liste;
-            }), Promise.resolve([]));
-            return data;
+    /**
+     * Authorizes a profile to access a specific API route within a BOS (Building Operating System).
+     * If the API route is not already linked to the BOS reference, creates a reference and links it.
+     *
+     * @param profile - The profile node to authorize.
+     * @param portofolioId - The ID of the portfolio.
+     * @param bosId - The ID of the BOS.
+     * @param apiRouteId - The ID of the API route to authorize access to.
+     * @returns The real SpinalNode of the API route if successful, otherwise undefined.
+     */
+    async authorizeProfileToAccessOneBosApisRoutes(profile, portofolioId, bosId, apiRouteId) {
+        const apiRoute = await building_service_1.BuildingService.getInstance().getApiFromBuilding(bosId, apiRouteId);
+        if (!apiRoute)
+            return;
+        const createContextIfNotExist = true;
+        const context = await (0, authorizationUtils_1._getAuthorizedPortofolioContext)(profile, createContextIfNotExist);
+        const bosOriginNalNode = this.authorizeProfileToAccessBos(profile, portofolioId, bosId);
+        if (!bosOriginNalNode)
+            return;
+        const portofolioRef = await (0, authorizationUtils_1.findNodeReferenceInProfileTree)(context, context, portofolioId);
+        const bosRef = await (0, authorizationUtils_1.findNodeReferenceInProfileTree)(context, portofolioRef, bosId);
+        if (!bosRef)
+            return;
+        const apiRouteAlreadyAuthorized = await (0, authorizationUtils_1.findNodeReferenceInProfileTree)(context, bosRef, apiRouteId);
+        if (apiRouteAlreadyAuthorized)
+            return apiRoute;
+        const apiRouteReference = await (0, authorizationUtils_1.createNodeReference)(apiRoute);
+        await bosRef.addChildInContext(apiRouteReference, constant_1.API_RELATION_NAME, constant_1.PTR_LST_TYPE, context);
+        return apiRoute;
+    }
+    /**
+     * Authorizes a profile to access multiple API routes within a BOS (Building Operating System).
+     * For each apiRouteId, if not already linked, creates a reference and links it to the BOS reference.
+     *
+     * @param profile - The profile node to authorize.
+     * @param portofolioId - The ID of the portfolio.
+     * @param bosId - The ID of the BOS.
+     * @param apiRoutesIds - The IDs of the API routes to authorize access to.
+     * @returns An array of real SpinalNode API routes that were authorized.
+     */
+    async authorizeProfileToAccessBosApisRoutes(profile, portofolioId, bosId, apiRoutesIds) {
+        if (!Array.isArray(apiRoutesIds))
+            apiRoutesIds = [apiRoutesIds];
+        if (!apiRoutesIds.length)
+            return [];
+        let index = 0;
+        let firstCreated;
+        // Try to authorize the first apiRouteId, if it fails, continue with the next ones until one succeeds
+        // This ensures to not have a duplicate bos reference in the profile tree
+        while (!firstCreated && index < apiRoutesIds.length) {
+            firstCreated = await this.authorizeProfileToAccessOneBosApisRoutes(profile, portofolioId, bosId, apiRoutesIds[index]);
+            index++;
+        }
+        const restApiRoutesIds = apiRoutesIds.slice(index);
+        const promises = restApiRoutesIds.map((apiRouteId) => this.authorizeProfileToAccessOneBosApisRoutes(profile, portofolioId, bosId, apiRouteId));
+        return Promise.all(promises).then(async (apis) => {
+            await this._removeEmptyBosFromProfile(profile, portofolioId, bosId);
+            return apis.filter(api => api !== undefined).concat(firstCreated ? [firstCreated] : []);
         });
     }
-    authorizeProfileToAccessBosApisRoutes(profile, portofolioId, bosId, apiRoutesIds) {
-        return __awaiter(this, void 0, void 0, function* () {
-            if (!Array.isArray(apiRoutesIds))
-                apiRoutesIds = [apiRoutesIds];
-            yield this.authorizeProfileToAccessBos(profile, portofolioId, bosId);
-            const { context, bosRef, portofolioRef } = yield this._getRefTree(profile, portofolioId, bosId);
-            if (!bosRef)
-                return;
-            const data = yield apiRoutesIds.reduce((prom, id) => __awaiter(this, void 0, void 0, function* () {
-                const liste = yield prom;
-                const node = yield building_service_1.BuildingService.getInstance().getApiFromBuilding(bosId, id);
-                if (node) {
-                    let apiExist = yield this._getReference(bosRef, id, [constant_1.API_RELATION_NAME]);
-                    if (!apiExist) {
-                        const _temp = yield this._createNodeReference(node);
-                        apiExist = yield bosRef.addChildInContext(_temp, constant_1.API_RELATION_NAME, constant_1.PTR_LST_TYPE, context);
-                    }
-                    liste.push(node);
-                }
-                return liste;
-            }), Promise.resolve([]));
-            yield this._checkBosValidity(profile, portofolioId, bosId, bosRef, portofolioRef);
-            return data;
+    /**
+     * Revokes a profile's authorization to access specific API routes within a BOS (Building Operating System).
+     *
+     * For each apiRouteId, finds the reference node in the profile's BOS tree and removes it.
+     * After removal, checks if the BOS reference is still valid (has children), and if not,
+     * revokes the profile's access to the BOS as well.
+     *
+     * @param profile - The profile node whose API route access is to be revoked.
+     * @param portofolioId - The unique identifier of the portfolio.
+     * @param bosId - The unique identifier of the BOS.
+     * @param apiRoutesIds - The ID(s) of the API route(s) to unauthorize.
+     * @returns A promise that resolves to an array of removed API route references.
+     */
+    async unauthorizeProfileToAccessBosApisRoutes(profile, portofolioId, bosId, apiRoutesIds) {
+        const createContextIfNotExist = true;
+        const context = await (0, authorizationUtils_1._getAuthorizedPortofolioContext)(profile, !createContextIfNotExist);
+        const portofolioRef = await (0, authorizationUtils_1.findNodeReferenceInProfileTree)(context, context, portofolioId);
+        if (!portofolioRef)
+            return [];
+        const bosRef = await (0, authorizationUtils_1.findNodeReferenceInProfileTree)(context, portofolioRef, bosId);
+        if (!bosRef)
+            return [];
+        if (!apiRoutesIds || !apiRoutesIds.length)
+            return [];
+        if (typeof apiRoutesIds === 'string')
+            apiRoutesIds = [apiRoutesIds];
+        const promises = apiRoutesIds.map(async (apiRouteId) => {
+            const apiRouteReference = await (0, authorizationUtils_1.findNodeReferenceInProfileTree)(context, bosRef, apiRouteId);
+            if (!apiRouteReference)
+                return null;
+            await (0, authorizationUtils_1.removeReferenceNode)(apiRouteReference);
+            return (0, authorizationUtils_1.getOriginalNodeFromReference)(apiRouteReference);
+        });
+        return Promise.all(promises).then(async (removedApis) => {
+            await this._removeEmptyBosFromProfile(profile, portofolioId, bosId, bosRef, portofolioRef);
+            return removedApis.filter(api => api !== null);
         });
     }
-    // unauthorize
-    unauthorizeProfileToAccessPortofolioApisRoutes(profile, portofolioId, apiRoutesIds) {
-        return __awaiter(this, void 0, void 0, function* () {
-            if (!Array.isArray(apiRoutesIds))
-                apiRoutesIds = [apiRoutesIds];
-            const { portofolioRef } = yield this._getRefTree(profile, portofolioId);
-            if (!portofolioRef)
-                return;
-            const data = yield apiRoutesIds.reduce((prom, id) => __awaiter(this, void 0, void 0, function* () {
-                const liste = yield prom;
-                const route = yield portofolio_service_1.PortofolioService.getInstance().getApiFromPortofolio(portofolioId, id);
-                if (route) {
-                    const routeRef = yield this._getReference(portofolioRef, id, [constant_1.API_RELATION_NAME]);
-                    try {
-                        yield portofolioRef.removeChild(routeRef, constant_1.API_RELATION_NAME, constant_1.PTR_LST_TYPE);
-                        liste.push(route);
-                    }
-                    catch (error) { }
-                }
-                return liste;
-                // this._removeApiFromContext(authcontext, el)
-            }), Promise.resolve([]));
-            yield this._checkPortofolioValidity(profile, portofolioId, portofolioRef);
-            return data;
-        });
-    }
-    unauthorizeProfileToAccessBosApisRoutes(profile, portofolioId, bosId, apiRoutesIds) {
-        return __awaiter(this, void 0, void 0, function* () {
-            if (!Array.isArray(apiRoutesIds))
-                apiRoutesIds = [apiRoutesIds];
-            const { bosRef, portofolioRef } = yield this._getRefTree(profile, portofolioId, bosId);
-            if (!bosRef)
-                return;
-            const data = yield apiRoutesIds.reduce((prom, id) => __awaiter(this, void 0, void 0, function* () {
-                const liste = yield prom;
-                const route = yield building_service_1.BuildingService.getInstance().getApiFromBuilding(bosId, id);
-                if (route) {
-                    const routeRef = yield this._getReference(bosRef, id, [constant_1.API_RELATION_NAME]);
-                    try {
-                        yield bosRef.removeChild(routeRef, constant_1.API_RELATION_NAME, constant_1.PTR_LST_TYPE);
-                        liste.push(route);
-                    }
-                    catch (error) { }
-                }
-                return liste;
-                // this._removeApiFromContext(authcontext, el)
-            }), Promise.resolve([]));
-            yield this._checkBosValidity(profile, portofolioId, bosId, bosRef, portofolioRef);
-            return data;
-        });
-    }
-    // get
-    getAuthorizedApisRoutesFromProfile(profile, portofolioId) {
-        return __awaiter(this, void 0, void 0, function* () {
-            const { portofolioRef } = yield this._getRefTree(profile, portofolioId);
-            if (!portofolioRef)
-                return [];
-            const children = yield portofolioRef.getChildren(constant_1.API_RELATION_NAME);
-            return children.reduce((prom, item) => __awaiter(this, void 0, void 0, function* () {
-                const liste = yield prom;
-                if (item) {
-                    const element = yield this._getRealNode(item);
-                    liste.push(element);
-                }
-                return liste;
-            }), Promise.resolve([]));
-        });
-    }
-    getAuthorizedBosApisRoutesFromProfile(profile, portofolioId, BosId) {
-        return __awaiter(this, void 0, void 0, function* () {
-            const { bosRef } = yield this._getRefTree(profile, portofolioId, BosId);
-            if (!bosRef)
-                return [];
-            const children = yield bosRef.getChildren(constant_1.API_RELATION_NAME);
-            return children.reduce((prom, item) => __awaiter(this, void 0, void 0, function* () {
-                const liste = yield prom;
-                if (item) {
-                    const element = yield this._getRealNode(item);
-                    liste.push(element);
-                }
-                return liste;
-            }), Promise.resolve([]));
-        });
+    /**
+     * Retrieves the list of authorized BOS API route nodes for a given profile, portfolio, and BOS ID.
+     *
+     * This method navigates the profile tree to find the specified portfolio and BOS nodes,
+     * then collects all API route nodes related to the BOS. Only nodes that can be resolved
+     * to their original references are returned.
+     *
+     * @param profile - The root profile node from which to start the search.
+     * @param portofolioId - The unique identifier of the portfolio node.
+     * @param BosId - The unique identifier of the BOS node.
+     * @returns A promise that resolves to an array of authorized BOS API route nodes.
+     */
+    async getAuthorizedBosApisRoutesFromProfile(profile, portofolioId, BosId) {
+        const context = await (0, authorizationUtils_1._getAuthorizedPortofolioContext)(profile, false);
+        if (!context)
+            return [];
+        const portofolioRef = await (0, authorizationUtils_1.findNodeReferenceInProfileTree)(context, context, portofolioId);
+        if (!portofolioRef)
+            return [];
+        const bosRef = await (0, authorizationUtils_1.findNodeReferenceInProfileTree)(context, portofolioRef, BosId);
+        if (!bosRef)
+            return [];
+        const apiRefs = await bosRef.getChildren(constant_1.API_RELATION_NAME);
+        const promises = apiRefs.map(async (apiRef) => (0, authorizationUtils_1.getOriginalNodeFromReference)(apiRef));
+        return Promise.all(promises).then((apis) => apis.filter(api => api !== undefined));
     }
     //////////////////////////////////////////////////////////
     //                     PRIVATES                         //
     //////////////////////////////////////////////////////////
-    _getRefTree(profile, portofolioId, BosId) {
-        return __awaiter(this, void 0, void 0, function* () {
-            const context = yield this._getAuthorizedPortofolioContext(profile, false);
-            if (!context || !portofolioId)
-                return { context };
-            const portofolioRef = yield this._getReference(context, portofolioId);
-            if (!portofolioRef || !BosId)
-                return { context, portofolioRef };
-            const bosRef = yield this._getReference(portofolioRef, BosId, [constant_1.PROFILE_TO_AUTHORIZED_BOS_RELATION]);
-            return { context, portofolioRef, bosRef };
-        });
-    }
-    _getAuthorizedPortofolioContext(profile, createIfNotExist = false) {
-        return __awaiter(this, void 0, void 0, function* () {
-            return this._getOrCreateContext(profile, constant_1.AUTHORIZED_PORTOFOLIO_CONTEXT_NAME, createIfNotExist, constant_1.AUTHORIZED_PORTOFOLIO_CONTEXT_TYPE);
-        });
-    }
-    _getAuthorizedApisRoutesContext(profile, createIfNotExist = false) {
-        return __awaiter(this, void 0, void 0, function* () {
-            return this._getOrCreateContext(profile, constant_1.AUTHORIZED_API_CONTEXT_NAME, createIfNotExist, constant_1.AUTHORIZED_API_CONTEXT_TYPE);
-        });
-    }
-    _getAuthorizedBosContext(profile, createIfNotExist = false) {
-        return __awaiter(this, void 0, void 0, function* () {
-            return this._getOrCreateContext(profile, constant_1.AUTHORIZED_BOS_CONTEXT_NAME, createIfNotExist, constant_1.AUTHORIZED_BOS_CONTEXT_TYPE);
-        });
-    }
-    // private async _addApiToContext(context: SpinalContext, id: string): Promise<SpinalNode> {
-    //     try {
-    //         const node = await APIService.getInstance().getApiRouteById(id);
-    //         if (node) {
-    //             const apiExist = context.getChildrenIds().find(id => id === node.getId().get());
-    //             if (!apiExist) return context.addChildInContext(node, CONTEXT_TO_AUTHORIZED_APIS_RELATION_NAME, PTR_LST_TYPE, context);
-    //             return node;
-    //         }
-    //     } catch (error) { }
-    // }
-    // private async _removeApiFromContext(context: SpinalContext, id: string): Promise<string> {
-    //     try {
-    //         const node = await APIService.getInstance().getApiRouteById(id);
-    //         if (node) {
-    //             await context.removeChild(node, CONTEXT_TO_AUTHORIZED_APIS_RELATION_NAME, PTR_LST_TYPE);
-    //             return node.getId().get();
-    //         }
-    //     } catch (error) { }
-    // }
-    _getOrCreateContext(profile, contextName, createIfNotExist, contextType) {
-        return __awaiter(this, void 0, void 0, function* () {
-            const graph = yield this._getProfileGraph(profile);
-            if (graph) {
-                let context = yield graph.getContext(contextName);
-                if (context)
-                    return context;
-                if (!createIfNotExist)
-                    return;
-                let newContext = new spinal_env_viewer_graph_service_1.SpinalContext(contextName, contextType);
-                return graph.addContext(newContext);
-            }
-        });
-    }
-    _getProfileGraph(profile) {
-        return __awaiter(this, void 0, void 0, function* () {
-            if (profile)
-                return profile.getElement();
-        });
-    }
-    _getReference(startNode, referenceId, relationName = []) {
-        return __awaiter(this, void 0, void 0, function* () {
-            let queue = [startNode];
-            while (queue.length > 0) {
-                const child = queue.shift();
-                if (child instanceof spinal_env_viewer_graph_service_1.SpinalNode) {
-                    const element = yield child.getElement(true);
-                    if (element && element.getId().get() === referenceId)
-                        return child;
-                    const children = yield child.getChildren(relationName);
-                    queue.push(...children);
-                }
-            }
-        });
-    }
-    _getRealNode(refNode) {
-        return refNode.getElement(false);
-    }
-    _createNodeReference(node) {
-        return __awaiter(this, void 0, void 0, function* () {
-            const refNode = new spinal_env_viewer_graph_service_1.SpinalNode(node.getName().get(), node.getType().get(), node);
-            refNode.info.name.set(node.info.name);
-            yield this._addRefToNode(node, refNode);
-            return refNode;
-        });
-    }
-    _addRefToNode(node, ref) {
-        if (node.info.references) {
-            return new Promise((resolve, reject) => {
-                node.info.references.load((lst) => {
-                    lst.push(ref);
-                    resolve(ref);
-                });
-            });
+    async _removeEmptyPortofolioFromProfile(profile, portofolioId, portofolioRef) {
+        if (!portofolioRef) {
+            const context = await (0, authorizationUtils_1._getAuthorizedPortofolioContext)(profile, false);
+            portofolioRef = await (0, authorizationUtils_1.findNodeReferenceInProfileTree)(context, context, portofolioId);
         }
-        else {
-            node.info.add_attr({
-                references: new spinal_core_connectorjs_type_1.Ptr(new spinal_core_connectorjs_type_1.Lst([ref]))
-            });
-            return Promise.resolve(ref);
-        }
+        if (!portofolioRef)
+            return;
+        const childrenList = await portofolioRef.getChildren();
+        if (childrenList.length > 0)
+            return;
+        return (0, authorizationUtils_1.removeReferenceNode)(portofolioRef);
     }
-    _getContextByType(profile, elementType) {
-        switch (elementType) {
-            case constant_1.AUTHORIZED_API_CONTEXT_TYPE:
-                return this._getAuthorizedApisRoutesContext(profile);
-            case constant_1.AUTHORIZED_PORTOFOLIO_CONTEXT_TYPE:
-                return this._getAuthorizedPortofolioContext(profile);
-            case constant_1.AUTHORIZED_BOS_CONTEXT_TYPE:
-                return this._getAuthorizedBosContext(profile);
-            default:
-                break;
-        }
-    }
-    _checkPortofolioValidity(profile, portofolioId, reference) {
-        return __awaiter(this, void 0, void 0, function* () {
-            const children = yield reference.getChildren();
-            if (children.length > 0)
-                return;
-            return this.unauthorizeProfileToAccessPortofolio(profile, portofolioId);
-        });
-    }
-    _checkBosValidity(profile, portofolioId, bosId, reference, portofolioRef) {
-        return __awaiter(this, void 0, void 0, function* () {
-            const children = yield reference.getChildren();
-            if (children.length > 0)
-                return;
-            yield this.unauthorizeProfileToAccessBos(profile, portofolioId, bosId);
-            return this._checkPortofolioValidity(profile, portofolioId, portofolioRef);
-        });
+    async _removeEmptyBosFromProfile(profile, portofolioId, bosId, bosReference, portofolioRef) {
+        const createContextIfNotExist = true;
+        const context = await (0, authorizationUtils_1._getAuthorizedPortofolioContext)(profile, !createContextIfNotExist);
+        if (!portofolioRef)
+            portofolioRef = await (0, authorizationUtils_1.findNodeReferenceInProfileTree)(context, context, portofolioId);
+        if (!portofolioRef)
+            return;
+        if (!bosReference)
+            bosReference = await (0, authorizationUtils_1.findNodeReferenceInProfileTree)(context, portofolioRef, bosId);
+        if (!bosReference)
+            return;
+        const childrenList = await bosReference.getChildren();
+        if (childrenList.length > 0)
+            return;
+        await (0, authorizationUtils_1.removeReferenceNode)(bosReference);
+        return this._removeEmptyPortofolioFromProfile(profile, portofolioId, portofolioRef);
     }
 }
 exports.default = AuthorizationService;

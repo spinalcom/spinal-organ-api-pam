@@ -34,15 +34,6 @@ var __metadata = (this && this.__metadata) || function (k, v) {
 var __param = (this && this.__param) || function (paramIndex, decorator) {
     return function (target, key) { decorator(target, key, paramIndex); }
 };
-var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
-    function adopt(value) { return value instanceof P ? value : new P(function (resolve) { resolve(value); }); }
-    return new (P || (P = Promise))(function (resolve, reject) {
-        function fulfilled(value) { try { step(generator.next(value)); } catch (e) { reject(e); } }
-        function rejected(value) { try { step(generator["throw"](value)); } catch (e) { reject(e); } }
-        function step(result) { result.done ? resolve(result.value) : adopt(result.value).then(fulfilled, rejected); }
-        step((generator = generator.apply(thisArg, _arguments || [])).next());
-    });
-};
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.APIController = void 0;
 const tsoa_1 = require("tsoa");
@@ -60,237 +51,214 @@ let APIController = class APIController extends tsoa_1.Controller {
     //////////////////////////////////////////
     //              PORTOFOLIO              //
     //////////////////////////////////////////
-    createPortofolioApiRoute(req, data) {
-        return __awaiter(this, void 0, void 0, function* () {
-            try {
-                const isAdmin = yield (0, authentication_1.checkIfItIsAdmin)(req);
-                if (!isAdmin)
-                    throw new AuthError_1.AuthError(constant_1.SECURITY_MESSAGES.UNAUTHORIZED);
-                // const data = req.body;
-                const node = yield apiService.createApiRoute(data, constant_1.PORTOFOLIO_API_GROUP_TYPE);
-                this.setStatus(constant_1.HTTP_CODES.CREATED);
+    async createPortofolioApiRoute(req, data) {
+        try {
+            const isAdmin = await (0, authentication_1.checkIfItIsAdmin)(req);
+            if (!isAdmin)
+                throw new AuthError_1.AuthError(constant_1.SECURITY_MESSAGES.UNAUTHORIZED);
+            // const data = req.body;
+            const node = await apiService.createApiRoute(data, constant_1.PORTOFOLIO_API_GROUP_TYPE);
+            this.setStatus(constant_1.HTTP_CODES.CREATED);
+            return node.info.get();
+        }
+        catch (error) {
+            this.setStatus(error.code || constant_1.HTTP_CODES.INTERNAL_ERROR);
+            return { message: error.message };
+        }
+    }
+    async updatePortofolioApiRoute(req, data, id) {
+        try {
+            const isAdmin = await (0, authentication_1.checkIfItIsAdmin)(req);
+            if (!isAdmin)
+                throw new AuthError_1.AuthError(constant_1.SECURITY_MESSAGES.UNAUTHORIZED);
+            const node = await apiService.updateApiRoute(id, data, constant_1.PORTOFOLIO_API_GROUP_TYPE);
+            this.setStatus(constant_1.HTTP_CODES.ACCEPTED);
+            return node.info.get();
+        }
+        catch (error) {
+            this.setStatus(error.code || constant_1.HTTP_CODES.INTERNAL_ERROR);
+            return { message: error.message };
+        }
+    }
+    async getPortofolioApiRouteById(req, id) {
+        try {
+            const profile = await (0, authentication_1.getProfileNode)(req);
+            const node = await authorization_service_1.default.getInstance().profileHasAccessToNode(profile, id);
+            if (node) {
+                this.setStatus(constant_1.HTTP_CODES.OK);
                 return node.info.get();
             }
-            catch (error) {
-                this.setStatus(error.code || constant_1.HTTP_CODES.INTERNAL_ERROR);
-                return { message: error.message };
-            }
-        });
+            this.setStatus(constant_1.HTTP_CODES.UNAUTHORIZED);
+            return { message: constant_1.SECURITY_MESSAGES.UNAUTHORIZED };
+        }
+        catch (error) {
+            this.setStatus(error.code || constant_1.HTTP_CODES.INTERNAL_ERROR);
+            return { message: error.message };
+        }
     }
-    updatePortofolioApiRoute(req, data, id) {
-        return __awaiter(this, void 0, void 0, function* () {
-            try {
-                const isAdmin = yield (0, authentication_1.checkIfItIsAdmin)(req);
-                if (!isAdmin)
-                    throw new AuthError_1.AuthError(constant_1.SECURITY_MESSAGES.UNAUTHORIZED);
-                const node = yield apiService.updateApiRoute(id, data, constant_1.PORTOFOLIO_API_GROUP_TYPE);
-                this.setStatus(constant_1.HTTP_CODES.ACCEPTED);
-                return node.info.get();
-            }
-            catch (error) {
-                this.setStatus(error.code || constant_1.HTTP_CODES.INTERNAL_ERROR);
-                return { message: error.message };
-            }
-        });
+    async getAllPortofolioApiRoute(req) {
+        try {
+            const isAdmin = await (0, authentication_1.checkIfItIsAdmin)(req);
+            if (!isAdmin)
+                throw new AuthError_1.AuthError(constant_1.SECURITY_MESSAGES.UNAUTHORIZED);
+            const routes = await apiService.getAllApiRoute(constant_1.PORTOFOLIO_API_GROUP_TYPE);
+            this.setStatus(constant_1.HTTP_CODES.OK);
+            return routes.map(el => el.info.get());
+        }
+        catch (error) {
+            this.setStatus(error.code || constant_1.HTTP_CODES.INTERNAL_ERROR);
+            return { message: error.message };
+        }
     }
-    getPortofolioApiRouteById(req, id) {
-        return __awaiter(this, void 0, void 0, function* () {
-            try {
-                const profile = yield (0, authentication_1.getProfileNode)(req);
-                const node = yield authorization_service_1.default.getInstance().profileHasAccess(profile, id);
-                if (node) {
-                    this.setStatus(constant_1.HTTP_CODES.OK);
-                    return node.info.get();
-                }
-                this.setStatus(constant_1.HTTP_CODES.UNAUTHORIZED);
-                return { message: constant_1.SECURITY_MESSAGES.UNAUTHORIZED };
-            }
-            catch (error) {
-                this.setStatus(error.code || constant_1.HTTP_CODES.INTERNAL_ERROR);
-                return { message: error.message };
-            }
-        });
+    async deletePortofolioApiRoute(req, id) {
+        try {
+            const isAdmin = await (0, authentication_1.checkIfItIsAdmin)(req);
+            if (!isAdmin)
+                throw new AuthError_1.AuthError(constant_1.SECURITY_MESSAGES.UNAUTHORIZED);
+            await apiService.deleteApiRoute(id, constant_1.PORTOFOLIO_API_GROUP_TYPE);
+            this.setStatus(constant_1.HTTP_CODES.OK);
+            return { message: `${id} api route has been deleted` };
+        }
+        catch (error) {
+            this.setStatus(error.code || constant_1.HTTP_CODES.INTERNAL_ERROR);
+            return { message: error.message };
+        }
     }
-    getAllPortofolioApiRoute(req) {
-        return __awaiter(this, void 0, void 0, function* () {
-            try {
-                const isAdmin = yield (0, authentication_1.checkIfItIsAdmin)(req);
-                if (!isAdmin)
-                    throw new AuthError_1.AuthError(constant_1.SECURITY_MESSAGES.UNAUTHORIZED);
-                const routes = yield apiService.getAllApiRoute(constant_1.PORTOFOLIO_API_GROUP_TYPE);
-                this.setStatus(constant_1.HTTP_CODES.OK);
-                return routes.map(el => el.info.get());
-            }
-            catch (error) {
-                this.setStatus(error.code || constant_1.HTTP_CODES.INTERNAL_ERROR);
-                return { message: error.message };
-            }
-        });
-    }
-    deletePortofolioApiRoute(req, id) {
-        return __awaiter(this, void 0, void 0, function* () {
-            try {
-                const isAdmin = yield (0, authentication_1.checkIfItIsAdmin)(req);
-                if (!isAdmin)
-                    throw new AuthError_1.AuthError(constant_1.SECURITY_MESSAGES.UNAUTHORIZED);
-                yield apiService.deleteApiRoute(id, constant_1.PORTOFOLIO_API_GROUP_TYPE);
-                this.setStatus(constant_1.HTTP_CODES.OK);
-                return { message: `${id} api route has been deleted` };
-            }
-            catch (error) {
-                this.setStatus(error.code || constant_1.HTTP_CODES.INTERNAL_ERROR);
-                return { message: error.message };
-            }
-        });
-    }
-    uploadPortofolioSwaggerFile(req, file) {
-        return __awaiter(this, void 0, void 0, function* () {
-            try {
-                const isAdmin = yield (0, authentication_1.checkIfItIsAdmin)(req);
-                if (!isAdmin)
-                    throw new AuthError_1.AuthError(constant_1.SECURITY_MESSAGES.UNAUTHORIZED);
-                if (!file) {
-                    this.setStatus(constant_1.HTTP_CODES.BAD_REQUEST);
-                    return { message: "No file uploaded" };
-                }
-                // const firstFile = Object.keys(files)[0];
-                if (file) {
-                    // const file = files[firstFile];
-                    if (!/.*\.json$/.test(file.originalname)) {
-                        this.setStatus(constant_1.HTTP_CODES.BAD_REQUEST);
-                        return { message: "The selected file must be a json file" };
-                    }
-                    const apis = yield services_1.PortofolioService.getInstance().uploadSwaggerFile(file.buffer);
-                    this.setStatus(constant_1.HTTP_CODES.OK);
-                    return apis.map(el => el.info.get());
-                }
+    async uploadPortofolioSwaggerFile(req, file) {
+        try {
+            const isAdmin = await (0, authentication_1.checkIfItIsAdmin)(req);
+            if (!isAdmin)
+                throw new AuthError_1.AuthError(constant_1.SECURITY_MESSAGES.UNAUTHORIZED);
+            if (!file) {
                 this.setStatus(constant_1.HTTP_CODES.BAD_REQUEST);
                 return { message: "No file uploaded" };
             }
-            catch (error) {
-                this.setStatus(error.code || constant_1.HTTP_CODES.INTERNAL_ERROR);
-                return { message: error.message };
+            // const firstFile = Object.keys(files)[0];
+            if (file) {
+                // const file = files[firstFile];
+                if (!/.*\.json$/.test(file.originalname)) {
+                    this.setStatus(constant_1.HTTP_CODES.BAD_REQUEST);
+                    return { message: "The selected file must be a json file" };
+                }
+                const apis = await services_1.PortofolioService.getInstance().uploadSwaggerFile(file.buffer);
+                this.setStatus(constant_1.HTTP_CODES.OK);
+                return apis.map(el => el.info.get());
             }
-        });
+            this.setStatus(constant_1.HTTP_CODES.BAD_REQUEST);
+            return { message: "No file uploaded" };
+        }
+        catch (error) {
+            this.setStatus(error.code || constant_1.HTTP_CODES.INTERNAL_ERROR);
+            return { message: error.message };
+        }
     }
     //////////////////////////////////////////
     //              BUILDING                //
     //////////////////////////////////////////
-    createBosApiRoute(req, data) {
-        return __awaiter(this, void 0, void 0, function* () {
-            try {
-                const isAdmin = yield (0, authentication_1.checkIfItIsAdmin)(req);
-                if (!isAdmin)
-                    throw new AuthError_1.AuthError(constant_1.SECURITY_MESSAGES.UNAUTHORIZED);
-                // const data = req.body;
-                const node = yield apiService.createApiRoute(data, constant_1.BUILDING_API_GROUP_TYPE);
-                this.setStatus(constant_1.HTTP_CODES.CREATED);
+    async createBosApiRoute(req, data) {
+        try {
+            const isAdmin = await (0, authentication_1.checkIfItIsAdmin)(req);
+            if (!isAdmin)
+                throw new AuthError_1.AuthError(constant_1.SECURITY_MESSAGES.UNAUTHORIZED);
+            // const data = req.body;
+            const node = await apiService.createApiRoute(data, constant_1.BUILDING_API_GROUP_TYPE);
+            this.setStatus(constant_1.HTTP_CODES.CREATED);
+            return node.info.get();
+        }
+        catch (error) {
+            this.setStatus(error.code || constant_1.HTTP_CODES.INTERNAL_ERROR);
+            return { message: error.message };
+        }
+    }
+    async updateBosApiRoute(req, data, id) {
+        try {
+            const isAdmin = await (0, authentication_1.checkIfItIsAdmin)(req);
+            if (!isAdmin)
+                throw new AuthError_1.AuthError(constant_1.SECURITY_MESSAGES.UNAUTHORIZED);
+            const node = await apiService.updateApiRoute(id, data, constant_1.BUILDING_API_GROUP_TYPE);
+            this.setStatus(constant_1.HTTP_CODES.ACCEPTED);
+            return node.info.get();
+        }
+        catch (error) {
+            this.setStatus(error.code || constant_1.HTTP_CODES.INTERNAL_ERROR);
+            return { message: error.message };
+        }
+    }
+    async getBosApiRouteById(req, id) {
+        try {
+            const tokenInfo = await (0, authentication_1.checkAndGetTokenInfo)(req);
+            const profileId = tokenInfo.profile.profileId || tokenInfo.profile.userProfileBosConfigId;
+            const isApp = tokenInfo.profile.profileId || tokenInfo.profile.userProfileBosConfigId ? false : true;
+            const instance = isApp ? services_1.AppProfileService.getInstance() : services_1.UserProfileService.getInstance();
+            const profile = await instance.getProfileNode(profileId);
+            const node = await authorization_service_1.default.getInstance().profileHasAccessToNode(profile, id);
+            if (node) {
+                this.setStatus(constant_1.HTTP_CODES.OK);
                 return node.info.get();
             }
-            catch (error) {
-                this.setStatus(error.code || constant_1.HTTP_CODES.INTERNAL_ERROR);
-                return { message: error.message };
-            }
-        });
+            this.setStatus(constant_1.HTTP_CODES.NOT_FOUND);
+            return { message: `No api route found for ${id}` };
+        }
+        catch (error) {
+            this.setStatus(error.code || constant_1.HTTP_CODES.INTERNAL_ERROR);
+            return { message: error.message };
+        }
     }
-    updateBosApiRoute(req, data, id) {
-        return __awaiter(this, void 0, void 0, function* () {
-            try {
-                const isAdmin = yield (0, authentication_1.checkIfItIsAdmin)(req);
-                if (!isAdmin)
-                    throw new AuthError_1.AuthError(constant_1.SECURITY_MESSAGES.UNAUTHORIZED);
-                const node = yield apiService.updateApiRoute(id, data, constant_1.BUILDING_API_GROUP_TYPE);
-                this.setStatus(constant_1.HTTP_CODES.ACCEPTED);
-                return node.info.get();
-            }
-            catch (error) {
-                this.setStatus(error.code || constant_1.HTTP_CODES.INTERNAL_ERROR);
-                return { message: error.message };
-            }
-        });
+    async getAllBosApiRoute(req) {
+        try {
+            const isAdmin = await (0, authentication_1.checkIfItIsAdmin)(req);
+            if (!isAdmin)
+                throw new AuthError_1.AuthError(constant_1.SECURITY_MESSAGES.UNAUTHORIZED);
+            const routes = await apiService.getAllApiRoute(constant_1.BUILDING_API_GROUP_TYPE);
+            this.setStatus(constant_1.HTTP_CODES.OK);
+            return routes.map(el => el.info.get());
+        }
+        catch (error) {
+            this.setStatus(error.code || constant_1.HTTP_CODES.INTERNAL_ERROR);
+            return { message: error.message };
+        }
     }
-    getBosApiRouteById(req, id) {
-        return __awaiter(this, void 0, void 0, function* () {
-            try {
-                const tokenInfo = yield (0, authentication_1.checkAndGetTokenInfo)(req);
-                const profileId = tokenInfo.profile.profileId || tokenInfo.profile.userProfileBosConfigId;
-                const isApp = tokenInfo.profile.profileId || tokenInfo.profile.userProfileBosConfigId ? false : true;
-                let profile = yield (isApp ? services_1.AppProfileService.getInstance()._getAppProfileNode(profileId) : services_1.UserProfileService.getInstance()._getUserProfileNode(profileId));
-                const node = yield authorization_service_1.default.getInstance().profileHasAccess(profile, id);
-                if (node) {
-                    this.setStatus(constant_1.HTTP_CODES.OK);
-                    return node.info.get();
-                }
-                this.setStatus(constant_1.HTTP_CODES.NOT_FOUND);
-                return { message: `No api route found for ${id}` };
-            }
-            catch (error) {
-                this.setStatus(error.code || constant_1.HTTP_CODES.INTERNAL_ERROR);
-                return { message: error.message };
-            }
-        });
+    async deleteBosApiRoute(req, id) {
+        try {
+            const isAdmin = await (0, authentication_1.checkIfItIsAdmin)(req);
+            if (!isAdmin)
+                throw new AuthError_1.AuthError(constant_1.SECURITY_MESSAGES.UNAUTHORIZED);
+            await apiService.deleteApiRoute(id, constant_1.BUILDING_API_GROUP_TYPE);
+            this.setStatus(constant_1.HTTP_CODES.OK);
+            return { message: `${id} api route has been deleted` };
+        }
+        catch (error) {
+            this.setStatus(error.code || constant_1.HTTP_CODES.INTERNAL_ERROR);
+            return { message: error.message };
+        }
     }
-    getAllBosApiRoute(req) {
-        return __awaiter(this, void 0, void 0, function* () {
-            try {
-                const isAdmin = yield (0, authentication_1.checkIfItIsAdmin)(req);
-                if (!isAdmin)
-                    throw new AuthError_1.AuthError(constant_1.SECURITY_MESSAGES.UNAUTHORIZED);
-                const routes = yield apiService.getAllApiRoute(constant_1.BUILDING_API_GROUP_TYPE);
-                this.setStatus(constant_1.HTTP_CODES.OK);
-                return routes.map(el => el.info.get());
-            }
-            catch (error) {
-                this.setStatus(error.code || constant_1.HTTP_CODES.INTERNAL_ERROR);
-                return { message: error.message };
-            }
-        });
-    }
-    deleteBosApiRoute(req, id) {
-        return __awaiter(this, void 0, void 0, function* () {
-            try {
-                const isAdmin = yield (0, authentication_1.checkIfItIsAdmin)(req);
-                if (!isAdmin)
-                    throw new AuthError_1.AuthError(constant_1.SECURITY_MESSAGES.UNAUTHORIZED);
-                yield apiService.deleteApiRoute(id, constant_1.BUILDING_API_GROUP_TYPE);
-                this.setStatus(constant_1.HTTP_CODES.OK);
-                return { message: `${id} api route has been deleted` };
-            }
-            catch (error) {
-                this.setStatus(error.code || constant_1.HTTP_CODES.INTERNAL_ERROR);
-                return { message: error.message };
-            }
-        });
-    }
-    uploadBosSwaggerFile(req, file) {
-        return __awaiter(this, void 0, void 0, function* () {
-            try {
-                const isAdmin = yield (0, authentication_1.checkIfItIsAdmin)(req);
-                if (!isAdmin)
-                    throw new AuthError_1.AuthError(constant_1.SECURITY_MESSAGES.UNAUTHORIZED);
-                if (!file) {
-                    this.setStatus(constant_1.HTTP_CODES.BAD_REQUEST);
-                    return { message: "No file uploaded" };
-                }
-                // const firstFile = Object.keys(files)[0];
-                if (file) {
-                    // const file = files[firstFile];
-                    if (!/.*\.json$/.test(file.originalname)) {
-                        this.setStatus(constant_1.HTTP_CODES.BAD_REQUEST);
-                        return { message: "The selected file must be a json file" };
-                    }
-                    const apis = yield services_1.BuildingService.getInstance().uploadSwaggerFile(file.buffer);
-                    this.setStatus(constant_1.HTTP_CODES.OK);
-                    return apis.map(el => el.info.get());
-                }
+    async uploadBosSwaggerFile(req, file) {
+        try {
+            const isAdmin = await (0, authentication_1.checkIfItIsAdmin)(req);
+            if (!isAdmin)
+                throw new AuthError_1.AuthError(constant_1.SECURITY_MESSAGES.UNAUTHORIZED);
+            if (!file) {
                 this.setStatus(constant_1.HTTP_CODES.BAD_REQUEST);
                 return { message: "No file uploaded" };
             }
-            catch (error) {
-                this.setStatus(error.code || constant_1.HTTP_CODES.INTERNAL_ERROR);
-                return { message: error.message };
+            // const firstFile = Object.keys(files)[0];
+            if (file) {
+                // const file = files[firstFile];
+                if (!/.*\.json$/.test(file.originalname)) {
+                    this.setStatus(constant_1.HTTP_CODES.BAD_REQUEST);
+                    return { message: "The selected file must be a json file" };
+                }
+                const apis = await services_1.BuildingService.getInstance().uploadSwaggerFile(file.buffer);
+                this.setStatus(constant_1.HTTP_CODES.OK);
+                return apis.map(el => el.info.get());
             }
-        });
+            this.setStatus(constant_1.HTTP_CODES.BAD_REQUEST);
+            return { message: "No file uploaded" };
+        }
+        catch (error) {
+            this.setStatus(error.code || constant_1.HTTP_CODES.INTERNAL_ERROR);
+            return { message: error.message };
+        }
     }
 };
 exports.APIController = APIController;

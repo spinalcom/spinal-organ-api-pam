@@ -30,6 +30,7 @@ import { checkIfItIsAdmin, getProfileNode } from "../security/authentication";
 import * as express from 'express';
 import AuthorizationService from "../services/authorization.service";
 import { AuthError } from "../security/AuthError";
+import { formatBuildingNode, formatBuildingStructure } from "../utils/buildingUtils";
 
 const serviceInstance = BuildingService.getInstance();
 
@@ -44,21 +45,18 @@ export class BuildingController extends Controller {
 
     @Security(SECURITY_NAME.bearerAuth)
     @Post("/get_building/{id}")
-    public async getBuildingByIdByPost(@Request() req: express.Request, @Path() id: string): Promise<IBuilding | { message: string }> {
+    public async getBuildingByIdUsingPostMethod(@Request() req: express.Request, @Path() id: string): Promise<IBuilding | { message: string }> {
         try {
             const profile = await getProfileNode(req);
-            const node = await AuthorizationService.getInstance().profileHasAccess(profile, id);
+            const buildingNode = await AuthorizationService.getInstance().profileHasAccessToNode(profile, id);
 
-            // const node = await serviceInstance.getBuildingById(id);
+            if (!buildingNode) {
+                this.setStatus(HTTP_CODES.NOT_FOUND);
+                return { message: `no Building found for ${id}` };
+            }
 
-            if (node) {
-                const data = await serviceInstance.formatBuilding(node.info.get());
-                this.setStatus(HTTP_CODES.OK);
-                return data;
-            };
-
-            this.setStatus(HTTP_CODES.NOT_FOUND);
-            return { message: `no Building found for ${id}` };
+            this.setStatus(HTTP_CODES.OK);
+            return formatBuildingNode(buildingNode);
 
         } catch (error) {
             this.setStatus(HTTP_CODES.INTERNAL_ERROR)
@@ -69,30 +67,29 @@ export class BuildingController extends Controller {
     @Security(SECURITY_NAME.bearerAuth)
     @Get("/get_building/{id}")
     public async getBuildingById(@Request() req: express.Request, @Path() id: string): Promise<IBuilding | { message: string }> {
-        return this.getBuildingByIdByPost(req, id);
+        return this.getBuildingByIdUsingPostMethod(req, id);
     }
 
 
     @Security(SECURITY_NAME.bearerAuth)
     @Get("/get_all_buildings_apps")
-    public async getAllBuildingsApps(@Request() req: express.Request,): Promise<(IBuilding & { apps: IApp })[] | { message: string }> {
+    public async getAllBuildingsAndTheirApps(@Request() req: express.Request,): Promise<(IBuilding & { apps: IApp })[] | { message: string }> {
         try {
             const isAdmin = await checkIfItIsAdmin(req);
             if (!isAdmin) throw new AuthError(SECURITY_MESSAGES.UNAUTHORIZED);
 
-            const nodes = await serviceInstance.getAllBuildingsApps() || [];
+            const nodes = await serviceInstance.getAllBuildingsAndTheirApps() || [];
 
-            const promises = nodes.map(async ({ node, apps }) => {
-
+            const promises = nodes.map(async ({ buildingNode, apps }) => {
+                const buildingFormatted = formatBuildingNode(buildingNode);
                 return {
-                    ...(await serviceInstance.formatBuilding(node.info.get())),
+                    ...buildingFormatted,
                     apps: apps.map(el => el.info.get())
                 }
             })
 
-            const data = Promise.all(promises);
             this.setStatus(HTTP_CODES.OK);
-            return <any>data;
+            return Promise.all(promises) as any;
 
         } catch (error) {
             this.setStatus(HTTP_CODES.INTERNAL_ERROR)
@@ -108,7 +105,7 @@ export class BuildingController extends Controller {
             const isAdmin = await checkIfItIsAdmin(req);
             if (!isAdmin) throw new AuthError(SECURITY_MESSAGES.UNAUTHORIZED);
 
-            await serviceInstance.deleteBuilding(id);
+            await serviceInstance.deleteBuildingById(id);
             this.setStatus(HTTP_CODES.OK);
             return { message: "building deleted" };
         } catch (error) {
@@ -126,11 +123,11 @@ export class BuildingController extends Controller {
             if (!isAdmin) throw new AuthError(SECURITY_MESSAGES.UNAUTHORIZED);
 
 
-            await serviceInstance.setLocation(data);
+            // await serviceInstance.set(data);
 
             const node = await serviceInstance.updateBuilding(id, data);
             if (node) {
-                const data = await serviceInstance.formatBuildingStructure(node);
+                const data = await formatBuildingStructure(node);
                 this.setStatus(HTTP_CODES.OK)
                 return data;
             };
@@ -150,7 +147,7 @@ export class BuildingController extends Controller {
             const isAdmin = await checkIfItIsAdmin(req);
             if (!isAdmin) throw new AuthError(SECURITY_MESSAGES.UNAUTHORIZED);
 
-            const apps = await serviceInstance.addAppToBuilding(buildingId, data.applicationId);
+            const apps = await serviceInstance.linkApplicationToBuilding(buildingId, data.applicationId);
             if (!apps || apps.length === 0) {
                 this.setStatus(HTTP_CODES.BAD_REQUEST);
                 return { message: "Something went wrong, please check your input data" };
@@ -171,7 +168,7 @@ export class BuildingController extends Controller {
             const isAdmin = await checkIfItIsAdmin(req);
             if (!isAdmin) throw new AuthError(SECURITY_MESSAGES.UNAUTHORIZED);
 
-            const apps = await serviceInstance.getAppsFromBuilding(buildingId);
+            const apps = await serviceInstance.getAppsLinkedToBuilding(buildingId);
             if (!apps) {
                 this.setStatus(HTTP_CODES.BAD_REQUEST);
                 return { message: "Something went wrong, please check your input data" };
@@ -189,7 +186,7 @@ export class BuildingController extends Controller {
     public async getAppFromBuilding(@Request() req: express.Request, @Path() buildingId: string, @Path() appId: string): Promise<IApp | { message: string }> {
         try {
             const profile = await getProfileNode(req);
-            const app = await AuthorizationService.getInstance().profileHasAccess(profile, appId);
+            const app = await AuthorizationService.getInstance().profileHasAccessToNode(profile, appId);
 
             // const app = await serviceInstance.getAppFromBuilding(buildingId, appId);
             if (!app) {
@@ -255,7 +252,7 @@ export class BuildingController extends Controller {
             const isAdmin = await checkIfItIsAdmin(req);
             if (!isAdmin) throw new AuthError(SECURITY_MESSAGES.UNAUTHORIZED);
 
-            const apis = await serviceInstance.addApiToBuilding(buildingId, data.apisIds);
+            const apis = await serviceInstance.linkApiToBuilding(buildingId, data.apisIds);
             if (!apis || apis.length === 0) {
                 this.setStatus(HTTP_CODES.BAD_REQUEST);
                 return { message: "Something went wrong, please check your input data" };
@@ -293,7 +290,7 @@ export class BuildingController extends Controller {
     public async getApiFromBuilding(@Request() req: express.Request, @Path() buildingId: string, @Path() apiId: string): Promise<IApiRoute | { message: string }> {
         try {
             const profile = await getProfileNode(req);
-            const api = await AuthorizationService.getInstance().profileHasAccess(profile, apiId);
+            const api = await AuthorizationService.getInstance().profileHasAccessToNode(profile, apiId);
 
             // const api = await serviceInstance.getApiFromBuilding(buildingId, apiId);
             if (!api) {

@@ -22,28 +22,15 @@
  * with this file. If not, see
  * <http://resources.spinalcom.com/licenses.pdf>.
  */
-var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
-    function adopt(value) { return value instanceof P ? value : new P(function (resolve) { resolve(value); }); }
-    return new (P || (P = Promise))(function (resolve, reject) {
-        function fulfilled(value) { try { step(generator.next(value)); } catch (e) { reject(e); } }
-        function rejected(value) { try { step(generator["throw"](value)); } catch (e) { reject(e); } }
-        function step(result) { result.done ? resolve(result.value) : adopt(result.value).then(fulfilled, rejected); }
-        step((generator = generator.apply(thisArg, _arguments || [])).next());
-    });
-};
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.BuildingService = void 0;
 const constant_1 = require("../constant");
 const spinal_env_viewer_graph_service_1 = require("spinal-env-viewer-graph-service");
-const openGeocoder = require("node-open-geocoder");
-// const { config: { server_port } } = require("../../config");
-const axios_1 = require("axios");
 const portofolio_service_1 = require("./portofolio.service");
 const _1 = require(".");
 const adminProfile_service_1 = require("./adminProfile.service");
-const utils_1 = require("../utils/utils");
-// const axiosInstance = axios.create({ baseURL: `http://localhost:${process.env.SERVER_PORT}` });
-// import * as NodeGeocoder from "node-geocoder";
+const buildingUtils_1 = require("../utils/buildingUtils");
+const authorizationUtils_1 = require("../utils/authorizationUtils");
 const adminProfileInstance = adminProfile_service_1.AdminProfileService.getInstance();
 class BuildingService {
     constructor() { }
@@ -52,395 +39,414 @@ class BuildingService {
             this.instance = new BuildingService();
         return this.instance;
     }
-    init() {
-        return __awaiter(this, void 0, void 0, function* () {
-            this.context = yield _1.configServiceInstance.getContext(constant_1.BUILDING_CONTEXT_NAME);
-            if (!this.context)
-                this.context = yield _1.configServiceInstance.addContext(constant_1.BUILDING_CONTEXT_NAME, constant_1.BUILDING_CONTEXT_TYPE);
-            return this.context;
+    async init(graph) {
+        this.context = await graph.getContext(constant_1.BUILDING_CONTEXT_NAME);
+        if (!this.context) {
+            const spinalContext = new spinal_env_viewer_graph_service_1.SpinalContext(constant_1.BUILDING_CONTEXT_NAME, constant_1.BUILDING_CONTEXT_TYPE);
+            this.context = await graph.addContext(spinalContext);
+        }
+        return this.context;
+    }
+    /**
+     * Creates a new building node with the provided building information, including geolocation coord, applications, and APIs.
+     * If the location is not specified, it attempts to retrieve the geographical position based on the address.
+     * Links the specified applications and APIs to the newly created building node, and adds the node to the context.
+     *
+     * @param buildingInfo - The information required to create the building, including address, location, appIds, and apiIds.
+     * @returns A promise that resolves to the details of the created building, including the node, linked applications, and APIs.
+     */
+    async createBuilding(buildingInfo) {
+        if (!buildingInfo.location || !buildingInfo.location.latlng) {
+            const coord = await (0, buildingUtils_1.getBuildingGeoPosition)(buildingInfo.address);
+            buildingInfo.location = coord || {};
+        }
+        const appIds = Object.assign([], buildingInfo.appIds);
+        const apiIds = Object.assign([], buildingInfo.apiIds);
+        const buildingNode = await (0, buildingUtils_1.createBuildingNode)(buildingInfo);
+        return Promise.all([this.linkApplicationToBuilding(buildingNode, appIds || []), this.linkApiToBuilding(buildingNode, apiIds || [])])
+            .then(async ([apps, apis]) => {
+            await this.context.addChildInContext(buildingNode, constant_1.BUILDING_RELATION_NAME, constant_1.PTR_LST_TYPE, this.context);
+            return { node: buildingNode, apps, apis };
         });
     }
-    createBuilding(buildingInfo) {
-        return __awaiter(this, void 0, void 0, function* () {
-            yield this.setLocation(buildingInfo);
-            buildingInfo.type = constant_1.BUILDING_TYPE;
-            const appIds = Object.assign([], buildingInfo.appIds);
-            const apiIds = Object.assign([], buildingInfo.apiIds);
-            delete buildingInfo.appIds;
-            delete buildingInfo.apiIds;
-            buildingInfo.apiUrl = buildingInfo.apiUrl.replace(/\/$/, el => "");
-            const id = spinal_env_viewer_graph_service_1.SpinalGraphService.createNode(buildingInfo, undefined);
-            const detail = yield this.getBuildingDetails(buildingInfo.apiUrl);
-            const building = spinal_env_viewer_graph_service_1.SpinalGraphService.getRealNode(id);
-            building.info.add_attr({ detail });
-            return Promise.all([this.addAppToBuilding(building, appIds || []), this.addApiToBuilding(building, apiIds || [])])
-                .then(([apps, apis]) => __awaiter(this, void 0, void 0, function* () {
-                yield this.context.addChildInContext(building, constant_1.BUILDING_RELATION_NAME, constant_1.PTR_LST_TYPE, this.context);
-                return { node: building, apps, apis };
-            }));
-        });
+    /**
+     * Retrieves all buildings nodes from the context.
+     *
+     * @return {*}  {Promise<SpinalNode[]>}
+     * @memberof BuildingService
+     */
+    async getAllBuildings() {
+        return this.context.getChildren([constant_1.BUILDING_RELATION_NAME]);
     }
-    getAllBuildings() {
-        return __awaiter(this, void 0, void 0, function* () {
-            return this.context.getChildren([constant_1.BUILDING_RELATION_NAME]);
-        });
+    /**
+     * gets a building node by its ID.
+     *
+     * @param {string} id
+     * @return {*}  {Promise<SpinalNode>}
+     * @memberof BuildingService
+     */
+    async getBuildingById(id) {
+        const children = await this.context.getChildren([constant_1.BUILDING_RELATION_NAME]);
+        return children.find(el => el.getId().get() === id);
     }
-    getAllBuildingsApps() {
-        return __awaiter(this, void 0, void 0, function* () {
-            const buildings = yield this.getAllBuildings();
-            return buildings.reduce((prom, el) => __awaiter(this, void 0, void 0, function* () {
-                const liste = yield prom;
-                const apps = yield this.getAppsFromBuilding(el);
-                if (apps) {
-                    liste.push({
-                        node: el,
-                        apps
-                    });
-                }
-                return liste;
-            }), Promise.resolve([]));
-        });
-    }
-    getBuildingById(id) {
-        return __awaiter(this, void 0, void 0, function* () {
-            const children = yield this.context.getChildren([constant_1.BUILDING_RELATION_NAME]);
-            return children.find(el => el.getId().get() === id);
-        });
-    }
-    deleteBuilding(id) {
-        return __awaiter(this, void 0, void 0, function* () {
-            const building = yield this.getBuildingById(id);
-            if (building) {
-                yield building.removeFromGraph();
-                yield (0, utils_1.removeNodeReferences)(building);
-                return true;
-            }
+    /**
+     * Deletes a building node by its ID.
+     *
+     * @param {string} id
+     * @return {*}  {Promise<boolean>}
+     * @memberof BuildingService
+     */
+    async deleteBuildingById(id) {
+        const buildingNode = await this.getBuildingById(id);
+        if (!buildingNode)
             return false;
+        await buildingNode.removeFromGraph();
+        await (0, authorizationUtils_1.removeNodeReferences)(buildingNode);
+        return true;
+    }
+    /**
+     * Retrieves all buildings and their associated applications.
+     *
+     * @return {*}  {Promise<{ buildingNode: SpinalNode, apps: SpinalNode[] }[]>}
+     * @memberof BuildingService
+     */
+    async getAllBuildingsAndTheirApps() {
+        const buildings = await this.getAllBuildings();
+        const promises = buildings.map(async (building) => {
+            const apps = await this.getAppsLinkedToBuilding(building);
+            return {
+                buildingNode: building,
+                apps
+            };
         });
+        return Promise.all(promises);
     }
-    addBuildingToPortofolio(portfolioId, building) {
-        return __awaiter(this, void 0, void 0, function* () {
-            const data = yield portofolio_service_1.PortofolioService.getInstance().addBuildingToPortofolio(portfolioId, building);
-            return data;
-        });
+    /**
+     * Links a building to a portfolio.
+     *
+     * @param {string} portfolioId
+     * @param {IBuildingCreation} building
+     * @return {*}  {Promise<IBuildingDetails>}
+     * @memberof BuildingService
+     */
+    async linkBuildingToPortofolio(portfolioId, building) {
+        return portofolio_service_1.PortofolioService.getInstance().linkBuildingToPortofolio(portfolioId, building);
     }
-    getBuildingFromPortofolio(portofolioId, buildingId) {
-        return __awaiter(this, void 0, void 0, function* () {
-            return portofolio_service_1.PortofolioService.getInstance().getBuildingFromPortofolio(portofolioId, buildingId);
-        });
+    /**
+     * Retrieves a building from a portfolio by its ID.
+     *
+     * @param {string} portofolioId
+     * @param {string} buildingId
+     * @return {*}  {(Promise<void | SpinalNode>)}
+     * @memberof BuildingService
+     */
+    async getBuildingFromPortofolio(portofolioId, buildingId) {
+        return portofolio_service_1.PortofolioService.getInstance().getBuildingFromPortofolio(portofolioId, buildingId);
     }
-    getAllBuildingsFromPortofolio(portfolioId) {
-        return __awaiter(this, void 0, void 0, function* () {
-            return portofolio_service_1.PortofolioService.getInstance().getPortofolioBuildings(portfolioId);
-            // const context = await this.getContext();
-            // if (!context) throw new Error("Make sure you set a default digitalTwin");
-            // return context.getChildrenInContext();
-        });
+    /**
+     * Retrieves all buildings from a portfolio by its ID.
+     *
+     * @param {string} portfolioId
+     * @return {*}  {Promise<SpinalNode[]>}
+     * @memberof BuildingService
+     */
+    async getAllBuildingsFromPortofolio(portfolioId) {
+        return portofolio_service_1.PortofolioService.getInstance().getPortofolioBuildings(portfolioId);
     }
-    updateBuilding(buildingId, newData) {
-        return __awaiter(this, void 0, void 0, function* () {
-            const node = yield this.getBuildingById(buildingId);
-            if (!node)
-                throw new Error(`no Building found for ${buildingId}`);
-            const apps = newData.authorizeAppIds || [];
-            const apis = newData.authorizeApiIds || [];
-            const unauthorizeAppIds = newData.unauthorizeAppIds || [];
-            const unauthorizeApiIds = newData.unauthorizeApiIds || [];
-            yield Promise.all([this.addAppToBuilding(node, apps), this.addApiToBuilding(node, apis)]);
-            return Promise.all([this.removeAppFromBuilding(node, unauthorizeAppIds), this.removeApisFromBuilding(node, unauthorizeApiIds)])
-                .then((result) => {
-                delete newData.appIds;
-                delete newData.apiIds;
-                delete newData.unauthorizeAppIds;
-                delete newData.unauthorizeApiIds;
-                for (const key in newData) {
-                    if (Object.prototype.hasOwnProperty.call(newData, key) && node.info[key]) {
-                        const element = newData[key];
-                        node.info[key].set(element);
-                    }
-                }
-                return this.getBuildingStructure(node);
-            });
-        });
-    }
-    getBuildingStructure(building) {
-        return __awaiter(this, void 0, void 0, function* () {
-            if (typeof building === "string")
-                building = yield this.getBuildingById(building);
-            if (!(building instanceof spinal_env_viewer_graph_service_1.SpinalNode))
-                return;
-            return Promise.all([this.getAppsFromBuilding(building), this.getApisFromBuilding(building)]).then(([apps, apis]) => {
-                return {
-                    node: building,
-                    apps,
-                    apis
-                };
-            });
-        });
-    }
-    formatBuildingStructure(building) {
-        const details = building.node.info.get();
-        // delete details.bosUrl;
-        // delete details.apiUrl;
-        return Object.assign(Object.assign({}, (details)), { apps: building.apps.map(el => el.info.get()), apis: building.apis.map(el => el.info.get()) });
-    }
-    // public async deleteBuildingFromPortofolio(portofolioId: string, buildingId: string | string[]): Promise<string> {
-    // const node = await this.getBuildingFromPortofolio(portofolioId, buildingId);
-    // if (!node) throw new Error(`no building found for ${buildingId}`);
-    // await node.removeFromGraph();
-    // return buildingId;
-    // }
-    validateBuilding(buildingInfo) {
-        if (!buildingInfo.name)
-            return { isValid: false, message: "The name is required" };
-        if (!buildingInfo.address)
-            return { isValid: false, message: "The address is required" };
-        return { isValid: true };
-    }
-    setLocation(buildingInfo) {
-        return __awaiter(this, void 0, void 0, function* () {
-            if (!buildingInfo.address)
-                return;
-            if (!buildingInfo.location || !buildingInfo.location.latlng) {
-                const { lat, lng } = yield this.getLatLngViaAddress(buildingInfo.address);
-                if (!buildingInfo.location)
-                    buildingInfo.location = { lat, lng };
-                else {
-                    buildingInfo.location.lat = lat;
-                    buildingInfo.location.lng = lng;
-                }
+    /**
+     * Updates a building's information and its linked applications and APIs.
+     *
+     * @param {string} buildingId - The ID of the building to update.
+     * @param {IEditBuilding} newData - The new data to update the building with.
+     * @return {*}  {Promise<IBuildingDetails>} - The updated building details.
+     * @memberof BuildingService
+     */
+    async updateBuilding(buildingId, buildingNewData) {
+        const buildingNode = await this.getBuildingById(buildingId);
+        if (!buildingNode)
+            throw new Error(`no Building found for ${buildingId}`);
+        // link the new apps and apis
+        await this._linkNewAppsAndApis(buildingNewData, buildingNode);
+        // unlink the unauthorized apps and apis
+        await this._unlinkUnauthorizedAppsAndApis(buildingNewData, buildingNode);
+        const { appIds, apiIds, unauthorizeAppIds, unauthorizeApiIds, ...dataToUpdate } = buildingNewData; // Destructure to remove appIds and apiIds
+        if (buildingNewData.address !== buildingNode.info.address.get()) {
+            // If the address has changed, we need to update the location
+            buildingNewData.location = await (0, buildingUtils_1.getBuildingGeoPosition)(buildingNewData.address);
+        }
+        // update buildingNode info
+        for (const key in buildingNewData) {
+            if (Object.prototype.hasOwnProperty.call(buildingNewData, key)) {
+                const newValue = buildingNewData[key];
+                buildingNode.info.mod_attr(key, newValue);
             }
-            return buildingInfo;
-        });
+        }
+        return this.getBuildingStructure(buildingNode);
     }
-    getLatLngViaAddress(address) {
-        return new Promise((resolve, reject) => {
-            openGeocoder().geocode(address).end((err, res) => {
-                if (err)
-                    return reject(err);
-                if (res.length === 0)
-                    return reject(new Error("Address not found"));
-                resolve({
-                    lat: res[0].lat,
-                    lng: res[0].lon
-                });
-            });
-        });
-    }
-    getBuildingDetails(batimentUrl) {
-        return __awaiter(this, void 0, void 0, function* () {
-            const detail = yield this._getBuildingTypeCount(batimentUrl);
-            detail.area = yield this._getBuildingArea(batimentUrl);
-            return detail;
-        });
-    }
-    formatBuilding(data) {
-        return __awaiter(this, void 0, void 0, function* () {
-            data.details = yield this.getBuildingDetails(data.id);
-            // delete data.bosUrl;
-            // delete data.apiUrl;
-            return data;
-        });
+    /**
+     * Retrieves the structure of a building, including its applications and APIs.
+     *
+     * @param {(string | SpinalNode)} building
+     * @return {*}  {Promise<IBuildingDetails>}
+     * @memberof BuildingService
+     */
+    async getBuildingStructure(building) {
+        if (typeof building === "string")
+            building = await this.getBuildingById(building);
+        if (!(building instanceof spinal_env_viewer_graph_service_1.SpinalNode))
+            return;
+        const buildingApps = await this.getAppsLinkedToBuilding(building);
+        const buildingApis = await this.getApisFromBuilding(building);
+        return {
+            node: building,
+            apps: buildingApps,
+            apis: buildingApis
+        };
     }
     //////////////////////////////////////////////////////
     //                      APPS                        //
     //////////////////////////////////////////////////////
-    addAppToBuilding(building, applicationId) {
-        return __awaiter(this, void 0, void 0, function* () {
-            if (typeof building === "string")
-                building = yield this.getBuildingById(building);
-            if (!(building instanceof spinal_env_viewer_graph_service_1.SpinalNode))
-                throw new Error(`No building found for ${building}`);
-            if (!Array.isArray(applicationId))
-                applicationId = [applicationId];
-            const data = yield applicationId.reduce((prom, appId) => __awaiter(this, void 0, void 0, function* () {
-                const liste = yield prom;
-                const appNode = yield _1.AppService.getInstance().getBuildingApp(appId);
-                if (!(appNode instanceof spinal_env_viewer_graph_service_1.SpinalNode))
-                    return liste;
-                const childrenIds = building.getChildrenIds();
-                const isChild = childrenIds.find(el => el === appId);
-                if (!isChild)
-                    yield building.addChildInContext(appNode, constant_1.APP_RELATION_NAME, constant_1.PTR_LST_TYPE, this.context);
-                liste.push(appNode);
-                return liste;
-            }), Promise.resolve([]));
-            yield adminProfileInstance.syncAdminProfile();
-            return data;
+    /**
+     * Links applications to a building.
+     *
+     * @param {(string | SpinalNode)} building
+     * @param {(string | string[])} applicationIds
+     * @return {*}  {Promise<SpinalNode[]>}
+     * @memberof BuildingService
+     */
+    async linkApplicationToBuilding(building, applicationIds) {
+        const buildingNode = building instanceof spinal_env_viewer_graph_service_1.SpinalNode ? building : await this.getBuildingById(building);
+        // if (typeof building === "string") building = await this.getBuildingById(building);
+        if (!(buildingNode instanceof spinal_env_viewer_graph_service_1.SpinalNode))
+            throw new Error(`No building found for ${building}`);
+        if (!Array.isArray(applicationIds))
+            applicationIds = [applicationIds];
+        const getOnlyAppNotLinked = async (appId) => {
+            const appIsAlreadyLinked = await this.buildingHasApp(buildingNode, appId);
+            return !appIsAlreadyLinked;
+        };
+        const appsToLink = await this._filterApps(applicationIds, getOnlyAppNotLinked);
+        const promises = appsToLink.map(async (appNode) => buildingNode.addChildInContext(appNode, constant_1.APP_RELATION_NAME, constant_1.PTR_LST_TYPE, this.context));
+        return Promise.all(promises).then(async (appsLinked) => {
+            await adminProfileInstance.syncAdminProfile(); // Sync the admin profile after linking apps
+            return appsLinked;
         });
     }
-    getAppsFromBuilding(building) {
-        return __awaiter(this, void 0, void 0, function* () {
-            if (typeof building === "string")
-                building = yield this.getBuildingById(building);
-            if (!(building instanceof spinal_env_viewer_graph_service_1.SpinalNode))
-                return [];
-            return building.getChildren([constant_1.APP_RELATION_NAME]);
+    /**
+     * Retrieves all applications linked to a building.
+     *
+     * @param {(string | SpinalNode)} building
+     * @return {*}  {Promise<SpinalNode[]>}
+     * @memberof BuildingService
+     */
+    async getAppsLinkedToBuilding(building) {
+        if (typeof building === "string")
+            building = await this.getBuildingById(building);
+        if (!(building instanceof spinal_env_viewer_graph_service_1.SpinalNode))
+            return [];
+        return building.getChildren([constant_1.APP_RELATION_NAME]);
+    }
+    /**
+     * Retrieves a specific application linked to a building by its ID.
+     *
+     * @param {(string | SpinalNode)} building
+     * @param {string} appId
+     * @return {*}  {Promise<SpinalNode>}
+     * @memberof BuildingService
+     */
+    async getAppFromBuilding(building, appId) {
+        const applicationsLinked = await this.getAppsLinkedToBuilding(building);
+        return applicationsLinked.find(app => app.getId().get() === appId);
+    }
+    /**
+     * Removes applications from a building.
+     *
+     * @param {(string | SpinalNode)} building
+     * @param {(string | string[])} applicationId
+     * @return {*}  {Promise<string[]>}
+     * @memberof BuildingService
+     */
+    async removeAppFromBuilding(building, applicationId) {
+        const buildingNode = building instanceof spinal_env_viewer_graph_service_1.SpinalNode ? building : await this.getBuildingById(building);
+        // if (typeof building === "string") building = await this.getBuildingById(building);
+        if (!(buildingNode instanceof spinal_env_viewer_graph_service_1.SpinalNode))
+            return [];
+        if (!Array.isArray(applicationId))
+            applicationId = [applicationId];
+        const getOnlyAppLinked = async (appId) => {
+            const appIsLinked = await this.buildingHasApp(buildingNode, appId);
+            return appIsLinked;
+        };
+        const appsToUnlink = await this._filterApps(applicationId, getOnlyAppLinked);
+        const promises = appsToUnlink.map(async (appNode) => {
+            await buildingNode.removeChild(appNode, constant_1.APP_RELATION_NAME, constant_1.PTR_LST_TYPE);
+            await (0, authorizationUtils_1.removeRelationFromReference)(buildingNode, appNode, constant_1.APP_RELATION_NAME, constant_1.PTR_LST_TYPE);
+            return appNode.getId().get();
+        });
+        return Promise.all(promises).then(async (result) => {
+            await adminProfileInstance.syncAdminProfile(); // Sync the admin profile after unlinking apps
+            return result;
         });
     }
-    getAppFromBuilding(building, appId) {
-        return __awaiter(this, void 0, void 0, function* () {
-            const children = yield this.getAppsFromBuilding(building);
-            return children.find(el => el.getId().get() === appId);
-        });
-    }
-    removeAppFromBuilding(building, applicationId) {
-        return __awaiter(this, void 0, void 0, function* () {
-            if (typeof building === "string")
-                building = yield this.getBuildingById(building);
-            if (!(building instanceof spinal_env_viewer_graph_service_1.SpinalNode))
-                return [];
-            if (!Array.isArray(applicationId))
-                applicationId = [applicationId];
-            return applicationId.reduce((prom, appId) => __awaiter(this, void 0, void 0, function* () {
-                const liste = yield prom;
-                const appNode = yield this.getAppFromBuilding(building, appId);
-                if (!(appNode instanceof spinal_env_viewer_graph_service_1.SpinalNode))
-                    return liste;
-                try {
-                    yield building.removeChild(appNode, constant_1.APP_RELATION_NAME, constant_1.PTR_LST_TYPE);
-                    yield (0, utils_1.removeRelationFromReference)(building, appNode, constant_1.APP_RELATION_NAME, constant_1.PTR_LST_TYPE);
-                    liste.push(appId);
-                }
-                catch (error) { }
-                return liste;
-            }), Promise.resolve([]));
-        });
-    }
-    buildingHasApp(building, appId) {
-        return __awaiter(this, void 0, void 0, function* () {
-            const app = yield this.getAppFromBuilding(building, appId);
-            return app ? true : false;
-        });
+    /**
+     * Checks if a building has a specific application linked to it.
+     *
+     * @param {(string | SpinalNode)} building
+     * @param {string} appId
+     * @return {*}  {Promise<boolean>}
+     * @memberof BuildingService
+     */
+    async buildingHasApp(building, appId) {
+        const app = await this.getAppFromBuilding(building, appId);
+        return app ? true : false;
     }
     //////////////////////////////////////////////////////
     //                      APIS                        //
     //////////////////////////////////////////////////////
-    addApiToBuilding(building, apisIds) {
-        return __awaiter(this, void 0, void 0, function* () {
-            if (typeof building === "string")
-                building = yield this.getBuildingById(building);
-            if (!(building instanceof spinal_env_viewer_graph_service_1.SpinalNode))
-                throw new Error(`No building found for ${building}`);
-            if (!Array.isArray(apisIds))
-                apisIds = [apisIds];
-            const data = yield apisIds.reduce((prom, appId) => __awaiter(this, void 0, void 0, function* () {
-                const liste = yield prom;
-                const apiNode = yield _1.APIService.getInstance().getApiRouteById(appId, constant_1.BUILDING_API_GROUP_TYPE);
-                if (!(apiNode instanceof spinal_env_viewer_graph_service_1.SpinalNode))
-                    return liste;
-                const childrenIds = building.getChildrenIds();
-                const isChild = childrenIds.find(el => el === appId);
-                if (!isChild)
-                    yield building.addChildInContext(apiNode, constant_1.API_RELATION_NAME, constant_1.PTR_LST_TYPE, this.context);
-                liste.push(apiNode);
-                return liste;
-            }), Promise.resolve([]));
-            yield adminProfileInstance.syncAdminProfile();
-            return data;
+    /**
+     * Links APIs to a building.
+     *
+     * @param {(string | SpinalNode)} building
+     * @param {(string | string[])} apisIds
+     * @return {*}  {Promise<SpinalNode[]>}
+     * @memberof BuildingService
+     */
+    async linkApiToBuilding(building, apisIds) {
+        const buildingNode = building instanceof spinal_env_viewer_graph_service_1.SpinalNode ? building : await this.getBuildingById(building);
+        // if (typeof building === "string") building = await this.getBuildingById(building);
+        if (!(buildingNode instanceof spinal_env_viewer_graph_service_1.SpinalNode))
+            throw new Error(`No building found for ${building}`);
+        if (!Array.isArray(apisIds))
+            apisIds = [apisIds];
+        const getOnlyApisNotLinked = async (apiId) => {
+            const apiIsAlreadyLinked = await this.buildingHasApi(buildingNode, apiId);
+            return !apiIsAlreadyLinked;
+        };
+        const apisToLink = await this._filterApis(apisIds, getOnlyApisNotLinked);
+        const promises = apisToLink.map(async (apiNode) => buildingNode.addChildInContext(apiNode, constant_1.API_RELATION_NAME, constant_1.PTR_LST_TYPE, this.context));
+        return Promise.all(promises).then(async (apisLinked) => {
+            await adminProfileInstance.syncAdminProfile(); // Sync the admin profile after linking apps
+            return apisLinked;
         });
     }
-    getApisFromBuilding(building) {
-        return __awaiter(this, void 0, void 0, function* () {
-            if (typeof building === "string")
-                building = yield this.getBuildingById(building);
-            if (!(building instanceof spinal_env_viewer_graph_service_1.SpinalNode))
-                return [];
-            return building.getChildren([constant_1.API_RELATION_NAME]);
+    /**
+     * Removes APIs from a building.
+     *
+     * @param {(string | SpinalNode)} building
+     * @param {(string | string[])} apisIds
+     * @return {*}  {Promise<string[]>}
+     * @memberof BuildingService
+     */
+    async removeApisFromBuilding(building, apisIds) {
+        // if (typeof building === "string") building = await this.getBuildingById(building);
+        const buildingNode = building instanceof spinal_env_viewer_graph_service_1.SpinalNode ? building : await this.getBuildingById(building);
+        if (!(buildingNode instanceof spinal_env_viewer_graph_service_1.SpinalNode))
+            return [];
+        if (!Array.isArray(apisIds))
+            apisIds = [apisIds];
+        const getOnlyApisLinked = async (apiId) => {
+            const apiIsLinked = await this.buildingHasApi(building, apiId);
+            return apiIsLinked;
+        };
+        const apisToUnlink = await this._filterApis(apisIds, getOnlyApisLinked);
+        const promises = apisToUnlink.map(async (apiNode) => {
+            await buildingNode.removeChild(apiNode, constant_1.APP_RELATION_NAME, constant_1.PTR_LST_TYPE);
+            await (0, authorizationUtils_1.removeRelationFromReference)(buildingNode, apiNode, constant_1.APP_RELATION_NAME, constant_1.PTR_LST_TYPE);
+            return apiNode.getId().get();
+        });
+        return Promise.all(promises).then(async (result) => {
+            await adminProfileInstance.syncAdminProfile(); // Sync the admin profile after unlinking apps
+            return result;
         });
     }
-    getApiFromBuilding(building, apiId) {
-        return __awaiter(this, void 0, void 0, function* () {
-            const children = yield this.getApisFromBuilding(building);
-            return children.find(el => el.getId().get() === apiId);
-        });
+    /**
+     * Retrieves all APIs linked to a building.
+     *
+     * @param {(string | SpinalNode)} building
+     * @return {*}  {Promise<SpinalNode[]>}
+     * @memberof BuildingService
+     */
+    async getApisFromBuilding(building) {
+        if (typeof building === "string")
+            building = await this.getBuildingById(building);
+        if (!(building instanceof spinal_env_viewer_graph_service_1.SpinalNode))
+            return [];
+        return building.getChildren([constant_1.API_RELATION_NAME]);
     }
-    removeApisFromBuilding(building, apisIds) {
-        return __awaiter(this, void 0, void 0, function* () {
-            if (typeof building === "string")
-                building = yield this.getBuildingById(building);
-            if (!(building instanceof spinal_env_viewer_graph_service_1.SpinalNode))
-                return [];
-            if (!Array.isArray(apisIds))
-                apisIds = [apisIds];
-            return apisIds.reduce((prom, apiId) => __awaiter(this, void 0, void 0, function* () {
-                const liste = yield prom;
-                const apiNode = yield this.getApiFromBuilding(building, apiId);
-                if (!(apiNode instanceof spinal_env_viewer_graph_service_1.SpinalNode))
-                    return liste;
-                try {
-                    yield building.removeChild(apiNode, constant_1.API_RELATION_NAME, constant_1.PTR_LST_TYPE);
-                    yield (0, utils_1.removeRelationFromReference)(building, apiNode, constant_1.API_RELATION_NAME, constant_1.PTR_LST_TYPE);
-                    liste.push(apiId);
-                }
-                catch (error) { }
-                return liste;
-            }), Promise.resolve([]));
-        });
+    /**
+     * Retrieves a specific API linked to a building by its ID.
+     *
+     * @param {(string | SpinalNode)} building
+     * @param {string} apiId
+     * @return {*}  {Promise<SpinalNode>}
+     * @memberof BuildingService
+     */
+    async getApiFromBuilding(building, apiId) {
+        const children = await this.getApisFromBuilding(building);
+        return children.find(el => el.getId().get() === apiId);
     }
-    buildingHasApi(building, apiId) {
-        return __awaiter(this, void 0, void 0, function* () {
-            const app = yield this.getApiFromBuilding(building, apiId);
-            return app ? true : false;
-        });
+    /**
+     * Checks if a building has a specific API linked to it.
+     *
+     * @param {(string | SpinalNode)} building
+     * @param {string} apiId
+     * @return {*}  {Promise<boolean>}
+     * @memberof BuildingService
+     */
+    async buildingHasApi(building, apiId) {
+        const app = await this.getApiFromBuilding(building, apiId);
+        return app ? true : false;
     }
-    uploadSwaggerFile(buffer) {
-        return __awaiter(this, void 0, void 0, function* () {
-            return _1.APIService.getInstance().uploadSwaggerFile(buffer, constant_1.BUILDING_API_GROUP_TYPE);
-        });
+    /**
+     * Uploads a Swagger file to create routes for a building.
+     *
+     * @param {Buffer} buffer
+     * @return {*}  {Promise<any[]>}
+     * @memberof BuildingService
+     */
+    async uploadSwaggerFile(buffer) {
+        return _1.APIService.getInstance().createRoutesFromSwaggerFile(buffer, constant_1.BUILDING_API_GROUP_TYPE);
     }
     /////////////////////////////////////////////////////
     //                  PRIVATES                       //
     /////////////////////////////////////////////////////
-    _findChildInContext(startNode, nodeIdOrName, context) {
-        return __awaiter(this, void 0, void 0, function* () {
-            const children = yield startNode.getChildrenInContext(context);
-            return children.find(el => {
-                if (el.getId().get() === nodeIdOrName || el.getName().get() === nodeIdOrName) {
-                    //@ts-ignore
-                    spinal_env_viewer_graph_service_1.SpinalGraphService._addNode(el);
-                    return true;
-                }
-                return false;
-            });
-        });
+    _unlinkUnauthorizedAppsAndApis(buildingNewData, buildingNode) {
+        const unlinlinkPromises = [];
+        if (buildingNewData.unauthorizeAppIds?.length > 0)
+            unlinlinkPromises.push(this.removeAppFromBuilding(buildingNode, buildingNewData.unauthorizeAppIds));
+        if (buildingNewData.unauthorizeApiIds?.length > 0)
+            unlinlinkPromises.push(this.removeApisFromBuilding(buildingNode, buildingNewData.unauthorizeApiIds));
+        return Promise.all(unlinlinkPromises);
     }
-    _getBuildingTypeCount(batimentUrl) {
-        return axios_1.default
-            .get(`${batimentUrl}/api/v1/geographicContext/tree`)
-            .then(res => {
-            return this._countTypeHelper(res.data);
-        })
-            .catch(error => {
-            // console.error("try to get Building details, but got", error.message);
-            return {};
-        });
+    _linkNewAppsAndApis(buildingNewData, buildingNode) {
+        const linkingPromises = [];
+        if (buildingNewData.authorizeAppIds?.length > 0)
+            linkingPromises.push(this.linkApplicationToBuilding(buildingNode, buildingNewData.authorizeAppIds));
+        if (buildingNewData.authorizeApiIds?.length > 0)
+            linkingPromises.push(this.linkApiToBuilding(buildingNode, buildingNewData.authorizeApiIds));
+        return Promise.all(linkingPromises);
     }
-    _getBuildingArea(batimentUrl) {
-        return axios_1.default
-            .get(`${batimentUrl}/api/v1/building/read`)
-            .then((response) => {
-            return response.data.area;
-        })
-            .catch((err) => {
-            return 0;
+    async _filterApps(applicationIds, predicate) {
+        const promises = applicationIds.map(async (appId) => {
+            const conditions = await predicate(appId);
+            if (!conditions)
+                return null;
+            const appNode = await _1.AppService.getInstance().getBuildingAppById(appId);
+            return appNode ? appNode : null;
         });
+        const appNodes = await Promise.all(promises);
+        return appNodes.filter(Boolean); // Filter out nulls
     }
-    _countTypeHelper(building) {
-        const obj = {};
-        const countType = (item) => {
-            if (!item)
-                return;
-            if (!obj[item.type])
-                obj[item.type] = 1;
-            else
-                obj[item.type] = obj[item.type] + 1;
-            (item.children || []).forEach((element) => {
-                countType(element);
-            });
-        };
-        countType(building);
-        return obj;
+    async _filterApis(apisIds, predicate) {
+        const promises = apisIds.map(async (apiId) => {
+            const conditions = await predicate(apiId);
+            if (!conditions)
+                return null;
+            const appNode = await _1.AppService.getInstance().getBuildingAppById(apiId);
+            return appNode ? appNode : null;
+        });
+        const apiNodes = await Promise.all(promises);
+        return apiNodes.filter(Boolean); // Filter out nulls
     }
 }
 exports.BuildingService = BuildingService;

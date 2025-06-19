@@ -34,11 +34,11 @@ const models: TsoaRoute.Models = {
     "IApiRoute": {
         "dataType": "refObject",
         "properties": {
-            "group": {"dataType":"string","required":true},
+            "group": {"dataType":"string"},
             "method": {"dataType":"string","required":true},
             "route": {"dataType":"string","required":true},
-            "scoped": {"dataType":"string","required":true},
-            "tag": {"dataType":"string","required":true},
+            "scoped": {"dataType":"string"},
+            "tag": {"dataType":"string"},
         },
         "additionalProperties": {"dataType":"string"},
     },
@@ -91,9 +91,11 @@ const models: TsoaRoute.Models = {
     "IBosAuth": {
         "dataType": "refObject",
         "properties": {
-            "buildingId": {"dataType":"string","required":true},
             "appsIds": {"dataType":"array","array":{"dataType":"string"}},
             "apisIds": {"dataType":"array","array":{"dataType":"string"}},
+            "unauthorizeAppsIds": {"dataType":"array","array":{"dataType":"string"}},
+            "unauthorizeApisIds": {"dataType":"array","array":{"dataType":"string"}},
+            "buildingId": {"dataType":"string","required":true},
         },
         "additionalProperties": false,
     },
@@ -101,9 +103,11 @@ const models: TsoaRoute.Models = {
     "IPortofolioAuth": {
         "dataType": "refObject",
         "properties": {
-            "portofolioId": {"dataType":"string","required":true},
             "appsIds": {"dataType":"array","array":{"dataType":"string"}},
             "apisIds": {"dataType":"array","array":{"dataType":"string"}},
+            "unauthorizeAppsIds": {"dataType":"array","array":{"dataType":"string"}},
+            "unauthorizeApisIds": {"dataType":"array","array":{"dataType":"string"}},
+            "portofolioId": {"dataType":"string","required":true},
             "building": {"dataType":"array","array":{"dataType":"refObject","ref":"IBosAuth"}},
         },
         "additionalProperties": false,
@@ -118,50 +122,16 @@ const models: TsoaRoute.Models = {
         "additionalProperties": false,
     },
     // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
-    "IBosAuthEdit": {
-        "dataType": "refObject",
-        "properties": {
-            "buildingId": {"dataType":"string","required":true},
-            "appsIds": {"dataType":"array","array":{"dataType":"string"}},
-            "apisIds": {"dataType":"array","array":{"dataType":"string"}},
-            "unauthorizeAppsIds": {"dataType":"array","array":{"dataType":"string"}},
-            "unauthorizeApisIds": {"dataType":"array","array":{"dataType":"string"}},
-        },
-        "additionalProperties": false,
-    },
-    // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
     "IPortofolioAuthEdit": {
-        "dataType": "refObject",
-        "properties": {
-            "portofolioId": {"dataType":"string","required":true},
-            "appsIds": {"dataType":"array","array":{"dataType":"string"}},
-            "apisIds": {"dataType":"array","array":{"dataType":"string"}},
-            "unauthorizeAppsIds": {"dataType":"array","array":{"dataType":"string"}},
-            "unauthorizeApisIds": {"dataType":"array","array":{"dataType":"string"}},
-            "building": {"dataType":"array","array":{"dataType":"refObject","ref":"IBosAuthEdit"}},
-        },
-        "additionalProperties": false,
+        "dataType": "refAlias",
+        "type": {"ref":"IPortofolioAuth","validators":{}},
     },
     // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
     "IProfileEdit": {
         "dataType": "refObject",
         "properties": {
             "name": {"dataType":"string"},
-            "authorize": {"dataType":"array","array":{"dataType":"refObject","ref":"IPortofolioAuthEdit"}},
-        },
-        "additionalProperties": false,
-    },
-    // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
-    "IApplicationToken": {
-        "dataType": "refObject",
-        "properties": {
-            "name": {"dataType":"string"},
-            "type": {"dataType":"string"},
-            "token": {"dataType":"string"},
-            "createdToken": {"dataType":"double"},
-            "expieredToken": {"dataType":"double"},
-            "applicationId": {"dataType":"string"},
-            "applicationProfileList": {"dataType":"array","array":{"dataType":"string"}},
+            "authorize": {"dataType":"array","array":{"dataType":"refAlias","ref":"IPortofolioAuthEdit"}},
         },
         "additionalProperties": false,
     },
@@ -189,24 +159,6 @@ const models: TsoaRoute.Models = {
             "password": {"dataType":"string","required":true},
         },
         "additionalProperties": false,
-    },
-    // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
-    "IAppCredential": {
-        "dataType": "refObject",
-        "properties": {
-            "clientId": {"dataType":"string","required":true},
-            "clientSecret": {"dataType":"string","required":true},
-        },
-        "additionalProperties": false,
-    },
-    // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
-    "IOAuth2Credential": {
-        "dataType": "refObject",
-        "properties": {
-            "client_id": {"dataType":"string","required":true},
-            "client_secret": {"dataType":"string","required":true},
-        },
-        "additionalProperties": {"dataType":"string"},
     },
     // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
     "IPamCredential": {
@@ -251,6 +203,20 @@ const models: TsoaRoute.Models = {
         "enums": [200,201,202,400,401,403,404,500,302],
     },
     // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
+    "IApplicationToken": {
+        "dataType": "refObject",
+        "properties": {
+            "name": {"dataType":"string"},
+            "type": {"dataType":"string"},
+            "token": {"dataType":"string"},
+            "createdToken": {"dataType":"double"},
+            "expieredToken": {"dataType":"double"},
+            "applicationId": {"dataType":"string"},
+            "applicationProfileList": {"dataType":"array","array":{"dataType":"string"}},
+        },
+        "additionalProperties": false,
+    },
+    // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
     "ILocation": {
         "dataType": "refObject",
         "properties": {
@@ -291,7 +257,7 @@ const models: TsoaRoute.Models = {
         "additionalProperties": false,
     },
     // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
-    "IEditProtofolio": {
+    "IEditPortofolio": {
         "dataType": "refObject",
         "properties": {
             "name": {"dataType":"string"},
@@ -1694,7 +1660,7 @@ export function RegisterRoutes(app: express.Router) {
 
             function AuthController_authenticate(request: any, response: any, next: any) {
             const args = {
-                    credential: {"in":"body","name":"credential","required":true,"dataType":"union","subSchemas":[{"ref":"IUserCredential"},{"ref":"IAppCredential"},{"ref":"IOAuth2Credential"}]},
+                    credential: {"in":"body","name":"credential","required":true,"ref":"IUserCredential"},
             };
 
             // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
@@ -1716,9 +1682,9 @@ export function RegisterRoutes(app: express.Router) {
         app.post('/api/v1/pam/register_admin',
             authenticateMiddleware([{"bearerAuth":[]}]),
             ...(fetchMiddlewares<RequestHandler>(AuthController)),
-            ...(fetchMiddlewares<RequestHandler>(AuthController.prototype.registerToAdmin)),
+            ...(fetchMiddlewares<RequestHandler>(AuthController.prototype.registerPamInAuthPlatform)),
 
-            function AuthController_registerToAdmin(request: any, response: any, next: any) {
+            function AuthController_registerPamInAuthPlatform(request: any, response: any, next: any) {
             const args = {
                     req: {"in":"request","name":"req","required":true,"dataType":"object"},
                     data: {"in":"body","name":"data","required":true,"ref":"IAdmin"},
@@ -1733,7 +1699,7 @@ export function RegisterRoutes(app: express.Router) {
                 const controller = new AuthController();
 
 
-              const promise = controller.registerToAdmin.apply(controller, validatedArgs as any);
+              const promise = controller.registerPamInAuthPlatform.apply(controller, validatedArgs as any);
               promiseHandler(controller, promise, response, undefined, next);
             } catch (err) {
                 return next(err);
@@ -1743,9 +1709,9 @@ export function RegisterRoutes(app: express.Router) {
         app.post('/api/v1/pam/update_platform_token',
             authenticateMiddleware([{"bearerAuth":[]}]),
             ...(fetchMiddlewares<RequestHandler>(AuthController)),
-            ...(fetchMiddlewares<RequestHandler>(AuthController.prototype.updatePlatformTokenData)),
+            ...(fetchMiddlewares<RequestHandler>(AuthController.prototype.updatePamTokenInAuthPlatform)),
 
-            function AuthController_updatePlatformTokenData(request: any, response: any, next: any) {
+            function AuthController_updatePamTokenInAuthPlatform(request: any, response: any, next: any) {
             const args = {
                     req: {"in":"request","name":"req","required":true,"dataType":"object"},
             };
@@ -1759,7 +1725,7 @@ export function RegisterRoutes(app: express.Router) {
                 const controller = new AuthController();
 
 
-              const promise = controller.updatePlatformTokenData.apply(controller, validatedArgs as any);
+              const promise = controller.updatePamTokenInAuthPlatform.apply(controller, validatedArgs as any);
               promiseHandler(controller, promise, response, undefined, next);
             } catch (err) {
                 return next(err);
@@ -1899,9 +1865,9 @@ export function RegisterRoutes(app: express.Router) {
         app.post('/api/v1/pam/get_building/:id',
             authenticateMiddleware([{"bearerAuth":[]}]),
             ...(fetchMiddlewares<RequestHandler>(BuildingController)),
-            ...(fetchMiddlewares<RequestHandler>(BuildingController.prototype.getBuildingByIdByPost)),
+            ...(fetchMiddlewares<RequestHandler>(BuildingController.prototype.getBuildingByIdUsingPostMethod)),
 
-            function BuildingController_getBuildingByIdByPost(request: any, response: any, next: any) {
+            function BuildingController_getBuildingByIdUsingPostMethod(request: any, response: any, next: any) {
             const args = {
                     req: {"in":"request","name":"req","required":true,"dataType":"object"},
                     id: {"in":"path","name":"id","required":true,"dataType":"string"},
@@ -1916,7 +1882,7 @@ export function RegisterRoutes(app: express.Router) {
                 const controller = new BuildingController();
 
 
-              const promise = controller.getBuildingByIdByPost.apply(controller, validatedArgs as any);
+              const promise = controller.getBuildingByIdUsingPostMethod.apply(controller, validatedArgs as any);
               promiseHandler(controller, promise, response, undefined, next);
             } catch (err) {
                 return next(err);
@@ -1953,9 +1919,9 @@ export function RegisterRoutes(app: express.Router) {
         app.get('/api/v1/pam/get_all_buildings_apps',
             authenticateMiddleware([{"bearerAuth":[]}]),
             ...(fetchMiddlewares<RequestHandler>(BuildingController)),
-            ...(fetchMiddlewares<RequestHandler>(BuildingController.prototype.getAllBuildingsApps)),
+            ...(fetchMiddlewares<RequestHandler>(BuildingController.prototype.getAllBuildingsAndTheirApps)),
 
-            function BuildingController_getAllBuildingsApps(request: any, response: any, next: any) {
+            function BuildingController_getAllBuildingsAndTheirApps(request: any, response: any, next: any) {
             const args = {
                     req: {"in":"request","name":"req","required":true,"dataType":"object"},
             };
@@ -1969,7 +1935,7 @@ export function RegisterRoutes(app: express.Router) {
                 const controller = new BuildingController();
 
 
-              const promise = controller.getAllBuildingsApps.apply(controller, validatedArgs as any);
+              const promise = controller.getAllBuildingsAndTheirApps.apply(controller, validatedArgs as any);
               promiseHandler(controller, promise, response, undefined, next);
             } catch (err) {
                 return next(err);
@@ -2367,7 +2333,7 @@ export function RegisterRoutes(app: express.Router) {
             const args = {
                     req: {"in":"request","name":"req","required":true,"dataType":"object"},
                     portofolioId: {"in":"path","name":"portofolioId","required":true,"dataType":"string"},
-                    data: {"in":"body","name":"data","required":true,"ref":"IEditProtofolio"},
+                    data: {"in":"body","name":"data","required":true,"ref":"IEditPortofolio"},
             };
 
             // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa

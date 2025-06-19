@@ -22,10 +22,10 @@
  * <http://resources.spinalcom.com/licenses.pdf>.
  */
 
-import {NextFunction} from 'express';
-import {Server as HttpServer} from 'http';
-import {SpinalNode} from 'spinal-env-viewer-graph-service';
-import {SECURITY_MESSAGES} from '../../constant';
+import { NextFunction } from 'express';
+import { Server as HttpServer } from 'http';
+import { SpinalNode } from 'spinal-env-viewer-graph-service';
+import { SECURITY_MESSAGES } from '../../constant';
 import {
   WebsocketLogsService,
   AuthentificationService,
@@ -34,14 +34,14 @@ import {
   SEND_EVENT,
   RECEIVE_EVENT,
 } from '../../services';
-import {profileHasAccessToBuilding} from '../bos/utils';
-import {Server, Socket} from 'socket.io';
+import { profileHasAccessToBuilding } from '../bos/utils';
+import { Server, Socket } from 'socket.io';
 import {
   CONNECTION_EVENT,
   DISCONNECTION_EVENT,
 } from 'spinal-service-pubsub-logs';
-import {async} from 'q';
-import {isObject} from 'lodash';
+import { async } from 'q';
+import { isObject } from 'lodash';
 const SocketClient = require('socket.io-client');
 
 const logInstance = WebsocketLogsService.getInstance();
@@ -64,7 +64,7 @@ export default class WebSocketServer {
     logInstance.setIo(this._io);
   }
 
-  public async init(): Promise<void> {
+  public async initialize(): Promise<void> {
     this._initNameSpace();
     this._initMiddleware();
   }
@@ -104,7 +104,7 @@ export default class WebSocketServer {
   }
 
   private async _getToken(socket: Socket) {
-    const {header, auth, query} = <any>socket.handshake;
+    const { header, auth, query } = <any>socket.handshake;
     const token = auth?.token || header?.token || query?.token;
     if (!token) throw new Error(SECURITY_MESSAGES.INVALID_TOKEN);
 
@@ -160,7 +160,7 @@ export default class WebSocketServer {
     return new Promise((resolve, reject) => {
       const api_url = building.info.apiUrl.get();
       const client = SocketClient(api_url, {
-        auth: {token, sessionId, building: building?.info?.get()},
+        auth: { token, sessionId, building: building?.info?.get() },
         transports: ['websocket'],
         reconnection: false,
       });
@@ -347,7 +347,7 @@ export default class WebSocketServer {
     const buildingId = (socket as any).auth.building.id;
     const building = this._buildingMap.get(buildingId);
 
-    const targetInfo = {id: userInfo.id, name: userInfo.userName};
+    const targetInfo = { id: userInfo.id, name: userInfo.userName };
     // let type, action;
 
     // type = sendItToClient ? SEND_EVENT : RECEIVE_EVENT;
@@ -377,4 +377,4 @@ export default class WebSocketServer {
   }
 }
 
-export {WebSocketServer};
+export { WebSocketServer };

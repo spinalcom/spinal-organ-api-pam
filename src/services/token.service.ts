@@ -22,9 +22,8 @@
  * <http://resources.spinalcom.com/licenses.pdf>.
  */
 
-import { SpinalContext, SpinalNode } from "spinal-env-viewer-graph-service";
+import { SpinalContext, SpinalGraph, SpinalNode } from "spinal-env-viewer-graph-service";
 import { TOKEN_LIST_CONTEXT_TYPE, TOKEN_LIST_CONTEXT_NAME, TOKEN_TYPE, PTR_LST_TYPE, TOKEN_RELATION_NAME } from "../constant";
-import { configServiceInstance } from "./configFile.service";
 import { Model } from 'spinal-core-connectorjs_type';
 import { AdminProfileService } from "./adminProfile.service";
 import * as jwt from "jsonwebtoken";
@@ -45,10 +44,13 @@ export class TokenService {
         return this.instance;
     }
 
-    public async init(): Promise<SpinalContext> {
-        this.context = await configServiceInstance.getContext(TOKEN_LIST_CONTEXT_NAME);
+    public async init(graph: SpinalGraph): Promise<SpinalContext> {
+        this.context = await graph.getContext(TOKEN_LIST_CONTEXT_NAME);
         if (!this.context) {
-            this.context = await configServiceInstance.addContext(TOKEN_LIST_CONTEXT_NAME, TOKEN_LIST_CONTEXT_TYPE);
+            const spinalContext = new SpinalContext(TOKEN_LIST_CONTEXT_NAME, TOKEN_LIST_CONTEXT_TYPE);
+            this.context = await graph.addContext(spinalContext);
+
+            this.getOrGenerateTokenKey(); // Ensure the token key is set in the context
         }
 
         await this._scheduleTokenPurge();
@@ -56,40 +58,99 @@ export class TokenService {
     }
 
 
+    /**
+     * Purge invalid tokens from the context.
+     *
+     * @return {*}  {(Promise<(IUserToken | IApplicationToken)[]>)}
+     * @memberof TokenService
+     */
     public async purgeToken(): Promise<(IUserToken | IApplicationToken)[]> {
         const tokens = await this._getAllTokens();
         const promises = tokens.map(token => this.tokenIsValid(token, true));
         return Promise.all(promises);
     }
 
-    public async addUserToken(userNode: SpinalNode, token: string, playload: any): Promise<any> {
+    /**
+     * Create a token for a user and add it to the context.
+     *
+     * @param {SpinalNode} userNode
+     * @param {string} token
+     * @param {*} playload
+     * @return {*}  {Promise<any>}
+     * @memberof TokenService
+     */
+    public async createToken(userNode: SpinalNode, playload: any, isAdmin: boolean = false): Promise<any> {
+        const tokenExpiration = isAdmin ? "7d" : "1h";
+        const token = this._generateToken(playload, tokenExpiration);
+        const tokenDecoded = await this.verifyTokenForAdmin(token);
+        playload = Object.assign(playload, { createdToken: tokenDecoded.iat, expieredToken: tokenDecoded.exp, token });
+
         const tokenNode = await this.addTokenToContext(token, playload);
         await userNode.addChild(tokenNode, TOKEN_RELATION_NAME, PTR_LST_TYPE);
         return playload;
     }
 
-    public async getAdminPlayLoad(userNode: SpinalNode, secret?: string, durationInMin?: number): Promise<any> {
-        const playload: any = {
-            userInfo: userNode.info.get()
-        };
 
-        durationInMin = durationInMin || 7 * 24 * 60 * 60; // par default 7jrs
-        const key = secret || this._generateString(15);
-        const token = jwt.sign(playload, key, { expiresIn: durationInMin });
+    /**
+     * Get or generate a token key for signing JWT tokens.
+     * If a secret is already set in the context, it will return that.
+     * Otherwise, it generates a new random string and sets it in the context.
+     *
+     * @return {*}  {string} - The token key.
+     * @memberof TokenService
+     */
+    public getOrGenerateTokenKey(): string {
+        if (this.context?.info?.secret) return this.context.info.secret.get();
 
-        const adminProfile = await AdminProfileService.getInstance().getAdminProfile()
-        const now = Date.now();
-        playload.createdToken = now;
-        playload.expieredToken = now + (durationInMin * 60 * 1000);
-        playload.userId = userNode.getId().get();
-        playload.token = token;
-        playload.profile = {
-            profileId: adminProfile.getId().get()
-        }
-
-        return playload;
+        const secret = this._generateString(20);
+        this.context.info.add_attr({ secret });
+        return secret;
     }
 
+
+    private _generateToken(payload: any, expiresIn = "1h"): string {
+        const tokenKey = this.getOrGenerateTokenKey();
+        return jwt.sign(payload, tokenKey, { expiresIn });
+    }
+
+    /**
+     * Generate a token for admin a user.
+     *
+     * @param {SpinalNode} userNode
+     * @param {string} [secret]
+     * @param {(number | string)} [durationInMin]
+     * @return {*}  {Promise<any>}
+     * @memberof TokenService
+     */
+    public async generateTokenForAdmin(userNode: SpinalNode): Promise<any> {
+        const adminProfile = await AdminProfileService.getInstance().getAdminProfile();
+
+        let playload = {
+            userInfo: userNode.info.get(),
+            userId: userNode.getId().get(),
+            profile: { profileId: adminProfile.getId().get() }
+        };
+
+        const isAdmin = true;
+        return this.createToken(userNode, playload, isAdmin);
+        // const tokenKey = this.getOrGenerateTokenKey();
+        // const token = jwt.sign(playload, tokenKey, { expiresIn: "7d" });
+
+        // const tokenDecoded = await this.verifyTokenForAdmin(token);
+        // playload = Object.assign(playload, { createdToken: tokenDecoded.iat, expieredToken: tokenDecoded.exp, token });
+
+        // return playload;
+    }
+
+
+    /**
+     * link a token to a context.
+     *
+     * @param {string} token
+     * @param {*} data
+     * @return {*}  {Promise<SpinalNode>}
+     * @memberof TokenService
+     */
     public async addTokenToContext(token: string, data: any): Promise<SpinalNode> {
         const node = new SpinalNode(token, TOKEN_TYPE, new Model(data));
         const child = await this.context.addChildInContext(node, TOKEN_RELATION_NAME, PTR_LST_TYPE)
@@ -97,30 +158,56 @@ export class TokenService {
         return child;
     }
 
+
+    /**
+     * Get the token data from the cache or from the context.
+     *
+     * @param {string} token
+     * @return {*}  {Promise<any>}
+     * @memberof TokenService
+     */
     public async getTokenData(token: string): Promise<any> {
-        const data = globalCache.get(token);
-        if (data) return data;
+        const tokenInCache = globalCache.get(token);
+        if (tokenInCache) return tokenInCache;
 
-        const found = await this.context.getChild((node) => node.getName().get() === token, TOKEN_RELATION_NAME, PTR_LST_TYPE);
-        if (!found) return;
+        const tokenNode = await this.getTokenNode(token);
+        if (!tokenNode) return;
 
-        const element = await found.getElement(true);
-        if (element) {
-            globalCache.set(token, element.get())
-            return element.get();
+        const nodeElement = await tokenNode.getElement(true);
+        if (nodeElement) {
+            globalCache.set(token, nodeElement.get())
+            return nodeElement.get();
         }
-
 
     }
 
+    /**
+     * Get a token node by its name.
+     *
+     * @param {string} token
+     * @return {*}  {Promise<SpinalNode>}
+     * @memberof TokenService
+     */
+    public getTokenNode(token: string): Promise<SpinalNode> {
+        return this.context.getChild((node) => node.getName().get() === token, TOKEN_RELATION_NAME, PTR_LST_TYPE);
+    }
+
+
+    /**
+     * remove a token.
+     *
+     * @param {(SpinalNode | string)} token
+     * @return {*}  {Promise<boolean>}
+     * @memberof TokenService
+     */
     public async deleteToken(token: SpinalNode | string): Promise<boolean> {
-        const found = token instanceof SpinalNode ? token : await this.context.getChild((node) => node.getName().get() === token, TOKEN_RELATION_NAME, PTR_LST_TYPE);
-        if (!found) return true;
+        if (!(token instanceof SpinalNode)) token = await this.getTokenNode(token);
+        if (!token) return false;
 
         try {
-            const parents = await found.getParents(TOKEN_RELATION_NAME);
+            const parents = await token.getParents(TOKEN_RELATION_NAME);
             for (const parent of parents) {
-                await parent.removeChild(found, TOKEN_RELATION_NAME, PTR_LST_TYPE);
+                await parent.removeChild(token, TOKEN_RELATION_NAME, PTR_LST_TYPE);
             }
             return true;
         } catch (error) {
@@ -128,24 +215,41 @@ export class TokenService {
         }
     }
 
+
+    /**
+     * Check if a token is valid.
+     *
+     * @param {string} token
+     * @param {boolean} [deleteIfExpired=false]
+     * @return {*}  {(Promise<IUserToken | IApplicationToken>)}
+     * @memberof TokenService
+     */
     public async tokenIsValid(token: string, deleteIfExpired: boolean = false): Promise<IUserToken | IApplicationToken> {
-        let data = await this.getTokenData(token);
 
-        if (!data) {
-            data = await this.verifyToken(token);
-        };
+        let isAdminToken = false;
 
-        const expirationTime = data.expieredToken;
-        const tokenExpired = expirationTime ? Date.now() >= expirationTime * 1000 : true;
+        try {
+            const adminTokenData = this.getTokenData(token);
+            if (!adminTokenData) throw new Error("Token not found in cache or context"); // Check if the token is in the cache or context
 
-        if (tokenExpired) {
-            if (deleteIfExpired) await this.deleteToken(token);
-            return;
+            isAdminToken = true;
+            await this.verifyTokenForAdmin(token) // Verify the token using the admin secret key
+            return adminTokenData;
+        } catch (error) {
+            if (isAdminToken) return; // If it is an admin token and verification failed, return undefined;
+
+            return this.verifyTokenInAuthPlatform(token);
         }
 
-        return data;
     }
 
+    /**
+     * Get the profile ID associated with a token.
+     *
+     * @param {string} token
+     * @return {*}  {Promise<string>}
+     * @memberof TokenService
+     */
     public async getProfileIdByToken(token: string): Promise<string> {
         const data: any = await this.tokenIsValid(token);
         if (data) return data.profile.profileId || data.profile.userProfileBosConfigId || data.profile.appProfileBosConfigId;
@@ -153,12 +257,61 @@ export class TokenService {
         return;
     }
 
-    public async verifyToken(token: string, actor: "user" | "app" = "user") {
-        const authAdmin = await AuthentificationService.getInstance().getPamToAdminCredential();
+    /**
+     * Verify a token in the authentication platform.
+     *
+     * @param {string} token - The JWT token to verify.
+     * @param {"user" | "app"} [actor="user"] - The actor type, either "user" or "app".
+     * @return {*}  {Promise<any>} - Resolves with the verification result.
+     * @memberof TokenService
+     */
+    public async verifyTokenInAuthPlatform(token: string, actor: "user" | "app" = "user") {
+        const authAdmin = await AuthentificationService.getInstance().getPamCredentials();
 
         return axios.post(`${authAdmin.urlAdmin}/tokens/verifyToken`, { tokenParam: token, actor }).then((result) => {
             return result.data;
         })
+    }
+
+    /**
+     * Verify a token using the admin secret key.
+     *
+     * @param {string} token - The JWT token to verify.
+     * @return {*}  {Promise<any>} - Resolves with the decoded token if valid, rejects if invalid.
+     * @memberof TokenService
+     */
+    public async verifyTokenForAdmin(token: string): Promise<any> {
+        const tokenKey = this.getOrGenerateTokenKey();
+        return new Promise((resolve, reject) => {
+            jwt.verify(token, tokenKey, (err, decoded) => {
+                if (err) {
+                    return reject(err);
+                }
+                resolve(decoded);
+            });
+        });
+    }
+
+    /**
+     * Check if the token is an application token.
+     *
+     * @param {*} tokenInfo
+     * @return {*}  {boolean}
+     * @memberof TokenService
+     */
+    public isAppToken(tokenInfo: any): boolean {
+        return tokenInfo && tokenInfo.profile.hasOwnProperty("appProfileBosConfigId");
+    }
+
+    /**
+     * Check if the token is an user token.
+     *
+     * @param {*} tokenInfo
+     * @return {*}  {boolean}
+     * @memberof TokenService
+     */
+    public isUserToken(tokenInfo: any): boolean {
+        return tokenInfo && tokenInfo.profile.hasOwnProperty("userProfileBosConfigId");
     }
 
     //////////////////////////////////////////////////
@@ -167,7 +320,7 @@ export class TokenService {
 
 
     private _generateString(length = 10): string {
-        const charset = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789*/-_@#&";
+        const charset = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
         let text = "";
         for (var i = 0, n = charset.length; i < length; ++i) {
             text += charset.charAt(Math.floor(Math.random() * n));

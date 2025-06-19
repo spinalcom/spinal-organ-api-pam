@@ -23,23 +23,44 @@
  * <http://resources.spinalcom.com/licenses.pdf>.
  */
 Object.defineProperty(exports, "__esModule", { value: true });
-exports._filterBosList = exports._filterPortofolioList = exports._filterApisList = exports._formatAuthorizationData = exports._formatProfileKeys = exports._getNodeListInfo = exports._formatBosAuthRes = exports._formatPortofolioAuthRes = exports._formatProfile = void 0;
-function _formatProfile(data) {
-    return Object.assign(Object.assign({}, data.node.info.get()), { authorized: data.authorized.map(el => _formatPortofolioAuthRes(el)) });
-}
 exports._formatProfile = _formatProfile;
-function _formatPortofolioAuthRes(data) {
-    return Object.assign(Object.assign({}, data.portofolio.info.get()), { apps: _getNodeListInfo(data.apps), apis: _getNodeListInfo(data.apis), buildings: data.buildings.map(el => _formatBosAuthRes(el)) });
-}
 exports._formatPortofolioAuthRes = _formatPortofolioAuthRes;
-function _formatBosAuthRes(data) {
-    return Object.assign(Object.assign({}, data.building.info.get()), { apps: _getNodeListInfo(data.apps), apis: _getNodeListInfo(data.apis) });
-}
 exports._formatBosAuthRes = _formatBosAuthRes;
+exports._getNodeListInfo = _getNodeListInfo;
+exports._formatProfileKeys = _formatProfileKeys;
+exports.formatAndMergeBosAuthorization = formatAndMergeBosAuthorization;
+exports.formatAndMergePortofolioAuthorization = formatAndMergePortofolioAuthorization;
+exports._findChildInContext = _findChildInContext;
+exports._createProfileNode = _createProfileNode;
+exports._getProfileNode = _getProfileNode;
+exports._renameProfile = _renameProfile;
+exports._getProfileNodeGraph = _getProfileNodeGraph;
+const constant_1 = require("../constant");
+const spinal_env_viewer_graph_service_1 = require("spinal-env-viewer-graph-service");
+function _formatProfile(data) {
+    return {
+        ...data.node.info.get(),
+        authorized: data.authorized.map(el => _formatPortofolioAuthRes(el))
+    };
+}
+function _formatPortofolioAuthRes(data) {
+    return {
+        ...data.portofolio.info.get(),
+        apps: _getNodeListInfo(data.apps),
+        apis: _getNodeListInfo(data.apis),
+        buildings: data.buildings.map(el => _formatBosAuthRes(el))
+    };
+}
+function _formatBosAuthRes(data) {
+    return {
+        ...data.building.info.get(),
+        apps: _getNodeListInfo(data.apps),
+        apis: _getNodeListInfo(data.apis)
+    };
+}
 function _getNodeListInfo(nodes = []) {
     return nodes.map(el => el.info.get());
 }
-exports._getNodeListInfo = _getNodeListInfo;
 function _formatProfileKeys(profile) {
     const res = {};
     for (const key in profile) {
@@ -50,82 +71,181 @@ function _formatProfileKeys(profile) {
     }
     return res;
 }
-exports._formatProfileKeys = _formatProfileKeys;
-function _formatAuthorizationData(profileData) {
-    const obj = {};
-    return profileData.authorize.reduce((liste, item) => {
-        const index = obj[item.portofolioId];
-        if (typeof index !== "undefined") {
-            const copy = _unifyData(liste[index - 1], item);
-            liste[index - 1] = copy;
+function formatAndMergeBosAuthorization(itemsToAuthorize) {
+    const buildingValids = itemsToAuthorize.filter(item => authorizationItemIsValid(item));
+    return mergeBosAuth(buildingValids);
+}
+function formatAndMergePortofolioAuthorization(itemsToAuthorize) {
+    itemsToAuthorize = removeEmptyBuildings(itemsToAuthorize);
+    itemsToAuthorize = removeInvalidPortofolio(itemsToAuthorize);
+    return mergePortofolioAuth(itemsToAuthorize);
+    // return profileData.authorize.reduce((liste, item: IPortofolioAuth) => {
+    //     const index = obj[item.portofolioId];
+    //     if (typeof index !== "undefined") {
+    //         const copy = _unifyData(liste[index - 1], item);
+    //         liste[index - 1] = copy
+    //     } else {
+    //         obj[item.portofolioId] = liste.push(item);
+    //     }
+    //     return liste;
+    // }, [])
+}
+async function _findChildInContext(startNode, nodeIdOrName, context) {
+    const children = await startNode.getChildrenInContext(context);
+    return children.find(el => {
+        if (el.getId().get() === nodeIdOrName || el.getName().get() === nodeIdOrName) {
+            //@ts-ignore
+            spinal_env_viewer_graph_service_1.SpinalGraphService._addNode(el);
+            return true;
+        }
+        return false;
+    });
+}
+async function _createProfileNode(profile) {
+    const info = {
+        name: profile.name,
+        type: constant_1.APP_PROFILE_TYPE
+    };
+    const graph = new spinal_env_viewer_graph_service_1.SpinalGraph(profile.name);
+    const profileId = spinal_env_viewer_graph_service_1.SpinalGraphService.createNode(info, graph);
+    const node = spinal_env_viewer_graph_service_1.SpinalGraphService.getRealNode(profileId);
+    return node;
+}
+async function _getProfileNode(profileId, context) {
+    const node = spinal_env_viewer_graph_service_1.SpinalGraphService.getRealNode(profileId);
+    if (node)
+        return node;
+    return _findChildInContext(context, profileId, context);
+}
+function _renameProfile(node, newName) {
+    if (newName && newName.trim())
+        node.info.name.set(newName);
+}
+async function _getProfileNodeGraph(profileId, context) {
+    const profile = await _getProfileNode(profileId, context);
+    if (profile)
+        return profile.getElement();
+}
+function mergePortofolioAuth(authorizedPortofolio) {
+    const mergedObj = {};
+    for (const portofolio of authorizedPortofolio) {
+        const existing = mergedObj[portofolio.portofolioId];
+        if (!existing) {
+            mergedObj[portofolio.portofolioId] = { ...portofolio };
         }
         else {
-            obj[item.portofolioId] = liste.push(item);
+            mergedObj[portofolio.portofolioId] = mergeTwoPortofolioAuth(existing, portofolio);
         }
-        return liste;
-    }, []);
+    }
+    return Object.values(mergedObj);
 }
-exports._formatAuthorizationData = _formatAuthorizationData;
-function _unifyData(profile1, profile2) {
-    if (!profile1.appsIds)
-        profile1.appsIds = [];
-    if (!profile1.apisIds)
-        profile1.apisIds = [];
-    if (!profile1.building)
-        profile1.building = [];
-    profile1.appsIds = [...profile1.appsIds, ...(profile2.appsIds || [])];
-    profile1.apisIds = [...profile1.apisIds, ...(profile2.apisIds || [])];
-    profile1.building = [...profile1.building, ...(profile2.building || [])];
-    return profile1;
+function mergeTwoPortofolioAuth(existing, portofolio) {
+    const mergedValue = mergeAuthorizationItems(existing, portofolio);
+    return {
+        portofolioId: existing.portofolioId,
+        building: mergeBosAuth(existing.building, portofolio.building),
+        ...mergedValue
+    };
 }
-function _filterApisList(authorizedIds = [], unauthorizedIds = []) {
-    if (!unauthorizedIds.length)
-        return authorizedIds;
-    const unAuthObj = {};
-    unauthorizedIds.map(id => unAuthObj[id] = id);
-    return authorizedIds.filter(id => !unAuthObj[id]);
+function mergeBosAuth(existingBuildings = [], newBuildings = []) {
+    const mergedObj = {};
+    const buildings = [...existingBuildings, ...newBuildings];
+    for (const building of buildings) {
+        const existing = mergedObj[building.buildingId];
+        let mergedValue;
+        if (!existing)
+            mergedValue = { ...building };
+        else
+            mergedValue = { buildingId: building.buildingId, ...mergeAuthorizationItems(existing, building) };
+        mergedObj[building.buildingId] = mergedValue;
+    }
+    return Object.values(mergedObj);
 }
-exports._filterApisList = _filterApisList;
-function _filterPortofolioList(authorizedPortofolio = [], unauthorizedPortofolio = []) {
-    const obj = {};
-    unauthorizedPortofolio.map(({ portofolioId, appsIds }) => {
-        obj[portofolioId] = appsIds;
-        return;
+function removeInvalidPortofolio(items) {
+    return items.filter(item => {
+        return item.portofolioId && item.portofolioId.trim() && authorizationItemIsValid(item);
     });
-    return authorizedPortofolio.reduce((liste, item) => {
-        const apps = obj[item.portofolioId];
-        if (apps) {
-            if (!item.appsIds)
-                item.appsIds = [];
-            item.appsIds = Array.isArray(item.appsIds) ? item.appsIds : [item.appsIds];
-            item.appsIds = item.appsIds.filter(id => {
-                return apps.find(el => el !== id);
-            });
-        }
-        liste.push(item);
-        return liste;
-    }, []);
 }
-exports._filterPortofolioList = _filterPortofolioList;
-function _filterBosList(authorizedBos = [], unauthorizedBos = []) {
-    const obj = {};
-    unauthorizedBos.map(({ buildingId, appsIds }) => {
-        obj[buildingId] = appsIds;
-        return;
-    });
-    return authorizedBos.reduce((liste, item) => {
-        const apps = obj[item.buildingId];
-        if (apps) {
-            if (!item.appsIds)
-                item.appsIds = [];
-            item.appsIds = Array.isArray(item.appsIds) ? item.appsIds : [item.appsIds];
-            item.appsIds = item.appsIds.filter(id => {
-                return apps.find(el => el !== id);
-            });
-        }
-        liste.push(item);
-        return liste;
-    }, []);
+function removeEmptyBuildings(items) {
+    for (const item of items) {
+        item.building = (item.building || []).filter(building => authorizationItemIsValid(building));
+    }
+    return items;
 }
-exports._filterBosList = _filterBosList;
+function authorizationItemIsValid(item) {
+    const globalCondition = item.appsIds?.length > 0 || item.apisIds?.length > 0 || item.unauthorizeApisIds?.length > 0 || item.unauthorizeAppsIds?.length > 0;
+    if (isBuildingAuth(item)) {
+        return globalCondition;
+    }
+    return globalCondition || item.building?.length > 0;
+}
+function isBuildingAuth(building) {
+    return typeof building.buildingId !== "undefined" && building.buildingId;
+}
+function mergeAuthorizationItems(item1, item2) {
+    const mergedAppsIds = new Set([...(item1.appsIds || []), ...(item2.appsIds || [])]);
+    const mergedApisIds = new Set([...(item1.apisIds || []), ...(item2.apisIds || [])]);
+    const mergedUnauthorizeAppsIds = new Set([...(item1.unauthorizeAppsIds || []), ...(item2.unauthorizeAppsIds || [])]);
+    const mergedUnauthorizeApisIds = new Set([...(item1.unauthorizeApisIds || []), ...(item2.unauthorizeApisIds || [])]);
+    return {
+        ...(mergedAppsIds.size > 0 && { appsIds: Array.from(mergedAppsIds) }),
+        ...(mergedApisIds.size > 0 && { apisIds: Array.from(mergedApisIds) }),
+        ...(mergedUnauthorizeAppsIds.size > 0 && { unauthorizeAppsIds: Array.from(mergedUnauthorizeAppsIds) }),
+        ...(mergedUnauthorizeApisIds.size > 0 && { unauthorizeApisIds: Array.from(mergedUnauthorizeApisIds) })
+    };
+}
+////////////////////////////////////////////////////////////////////////////////////
+// function _unifyData(profile1: IPortofolioAuth, profile2: IPortofolioAuth): IPortofolioAuth {
+//     if (!profile1.appsIds) profile1.appsIds = [];
+//     if (!profile1.apisIds) profile1.apisIds = [];
+//     if (!profile1.building) profile1.building = [];
+//     profile1.appsIds = [...profile1.appsIds, ...(profile2.appsIds || [])];
+//     profile1.apisIds = [...profile1.apisIds, ...(profile2.apisIds || [])];
+//     profile1.building = [...profile1.building, ...(profile2.building || [])];
+//     return profile1;
+// }
+// export function _filterApisList(authorizedIds: string[] = [], unauthorizedIds: string[] = []): string[] {
+//     if (!unauthorizedIds.length) return authorizedIds;
+//     const unAuthObj = {};
+//     unauthorizedIds.map(id => unAuthObj[id] = id);
+//     return authorizedIds.filter(id => !unAuthObj[id]);
+// }
+// export function _filterPortofolioList(authorizedPortofolio: IPortofolioAuth[] = [], unauthorizedPortofolio: IPortofolioAuth[] = []): IPortofolioAuth[] {
+//     const obj = {};
+//     unauthorizedPortofolio.map(({ portofolioId, appsIds }) => {
+//         obj[portofolioId] = appsIds;
+//         return;
+//     })
+//     return authorizedPortofolio.reduce((liste, item) => {
+//         const apps = obj[item.portofolioId]
+//         if (apps) {
+//             if (!item.appsIds) item.appsIds = [];
+//             item.appsIds = Array.isArray(item.appsIds) ? item.appsIds : [item.appsIds];
+//             item.appsIds = item.appsIds.filter(id => {
+//                 return apps.find(el => el !== id);
+//             })
+//         }
+//         liste.push(item);
+//         return liste;
+//     }, [])
+// }
+// export function _filterBosList(authorizedBos: IBosAuth[] = [], unauthorizedBos: IBosAuth[] = []): IBosAuth[] {
+//     const obj = {};
+//     unauthorizedBos.map(({ buildingId, appsIds }) => {
+//         obj[buildingId] = appsIds;
+//         return;
+//     })
+//     return authorizedBos.reduce((liste, item) => {
+//         const apps = obj[item.buildingId]
+//         if (apps) {
+//             if (!item.appsIds) item.appsIds = [];
+//             item.appsIds = Array.isArray(item.appsIds) ? item.appsIds : [item.appsIds];
+//             item.appsIds = item.appsIds.filter(id => {
+//                 return apps.find(el => el !== id);
+//             })
+//         }
+//         liste.push(item);
+//         return liste;
+//     }, [])
+// }
 //# sourceMappingURL=profileUtils.js.map

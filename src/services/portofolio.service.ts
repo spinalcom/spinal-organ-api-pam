@@ -22,42 +22,29 @@
  * <http://resources.spinalcom.com/licenses.pdf>.
  */
 
-import {SpinalContext, SpinalNode} from 'spinal-env-viewer-graph-service';
-import {configServiceInstance} from './configFile.service';
+import { SpinalContext, SpinalGraph, SpinalNode } from 'spinal-env-viewer-graph-service';
+
 import {
-  PORTOFOLIO_CONTEXT_NAME,
-  PORTOFOLIO_CONTEXT_TYPE,
-  PORTOFOLIO_TYPE,
-  CONTEXT_TO_PORTOFOLIO_RELATION_NAME,
-  APP_RELATION_NAME,
-  PTR_LST_TYPE,
-  BUILDING_RELATION_NAME,
-  PORTOFOLIO_API_GROUP_TYPE,
-  API_RELATION_NAME,
+  PORTOFOLIO_CONTEXT_NAME, PORTOFOLIO_CONTEXT_TYPE, PORTOFOLIO_TYPE,
+  CONTEXT_TO_PORTOFOLIO_RELATION_NAME, APP_RELATION_NAME, PTR_LST_TYPE,
+  BUILDING_RELATION_NAME, PORTOFOLIO_API_GROUP_TYPE, API_RELATION_NAME
 } from '../constant';
-import {AppService} from './apps.service';
-import {
-  IEditProtofolio,
-  IPortofolioData,
-  IPortofolioDetails,
-  IBuilding,
-  IBuildingCreation,
-  IBuildingDetails,
-} from '../interfaces';
-import {BuildingService} from './building.service';
-import {APIService} from './apis.service';
-import {AdminProfileService} from './adminProfile.service';
-import {
-  removeNodeReferences,
-  removeRelationFromReference,
-} from '../utils/utils';
+
+import { AppService } from './apps.service';
+import { IEditPortofolio, IPortofolioData, IPortofolioDetails, IBuildingCreation, IBuildingDetails, convertIEditPortofolio } from '../interfaces';
+import { BuildingService } from './building.service';
+import { APIService } from './apis.service';
+import { AdminProfileService } from './adminProfile.service';
+import { removeNodeReferences, removeRelationFromReference } from '../utils/authorizationUtils';
+import { formatBuildingStructure } from '../utils/buildingUtils';
+import { formatAndMergePortofolioAuthorization } from '../utils/profileUtils';
 
 const adminProfileInstance = AdminProfileService.getInstance();
 
 export class PortofolioService {
   private static instance: PortofolioService;
   public context: SpinalContext;
-  constructor() {}
+  constructor() { }
 
   public static getInstance(): PortofolioService {
     if (!this.instance) this.instance = new PortofolioService();
@@ -65,150 +52,171 @@ export class PortofolioService {
     return this.instance;
   }
 
-  public async init(): Promise<SpinalContext> {
-    this.context = await configServiceInstance.getContext(
-      PORTOFOLIO_CONTEXT_NAME
-    );
-    if (!this.context)
-      this.context = await configServiceInstance.addContext(
-        PORTOFOLIO_CONTEXT_NAME,
-        PORTOFOLIO_CONTEXT_TYPE
-      );
+  public async init(graph: SpinalGraph): Promise<SpinalContext> {
+    this.context = await graph.getContext(PORTOFOLIO_CONTEXT_NAME);
+    if (!this.context) {
+      const spinalContext = new SpinalContext(PORTOFOLIO_CONTEXT_NAME, PORTOFOLIO_CONTEXT_TYPE);
+      this.context = await graph.addContext(spinalContext);
+    }
     return this.context;
   }
 
-  public async addPortofolio(
-    portofolioName: string,
-    appsIds: string[] = [],
-    apisIds = []
-  ): Promise<IPortofolioDetails> {
+
+  /**
+   * Creates a new portfolio node with the specified name, links the provided applications and APIs to it,
+   * adds the node to the context, and synchronizes the admin profile.
+   *
+   * @param portofolioName - The name of the portfolio to create.
+   * @param appsIds - An optional array of application IDs to link to the portfolio. Defaults to an empty array.
+   * @param apisIds - An optional array of API IDs to link to the portfolio. Defaults to an empty array.
+   * @returns A promise that resolves to the details of the created portfolio, including the node, linked apps, empty buildings array, and linked APIs.
+   */
+  public async createPortofolio(portofolioName: string, appsIds: string[] = [], apisIds = []): Promise<IPortofolioDetails> {
     const node = new SpinalNode(portofolioName, PORTOFOLIO_TYPE);
-    await this.context.addChildInContext(
-      node,
-      CONTEXT_TO_PORTOFOLIO_RELATION_NAME,
-      PTR_LST_TYPE,
-      this.context
-    );
 
-    const apps = await this.addAppToPortofolio(node, appsIds);
-    const apis = await this.addApiToPortofolio(node, apisIds);
-    // const buildings = await this.addBuildingToPortofolio(node, buildingsIds);
+    const apps = await this.linkSeveralAppsToPortofolio(node, appsIds);
+    const apis = await this.linkSeveralApisToPortofolio(node, apisIds);
 
+    await this.context.addChildInContext(node, CONTEXT_TO_PORTOFOLIO_RELATION_NAME, PTR_LST_TYPE, this.context);
     await adminProfileInstance.syncAdminProfile();
 
-    return {
-      node,
-      apps,
-      buildings: [],
-      apis,
-    };
+    return { node, apps, buildings: [], apis };
   }
 
-  public async renamePortofolio(
-    portfolioId: string,
-    newName: string
-  ): Promise<boolean> {
-    const portofolio = await this.getPortofolio(portfolioId);
-    if (!portofolio) return false;
 
-    portofolio.info.name.set(newName.trim());
+
+  /**
+   * Renames a portfolio node with the specified new name.
+   *
+   * @param portfolioId - The unique identifier of the portfolio to rename.
+   * @param newName - The new name to assign to the portfolio.
+   * @returns A promise that resolves to `true` if the portfolio was successfully renamed,
+   *          or `false` if the new name is empty or the portfolio node could not be found.
+   */
+  public async renamePortofolio(portfolioId: string, newName: string): Promise<boolean> {
+    if (newName.trim() === '') return false;
+
+    const portofolioNode = await this.getPortofolioNode(portfolioId);
+    if (!portofolioNode) return false;
+
+    portofolioNode.info.name.set(newName.trim());
     return true;
   }
 
-  public async updateProtofolio(
-    portofolioId: string,
-    newData: IEditProtofolio
-  ): Promise<IPortofolioDetails> {
-    const node = await this.getPortofolio(portofolioId);
-    if (!node) return;
 
-    if (newData.name?.trim()) node.info.name.set(newData.name.trim());
+  /**
+   * Updates a portfolio node with new data, including renaming, linking/unlinking apps and APIs.
+   *
+   * @param portofolioId - The unique identifier of the portfolio to update.
+   * @param newData - The new data to apply to the portfolio.
+   * @returns A promise that resolves to the updated portfolio details, or undefined if the portfolio does not exist.
+   */
+  public async updatePortofolio(portofolioId: string, newData: IEditPortofolio): Promise<IPortofolioDetails> {
 
-    if (newData.authorizeAppIds)
-      await this.addAppToPortofolio(node, newData.authorizeAppIds);
-    if (newData.authorizeApiIds)
-      await this.addApiToPortofolio(node, newData.authorizeApiIds);
+    const portofolioNode = await this.getPortofolioNode(portofolioId);
+    if (!portofolioNode) return;
 
-    if (newData.unauthorizeAppIds)
-      await this.removeAppFromPortofolio(node, newData.unauthorizeAppIds);
-    if (newData.unauthorizeApiIds)
-      await this.removeApiFromPortofolio(node, newData.unauthorizeApiIds);
+    const convertedData = convertIEditPortofolio(portofolioId, newData);
+    const [dataFormatted] = formatAndMergePortofolioAuthorization([convertedData]);
 
-    return this.getPortofolioDetails(node);
+    if (dataFormatted) return;
+
+    if (newData.name?.trim()) await this.renamePortofolio(portofolioId, newData.name.trim());
+
+    if (dataFormatted.appsIds) await this.linkSeveralAppsToPortofolio(portofolioNode, dataFormatted.appsIds);
+    if (dataFormatted.apisIds) await this.linkSeveralApisToPortofolio(portofolioNode, dataFormatted.apisIds);
+
+    if (dataFormatted.unauthorizeAppsIds) await this.removeSeveralAppsFromPortofolio(portofolioNode, dataFormatted.unauthorizeAppsIds);
+    if (dataFormatted.unauthorizeApisIds) await this.removeSeveralApisFromPortofolio(portofolioNode, dataFormatted.unauthorizeApisIds);
+
+    return this.getPortofolioDetails(portofolioNode);
   }
 
+  /**
+   * Retrieves all portfolio nodes from the context.
+   *
+   * @returns A promise that resolves to an array of SpinalNode instances representing all portfolios.
+   */
   public getAllPortofolio(): Promise<SpinalNode[]> {
     return this.context.getChildren([CONTEXT_TO_PORTOFOLIO_RELATION_NAME]);
   }
 
-  public async getPortofolio(portofolioId: string): Promise<SpinalNode> {
+  /**
+   * Retrieves a portfolio node by its ID.
+   *
+   * @param {string} portofolioId
+   * @return {*}  {Promise<SpinalNode>}
+   * @memberof PortofolioService
+   */
+  public async getPortofolioNode(portofolioId: string): Promise<SpinalNode> {
     const portofolios = await this.getAllPortofolio();
     return portofolios.find((el) => el.getId().get() === portofolioId);
   }
 
-  public async getPortofolioDetails(
-    portofolio: string | SpinalNode
-  ): Promise<IPortofolioDetails> {
-    const node =
-      portofolio instanceof SpinalNode
-        ? portofolio
-        : await this.getPortofolio(portofolio);
 
-    if (!node) {
+  /**
+   * Retrieves the details of a portfolio, including its node, linked applications, buildings, and APIs.
+   *
+   * @param {string | SpinalNode} portofolio - The ID or SpinalNode of the portfolio to retrieve.
+   * @return {*}  {Promise<IPortofolioDetails>}
+   * @memberof PortofolioService
+   */
+  public async getPortofolioDetails(portofolio: string | SpinalNode): Promise<IPortofolioDetails> {
+    const portfolioNode = portofolio instanceof SpinalNode ? portofolio : await this.getPortofolioNode(portofolio);
+
+    if (!portfolioNode) {
       const id = typeof portofolio === "string" ? portofolio : portofolio.getId().get();
       throw new Error(`No portofolio found for ${id}`);
     }
 
     const [apps, buildings, apis] = await Promise.all([
-      this.getPortofolioApps(node),
-      this.getPortofolioBuildings(node),
-      this.getPortofolioApis(node),
+      this.getPortofolioApps(portfolioNode),
+      this.getPortofolioBuildings(portfolioNode),
+      this.getPortofolioApis(portfolioNode),
     ]);
 
     return {
-      node,
+      node: portfolioNode,
       apps,
-      buildings: await Promise.all(
-        buildings.map((el) =>
-          BuildingService.getInstance().getBuildingStructure(el)
-        )
-      ),
       apis,
+      buildings: await Promise.all(buildings.map((el) => BuildingService.getInstance().getBuildingStructure(el))),
     };
   }
 
+
+  /**
+   * Retrieves the details of all portfolios in the context.
+   *
+   * @returns A promise that resolves to an array of IPortofolioDetails for each portfolio.
+   */
   public async getAllPortofoliosDetails(): Promise<IPortofolioDetails[]> {
     const portofolios = await this.getAllPortofolio();
-    return portofolios.reduce(async (prom, el) => {
-      const liste = await prom;
-      const details = await this.getPortofolioDetails(el);
-      if (details) liste.push(details);
-      return liste;
-    }, Promise.resolve([]));
+    const promises = portofolios.map((el) => this.getPortofolioDetails(el));
+    return Promise.all(promises);
   }
 
-  public async removePortofolio(
-    portofolio: string | SpinalNode
-  ): Promise<boolean> {
+
+  /**
+   * Removes a portfolio and all its associated buildings from the system.
+   *
+   * This method accepts either a portfolio node or a portfolio identifier. It retrieves the corresponding
+   * portfolio node, fetches all buildings linked to it, and deletes each building. After removing all
+   * associated buildings, it removes the portfolio node from its parent context and cleans up any remaining
+   * references to the node.
+   *
+   * @param portofolio - The portfolio to remove, specified as either a string identifier or a SpinalNode instance.
+   * @returns A promise that resolves to `true` if the portfolio and its references were successfully removed,
+   *          or `false` if an error occurred during the process.
+   */
+  public async removePortofolio(portofolio: string | SpinalNode): Promise<boolean> {
     try {
-      const node =
-        portofolio instanceof SpinalNode
-          ? portofolio
-          : await this.getPortofolio(portofolio);
-      const buildings = await this.getPortofolioBuildings(node);
+      const portofolioNode = portofolio instanceof SpinalNode ? portofolio : await this.getPortofolioNode(portofolio);
+      const buildings = await this.getPortofolioBuildings(portofolioNode);
+      const promises = buildings.map(building => BuildingService.getInstance().deleteBuildingById(building.getId().get()));
+      await Promise.all(promises);
 
-      await Promise.all(
-        buildings.map((el) =>
-          BuildingService.getInstance().deleteBuilding(el.getId().get())
-        )
-      );
-
-      await this.context.removeChild(
-        node,
-        CONTEXT_TO_PORTOFOLIO_RELATION_NAME,
-        PTR_LST_TYPE
-      );
-      await removeNodeReferences(node);
+      await this.context.removeChild(portofolioNode, CONTEXT_TO_PORTOFOLIO_RELATION_NAME, PTR_LST_TYPE);
+      await removeNodeReferences(portofolioNode);
       return true;
     } catch (error) {
       return false;
@@ -219,105 +227,132 @@ export class PortofolioService {
   //                      APPS                        //
   //////////////////////////////////////////////////////
 
-  public async addAppToPortofolio(
-    portofolio: string | SpinalNode,
-    applicationId: string | string[]
-  ): Promise<SpinalNode[]> {
-    if (typeof portofolio === 'string')
-      portofolio = await this.getPortofolio(portofolio);
-    if (!(portofolio instanceof SpinalNode))
-      throw new Error(`No portofolio found for ${portofolio}`);
+  /**
+   * Links a single application to a portfolio node.
+   *
+   * @param portofolio - The portfolio node or its ID.
+   * @param applicationId - The ID of the application to link.
+   * @returns A promise that resolves to the linked SpinalNode instance, or undefined if not found or already linked.
+   */
+  public async linkAppToPortofolio(portofolio: string | SpinalNode, applicationId: string): Promise<SpinalNode> {
+    const portofolioNode = portofolio instanceof SpinalNode ? portofolio : await this.getPortofolioNode(portofolio);
+    if (!(portofolioNode instanceof SpinalNode)) throw new Error(`No portofolio found for ${portofolio}`);
 
-    if (!Array.isArray(applicationId)) applicationId = [applicationId];
+    const appNode = await AppService.getInstance().getPortofolioAppById(applicationId);
+    if (!appNode || !(appNode instanceof SpinalNode)) return;
 
-    const data = await applicationId.reduce(async (prom, appId: string) => {
-      const liste = await prom;
-      const appNode = await AppService.getInstance().getPortofolioApp(appId);
-      if (!(appNode instanceof SpinalNode)) return liste;
+    const appsAreadyLinked = await portofolioNode.getChildrenIds();
+    const isChild = appsAreadyLinked.find((el) => el === applicationId);
 
-      const childrenIds = (<SpinalNode>portofolio).getChildrenIds();
-      const isChild = childrenIds.find((el) => el === appId);
+    if (isChild) return appNode;
 
-      if (!isChild)
-        (<SpinalNode>portofolio).addChildInContext(
-          appNode,
-          APP_RELATION_NAME,
-          PTR_LST_TYPE,
-          this.context
-        );
-      liste.push(appNode);
-      return liste;
-    }, Promise.resolve([]));
-
-    await adminProfileInstance.syncAdminProfile();
-
-    return data;
+    return portofolioNode.addChildInContext(appNode, APP_RELATION_NAME, PTR_LST_TYPE, this.context);
   }
 
-  public async getPortofolioApps(
-    portofolio: string | SpinalNode
-  ): Promise<SpinalNode[]> {
-    if (typeof portofolio === 'string')
-      portofolio = await this.getPortofolio(portofolio);
-    if (!(portofolio instanceof SpinalNode)) return [];
 
-    return portofolio.getChildren([APP_RELATION_NAME]);
+  /**
+   * Links multiple applications to a portfolio node.
+   *
+   * @param portofolio - The portfolio node or its ID.
+   * @param applicationIds - An array of application IDs to link to the portfolio.
+   * @returns A promise that resolves to an array of linked SpinalNode instances.
+   */
+  public async linkSeveralAppsToPortofolio(portofolio: string | SpinalNode, applicationIds: string[]): Promise<SpinalNode[]> {
+    const portofolioNode = portofolio instanceof SpinalNode ? portofolio : await this.getPortofolioNode(portofolio);
+
+    if (!(portofolioNode instanceof SpinalNode)) throw new Error(`No portofolio found for ${portofolio}`);
+
+    if (!Array.isArray(applicationIds)) applicationIds = [applicationIds];
+    const promises = applicationIds.map((appId) => this.linkAppToPortofolio(portofolioNode, appId));
+
+    return Promise.all(promises).then(async (apps) => {
+      await adminProfileInstance.syncAdminProfile();
+      return apps.filter((app) => app instanceof SpinalNode);
+    });
+
   }
 
-  public async getAppFromPortofolio(
-    portofolio: string | SpinalNode,
-    appId: string
-  ): Promise<SpinalNode> {
-    if (typeof portofolio === 'string')
-      portofolio = await this.getPortofolio(portofolio);
-    if (!(portofolio instanceof SpinalNode)) return;
+  /**
+   * Retrieves the list of application nodes associated with a given portfolio.
+   *
+   * @param portofolio - The portfolio identifier or a SpinalNode instance representing the portfolio.
+   * @returns A promise that resolves to an array of SpinalNode instances representing the applications under the specified portfolio.
+   *
+   * If the provided portfolio cannot be resolved to a SpinalNode, an empty array is returned.
+   */
+  public async getPortofolioApps(portofolio: string | SpinalNode): Promise<SpinalNode[]> {
+    const portofolioNode = portofolio instanceof SpinalNode ? portofolio : await this.getPortofolioNode(portofolio);
 
-    const children = await portofolio.getChildren([APP_RELATION_NAME]);
-    return children.find((el) => el.getId().get() === appId);
+    if (!(portofolioNode instanceof SpinalNode)) return [];
+
+    return portofolioNode.getChildren([APP_RELATION_NAME]);
   }
 
-  public async removeAppFromPortofolio(
-    portofolio: string | SpinalNode,
-    applicationId: string | string[]
-  ): Promise<string[]> {
-    if (typeof portofolio === 'string')
-      portofolio = await this.getPortofolio(portofolio);
-    if (!(portofolio instanceof SpinalNode))
-      throw new Error(`No portofolio found for ${portofolio}`);
+  /**
+   * Retrieves an application node from a given portfolio by its application ID.
+   *
+   * @param portofolio - The portfolio to search within, either as a string identifier or a `SpinalNode` instance.
+   * @param appId - The unique identifier of the application to retrieve.
+   * @returns A promise that resolves to the `SpinalNode` representing the application if found, or `undefined` if not found.
+   */
+  public async getAppFromPortofolio(portofolio: string | SpinalNode, appId: string): Promise<SpinalNode> {
+    const portofolioNode = portofolio instanceof SpinalNode ? portofolio : await this.getPortofolioNode(portofolio);
 
-    if (!Array.isArray(applicationId)) applicationId = [applicationId];
+    if (!(portofolioNode instanceof SpinalNode)) return;
 
-    const data = await applicationId.reduce(async (prom, appId: string) => {
-      const liste = await prom;
-      const appNode = await this.getAppFromPortofolio(portofolio, appId);
-      if (!(appNode instanceof SpinalNode)) return liste;
-
-      try {
-        await (<SpinalNode>portofolio).removeChild(
-          appNode,
-          APP_RELATION_NAME,
-          PTR_LST_TYPE
-        );
-        await removeRelationFromReference(
-          <SpinalNode>portofolio,
-          appNode,
-          APP_RELATION_NAME,
-          PTR_LST_TYPE
-        );
-        liste.push(appId);
-      } catch (error) {}
-
-      return liste;
-    }, Promise.resolve([]));
-
-    // await adminProfileInstance.syncAdminProfile();
-    return data;
+    const appsLinked = await portofolioNode.getChildren([APP_RELATION_NAME]);
+    return appsLinked.find((app) => app.getId().get() === appId);
   }
 
-  public async portofolioHasApp(
-    portofolio: string | SpinalNode,
-    appId: string
-  ): Promise<SpinalNode | void> {
+  /**
+   * Removes a single application from a portfolio node.
+   *
+   * @param portofolio - The portfolio node or its ID.
+   * @param applicationId - The ID of the application to remove.
+   * @returns A promise that resolves to the application ID if successfully removed, or undefined if not found.
+   */
+  public async removeAppFromPortofolio(portofolio: string | SpinalNode, applicationId: string): Promise<string> {
+    const portofolioNode = portofolio instanceof SpinalNode ? portofolio : await this.getPortofolioNode(portofolio);
+
+    if (!(portofolioNode instanceof SpinalNode)) throw new Error(`No portofolio found for ${portofolio}`);
+
+    const appNode = await this.getAppFromPortofolio(portofolioNode, applicationId);
+    if (!(appNode instanceof SpinalNode)) return;
+
+    await portofolioNode.removeChild(appNode, APP_RELATION_NAME, PTR_LST_TYPE);
+    return applicationId;
+  }
+
+  /**
+   * Removes multiple applications from a portfolio node.
+   *
+   * @param portofolio - The portfolio node or its ID.
+   * @param applicationIds - An array or single application ID to remove from the portfolio.
+   * @returns A promise that resolves to an array of removed application IDs.
+   */
+  public async removeSeveralAppsFromPortofolio(portofolio: string | SpinalNode, applicationIds: string | string[]): Promise<string[]> {
+    const portofolioNode = portofolio instanceof SpinalNode ? portofolio : await this.getPortofolioNode(portofolio);
+
+    if (!(portofolioNode instanceof SpinalNode)) throw new Error(`No portofolio found for ${portofolio}`);
+
+    if (!Array.isArray(applicationIds)) applicationIds = [applicationIds];
+
+    const promises = applicationIds.map(async (appId: string) => this.removeAppFromPortofolio(portofolioNode, appId))
+
+    return Promise.all(promises).then(async (data) => {
+      await adminProfileInstance.syncAdminProfile();
+      return data.filter((appId) => appId !== undefined);
+    })
+  }
+
+  /**
+   * Checks if a given portfolio contains an application with the specified appId.
+   *
+   * @param portofolio - The portfolio to check, either as a string identifier or a SpinalNode instance.
+   * @param appId - The unique identifier of the application to search for.
+   * @returns A promise that resolves to the SpinalNode representing the application if found, or void if not found.
+   */
+  public async portofolioHasApp(portofolio: string | SpinalNode, appId: string): Promise<SpinalNode | void> {
     const apps = await this.getPortofolioApps(portofolio);
     return apps.find((el) => el.getId().get() === appId);
   }
@@ -326,233 +361,243 @@ export class PortofolioService {
   //                      APIS                        //
   //////////////////////////////////////////////////////
 
-  public async addApiToPortofolio(
-    portofolio: string | SpinalNode,
-    apisIds: string | string[]
-  ): Promise<SpinalNode[]> {
-    if (typeof portofolio === 'string')
-      portofolio = await this.getPortofolio(portofolio);
-    if (!(portofolio instanceof SpinalNode))
-      throw new Error(`No portofolio found for ${portofolio}`);
+  /**
+   * Links a single API to a portfolio node.
+   *
+   * @param portofolio - The portfolio node or its ID.
+   * @param apiId - The ID of the API to link.
+   * @returns A promise that resolves to the linked SpinalNode instance, or undefined if not found or already linked.
+   */
+  public async linkApiToPortofolio(portofolio: string | SpinalNode, apiId: string): Promise<SpinalNode> {
+    const portofolioNode = portofolio instanceof SpinalNode ? portofolio : await this.getPortofolioNode(portofolio);
+    if (!(portofolioNode instanceof SpinalNode)) throw new Error(`No portofolio found for ${portofolio}`);
+
+    const apiNode = await APIService.getInstance().getApiRouteById(apiId, PORTOFOLIO_API_GROUP_TYPE);
+    if (!(apiNode instanceof SpinalNode)) return;
+
+    const apisAreadyLinked = await portofolioNode.getChildrenIds();
+    const isChild = apisAreadyLinked.find((el) => el === apiId);
+    if (isChild) return apiNode;
+
+    return portofolioNode.addChildInContext(apiNode, API_RELATION_NAME, PTR_LST_TYPE, this.context);
+  }
+
+
+  /**
+   * Links multiple APIs to a portfolio node.
+   *
+   * @param portofolio - The portfolio node or its ID.
+   * @param apisIds - An array or single API ID to link to the portfolio.
+   * @returns A promise that resolves to an array of linked SpinalNode instances.
+   */
+  public async linkSeveralApisToPortofolio(portofolio: string | SpinalNode, apisIds: string | string[]): Promise<SpinalNode[]> {
+    const portofolioNode = portofolio instanceof SpinalNode ? portofolio : await this.getPortofolioNode(portofolio);
+
+    if (!(portofolioNode instanceof SpinalNode)) throw new Error(`No portofolio found for ${portofolio}`);
 
     if (!Array.isArray(apisIds)) apisIds = [apisIds];
 
-    const data = await apisIds.reduce(async (prom, apiId: string) => {
-      const liste = await prom;
-      const apiNode = await APIService.getInstance().getApiRouteById(
-        apiId,
-        PORTOFOLIO_API_GROUP_TYPE
-      );
-      if (!(apiNode instanceof SpinalNode)) return liste;
+    const promises = apisIds.map((apiId) => this.linkApiToPortofolio(portofolioNode, apiId));
 
-      const childrenIds = (<SpinalNode>portofolio).getChildrenIds();
-      const isChild = childrenIds.find((el) => el === apiId);
-
-      if (!isChild)
-        (<SpinalNode>portofolio).addChildInContext(
-          apiNode,
-          API_RELATION_NAME,
-          PTR_LST_TYPE,
-          this.context
-        );
-      liste.push(apiNode);
-      return liste;
-    }, Promise.resolve([]));
-
-    await adminProfileInstance.syncAdminProfile();
-
-    return data;
+    return Promise.all(promises).then(async (apis) => {
+      await adminProfileInstance.syncAdminProfile();
+      return apis.filter((api) => api instanceof SpinalNode);
+    });
   }
 
-  public async getPortofolioApis(
-    portofolio: string | SpinalNode
-  ): Promise<SpinalNode[]> {
-    if (typeof portofolio === 'string')
-      portofolio = await this.getPortofolio(portofolio);
-    if (!(portofolio instanceof SpinalNode)) return [];
+  /**
+   * Retrieves the list of API nodes associated with a given portfolio.
+   *
+   * @param portofolio - The portfolio identifier or a SpinalNode instance representing the portfolio.
+   * @returns A promise that resolves to an array of SpinalNode objects representing the APIs linked to the portfolio.
+   *
+   * If the provided portfolio cannot be resolved to a valid SpinalNode, an empty array is returned.
+   */
+  public async getPortofolioApis(portofolio: string | SpinalNode): Promise<SpinalNode[]> {
+    const portofolioNode = portofolio instanceof SpinalNode ? portofolio : await this.getPortofolioNode(portofolio);
 
-    return portofolio.getChildren([API_RELATION_NAME]);
+    if (!(portofolioNode instanceof SpinalNode)) return [];
+    return portofolioNode.getChildren([API_RELATION_NAME]);
   }
 
-  public async getApiFromPortofolio(
-    portofolio: string | SpinalNode,
-    apiId: string
-  ): Promise<SpinalNode> {
-    if (typeof portofolio === 'string')
-      portofolio = await this.getPortofolio(portofolio);
-    if (!(portofolio instanceof SpinalNode)) return;
+  /**
+   * Retrieves a specific API node linked to a given portfolio by its API ID.
+   *
+   * @param portofolio - The portfolio identifier or a SpinalNode instance representing the portfolio.
+   * @param apiId - The unique identifier of the API to retrieve.
+   * @returns A promise that resolves to the SpinalNode representing the API if found, or `undefined` if not found.
+   */
+  public async getApiFromPortofolio(portofolio: string | SpinalNode, apiId: string): Promise<SpinalNode> {
+    const portofolioNode = portofolio instanceof SpinalNode ? portofolio : await this.getPortofolioNode(portofolio);
 
-    const children = await this.getPortofolioApis(portofolio);
-    return children.find((el) => el.getId().get() === apiId);
+    if (!(portofolioNode instanceof SpinalNode)) return;
+
+    const apisLinked = await this.getPortofolioApis(portofolioNode);
+    return apisLinked.find((el) => el.getId().get() === apiId);
   }
 
-  public async removeApiFromPortofolio(
-    portofolio: string | SpinalNode,
-    apisIds: string | string[]
-  ): Promise<string[]> {
-    if (typeof portofolio === 'string')
-      portofolio = await this.getPortofolio(portofolio);
-    if (!(portofolio instanceof SpinalNode))
-      throw new Error(`No portofolio found for ${portofolio}`);
+
+  /**
+   * Removes an API node from the specified portfolio.
+   *
+   * @param portofolio - The portfolio identifier or SpinalNode instance from which the API should be removed.
+   * @param apiId - The unique identifier of the API to remove from the portfolio.
+   * @returns A promise that resolves to the removed API's ID if successful.
+   * @throws Will throw an error if the portfolio node cannot be found.
+   */
+  public async removeApiFromPortofolio(portofolio: string | SpinalNode, apiId: string): Promise<string> {
+    const portofolioNode = portofolio instanceof SpinalNode ? portofolio : await this.getPortofolioNode(portofolio);
+
+    if (!(portofolioNode instanceof SpinalNode)) return;
+
+    const apiNode = await this.getApiFromPortofolio(portofolioNode, apiId);
+    if (!(apiNode instanceof SpinalNode)) return;
+
+    await portofolioNode.removeChild(apiNode, API_RELATION_NAME, PTR_LST_TYPE);
+    return apiId;
+  }
+
+
+  /**
+   * Removes multiple APIs from a portfolio node.
+   *
+   * @param portofolio - The portfolio node or its ID.
+   * @param apisIds - An array or single API ID to remove from the portfolio.
+   * @returns A promise that resolves to an array of removed API IDs.
+   */
+  public async removeSeveralApisFromPortofolio(portofolio: string | SpinalNode, apisIds: string | string[]): Promise<string[]> {
+    const portofolioNode = portofolio instanceof SpinalNode ? portofolio : await this.getPortofolioNode(portofolio);
+
+    if (!(portofolioNode instanceof SpinalNode)) throw new Error(`No portofolio found for ${portofolio}`);
 
     if (!Array.isArray(apisIds)) apisIds = [apisIds];
 
-    const data = await apisIds.reduce(async (prom, apiId: string) => {
-      const liste = await prom;
-      const appNode = await this.getApiFromPortofolio(portofolio, apiId);
-      if (!(appNode instanceof SpinalNode)) return liste;
+    const promises = apisIds.map(async (apiId: string) => this.removeApiFromPortofolio(portofolioNode, apiId));
 
-      try {
-        await (<SpinalNode>portofolio).removeChild(
-          appNode,
-          API_RELATION_NAME,
-          PTR_LST_TYPE
-        );
-        await removeRelationFromReference(
-          <SpinalNode>portofolio,
-          appNode,
-          API_RELATION_NAME,
-          PTR_LST_TYPE
-        );
-
-        liste.push(apiId);
-      } catch (error) {}
-
-      return liste;
-    }, Promise.resolve([]));
-
-    // await adminProfileInstance.removeFromAdminProfile({ portofolioId: portofolio.getId().get(), unauthorizeApisIds: apisIds });
-
-    return data;
+    return Promise.all(promises).then(async (data) => {
+      await adminProfileInstance.syncAdminProfile();
+      return data.filter((apiId) => apiId !== undefined);
+    });
   }
 
-  public async portofolioHasApi(
-    portofolio: string | SpinalNode,
-    apiId: string
-  ): Promise<SpinalNode | void> {
+  /**
+   * Checks if a given portfolio contains an API with the specified ID.
+   *
+   * @param portofolio - The portfolio to check, either as a string identifier or a SpinalNode instance.
+   * @param apiId - The unique identifier of the API to search for within the portfolio.
+   * @returns A promise that resolves to the SpinalNode representing the API if found, or void if not found.
+   */
+  public async portofolioHasApi(portofolio: string | SpinalNode, apiId: string): Promise<SpinalNode | void> {
     const apps = await this.getPortofolioApis(portofolio);
     return apps.find((el) => el.getId().get() === apiId);
   }
 
   public async uploadSwaggerFile(buffer: Buffer): Promise<any[]> {
-    return APIService.getInstance().uploadSwaggerFile(
-      buffer,
-      PORTOFOLIO_API_GROUP_TYPE
-    );
+    return APIService.getInstance().createRoutesFromSwaggerFile(buffer, PORTOFOLIO_API_GROUP_TYPE);
   }
 
   //////////////////////////////////////////////////////
   //                      BUILDINGS                   //
   //////////////////////////////////////////////////////
 
-  public async addBuildingToPortofolio(
-    portofolio: string | SpinalNode,
-    buildingInfo: IBuildingCreation
-  ): Promise<IBuildingDetails> {
-    if (typeof portofolio === 'string')
-      portofolio = await this.getPortofolio(portofolio);
-    if (!(portofolio instanceof SpinalNode))
+  /**
+   * Links a newly created building to a portfolio node.
+   *
+   * @param portofolio - The portfolio node or its ID.
+   * @param buildingInfo - The information required to create the building.
+   * @returns A promise that resolves to the details of the created building.
+   * @throws Will throw an error if the portfolio node cannot be found.
+   */
+  public async linkBuildingToPortofolio(portofolio: string | SpinalNode, buildingInfo: IBuildingCreation): Promise<IBuildingDetails> {
+    const portofolioNode = portofolio instanceof SpinalNode ? portofolio : await this.getPortofolioNode(portofolio);
+    if (!(portofolioNode instanceof SpinalNode))
       throw new Error(`No portofolio found for ${portofolio}`);
 
-    // if (!Array.isArray(buildingId)) buildingId = [buildingId];
+    const structure = await BuildingService.getInstance().createBuilding(buildingInfo);
 
-    const structure = await BuildingService.getInstance().createBuilding(
-      buildingInfo
-    );
-
-    await (<SpinalNode>portofolio).addChildInContext(
-      structure.node,
-      BUILDING_RELATION_NAME,
-      PTR_LST_TYPE,
-      this.context
-    );
+    await portofolioNode.addChildInContext(structure.node, BUILDING_RELATION_NAME, PTR_LST_TYPE, this.context);
     await adminProfileInstance.syncAdminProfile();
 
     return structure;
-    // return buildingId.reduce(async (prom, id: string) => {
-    //     const liste = await prom;
-    //     const buildingNode = await BuildingService.getInstance().getBuildingById(id);
-    //     if (!(buildingNode instanceof SpinalNode)) return liste;
-
-    //     const childrenIds = (<SpinalNode>portofolio).getChildrenIds();
-    //     const isChild = childrenIds.find(el => el === id);
-
-    //     if (!isChild) (<SpinalNode>portofolio).addChildInContext(buildingNode, BUILDING_RELATION_NAME, PTR_LST_TYPE, this.context);
-    //     liste.push(buildingNode);
-    //     return liste;
-    //     //         const appNode = AppService.getInstance().getAppById(appId);
-    //     //         if (!(appNode instanceof SpinalNode)) throw new Error(`No application found for ${appId}`);
-
-    // }, Promise.resolve([]))
   }
 
-  public async getPortofolioBuildings(
-    portofolio: string | SpinalNode
-  ): Promise<SpinalNode[]> {
-    if (typeof portofolio === 'string')
-      portofolio = await this.getPortofolio(portofolio);
-    if (!(portofolio instanceof SpinalNode))
+  /**
+   * Retrieves the list of building nodes associated with a given portfolio.
+   *
+   * @param portofolio - The portfolio identifier or a SpinalNode instance representing the portfolio.
+   * @returns A promise that resolves to an array of SpinalNode instances representing the buildings under the specified portfolio.
+   * @throws {Error} If the portfolio cannot be found.
+   */
+  public async getPortofolioBuildings(portofolio: string | SpinalNode): Promise<SpinalNode[]> {
+    const portofolioNode = portofolio instanceof SpinalNode ? portofolio : await this.getPortofolioNode(portofolio);
+    if (!(portofolioNode instanceof SpinalNode))
       throw new Error(`No portofolio found for ${portofolio}`);
 
-    return portofolio.getChildren([BUILDING_RELATION_NAME]);
+    return portofolioNode.getChildren([BUILDING_RELATION_NAME]);
   }
 
-  public async removeBuildingFromPortofolio(
-    portofolio: string | SpinalNode,
-    buildingId: string | string[]
-  ): Promise<string[]> {
-    if (typeof portofolio === 'string')
-      portofolio = await this.getPortofolio(portofolio);
-    if (!(portofolio instanceof SpinalNode))
+  /**
+   * Removes a single building from a portfolio node.
+   *
+   * @param portofolio - The portfolio node or its ID.
+   * @param buildingId - The ID of the building to remove.
+   * @param syncAdmin - Whether to synchronize the admin profile after removal (default: true).
+   * @returns A promise that resolves to the building ID if successfully removed, or undefined if not found.
+   */
+  public async removeBuildingFromPortofolio(portofolio: string | SpinalNode, buildingId: string, syncAdmin: boolean = true): Promise<string> {
+    const portofolioNode = portofolio instanceof SpinalNode ? portofolio : await this.getPortofolioNode(portofolio);
+    if (!(portofolioNode instanceof SpinalNode)) return;
+
+    const buildingNode = await this.getBuildingFromPortofolio(portofolioNode, buildingId);
+    if (!(buildingNode instanceof SpinalNode)) return;
+    await portofolioNode.removeChild(buildingNode, BUILDING_RELATION_NAME, PTR_LST_TYPE);
+    await removeRelationFromReference(portofolioNode, buildingNode, BUILDING_RELATION_NAME, PTR_LST_TYPE);
+    if (syncAdmin) await adminProfileInstance.syncAdminProfile();
+
+    return buildingId;
+  }
+
+  /**
+   * Removes multiple buildings from a portfolio node.
+   *
+   * @param portofolio - The portfolio node or its ID.
+   * @param buildingId - An array or single building ID to remove from the portfolio.
+   * @returns A promise that resolves to an array of removed building IDs.
+   */
+  public async removeSeveralBuildingsFromPortofolio(portofolio: string | SpinalNode, buildingId: string | string[]): Promise<string[]> {
+    const portofolioNode = portofolio instanceof SpinalNode ? portofolio : await this.getPortofolioNode(portofolio);
+    if (!(portofolioNode instanceof SpinalNode))
       throw new Error(`No portofolio found for ${portofolio}`);
 
     if (!Array.isArray(buildingId)) buildingId = [buildingId];
 
-    const data = await buildingId.reduce(async (prom, id: string) => {
-      const liste = await prom;
-      const buildingNode = await this.getBuildingFromPortofolio(portofolio, id);
-      if (!(buildingNode instanceof SpinalNode)) return liste;
+    const syncAdmin = false; // We will sync the admin profile at the end of all removals
+    const promises = buildingId.map((id: string) => this.removeBuildingFromPortofolio(portofolioNode, id, syncAdmin));
 
-      try {
-        await (<SpinalNode>portofolio).removeChild(
-          buildingNode,
-          BUILDING_RELATION_NAME,
-          PTR_LST_TYPE
-        );
-        await removeRelationFromReference(
-          <SpinalNode>portofolio,
-          buildingNode,
-          BUILDING_RELATION_NAME,
-          PTR_LST_TYPE
-        );
-        liste.push(id);
-      } catch (error) {}
-
-      return liste;
-
-      //         const appNode = AppService.getInstance().getAppById(appId);
-      //         if (!(appNode instanceof SpinalNode)) throw new Error(`No application found for ${appId}`);
-    }, Promise.resolve([]));
-
-    return data;
+    return Promise.all(promises).then(async (data) => {
+      await adminProfileInstance.syncAdminProfile();
+      return data.filter((id) => id !== undefined);
+    });
   }
 
-  public async getBuildingFromPortofolio(
-    portofolio: string | SpinalNode,
-    buildingId: string
-  ): Promise<SpinalNode | void> {
+  /**
+   * Retrieves a building node from a given portfolio by its building ID.
+   *
+   * @param portofolio - The portfolio to search within, either as a string identifier or a SpinalNode instance.
+   * @param buildingId - The unique identifier of the building to retrieve.
+   * @returns A promise that resolves to the matching SpinalNode if found, or void if not found.
+   */
+  public async getBuildingFromPortofolio(portofolio: string | SpinalNode, buildingId: string): Promise<SpinalNode | void> {
     const buildings = await this.getPortofolioBuildings(portofolio);
-    return buildings.find((el) => el.getId().get() === buildingId);
+    return buildings.find((building) => building.getId().get() === buildingId);
   }
 
   public _formatDetails(data: IPortofolioDetails): IPortofolioData {
     return {
       ...data.node.info.get(),
-      buildings: (data.buildings || []).map((el) =>
-        BuildingService.getInstance().formatBuildingStructure(el)
-      ),
-      apps: (data.apps || []).map((el) => el.info.get()),
-      apis: (data.apis || []).map((el) => el.info.get()),
+      apps: (data.apps || []).map((app) => app.info.get()),
+      apis: (data.apis || []).map((api) => api.info.get()),
+      buildings: (data.buildings || []).map((building) => formatBuildingStructure(building)),
     };
   }
 }

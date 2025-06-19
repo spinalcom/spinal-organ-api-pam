@@ -22,20 +22,10 @@
  * with this file. If not, see
  * <http://resources.spinalcom.com/licenses.pdf>.
  */
-var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
-    function adopt(value) { return value instanceof P ? value : new P(function (resolve) { resolve(value); }); }
-    return new (P || (P = Promise))(function (resolve, reject) {
-        function fulfilled(value) { try { step(generator.next(value)); } catch (e) { reject(e); } }
-        function rejected(value) { try { step(generator["throw"](value)); } catch (e) { reject(e); } }
-        function step(result) { result.done ? resolve(result.value) : adopt(result.value).then(fulfilled, rejected); }
-        step((generator = generator.apply(thisArg, _arguments || [])).next());
-    });
-};
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.TokenService = void 0;
 const spinal_env_viewer_graph_service_1 = require("spinal-env-viewer-graph-service");
 const constant_1 = require("../constant");
-const configFile_service_1 = require("./configFile.service");
 const spinal_core_connectorjs_type_1 = require("spinal-core-connectorjs_type");
 const adminProfile_service_1 = require("./adminProfile.service");
 const jwt = require("jsonwebtoken");
@@ -50,146 +40,265 @@ class TokenService {
             this.instance = new TokenService();
         return this.instance;
     }
-    init() {
-        return __awaiter(this, void 0, void 0, function* () {
-            this.context = yield configFile_service_1.configServiceInstance.getContext(constant_1.TOKEN_LIST_CONTEXT_NAME);
-            if (!this.context) {
-                this.context = yield configFile_service_1.configServiceInstance.addContext(constant_1.TOKEN_LIST_CONTEXT_NAME, constant_1.TOKEN_LIST_CONTEXT_TYPE);
-            }
-            yield this._scheduleTokenPurge();
-            return this.context;
-        });
+    async init(graph) {
+        this.context = await graph.getContext(constant_1.TOKEN_LIST_CONTEXT_NAME);
+        if (!this.context) {
+            const spinalContext = new spinal_env_viewer_graph_service_1.SpinalContext(constant_1.TOKEN_LIST_CONTEXT_NAME, constant_1.TOKEN_LIST_CONTEXT_TYPE);
+            this.context = await graph.addContext(spinalContext);
+            this.getOrGenerateTokenKey(); // Ensure the token key is set in the context
+        }
+        await this._scheduleTokenPurge();
+        return this.context;
     }
-    purgeToken() {
-        return __awaiter(this, void 0, void 0, function* () {
-            const tokens = yield this._getAllTokens();
-            const promises = tokens.map(token => this.tokenIsValid(token, true));
-            return Promise.all(promises);
-        });
+    /**
+     * Purge invalid tokens from the context.
+     *
+     * @return {*}  {(Promise<(IUserToken | IApplicationToken)[]>)}
+     * @memberof TokenService
+     */
+    async purgeToken() {
+        const tokens = await this._getAllTokens();
+        const promises = tokens.map(token => this.tokenIsValid(token, true));
+        return Promise.all(promises);
     }
-    addUserToken(userNode, token, playload) {
-        return __awaiter(this, void 0, void 0, function* () {
-            const tokenNode = yield this.addTokenToContext(token, playload);
-            yield userNode.addChild(tokenNode, constant_1.TOKEN_RELATION_NAME, constant_1.PTR_LST_TYPE);
-            return playload;
-        });
+    /**
+     * Create a token for a user and add it to the context.
+     *
+     * @param {SpinalNode} userNode
+     * @param {string} token
+     * @param {*} playload
+     * @return {*}  {Promise<any>}
+     * @memberof TokenService
+     */
+    async createToken(userNode, playload, isAdmin = false) {
+        const tokenExpiration = isAdmin ? "7d" : "1h";
+        const token = this._generateToken(playload, tokenExpiration);
+        const tokenDecoded = await this.verifyTokenForAdmin(token);
+        playload = Object.assign(playload, { createdToken: tokenDecoded.iat, expieredToken: tokenDecoded.exp, token });
+        const tokenNode = await this.addTokenToContext(token, playload);
+        await userNode.addChild(tokenNode, constant_1.TOKEN_RELATION_NAME, constant_1.PTR_LST_TYPE);
+        return playload;
     }
-    getAdminPlayLoad(userNode, secret, durationInMin) {
-        return __awaiter(this, void 0, void 0, function* () {
-            const playload = {
-                userInfo: userNode.info.get()
-            };
-            durationInMin = durationInMin || 7 * 24 * 60 * 60; // par default 7jrs
-            const key = secret || this._generateString(15);
-            const token = jwt.sign(playload, key, { expiresIn: durationInMin });
-            const adminProfile = yield adminProfile_service_1.AdminProfileService.getInstance().getAdminProfile();
-            const now = Date.now();
-            playload.createdToken = now;
-            playload.expieredToken = now + (durationInMin * 60 * 1000);
-            playload.userId = userNode.getId().get();
-            playload.token = token;
-            playload.profile = {
-                profileId: adminProfile.getId().get()
-            };
-            return playload;
-        });
+    /**
+     * Get or generate a token key for signing JWT tokens.
+     * If a secret is already set in the context, it will return that.
+     * Otherwise, it generates a new random string and sets it in the context.
+     *
+     * @return {*}  {string} - The token key.
+     * @memberof TokenService
+     */
+    getOrGenerateTokenKey() {
+        if (this.context?.info?.secret)
+            return this.context.info.secret.get();
+        const secret = this._generateString(20);
+        this.context.info.add_attr({ secret });
+        return secret;
     }
-    addTokenToContext(token, data) {
-        return __awaiter(this, void 0, void 0, function* () {
-            const node = new spinal_env_viewer_graph_service_1.SpinalNode(token, constant_1.TOKEN_TYPE, new spinal_core_connectorjs_type_1.Model(data));
-            const child = yield this.context.addChildInContext(node, constant_1.TOKEN_RELATION_NAME, constant_1.PTR_LST_TYPE);
-            globalCache.set(data.token, data);
-            return child;
-        });
+    _generateToken(payload, expiresIn = "1h") {
+        const tokenKey = this.getOrGenerateTokenKey();
+        return jwt.sign(payload, tokenKey, { expiresIn });
     }
-    getTokenData(token) {
-        return __awaiter(this, void 0, void 0, function* () {
-            const data = globalCache.get(token);
-            if (data)
-                return data;
-            const found = yield this.context.getChild((node) => node.getName().get() === token, constant_1.TOKEN_RELATION_NAME, constant_1.PTR_LST_TYPE);
-            if (!found)
-                return;
-            const element = yield found.getElement(true);
-            if (element) {
-                globalCache.set(token, element.get());
-                return element.get();
-            }
-        });
+    /**
+     * Generate a token for admin a user.
+     *
+     * @param {SpinalNode} userNode
+     * @param {string} [secret]
+     * @param {(number | string)} [durationInMin]
+     * @return {*}  {Promise<any>}
+     * @memberof TokenService
+     */
+    async generateTokenForAdmin(userNode) {
+        const adminProfile = await adminProfile_service_1.AdminProfileService.getInstance().getAdminProfile();
+        let playload = {
+            userInfo: userNode.info.get(),
+            userId: userNode.getId().get(),
+            profile: { profileId: adminProfile.getId().get() }
+        };
+        const isAdmin = true;
+        return this.createToken(userNode, playload, isAdmin);
+        // const tokenKey = this.getOrGenerateTokenKey();
+        // const token = jwt.sign(playload, tokenKey, { expiresIn: "7d" });
+        // const tokenDecoded = await this.verifyTokenForAdmin(token);
+        // playload = Object.assign(playload, { createdToken: tokenDecoded.iat, expieredToken: tokenDecoded.exp, token });
+        // return playload;
     }
-    deleteToken(token) {
-        return __awaiter(this, void 0, void 0, function* () {
-            const found = token instanceof spinal_env_viewer_graph_service_1.SpinalNode ? token : yield this.context.getChild((node) => node.getName().get() === token, constant_1.TOKEN_RELATION_NAME, constant_1.PTR_LST_TYPE);
-            if (!found)
-                return true;
-            try {
-                const parents = yield found.getParents(constant_1.TOKEN_RELATION_NAME);
-                for (const parent of parents) {
-                    yield parent.removeChild(found, constant_1.TOKEN_RELATION_NAME, constant_1.PTR_LST_TYPE);
-                }
-                return true;
-            }
-            catch (error) {
-                return false;
-            }
-        });
+    /**
+     * link a token to a context.
+     *
+     * @param {string} token
+     * @param {*} data
+     * @return {*}  {Promise<SpinalNode>}
+     * @memberof TokenService
+     */
+    async addTokenToContext(token, data) {
+        const node = new spinal_env_viewer_graph_service_1.SpinalNode(token, constant_1.TOKEN_TYPE, new spinal_core_connectorjs_type_1.Model(data));
+        const child = await this.context.addChildInContext(node, constant_1.TOKEN_RELATION_NAME, constant_1.PTR_LST_TYPE);
+        globalCache.set(data.token, data);
+        return child;
     }
-    tokenIsValid(token, deleteIfExpired = false) {
-        return __awaiter(this, void 0, void 0, function* () {
-            let data = yield this.getTokenData(token);
-            if (!data) {
-                data = yield this.verifyToken(token);
-            }
-            ;
-            const expirationTime = data.expieredToken;
-            const tokenExpired = expirationTime ? Date.now() >= expirationTime * 1000 : true;
-            if (tokenExpired) {
-                if (deleteIfExpired)
-                    yield this.deleteToken(token);
-                return;
-            }
-            return data;
-        });
-    }
-    getProfileIdByToken(token) {
-        return __awaiter(this, void 0, void 0, function* () {
-            const data = yield this.tokenIsValid(token);
-            if (data)
-                return data.profile.profileId || data.profile.userProfileBosConfigId || data.profile.appProfileBosConfigId;
+    /**
+     * Get the token data from the cache or from the context.
+     *
+     * @param {string} token
+     * @return {*}  {Promise<any>}
+     * @memberof TokenService
+     */
+    async getTokenData(token) {
+        const tokenInCache = globalCache.get(token);
+        if (tokenInCache)
+            return tokenInCache;
+        const tokenNode = await this.getTokenNode(token);
+        if (!tokenNode)
             return;
+        const nodeElement = await tokenNode.getElement(true);
+        if (nodeElement) {
+            globalCache.set(token, nodeElement.get());
+            return nodeElement.get();
+        }
+    }
+    /**
+     * Get a token node by its name.
+     *
+     * @param {string} token
+     * @return {*}  {Promise<SpinalNode>}
+     * @memberof TokenService
+     */
+    getTokenNode(token) {
+        return this.context.getChild((node) => node.getName().get() === token, constant_1.TOKEN_RELATION_NAME, constant_1.PTR_LST_TYPE);
+    }
+    /**
+     * remove a token.
+     *
+     * @param {(SpinalNode | string)} token
+     * @return {*}  {Promise<boolean>}
+     * @memberof TokenService
+     */
+    async deleteToken(token) {
+        if (!(token instanceof spinal_env_viewer_graph_service_1.SpinalNode))
+            token = await this.getTokenNode(token);
+        if (!token)
+            return false;
+        try {
+            const parents = await token.getParents(constant_1.TOKEN_RELATION_NAME);
+            for (const parent of parents) {
+                await parent.removeChild(token, constant_1.TOKEN_RELATION_NAME, constant_1.PTR_LST_TYPE);
+            }
+            return true;
+        }
+        catch (error) {
+            return false;
+        }
+    }
+    /**
+     * Check if a token is valid.
+     *
+     * @param {string} token
+     * @param {boolean} [deleteIfExpired=false]
+     * @return {*}  {(Promise<IUserToken | IApplicationToken>)}
+     * @memberof TokenService
+     */
+    async tokenIsValid(token, deleteIfExpired = false) {
+        let isAdminToken = false;
+        try {
+            const adminTokenData = this.getTokenData(token);
+            if (!adminTokenData)
+                throw new Error("Token not found in cache or context"); // Check if the token is in the cache or context
+            isAdminToken = true;
+            await this.verifyTokenForAdmin(token); // Verify the token using the admin secret key
+            return adminTokenData;
+        }
+        catch (error) {
+            if (isAdminToken)
+                return; // If it is an admin token and verification failed, return undefined;
+            return this.verifyTokenInAuthPlatform(token);
+        }
+    }
+    /**
+     * Get the profile ID associated with a token.
+     *
+     * @param {string} token
+     * @return {*}  {Promise<string>}
+     * @memberof TokenService
+     */
+    async getProfileIdByToken(token) {
+        const data = await this.tokenIsValid(token);
+        if (data)
+            return data.profile.profileId || data.profile.userProfileBosConfigId || data.profile.appProfileBosConfigId;
+        return;
+    }
+    /**
+     * Verify a token in the authentication platform.
+     *
+     * @param {string} token - The JWT token to verify.
+     * @param {"user" | "app"} [actor="user"] - The actor type, either "user" or "app".
+     * @return {*}  {Promise<any>} - Resolves with the verification result.
+     * @memberof TokenService
+     */
+    async verifyTokenInAuthPlatform(token, actor = "user") {
+        const authAdmin = await authentification_service_1.AuthentificationService.getInstance().getPamCredentials();
+        return axios_1.default.post(`${authAdmin.urlAdmin}/tokens/verifyToken`, { tokenParam: token, actor }).then((result) => {
+            return result.data;
         });
     }
-    verifyToken(token, actor = "user") {
-        return __awaiter(this, void 0, void 0, function* () {
-            const authAdmin = yield authentification_service_1.AuthentificationService.getInstance().getPamToAdminCredential();
-            return axios_1.default.post(`${authAdmin.urlAdmin}/tokens/verifyToken`, { tokenParam: token, actor }).then((result) => {
-                return result.data;
+    /**
+     * Verify a token using the admin secret key.
+     *
+     * @param {string} token - The JWT token to verify.
+     * @return {*}  {Promise<any>} - Resolves with the decoded token if valid, rejects if invalid.
+     * @memberof TokenService
+     */
+    async verifyTokenForAdmin(token) {
+        const tokenKey = this.getOrGenerateTokenKey();
+        return new Promise((resolve, reject) => {
+            jwt.verify(token, tokenKey, (err, decoded) => {
+                if (err) {
+                    return reject(err);
+                }
+                resolve(decoded);
             });
         });
+    }
+    /**
+     * Check if the token is an application token.
+     *
+     * @param {*} tokenInfo
+     * @return {*}  {boolean}
+     * @memberof TokenService
+     */
+    isAppToken(tokenInfo) {
+        return tokenInfo && tokenInfo.profile.hasOwnProperty("appProfileBosConfigId");
+    }
+    /**
+     * Check if the token is an user token.
+     *
+     * @param {*} tokenInfo
+     * @return {*}  {boolean}
+     * @memberof TokenService
+     */
+    isUserToken(tokenInfo) {
+        return tokenInfo && tokenInfo.profile.hasOwnProperty("userProfileBosConfigId");
     }
     //////////////////////////////////////////////////
     //                        PRIVATE               //
     //////////////////////////////////////////////////
     _generateString(length = 10) {
-        const charset = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789*/-_@#&";
+        const charset = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
         let text = "";
         for (var i = 0, n = charset.length; i < length; ++i) {
             text += charset.charAt(Math.floor(Math.random() * n));
         }
         return text;
     }
-    _getAllTokens() {
-        return __awaiter(this, void 0, void 0, function* () {
-            const tokens = yield this.context.getChildren(constant_1.TOKEN_RELATION_NAME);
-            return tokens.map(el => el.getName().get());
-        });
+    async _getAllTokens() {
+        const tokens = await this.context.getChildren(constant_1.TOKEN_RELATION_NAME);
+        return tokens.map(el => el.getName().get());
     }
     _scheduleTokenPurge() {
         // cron.schedule('0 0 23 * * *', async () => {
-        cron.schedule('30 */1 * * *', () => __awaiter(this, void 0, void 0, function* () {
+        cron.schedule('30 */1 * * *', async () => {
             console.log(new Date().toUTCString(), "purge invalid tokens");
-            yield this.purgeToken();
-        }));
+            await this.purgeToken();
+        });
     }
 }
 exports.TokenService = TokenService;

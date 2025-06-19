@@ -24,6 +24,7 @@
 
 import { SpinalNode } from "spinal-env-viewer-graph-service";
 import { IBuildingDetails } from "./IBuilding";
+import { IPortofolioAuth } from "./IProfile";
 
 export interface IPortofolioDetails {
     node: SpinalNode;
@@ -39,10 +40,21 @@ export interface IPortofolioInfo {
 }
 
 
-export interface IEditProtofolio {
+export interface IEditPortofolio {
     name?: string;
     authorizeAppIds?: string[];
     unauthorizeAppIds?: string[];
     authorizeApiIds?: string[];
     unauthorizeApiIds?: string[];
 }
+
+export function convertIEditPortofolio(portofolioId: string, editData: IEditPortofolio): IPortofolioAuth {
+    return {
+        portofolioId,
+        appsIds: editData.authorizeAppIds || [],
+        unauthorizeAppsIds: editData.unauthorizeAppIds || [],
+        apisIds: editData.authorizeApiIds || [],
+        unauthorizeApisIds: editData.unauthorizeApiIds || []
+    }
+}
+

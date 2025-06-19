@@ -22,46 +22,33 @@
  * with this file. If not, see
  * <http://resources.spinalcom.com/licenses.pdf>.
  */
-var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
-    function adopt(value) { return value instanceof P ? value : new P(function (resolve) { resolve(value); }); }
-    return new (P || (P = Promise))(function (resolve, reject) {
-        function fulfilled(value) { try { step(generator.next(value)); } catch (e) { reject(e); } }
-        function rejected(value) { try { step(generator["throw"](value)); } catch (e) { reject(e); } }
-        function step(result) { result.done ? resolve(result.value) : adopt(result.value).then(fulfilled, rejected); }
-        step((generator = generator.apply(thisArg, _arguments || [])).next());
-    });
-};
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.profileHasAccessToApi = exports.getToken = void 0;
+exports.getToken = getToken;
+exports.profileHasAccessToApi = profileHasAccessToApi;
 const appProfile_service_1 = require("../services/appProfile.service");
 const services_1 = require("../services");
 const constant_1 = require("../constant");
 function getToken(request) {
-    var _a, _b;
     const header = request.headers.authorization || request.headers.Authorization;
     if (header) {
         const [, token] = header.split(" ");
         if (token)
             return token;
     }
-    return ((_a = request.body) === null || _a === void 0 ? void 0 : _a.token) || ((_b = request.query) === null || _b === void 0 ? void 0 : _b.token) || request.headers["x-access-token"];
+    return request.body?.token || request.query?.token || request.headers["x-access-token"];
 }
-exports.getToken = getToken;
-function profileHasAccessToApi(profile, apiUrl, method) {
-    return __awaiter(this, void 0, void 0, function* () {
-        let parentType = constant_1.PORTOFOLIO_API_GROUP_TYPE;
-        if (apiUrl.match(`(${constant_1.BOS_BASE_URI_V1}|${constant_1.BOS_BASE_URI_V1_2}|${constant_1.BOS_BASE_URI_V2})`))
-            parentType = constant_1.BUILDING_API_GROUP_TYPE;
-        const api = yield services_1.APIService.getInstance().getApiRouteByRoute({ route: apiUrl, method }, parentType);
-        ;
-        if (!api)
-            return;
-        const hasAccess = yield appProfile_service_1.AppProfileService.getInstance().profileHasAccessToApi(profile, api);
-        if (hasAccess)
-            return api;
-    });
+async function profileHasAccessToApi(profile, apiUrl, method) {
+    let parentType = constant_1.PORTOFOLIO_API_GROUP_TYPE;
+    if (apiUrl.match(`(${constant_1.BOS_BASE_URI_V1}|${constant_1.BOS_BASE_URI_V1_2}|${constant_1.BOS_BASE_URI_V2})`))
+        parentType = constant_1.BUILDING_API_GROUP_TYPE;
+    const api = await services_1.APIService.getInstance().getApiRouteByRoute({ route: apiUrl, method }, parentType);
+    ;
+    if (!api)
+        return;
+    const hasAccess = await appProfile_service_1.AppProfileService.getInstance().profileHasAccessToApi(profile, api);
+    if (hasAccess)
+        return api;
 }
-exports.profileHasAccessToApi = profileHasAccessToApi;
 // async function getProfileNode(profileId: string): Promise<SpinalNode> {
 //     let profile = await UserProfileService.getInstance().getUserProfile(profileId);
 //     if (profile) return profile.node;

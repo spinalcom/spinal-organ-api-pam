@@ -24,16 +24,17 @@
 
 import { BuildingService, PortofolioService } from "../services";
 
-import { IApiRoute, IApp, IBuilding, IBuildingCreation, IEditProtofolio, IPortofolioData, IPortofolioInfo } from "../interfaces";
+import { IApiRoute, IApp, IBuilding, IBuildingCreation, IEditPortofolio, IPortofolioData, IPortofolioInfo } from "../interfaces";
 import { Body, Controller, Path, Post, Route, Tags, Put, Get, Delete, UploadedFile, Security, Request } from "tsoa";
 import { HTTP_CODES, SECURITY_MESSAGES, SECURITY_NAME } from "../constant";
 import * as express from 'express';
 import { checkIfItIsAdmin, getProfileNode } from "../security/authentication";
 import { AuthError } from "../security/AuthError";
 import AuthorizationService from "../services/authorization.service";
+import { formatBuildingNode, formatBuildingStructure } from "../utils/buildingUtils";
 
 
-const serviceInstance = BuildingService.getInstance();
+const buildingServiceInstance = BuildingService.getInstance();
 const portofolioInstance = PortofolioService.getInstance();
 
 
@@ -55,7 +56,7 @@ export class PortofolioController extends Controller {
 
             const { name, appIds, apiIds } = data;
 
-            const res = await portofolioInstance.addPortofolio(name, appIds, apiIds);
+            const res = await portofolioInstance.createPortofolio(name, appIds, apiIds);
             const details = portofolioInstance._formatDetails(res);
 
             this.setStatus(HTTP_CODES.CREATED);
@@ -68,12 +69,12 @@ export class PortofolioController extends Controller {
 
     @Security(SECURITY_NAME.bearerAuth)
     @Put("/update_portofolio/{portofolioId}")
-    public async updatePortofolio(@Request() req: express.Request, @Path() portofolioId: string, @Body() data: IEditProtofolio): Promise<IPortofolioData | { message: string }> {
+    public async updatePortofolio(@Request() req: express.Request, @Path() portofolioId: string, @Body() data: IEditPortofolio): Promise<IPortofolioData | { message: string }> {
         try {
             const isAdmin = await checkIfItIsAdmin(req);
             if (!isAdmin) throw new AuthError(SECURITY_MESSAGES.UNAUTHORIZED);
 
-            const res = await portofolioInstance.updateProtofolio(portofolioId, data);
+            const res = await portofolioInstance.updatePortofolio(portofolioId, data);
             const details = portofolioInstance._formatDetails(res);
             this.setStatus(HTTP_CODES.OK)
             return details;
@@ -124,7 +125,7 @@ export class PortofolioController extends Controller {
     public async getPortofolio(@Request() req: express.Request, @Path() id: string): Promise<any | { message: string }> {
         try {
             const profile = await getProfileNode(req);
-            const portofolio = await AuthorizationService.getInstance().profileHasAccess(profile, id);
+            const portofolio = await AuthorizationService.getInstance().profileHasAccessToNode(profile, id);
             if (!portofolio) throw new AuthError(SECURITY_MESSAGES.UNAUTHORIZED);
 
             // const portofolio = await portofolioInstance.getPortofolio(id);
@@ -197,13 +198,13 @@ export class PortofolioController extends Controller {
             const isAdmin = await checkIfItIsAdmin(req);
             if (!isAdmin) throw new AuthError(SECURITY_MESSAGES.UNAUTHORIZED);
 
-            const node = await serviceInstance.addBuildingToPortofolio(portofolioId, body);
+            const node = await buildingServiceInstance.linkBuildingToPortofolio(portofolioId, body);
             if (!node) {
                 this.setStatus(HTTP_CODES.BAD_REQUEST);
                 return { message: "Something went wrong, please check your input data" };
             }
             this.setStatus(HTTP_CODES.OK);
-            return BuildingService.getInstance().formatBuildingStructure(node);
+            return formatBuildingStructure(node);
         } catch (error) {
             this.setStatus(error.code || HTTP_CODES.INTERNAL_ERROR);
             return { message: error.message };
@@ -215,14 +216,14 @@ export class PortofolioController extends Controller {
     public async getBuilding(@Request() req: express.Request, @Path() portofolioId: string, @Path() buildingId: string): Promise<IBuilding | { message: string }> {
         try {
             const profile = await getProfileNode(req);
-            const node = await serviceInstance.getBuildingFromPortofolio(portofolioId, buildingId);
+            const node = await buildingServiceInstance.getBuildingFromPortofolio(portofolioId, buildingId);
 
 
             if (node) {
-                const hasAccess = await AuthorizationService.getInstance().profileHasAccess(profile, node);
+                const hasAccess = await AuthorizationService.getInstance().profileHasAccessToNode(profile, node);
                 if (!hasAccess) throw new AuthError(SECURITY_MESSAGES.UNAUTHORIZED);
 
-                const data = await serviceInstance.formatBuilding(node.info.get());
+                const data = await formatBuildingNode(node);
                 this.setStatus(HTTP_CODES.OK);
                 return data
             };
@@ -243,9 +244,9 @@ export class PortofolioController extends Controller {
             const isAdmin = await checkIfItIsAdmin(req);
             if (!isAdmin) throw new AuthError(SECURITY_MESSAGES.UNAUTHORIZED);
 
-            const nodes = await serviceInstance.getAllBuildingsFromPortofolio(portofolioId) || [];
+            const nodes = await buildingServiceInstance.getAllBuildingsFromPortofolio(portofolioId) || [];
 
-            const promises = nodes.map(el => serviceInstance.formatBuilding(el.info.get()))
+            const promises = nodes.map(el => formatBuildingNode(el));
 
             const data = await Promise.all(promises);
             this.setStatus(HTTP_CODES.OK);
@@ -265,7 +266,7 @@ export class PortofolioController extends Controller {
             const isAdmin = await checkIfItIsAdmin(req);
             if (!isAdmin) throw new AuthError(SECURITY_MESSAGES.UNAUTHORIZED);
 
-            const ids = await portofolioInstance.removeBuildingFromPortofolio(portofolioId, data.buildingIds);
+            const ids = await portofolioInstance.removeSeveralBuildingsFromPortofolio(portofolioId, data.buildingIds);
             if (!ids || ids.length === 0) {
                 this.setStatus(HTTP_CODES.BAD_REQUEST);
                 return { message: "Something went wrong, please check your input data" };
@@ -286,7 +287,7 @@ export class PortofolioController extends Controller {
             const isAdmin = await checkIfItIsAdmin(req);
             if (!isAdmin) throw new AuthError(SECURITY_MESSAGES.UNAUTHORIZED);
 
-            const nodes = await portofolioInstance.addAppToPortofolio(portofolioId, data.applicationsIds);
+            const nodes = await portofolioInstance.linkSeveralAppsToPortofolio(portofolioId, data.applicationsIds);
             if (!nodes || nodes.length === 0) {
                 this.setStatus(HTTP_CODES.BAD_REQUEST);
                 return { message: "Something wen wrong, please check your input data" };
@@ -331,7 +332,7 @@ export class PortofolioController extends Controller {
     public async getAppFromPortofolio(@Request() req: express.Request, @Path() portofolioId: string, @Path() applicationId: string): Promise<IApp | { message: string }> {
         try {
             const profile = await getProfileNode(req);
-            const node = await AuthorizationService.getInstance().profileHasAccess(profile, applicationId);
+            const node = await AuthorizationService.getInstance().profileHasAccessToNode(profile, applicationId);
 
             // const node = await portofolioInstance.getAppFromPortofolio(portofolioId, applicationId);
             if (!node) {
@@ -356,7 +357,7 @@ export class PortofolioController extends Controller {
             const isAdmin = await checkIfItIsAdmin(req);
             if (!isAdmin) throw new AuthError(SECURITY_MESSAGES.UNAUTHORIZED);
 
-            const ids = await portofolioInstance.removeAppFromPortofolio(portofolioId, data.applicationId);
+            const ids = await portofolioInstance.removeSeveralAppsFromPortofolio(portofolioId, data.applicationId);
             if (!ids || ids.length === 0) {
                 this.setStatus(HTTP_CODES.BAD_REQUEST);
                 return { message: "Something went wrong, please check your input data" };
@@ -396,7 +397,7 @@ export class PortofolioController extends Controller {
             const isAdmin = await checkIfItIsAdmin(req);
             if (!isAdmin) throw new AuthError(SECURITY_MESSAGES.UNAUTHORIZED);
 
-            const nodes = await portofolioInstance.addApiToPortofolio(portofolioId, data.apisIds);
+            const nodes = await portofolioInstance.linkSeveralApisToPortofolio(portofolioId, data.apisIds);
             if (!nodes || nodes.length === 0) {
                 this.setStatus(HTTP_CODES.BAD_REQUEST);
                 return { message: "Something wen wrong, please check your input data" };
@@ -465,7 +466,7 @@ export class PortofolioController extends Controller {
             const isAdmin = await checkIfItIsAdmin(req);
             if (!isAdmin) throw new AuthError(SECURITY_MESSAGES.UNAUTHORIZED);
 
-            const ids = await portofolioInstance.removeApiFromPortofolio(portofolioId, data.apisIds);
+            const ids = await portofolioInstance.removeSeveralApisFromPortofolio(portofolioId, data.apisIds);
             if (!ids || ids.length === 0) {
                 this.setStatus(HTTP_CODES.BAD_REQUEST);
                 return { message: "Something went wrong, please check your input data" };

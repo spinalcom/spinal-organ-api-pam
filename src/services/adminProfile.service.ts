@@ -22,29 +22,12 @@
  * <http://resources.spinalcom.com/licenses.pdf>.
  */
 
-import {
-  SpinalContext,
-  SpinalGraph,
-  SpinalGraphService,
-  SpinalNode,
-} from 'spinal-env-viewer-graph-service';
-import {
-  ADMIN_PROFILE_NAME,
-  ADMIN_PROFILE_TYPE,
-  APP_RELATION_NAME,
-  CONTEXT_TO_USER_PROFILE_RELATION_NAME,
-  PORTOFOLIO_TYPE,
-  PROFILE_TO_AUTHORIZED_PORTOFOLIO_RELATION,
-  PTR_LST_TYPE,
-} from '../constant';
-import {
-  IPortofolioAuth,
-  IPortofolioAuthEdit,
-  IPortofolioAuthRes,
-} from '../interfaces';
-import AuthorizationService from './authorization.service';
+import { SpinalContext, SpinalGraph, SpinalGraphService, SpinalNode } from 'spinal-env-viewer-graph-service';
+import { ADMIN_PROFILE_NAME, ADMIN_PROFILE_TYPE, APP_RELATION_NAME, CONTEXT_TO_USER_PROFILE_RELATION_NAME, PROFILE_TO_AUTHORIZED_PORTOFOLIO_RELATION, PTR_LST_TYPE } from '../constant';
+import { IPortofolioAuth, IPortofolioAuthEdit, IPortofolioAuthRes } from '../interfaces';
 import { PortofolioService } from './portofolio.service';
 import { UserProfileService } from './userProfile.service';
+import { _getAuthorizedPortofolioContext, createNodeReference } from '../utils/authorizationUtils';
 
 export class AdminProfileService {
   private static instance: AdminProfileService;
@@ -53,9 +36,7 @@ export class AdminProfileService {
   private constructor() { }
 
   public static getInstance(): AdminProfileService {
-    if (!this.instance) {
-      this.instance = new AdminProfileService();
-    }
+    if (!this.instance) this.instance = new AdminProfileService();
 
     return this.instance;
   }
@@ -65,95 +46,114 @@ export class AdminProfileService {
   }
 
   public async init(context: SpinalContext): Promise<SpinalNode> {
-    let node = await this.getAdminProfile(context);
+    let existingAdminProfile = await this.getAdminProfile(context);
 
-    if (!node) {
-      node = this._createAdminProfile();
-      await context.addChildInContext(
-        node,
-        CONTEXT_TO_USER_PROFILE_RELATION_NAME,
-        PTR_LST_TYPE,
-        context
-      );
+    //  If no admin profile exists, create one
+    if (!existingAdminProfile) {
+      existingAdminProfile = this._createAdminProfileNode();
+      await context.addChildInContext(existingAdminProfile, CONTEXT_TO_USER_PROFILE_RELATION_NAME, PTR_LST_TYPE, context);
     }
 
-    this._adminNode = node;
+    this._adminNode = existingAdminProfile;
 
-    await this.syncAdminProfile();
-    return node;
+    await this.syncAdminProfile(); // Synchronize the admin profile with existing portofolios
+    return existingAdminProfile;
   }
 
-  async addAppToProfil(app: SpinalNode) {
+  /**
+   * Adds an application node to the admin profile's "Administration" portofolio.
+   * If the admin portofolio does not exist, it is created.
+   * @param app The application SpinalNode to add.
+   * @returns The reference node added as a child.
+   */
+  async addAppToAdminProfil(app: SpinalNode): Promise<SpinalNode> {
     const { context, portofolio } = await this._createOrGetAdminPortofolio();
-    const reference = new SpinalNode(
-      app.getName().get(),
-      app.getType().get(),
-      app
-    );
-    await portofolio.addChildInContext(
-      reference,
-      APP_RELATION_NAME,
-      PTR_LST_TYPE,
-      context
-    );
+
+    const appReference = await createNodeReference(app);
+
+    return portofolio.addChildInContext(appReference, APP_RELATION_NAME, PTR_LST_TYPE, context);
   }
 
-  public async addToAdminProfile(data: IPortofolioAuth) {
-    return UserProfileService.getInstance()._authorizeIPortofolioAuth(
-      this._adminNode,
-      data
-    );
+
+  /**
+   * Authorizes an admin profile to access a specified portfolio.
+   *
+   * This method delegates the authorization logic to the `UserProfileService`,
+   * passing the current admin node and the provided portfolio authorization data.
+   *
+   * @param data - The portfolio authorization data containing the necessary information
+   *               to determine access rights.
+   * @returns A promise that resolves with the result of the authorization operation.
+   */
+  public async authorizeAdminProfileToAccessPortofolio(data: IPortofolioAuth) {
+    return UserProfileService.getInstance().authorizeProfileToAccessPortofolio(this._adminNode, data);
   }
 
-  public async removeFromAdminProfile(data: IPortofolioAuthEdit) {
-    return UserProfileService.getInstance()._unauthorizeIPortofolioAuth(
-      this._adminNode,
-      data
-    );
+
+  /**
+   * Removes authorization for a profile to access a portfolio from the admin profile.
+   *
+   * @param profileInfo - The profile information containing authorization details to be removed.
+   * @returns A promise that resolves when the profile has been unauthorized from accessing the portfolio.
+   */
+  public async removeFromAdminProfile(profileInfo: IPortofolioAuthEdit) {
+    return UserProfileService.getInstance().unauthorizeProfileToAccessPortofolio(this._adminNode, profileInfo);
   }
 
+
+  /**
+   * Synchronizes the admin profile's access to all existing portofolios.
+   * For each portofolio, ensures the admin profile is authorized to access it.
+   * @returns A promise resolving to an array of authorization results for each portofolio.
+   */
   public async syncAdminProfile(): Promise<IPortofolioAuthRes[]> {
     const data = await this._getPortofoliosStructure();
 
-    return data.reduce(async (prom, el: any) => {
-      const liste = await prom;
-      const res =
-        await UserProfileService.getInstance()._authorizeIPortofolioAuth(
-          this._adminNode,
-          el
-        );
-      liste.push(res);
-      return liste;
-    }, Promise.resolve([]));
+    const promises = data.map(async (el: IPortofolioAuth) => UserProfileService.getInstance().authorizeProfileToAccessPortofolio(this._adminNode, el));
+
+    return Promise.all(promises);
   }
 
-  public async getAdminProfile(
-    argContext?: SpinalContext
-  ): Promise<SpinalNode> {
+
+  /**
+   * Retrieves the admin profile node from the specified context or from the default user profile context.
+   *
+   * If the admin profile node has already been retrieved and cached, it returns the cached node.
+   * Otherwise, it fetches the children of the provided context (or the default context if none is provided),
+   * and searches for a node matching the admin profile name and type.
+   *
+   * @param argContext - (Optional) The context from which to retrieve the admin profile node.
+   * @returns A promise that resolves to the admin profile node if found, otherwise `undefined`.
+   */
+  public async getAdminProfile(argContext?: SpinalContext): Promise<SpinalNode> {
     if (this._adminNode) return this._adminNode;
 
     const context = argContext || UserProfileService.getInstance().context;
     if (!context) return;
 
-    const children = await context.getChildren();
+    const contexts = await context.getChildren();
 
-    return children.find((el) => {
-      return (
-        el.getName().get() === ADMIN_PROFILE_NAME &&
-        el.getType().get() === ADMIN_PROFILE_TYPE
-      );
-    });
+    return contexts.find((el) => (el.getName().get() === ADMIN_PROFILE_NAME && el.getType().get() === ADMIN_PROFILE_TYPE));
   }
 
+
+  /**
+   * Determines whether the given profile ID corresponds to the admin profile.
+   *
+   * @param profileId - The ID of the profile to check.
+   * @returns `true` if the provided profile ID matches the admin profile's ID; otherwise, `false`.
+   */
   public isAdmin(profileId: string): boolean {
     return this._adminNode.getId().get() === profileId;
   }
 
-  private _createAdminProfile(): SpinalNode {
-    const info = {
-      name: ADMIN_PROFILE_NAME,
-      type: ADMIN_PROFILE_TYPE,
-    };
+
+  /////////////////////////////////////
+  //        Private methods          //
+  /////////////////////////////////////
+
+  private _createAdminProfileNode(): SpinalNode {
+    const info = { name: ADMIN_PROFILE_NAME, type: ADMIN_PROFILE_TYPE };
     const graph = new SpinalGraph(ADMIN_PROFILE_NAME);
     const profileId = SpinalGraphService.createNode(info, graph);
 
@@ -162,9 +162,9 @@ export class AdminProfileService {
   }
 
   private async _getPortofoliosStructure(): Promise<IPortofolioAuth[]> {
-    const details =
-      await PortofolioService.getInstance().getAllPortofoliosDetails();
-    return details.map(({ node, apps, apis, buildings }: any) => {
+    const portofolioDetails = await PortofolioService.getInstance().getAllPortofoliosDetails();
+
+    return portofolioDetails.map(({ node, apps, apis, buildings }: any) => {
       return {
         portofolioId: node.getId().get(),
         appsIds: apps.map((el) => el.getId().get()),
@@ -182,25 +182,18 @@ export class AdminProfileService {
 
   private async _createOrGetAdminPortofolio() {
     const adminPortofolio = 'Administration';
-    const context =
-      await AuthorizationService.getInstance()._getAuthorizedPortofolioContext(
-        this._adminNode,
-        true
-      );
-    const children = await context.getChildren();
-    let found = children.find((el) => el.getName().get() === adminPortofolio);
+    const createIfNotExist = true;
+    const context = await _getAuthorizedPortofolioContext(this._adminNode, createIfNotExist);
+    const portfolioContexts = await context.getChildren();
 
-    if (found) return { context, portofolio: found };
+    let portofolio = portfolioContexts.find((el) => el.getName().get() === adminPortofolio);
+
+    if (portofolio) return { context, portofolio };
 
     const node = new SpinalNode(adminPortofolio, adminPortofolio);
-    const refNode = new SpinalNode(adminPortofolio, adminPortofolio, node);
+    const refNode = await createNodeReference(node);
 
-    await context.addChildInContext(
-      refNode,
-      PROFILE_TO_AUTHORIZED_PORTOFOLIO_RELATION,
-      PTR_LST_TYPE,
-      context
-    );
+    await context.addChildInContext(refNode, PROFILE_TO_AUTHORIZED_PORTOFOLIO_RELATION, PTR_LST_TYPE, context);
     return { context, portofolio: refNode };
   }
 }

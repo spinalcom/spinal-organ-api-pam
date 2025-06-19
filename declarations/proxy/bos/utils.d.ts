@@ -1,7 +1,8 @@
 import { ProxyOptions } from "express-http-proxy";
-import { IBosAuthRes, IBuilding } from "../../interfaces";
-export declare function tryToDownloadSvf(req: any): boolean;
-export declare function _formatBuildingRes(building: IBuilding): {
+import { SpinalNode } from "spinal-env-viewer-graph-service";
+import { IBuilding } from "../../interfaces";
+export declare function isTryingToDownloadSvf(req: any): boolean;
+export declare function _formatBuildingResponse(building: IBuilding): {
     name: string;
     _id: any;
     id: any;
@@ -11,7 +12,9 @@ export declare function _formatBuildingRes(building: IBuilding): {
     type: any;
     localisation: import("../../interfaces").ILocation;
 };
-export declare function getProfileBuildings(profileId: string, isApp: boolean): Promise<any[]>;
+export declare function getBuildingsAuthorizedToProfile(tokenInfo: any): Promise<any[]>;
+export declare function getAppProfileBuildings(tokenInfo: any): Promise<any[]>;
+export declare function getUserProfileBuildings(tokenInfo: any): Promise<any[]>;
 export declare function formatUri(argUrl: string, uri: string): string;
 export declare function canAccess(buildingId: string, api: {
     method: string;
@@ -22,5 +25,7 @@ export declare function tryToAccessBuildingInfo(api: {
     route: string;
 }): boolean;
 export declare const proxyOptions: (useV1: boolean) => ProxyOptions;
-export declare function profileHasAccessToBuilding(profileId: string, buildingId: string, isAppProfile: boolean): Promise<IBosAuthRes>;
+export declare function profileHasAccessToBuilding(profileId: string, buildingId: string, isAppProfile: boolean): Promise<SpinalNode<any>>;
+export declare function profileHasAccessToApi(profileId: string, buildingId: string, isAppProfile: boolean): Promise<SpinalNode<any>>;
 export declare function _get_method(method: string, statusCode: number): "READ" | "ADD" | "DEL" | "ERROR";
+export declare function getProfileIdInTokenInfo(tokenInfo: any): string;

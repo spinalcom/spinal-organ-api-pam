@@ -1,4 +1,3 @@
-/// <reference types="node" />
 import { Server as HttpServer } from 'http';
 export default class WebSocketServer {
     private _io;
@@ -7,7 +6,7 @@ export default class WebSocketServer {
     private _buildingMap;
     private _sessionToUserInfo;
     constructor(server: HttpServer);
-    init(): Promise<void>;
+    initialize(): Promise<void>;
     private _initNameSpace;
     private _initMiddleware;
     private _getToken;
