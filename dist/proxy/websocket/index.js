@@ -29,7 +29,8 @@ const services_1 = require("../../services");
 const utils_1 = require("../bos/utils");
 const socket_io_1 = require("socket.io");
 const spinal_service_pubsub_logs_1 = require("spinal-service-pubsub-logs");
-const SocketClient = require('socket.io-client');
+const uuid_1 = require("uuid");
+const SocketClient = require("socket.io-client");
 const logInstance = services_1.WebsocketLogsService.getInstance();
 class WebSocketServer {
     //   private _reInitLogData = lodash.debounce(
@@ -50,8 +51,8 @@ class WebSocketServer {
         this._initMiddleware();
     }
     _initNameSpace() {
-        this._io.on('connection', (socket) => {
-            console.log(socket.id, 'is connected');
+        this._io.on("connection", (socket) => {
+            console.log(socket.id, "is connected");
         });
         this._io.of(/.*/).use(async (socket, next) => {
             let err;
@@ -90,12 +91,10 @@ class WebSocketServer {
     }
     async _getBuilding(socket) {
         const _url = socket.nsp.name;
-        const index = _url
-            .split('/')
-            .findIndex((el) => el.toLowerCase() === 'building');
-        const buildingId = index !== -1 ? _url.split('/')[index + 1] : undefined;
+        const index = _url.split("/").findIndex((el) => el.toLowerCase() === "building");
+        const buildingId = index !== -1 ? _url.split("/")[index + 1] : undefined;
         if (!buildingId)
-            throw new Error('Invalid building id');
+            throw new Error("Invalid building id");
         const building = await services_1.BuildingService.getInstance().getBuildingById(buildingId);
         if (!building)
             throw new Error(`No building found for ${buildingId}`);
@@ -104,16 +103,15 @@ class WebSocketServer {
     }
     async _checkIfUserHasAccess(tokenInfo, building) {
         const isAppProfile = tokenInfo.profile.appProfileBosConfigId ? true : false;
-        const profileId = tokenInfo.profile.appProfileBosConfigId ||
-            tokenInfo.profile.userProfileBosConfigId ||
-            tokenInfo.profile.profileId;
+        const profileId = tokenInfo.profile.appProfileBosConfigId || tokenInfo.profile.userProfileBosConfigId || tokenInfo.profile.profileId;
         const access = await (0, utils_1.profileHasAccessToBuilding)(profileId, building.getId().get(), isAppProfile);
         if (!access)
             throw new Error(constant_1.SECURITY_MESSAGES.UNAUTHORIZED);
         return access;
     }
     _createClient(building, socket, tokenInfo) {
-        const sessionId = tokenInfo.userInfo?.id;
+        // const sessionId = tokenInfo.userInfo?.id;
+        const sessionId = (0, uuid_1.v4)();
         const token = tokenInfo.token;
         if (sessionId)
             this._sessionToUserInfo.set(sessionId, tokenInfo.userInfo);
@@ -121,21 +119,21 @@ class WebSocketServer {
             const api_url = building.info.apiUrl.get();
             const client = SocketClient(api_url, {
                 auth: { token, sessionId, building: building?.info?.get() },
-                transports: ['websocket'],
+                transports: ["websocket"],
                 reconnection: false,
             });
-            client.on('connect', () => {
-                console.log(tokenInfo?.userInfo?.name || tokenInfo?.userInfo?.id, 'is connected');
+            client.on("connect", () => {
+                console.log(tokenInfo?.userInfo?.name || tokenInfo?.userInfo?.id, "is connected");
             });
-            client.on('session_created', async (id) => {
+            client.on("session_created", async (id) => {
                 this._sessionToUserInfo.set(id, tokenInfo.userInfo);
-                socket.emit('session_created', id);
-                client['sessionId'] = id;
-                socket['sessionId'] = id;
+                socket.emit("session_created", id);
+                client["sessionId"] = id;
+                socket["sessionId"] = id;
                 await this._saveConnectionLog(client);
                 resolve(client);
             });
-            client.on('connect_error', (err) => reject(err));
+            client.on("connect_error", (err) => reject(err));
         });
     }
     _associateClientAndServer(pamToBosSocket, clientToPamSocket) {
@@ -185,11 +183,11 @@ class WebSocketServer {
         //   // // const emitter = this._clientToServer.get((<any>client).sessionID || client.id);
         //   // // if (emitter) emitter.emit(eventName, ...data);
         // });
-        pamToBosSocket.on('disconnect', async (reason) => {
+        pamToBosSocket.on("disconnect", async (reason) => {
             const emitter = this._clientToServer.get(pamToBosSocket.sessionId || pamToBosSocket.id);
             if (emitter) {
                 const emitterInfo = this._sessionToUserInfo.get(emitter.sessionId);
-                console.log(emitterInfo.userName || emitter.sessionId, 'is disconnected', reason);
+                console.log(emitterInfo.userName || emitter.sessionId, "is disconnected", reason);
                 emitter.disconnect();
             }
         });
@@ -208,11 +206,11 @@ class WebSocketServer {
         //   // const emitter = this._serverToClient.get((<any>server).sessionId || server.id);
         //   // if (emitter) emitter.emit(eventName, ...data);
         // });
-        clientToPamSocket.on('disconnect', async (reason) => {
+        clientToPamSocket.on("disconnect", async (reason) => {
             const emitter = this._serverToClient.get(clientToPamSocket.sessionId || clientToPamSocket.id);
             if (emitter) {
                 const emitterInfo = this._sessionToUserInfo.get(emitter.sessionId);
-                console.log(emitterInfo.userName || emitter.sessionId, 'is disconnected', reason);
+                console.log(emitterInfo.userName || emitter.sessionId, "is disconnected", reason);
                 emitter.disconnect();
                 await this._createWebsocketLog(emitter, spinal_service_pubsub_logs_1.DISCONNECTION_EVENT, undefined, emitterInfo, spinal_service_pubsub_logs_1.DISCONNECTION_EVENT);
             }

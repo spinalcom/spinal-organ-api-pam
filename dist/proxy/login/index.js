@@ -3,6 +3,8 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.useLoginProxy = useLoginProxy;
 const services_1 = require("../../services");
 const constant_1 = require("../../constant");
+const globalCache = require("global-cache");
+const uuid_1 = require("uuid");
 async function useLoginProxy(app) {
     app.get('/login', async (req, res, next) => {
         try {
@@ -36,20 +38,48 @@ async function useLoginProxy(app) {
     });
     app.post("/callback", async (req, res, next) => {
         try {
-            const data = JSON.parse(req.body.data);
+            const data = typeof req.body.data === 'string' ? JSON.parse(req.body.data) : req.body.data;
             const formatData = await services_1.UserListService.getInstance().getUserDataFormatted(data, null, true);
             const profileId = formatData.profile.userProfileBosConfigId || data.profile.profileId;
             const token = formatData.token;
-            const user = btoa(JSON.stringify(formatData.userInfo));
-            res.cookie("profileId", profileId);
-            res.cookie("token", token);
-            res.cookie("user", user);
+            const user = Buffer.from(JSON.stringify(formatData.userInfo)).toString("base64");
             const vue_client_uri = process.env.VUE_CLIENT_URI;
-            res.redirect(vue_client_uri);
+            /**
+             * Sending cookies doesn't work when the client and server are on different origins.
+             * I implemented this temporary method.
+             */
+            const cookiesId = (0, uuid_1.v4)();
+            globalCache.set(cookiesId, { uri: vue_client_uri, profileId, token, user }, 30 * 1000); //store data for 30seconds
+            return res.redirect(`${vue_client_uri}/login?ref=${cookiesId}`);
+            /**
+             * found a way to send cookies with a redirect, but it doesn't work in all browsers
+             */
+            // const options: express.CookieOptions = {
+            //     httpOnly: true,
+            //     secure: false,
+            //     sameSite: 'none',
+            // }
+            // res.cookie("profileId", profileId, options);
+            // res.cookie("token", token, options);
+            // res.cookie("user", user, options);
+            // console.log(res.getHeaders());
+            // return res.redirect(`${vue_client_uri}?ref=${cookiesId}`);
         }
         catch (error) {
             console.error(error.message);
+            res.status(constant_1.HTTP_CODES.INTERNAL_ERROR).send({ status: constant_1.HTTP_CODES.INTERNAL_ERROR, message: error.message });
         }
+    });
+    app.get("/getTokenByRef/:ref", (req, res, next) => {
+        const cookiesId = req.params.ref;
+        if (!cookiesId)
+            return res.status(constant_1.HTTP_CODES.BAD_REQUEST).send({ status: constant_1.HTTP_CODES.BAD_REQUEST, message: "No id provided" });
+        const data = globalCache.get(cookiesId); // Retrieve the data from the cache using the cookiesId
+        if (!data)
+            return res.status(constant_1.HTTP_CODES.NOT_FOUND).send({ status: constant_1.HTTP_CODES.NOT_FOUND, message: "No found" });
+        // Clear the cache after retrieving the data
+        globalCache.delete(cookiesId);
+        return res.status(constant_1.HTTP_CODES.OK).send(data);
     });
 }
 //# sourceMappingURL=index.js.map

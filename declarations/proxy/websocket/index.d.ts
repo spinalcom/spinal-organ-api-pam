@@ -1,4 +1,4 @@
-import { Server as HttpServer } from 'http';
+import { Server as HttpServer } from "http";
 export default class WebSocketServer {
     private _io;
     private _clientToServer;
