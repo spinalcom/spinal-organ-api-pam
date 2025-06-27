@@ -29,6 +29,8 @@ import { ADMIN_CREDENTIAL_CONTEXT_NAME, ADMIN_CREDENTIAL_CONTEXT_TYPE, PAM_CREDE
 import { v4 as uuidv4 } from 'uuid';
 import { UserListService } from "./userList.services";
 import { getRequestBody, getOrCreateContext } from "../utils/authPlatformUtils";
+import { SpinalCodeUniqueService } from "./spinalCodeUnique.service";
+import { OtherError } from "../security/AuthError";
 
 
 const tokenKey = '9b1deb4d-3b7d-4bad-9bdd-2b0d7b3dcb6d';
@@ -51,6 +53,13 @@ export class AuthentificationService {
         this.graph = graph;
     }
 
+    public consumeCodeUnique(code: string): Promise<any> {
+        try {
+            return SpinalCodeUniqueService.getInstance().consumeCode(code);
+        } catch (error) {
+            throw new OtherError(HTTP_CODES.BAD_REQUEST, "Code unique not valid");
+        }
+    }
 
     /**
      * Authenticates a user based on the provided credentials.

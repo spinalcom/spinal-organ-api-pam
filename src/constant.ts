@@ -67,6 +67,7 @@ export const TOKEN_LIST_CONTEXT_NAME = 'Tokens';
 export const BUILDING_API_GROUP_NAME = 'Building Apis Routes';
 export const PORTOFOLIO_API_GROUP_NAME = 'Portofolio Apis Routes';
 export const LOG_CONTEXT_NAME = 'Logs';
+export const CODE_USED_LIST_CONTEXT_NAME = "CodeUsedList";
 
 //Contexts types
 export const USER_PROFILE_CONTEXT_TYPE = 'UserProfileList';
@@ -87,6 +88,7 @@ export const ADMIN_CREDENTIAL_CONTEXT_TYPE = 'AdminCredential';
 export const PORTOFOLIO_CONTEXT_TYPE = 'PortofolioContext';
 export const TOKEN_LIST_CONTEXT_TYPE = 'TokenList';
 export const LOG_CONTEXT_TYPE = 'LogsContext';
+export const CODE_USED_LIST_CONTEXT_TYPE = "CodeUsedListContext";
 
 // types
 export const ROLE_TYPE = 'role';
@@ -142,6 +144,7 @@ export const PROFILE_TO_AUTHORIZED_PORTOFOLIO_RELATION =
   'hasAccessToPortofolio';
 export const PROFILE_TO_AUTHORIZED_BOS_RELATION = 'hasAccessToBos';
 export const USER_TO_FAVORITE_APP_RELATION = 'hasFavoriteApp';
+export const CONTEXT_TO_CODE_RELATION_NAME = "hasCodeUnique";
 
 // Relation Type
 export const PTR_LST_TYPE = SPINAL_RELATION_PTR_LST_TYPE;

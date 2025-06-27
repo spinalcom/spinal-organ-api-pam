@@ -38,5 +38,5 @@ export * from './appConnectedList.service';
 export * from './token.service';
 export * from './log.service';
 export * from './webSocketLogs.service';
-
+export * from './spinalCodeUnique.service';
 

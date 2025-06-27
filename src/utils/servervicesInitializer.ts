@@ -32,7 +32,8 @@ import {
     UserProfileService, PortofolioService,
     TokenService, UserListService,
     AppListService, LogService,
-    AuthentificationService
+    AuthentificationService,
+    SpinalCodeUniqueService
 } from "../services";
 
 
@@ -71,7 +72,8 @@ export default class ServicesInitializer {
             PortofolioService,
             TokenService,
             LogService,
-            AuthentificationService
+            AuthentificationService,
+            SpinalCodeUniqueService
         ];
 
         return this._initServicesList(services);

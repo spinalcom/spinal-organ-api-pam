@@ -53,6 +53,19 @@ export class AuthController extends Controller {
         }
     }
 
+    @Post("/consume/code")
+    public async consumeCodeUnique(@Body() data: { code: string }): Promise<string | IApplicationToken | IUserToken | { message: string }> {
+        try {
+            const resp = await serviceInstance.consumeCodeUnique(data.code);
+            this.setStatus(HTTP_CODES.OK);
+            return resp;
+        } catch (error) {
+            this.setStatus(error.code || HTTP_CODES.INTERNAL_ERROR);
+            return { message: error.message };
+        }
+    }
+
+
 
 
     @Security(SECURITY_NAME.bearerAuth)
