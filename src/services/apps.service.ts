@@ -154,8 +154,8 @@ export class AppService {
       for (const key in newInfo) {
         if (Object.prototype.hasOwnProperty.call(newInfo, key) && appNode.info[key] || key === "documentationLink") {
           const element = newInfo[key];
+          if(typeof appNode.info[key] === "undefined") appNode.info.add_attr({ [key]: element });
           if (appNode.info[key]) appNode.info[key].set(element);
-          else appNode.info.add_attr({ [key]: element });
         }
       }
 
@@ -171,8 +171,8 @@ export class AppService {
       for (const key in newInfo) {
         if (Object.prototype.hasOwnProperty.call(newInfo, key) && appNode.info[key] || key === "documentationLink") {
           const element = newInfo[key];
+          if(typeof appNode.info[key] === "undefined") appNode.info.add_attr({ [key]: element });
           if (appNode.info[key]) appNode.info[key].set(element);
-          else appNode.info.add_attr({ [key]: element });
         }
       }
 
@@ -187,8 +187,8 @@ export class AppService {
       for (const key in newInfo) {
         if (Object.prototype.hasOwnProperty.call(newInfo, key) && appNode.info[key] || key === "documentationLink") {
           const element = newInfo[key];
+          if(typeof	 appNode.info[key] === "undefined") appNode.info.add_attr({ [key]: element });
           if (appNode.info[key]) appNode.info[key].set(element);
-          else appNode.info.add_attr({ [key]: element });
         }
       }
 

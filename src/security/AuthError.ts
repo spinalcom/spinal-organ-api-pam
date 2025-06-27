@@ -22,7 +22,7 @@
  * <http://resources.spinalcom.com/licenses.pdf>.
  */
 
-import {HTTP_CODES, SECURITY_MESSAGES} from '../constant';
+import { HTTP_CODES, SECURITY_MESSAGES } from '../constant';
 
 export class AuthError extends Error {
   code: number;
@@ -42,4 +42,16 @@ export class AuthError extends Error {
         break;
     }
   }
+}
+
+export class OtherError extends Error {
+
+  code: number;
+
+  constructor(code: number, message: string) {
+    super(message);
+    this.code = code;
+  }
+
+
 }

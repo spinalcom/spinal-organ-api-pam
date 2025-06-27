@@ -3,6 +3,7 @@ export declare class AuthentificationService {
     private static instance;
     private constructor();
     static getInstance(): AuthentificationService;
+    consumeCodeUnique(code: string): Promise<any>;
     authenticate(info: IUserCredential | IAppCredential | IOAuth2Credential): Promise<{
         code: number;
         data: string | IApplicationToken | IUserToken;
@@ -16,6 +17,7 @@ export declare class AuthentificationService {
     editAdminCredential(admin: IAdminCredential): Promise<IAdminCredential>;
     getAdminCredential(): Promise<IAdminCredential>;
     sendDataToAdmin(update?: boolean): Promise<import("axios").AxiosResponse<any, any>>;
+    updatePlatformTokenData(): Promise<any>;
     private _getOrCreateAdminCredential;
     private getJsonData;
     private _getRequestBody;

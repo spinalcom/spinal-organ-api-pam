@@ -3,6 +3,9 @@ import { Controller } from "tsoa";
 import * as express from 'express';
 export declare class BuildingController extends Controller {
     constructor();
+    getBuildingByIdByPost(req: express.Request, id: string): Promise<IBuilding | {
+        message: string;
+    }>;
     getBuildingById(req: express.Request, id: string): Promise<IBuilding | {
         message: string;
     }>;

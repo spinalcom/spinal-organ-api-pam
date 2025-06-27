@@ -39,6 +39,7 @@ const spinal_model_graph_1 = require("spinal-model-graph");
 const constant_1 = require("../constant");
 const _1 = require(".");
 const adminApps_1 = require("../adminApps");
+const codeUnique_service_1 = require("./codeUnique.service");
 // const { config: { directory_path, fileName } } = require("../../config");
 const directory_path = process.env.CONFIG_DIRECTORY_PATH || constant_1.CONFIG_DEFAULT_DIRECTORY_PATH;
 const fileName = process.env.CONFIG_FILE_NAME || constant_1.CONFIG_DEFAULT_NAME;
@@ -94,7 +95,8 @@ class ConfigFileService {
             // DigitalTwinService,
             _1.PortofolioService,
             _1.TokenService,
-            _1.LogService
+            _1.LogService,
+            codeUnique_service_1.SpinalCodeUniqueService,
         ];
         const promises = services.map(service => {
             try {

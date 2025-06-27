@@ -75,17 +75,17 @@ export class Utils {
 		if (e.constructor.name === "APIException") {
 			result.code = e.getAll().code;
 			result.msg = e.getAll();
-			Utils.logger("error", errorPrefix, e.getAll());
+			// Utils.logger("error", errorPrefix, e.getAll());
 		} else if (e !== null && e !== undefined && e.code === 11000) {
 			e = Utils.getDuplicateError(e.errmsg);
 			result.msg = new APIException(UTILS.INTERNAL_ERR, e).getAll();
 		} else if (e.errors !== undefined && e.errors.name === "ValidatorError" && e.errors.kind === "required") {
 			const err = Utils.getDuplicateError(e.errors.path);
 			result.msg = new APIException(UTILS.INTERNAL_ERR, err).getAll();
-			Utils.logger("error", errorPrefix, err);
+			// Utils.logger("error", errorPrefix, err);
 		} else {
 			result.msg = new APIException(UTILS.INTERNAL_ERR, e.message).getAll();
-			Utils.logger("error", errorPrefix, e.message);
+			// Utils.logger("error", errorPrefix, e.message);
 		}
 
 		return result;

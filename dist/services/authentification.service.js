@@ -42,6 +42,8 @@ const userProfile_service_1 = require("./userProfile.service");
 const appProfile_service_1 = require("./appProfile.service");
 const userList_services_1 = require("./userList.services");
 const appConnectedList_services_1 = require("./appConnectedList.services");
+const AuthError_1 = require("../security/AuthError");
+const codeUnique_service_1 = require("./codeUnique.service");
 const tokenKey = '9b1deb4d-3b7d-4bad-9bdd-2b0d7b3dcb6d';
 class AuthentificationService {
     constructor() { }
@@ -49,6 +51,14 @@ class AuthentificationService {
         if (!this.instance)
             this.instance = new AuthentificationService();
         return this.instance;
+    }
+    consumeCodeUnique(code) {
+        try {
+            return codeUnique_service_1.SpinalCodeUniqueService.getInstance().consumeCode(code);
+        }
+        catch (error) {
+            throw new AuthError_1.OtherError(constant_1.HTTP_CODES.BAD_REQUEST, "Code unique not valid");
+        }
     }
     authenticate(info) {
         return __awaiter(this, void 0, void 0, function* () {
@@ -134,6 +144,27 @@ class AuthentificationService {
             });
         });
     }
+    updatePlatformTokenData() {
+        var _a;
+        return __awaiter(this, void 0, void 0, function* () {
+            let context = yield configFile_service_1.configServiceInstance.getContext(constant_1.PAM_CREDENTIAL_CONTEXT_NAME);
+            const bosCredential = (_a = context === null || context === void 0 ? void 0 : context.info) === null || _a === void 0 ? void 0 : _a.get();
+            if (!bosCredential)
+                throw new Error("No admin registered, register an admin and retry !");
+            const { urlAdmin, idPlateform: clientId, tokenPamToAdmin } = bosCredential;
+            return axios_1.default.post(`${urlAdmin}/platforms/updatePlatformToken`, { clientId, token: tokenPamToAdmin }, {
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+            }).then((result) => {
+                if (result.data.error)
+                    throw new Error(result.data.error);
+                const { token } = result.data;
+                context.info.mod_attr("tokenPamToAdmin", token);
+                return result.data;
+            });
+        });
+    }
     // public async updateToken(oldToken: string) {
     //     const adminInfo = await this.getAdminCredential();
     //     const decodeToken = jwt.verify(oldToken, tokenKey);
@@ -214,15 +245,18 @@ class AuthentificationService {
         });
     }
     _formatInfo(info) {
+        const obj = { clientId: undefined, clientSecret: undefined };
         if ("client_id" in info) {
-            info["clientId"] = info["client_id"];
-            delete info.client_id;
+            // info["clientId"] = info["client_id"]
+            // delete info.client_id;
+            obj.clientId = info["client_id"];
         }
         if ("client_secret" in info) {
-            info["clientSecret"] = info["client_secret"];
-            delete info.client_secret;
+            // info["clientSecret"] = info["client_secret"]
+            // delete info.client_secret;
+            obj.clientSecret = info["client_secret"];
         }
-        return info;
+        return (obj.clientId && obj.clientSecret ? obj : info);
     }
 }
 exports.AuthentificationService = AuthentificationService;

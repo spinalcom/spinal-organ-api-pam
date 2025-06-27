@@ -37,9 +37,11 @@ require("dotenv").config({ path: path.resolve(__dirname, "../.env") });
 const spinal_core_connectorjs_type_1 = require("spinal-core-connectorjs_type");
 const configFile_service_1 = require("./services/configFile.service");
 const server_1 = require("./server");
+const spinal_lib_organ_monitoring_1 = require("spinal-lib-organ-monitoring");
 const conn = spinal_core_connectorjs_type_1.spinalCore.connect(`${process.env.HUB_PROTOCOL}://${process.env.USER_ID}:${process.env.USER_MDP}@${process.env.HUB_HOST}:${process.env.HUB_PORT}/`);
 configFile_service_1.configServiceInstance.init(conn).then(() => __awaiter(void 0, void 0, void 0, function* () {
     const { app } = yield (0, server_1.default)(conn);
+    yield spinal_lib_organ_monitoring_1.default.init(conn, process.env.ORGAN_NAME, "PAM_API", process.env.HUB_HOST, parseInt(process.env.HUB_PORT));
 })).catch((err) => {
     console.error(err);
 });

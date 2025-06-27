@@ -43,14 +43,14 @@ import {
   IPortofolioAuthRes,
 } from '../interfaces';
 import AuthorizationService from './authorization.service';
-import {PortofolioService} from './portofolio.service';
-import {UserProfileService} from './userProfile.service';
+import { PortofolioService } from './portofolio.service';
+import { UserProfileService } from './userProfile.service';
 
 export class AdminProfileService {
   private static instance: AdminProfileService;
   private _adminNode: SpinalNode;
 
-  private constructor() {}
+  private constructor() { }
 
   public static getInstance(): AdminProfileService {
     if (!this.instance) {
@@ -84,7 +84,7 @@ export class AdminProfileService {
   }
 
   async addAppToProfil(app: SpinalNode) {
-    const {context, portofolio} = await this._createOrGetAdminPortofolio();
+    const { context, portofolio } = await this._createOrGetAdminPortofolio();
     const reference = new SpinalNode(
       app.getName().get(),
       app.getType().get(),
@@ -145,6 +145,10 @@ export class AdminProfileService {
     });
   }
 
+  public isAdmin(profileId: string): boolean {
+    return this._adminNode.getId().get() === profileId;
+  }
+
   private _createAdminProfile(): SpinalNode {
     const info = {
       name: ADMIN_PROFILE_NAME,
@@ -160,7 +164,7 @@ export class AdminProfileService {
   private async _getPortofoliosStructure(): Promise<IPortofolioAuth[]> {
     const details =
       await PortofolioService.getInstance().getAllPortofoliosDetails();
-    return details.map(({node, apps, apis, buildings}: any) => {
+    return details.map(({ node, apps, apis, buildings }: any) => {
       return {
         portofolioId: node.getId().get(),
         appsIds: apps.map((el) => el.getId().get()),
@@ -186,7 +190,7 @@ export class AdminProfileService {
     const children = await context.getChildren();
     let found = children.find((el) => el.getName().get() === adminPortofolio);
 
-    if (found) return {context, portofolio: found};
+    if (found) return { context, portofolio: found };
 
     const node = new SpinalNode(adminPortofolio, adminPortofolio);
     const refNode = new SpinalNode(adminPortofolio, adminPortofolio, node);
@@ -197,6 +201,6 @@ export class AdminProfileService {
       PTR_LST_TYPE,
       context
     );
-    return {context, portofolio: refNode};
+    return { context, portofolio: refNode };
   }
 }

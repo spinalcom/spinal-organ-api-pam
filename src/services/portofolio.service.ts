@@ -154,7 +154,10 @@ export class PortofolioService {
         ? portofolio
         : await this.getPortofolio(portofolio);
 
-    if (!node) throw new Error(`No portofolio found for {portofolio}`);
+    if (!node) {
+      const id = typeof portofolio === "string" ? portofolio : portofolio.getId().get();
+      throw new Error(`No portofolio found for ${id}`);
+    }
 
     const [apps, buildings, apis] = await Promise.all([
       this.getPortofolioApps(node),

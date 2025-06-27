@@ -53,6 +53,18 @@ export class AuthController extends Controller {
         }
     }
 
+    @Post("/consume/code")
+    public async consumeCodeUnique(@Body() data: { code: string }): Promise<string | IApplicationToken | IUserToken | { message: string }> {
+        try {
+            const resp = await serviceInstance.consumeCodeUnique(data.code);
+            this.setStatus(HTTP_CODES.OK);
+            return resp;
+        } catch (error) {
+            this.setStatus(error.code || HTTP_CODES.INTERNAL_ERROR);
+            return { message: error.message };
+        }
+    }
+
 
     @Security(SECURITY_NAME.bearerAuth)
     @Post("/register_admin")
@@ -65,6 +77,23 @@ export class AuthController extends Controller {
             await serviceInstance.sendDataToAdmin();
             this.setStatus(HTTP_CODES.OK)
             return registeredData;
+        } catch (error) {
+            this.setStatus(error.code || HTTP_CODES.INTERNAL_ERROR);
+            return { message: error.message };
+        }
+    }
+
+    @Security(SECURITY_NAME.bearerAuth)
+    @Post("/update_platform_token")
+    public async updatePlatformTokenData(@Request() req: express.Request): Promise<{ token: string; code: number } | { message: string }> {
+        try {
+            const isAdmin = await checkIfItIsAdmin(req);
+            if (!isAdmin) throw new AuthError(SECURITY_MESSAGES.UNAUTHORIZED);
+
+            const data = await serviceInstance.updatePlatformTokenData();
+
+            this.setStatus(HTTP_CODES.OK)
+            return data;
         } catch (error) {
             this.setStatus(error.code || HTTP_CODES.INTERNAL_ERROR);
             return { message: error.message };

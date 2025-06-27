@@ -32,17 +32,39 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
     });
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.profileHasAccessToBuilding = exports.proxyOptions = exports.canAccess = exports.formatUri = exports.getProfileBuildings = void 0;
+exports._get_method = exports.profileHasAccessToBuilding = exports.proxyOptions = exports.tryToAccessBuildingInfo = exports.canAccess = exports.formatUri = exports.getProfileBuildings = exports._formatBuildingRes = exports.tryToDownloadSvf = void 0;
 const constant_1 = require("../../constant");
 const services_1 = require("../../services");
 const utils_1 = require("../../utils/pam_v1_utils/utils");
 const correspondance_1 = require("./correspondance");
+const api_exception_1 = require("../../utils/pam_v1_utils/api_exception");
 const apiServerEndpoint = "/api/v1/";
+function tryToDownloadSvf(req) {
+    if (/\BIM\/file/.test(req.endpoint)) {
+        req["endpoint"] = req.endpoint.replace("/api/v1", "");
+        return true;
+    }
+    return false;
+}
+exports.tryToDownloadSvf = tryToDownloadSvf;
+function _formatBuildingRes(building) {
+    return {
+        name: building.name,
+        _id: building.id,
+        id: building.id,
+        address: building.address,
+        description: building.description,
+        urlBos: building.bosUrl,
+        type: building.type,
+        localisation: building.location,
+    };
+}
+exports._formatBuildingRes = _formatBuildingRes;
 function getProfileBuildings(profileId, isApp) {
     return __awaiter(this, void 0, void 0, function* () {
         const instance = isApp ? services_1.AppProfileService.getInstance() : services_1.UserProfileService.getInstance();
         const buildings = yield instance.getAllAuthorizedBos(profileId);
-        return buildings.map(el => el.info.get());
+        return buildings.map((el) => el.info.get());
     });
 }
 exports.getProfileBuildings = getProfileBuildings;
@@ -52,10 +74,10 @@ function formatUri(argUrl, uri) {
     let query = "";
     if (url.includes("?")) {
         query = url.slice(url.indexOf("?"));
-        url = url.substring(0, url.indexOf('?'));
+        url = url.substring(0, url.indexOf("?"));
     }
     const correspondance = _getCorrespondance(url);
-    return (/^api\/v1/.test(correspondance) ? ('/' + correspondance) : (apiServerEndpoint + correspondance)) + query;
+    return (/^api\/v1/.test(correspondance) ? "/" + correspondance : apiServerEndpoint + correspondance) + query;
 }
 exports.formatUri = formatUri;
 function canAccess(buildingId, api, profileId, isAppProfile) {
@@ -63,10 +85,10 @@ function canAccess(buildingId, api, profileId, isAppProfile) {
         const buildingAccess = yield profileHasAccessToBuilding(profileId, buildingId, isAppProfile);
         if (!buildingAccess)
             return false;
-        if (!isAppProfile)
+        if (!isAppProfile || tryToAccessBuildingInfo(api))
             return true;
         if (api.route.includes("?"))
-            api.route = api.route.substring(0, api.route.indexOf('?'));
+            api.route = api.route.substring(0, api.route.indexOf("?"));
         const routeFound = _hasAccessToApiRoute(buildingAccess, api);
         if (!routeFound)
             return false;
@@ -74,27 +96,40 @@ function canAccess(buildingId, api, profileId, isAppProfile) {
     });
 }
 exports.canAccess = canAccess;
+function tryToAccessBuildingInfo(api) {
+    if (api.method.toUpperCase() !== "GET")
+        return false;
+    const reqWithOutApi = api.route.replace("/api/v1", "");
+    return reqWithOutApi === "/" || reqWithOutApi.length == 0;
+}
+exports.tryToAccessBuildingInfo = tryToAccessBuildingInfo;
 const proxyOptions = (useV1) => {
     return {
         memoizeHost: false,
-        proxyReqPathResolver: (req) => req["endpoint"],
-        limit: '500mb',
+        proxyReqPathResolver: (req) => {
+            return req["endpoint"];
+        },
+        limit: "500gb",
         userResDecorator: (proxyRes, proxyResData) => {
             return new Promise((resolve, reject) => {
                 if (!useV1)
                     return resolve(proxyResData);
-                if (proxyRes.statusCode == constant_1.HTTP_CODES.NOT_FOUND)
-                    return resolve(proxyResData);
                 try {
+                    if (proxyRes.statusCode >= 400 && proxyRes.statusCode <= 599) {
+                        throw new api_exception_1.APIException(proxyRes.statusCode, proxyResData.toString());
+                    }
                     const response = JSON.parse(proxyResData.toString());
-                    const data = utils_1.Utils.getReturnObj(null, response, _get_method(proxyRes.req.method));
+                    const data = utils_1.Utils.getReturnObj(null, response, _get_method(proxyRes.req.method, proxyRes.statusCode));
                     resolve(data);
                 }
                 catch (error) {
-                    resolve(proxyResData);
+                    const oErr = utils_1.Utils.getErrObj(error, "");
+                    oErr.msg.datas = { ko: {} };
+                    resolve(oErr.msg);
+                    // resolve(proxyResData)
                 }
             });
-        }
+        },
     };
 };
 exports.proxyOptions = proxyOptions;
@@ -109,8 +144,8 @@ exports.profileHasAccessToBuilding = profileHasAccessToBuilding;
 //            PRIVATES           //
 ///////////////////////////////////
 function _getCorrespondance(url) {
-    const found = Object.keys(correspondance_1.correspondanceObj).find(el => {
-        const t = el.replace(/\{(.*?)\}/g, (el) => '(.*?)');
+    const found = Object.keys(correspondance_1.correspondanceObj).find((el) => {
+        const t = el.replace(/\{(.*?)\}/g, (el) => "(.*?)");
         const regex = new RegExp(`^${t}$`);
         return url.match(regex);
     });
@@ -140,23 +175,28 @@ function _hasAccessToBuilding(profile, buildingId) {
     return;
 }
 function _hasAccessToApiRoute(building, apiRoute) {
-    return building.apis.find(node => {
+    return building.apis.find((node) => {
         const route = node.info.get();
         if (apiRoute.method.toUpperCase() !== route.method.toUpperCase())
             return false;
-        const routeFormatted = route.name.replace(/\{(.*?)\}/g, (el) => '(.*?)');
+        const routeFormatted = route.name.replace(/\{(.*?)\}/g, (el) => "(.*?)");
         const regex = new RegExp(`^${routeFormatted}$`);
         return apiRoute.route.match(regex);
     });
 }
-function _get_method(method) {
+function _get_method(method, statusCode) {
     switch (method) {
-        case "GET":
-            return "READ";
         case "POST":
-            return "ADD";
+            if (statusCode === constant_1.HTTP_CODES.CREATED)
+                return "ADD";
+            return "READ";
         case "DELETE":
             return "DEL";
+        default:
+            if (statusCode >= 400 && statusCode <= 599)
+                return "ERROR";
+            return "READ";
     }
 }
+exports._get_method = _get_method;
 //# sourceMappingURL=utils.js.map

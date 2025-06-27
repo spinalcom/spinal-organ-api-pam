@@ -82,7 +82,7 @@ let UserProfileController = class UserProfileController extends tsoa_1.Controlle
         return __awaiter(this, void 0, void 0, function* () {
             try {
                 const profileId = yield (0, authentication_1.getProfileId)(req);
-                const isAdmin = adminProfile_service_1.AdminProfileService.getInstance().adminNode.getId().get() === profileId;
+                const isAdmin = adminProfile_service_1.AdminProfileService.getInstance().isAdmin(profileId);
                 if (!isAdmin && profileId !== id)
                     throw new AuthError_1.AuthError(constant_1.SECURITY_MESSAGES.UNAUTHORIZED);
                 const data = yield serviceInstance.getUserProfile(id);
@@ -158,7 +158,7 @@ let UserProfileController = class UserProfileController extends tsoa_1.Controlle
         return __awaiter(this, void 0, void 0, function* () {
             try {
                 const id = yield (0, authentication_1.getProfileId)(req);
-                const isAdmin = adminProfile_service_1.AdminProfileService.getInstance().adminNode.getId().get() === id;
+                const isAdmin = adminProfile_service_1.AdminProfileService.getInstance().isAdmin(id);
                 if (!isAdmin && profileId !== id)
                     throw new AuthError_1.AuthError(constant_1.SECURITY_MESSAGES.UNAUTHORIZED);
                 const nodes = yield serviceInstance.getPortofolioAuthStructure(profileId);
@@ -199,7 +199,7 @@ let UserProfileController = class UserProfileController extends tsoa_1.Controlle
         return __awaiter(this, void 0, void 0, function* () {
             try {
                 const id = yield (0, authentication_1.getProfileId)(req);
-                const isAdmin = adminProfile_service_1.AdminProfileService.getInstance().adminNode.getId().get() === id;
+                const isAdmin = adminProfile_service_1.AdminProfileService.getInstance().isAdmin(id);
                 if (!isAdmin && profileId !== id)
                     throw new AuthError_1.AuthError(constant_1.SECURITY_MESSAGES.UNAUTHORIZED);
                 const nodes = yield serviceInstance.getAuthorizedPortofolioApp(profileId, portofolioId);
@@ -247,7 +247,7 @@ let UserProfileController = class UserProfileController extends tsoa_1.Controlle
         return __awaiter(this, void 0, void 0, function* () {
             try {
                 const id = yield (0, authentication_1.getProfileId)(req);
-                const isAdmin = adminProfile_service_1.AdminProfileService.getInstance().adminNode.getId().get() === id;
+                const isAdmin = adminProfile_service_1.AdminProfileService.getInstance().isAdmin(id);
                 if (!isAdmin && profileId !== id)
                     throw new AuthError_1.AuthError(constant_1.SECURITY_MESSAGES.UNAUTHORIZED);
                 const nodes = yield serviceInstance.getBosAuthStructure(profileId, portofolioId);
@@ -288,7 +288,7 @@ let UserProfileController = class UserProfileController extends tsoa_1.Controlle
         return __awaiter(this, void 0, void 0, function* () {
             try {
                 const id = yield (0, authentication_1.getProfileId)(req);
-                const isAdmin = adminProfile_service_1.AdminProfileService.getInstance().adminNode.getId().get() === id;
+                const isAdmin = adminProfile_service_1.AdminProfileService.getInstance().isAdmin(id);
                 if (!isAdmin && profileId !== id)
                     throw new AuthError_1.AuthError(constant_1.SECURITY_MESSAGES.UNAUTHORIZED);
                 const nodes = yield serviceInstance.getAuthorizedBosApp(profileId, portofolioId, bosId);

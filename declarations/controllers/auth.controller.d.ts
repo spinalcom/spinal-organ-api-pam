@@ -7,10 +7,21 @@ export declare class AuthController extends Controller {
     authenticate(credential: IUserCredential | IAppCredential | IOAuth2Credential): Promise<string | IApplicationToken | IUserToken | {
         message: string;
     }>;
+    consumeCodeUnique(data: {
+        code: string;
+    }): Promise<string | IApplicationToken | IUserToken | {
+        message: string;
+    }>;
     registerToAdmin(req: express.Request, data: {
         pamInfo: IPamInfo;
         adminInfo: IAdmin;
     }): Promise<IPamCredential | {
+        message: string;
+    }>;
+    updatePlatformTokenData(req: express.Request): Promise<{
+        token: string;
+        code: number;
+    } | {
         message: string;
     }>;
     getBosToAdminCredential(req: express.Request): Promise<IPamCredential | {

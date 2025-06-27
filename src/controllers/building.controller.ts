@@ -44,7 +44,7 @@ export class BuildingController extends Controller {
 
     @Security(SECURITY_NAME.bearerAuth)
     @Post("/get_building/{id}")
-    public async getBuildingById(@Request() req: express.Request, @Path() id: string): Promise<IBuilding | { message: string }> {
+    public async getBuildingByIdByPost(@Request() req: express.Request, @Path() id: string): Promise<IBuilding | { message: string }> {
         try {
             const profile = await getProfileNode(req);
             const node = await AuthorizationService.getInstance().profileHasAccess(profile, id);
@@ -64,6 +64,12 @@ export class BuildingController extends Controller {
             this.setStatus(HTTP_CODES.INTERNAL_ERROR)
             return { message: error.message };
         }
+    }
+
+    @Security(SECURITY_NAME.bearerAuth)
+    @Get("/get_building/{id}")
+    public async getBuildingById(@Request() req: express.Request, @Path() id: string): Promise<IBuilding | { message: string }> {
+        return this.getBuildingByIdByPost(req, id);
     }
 
 

@@ -118,7 +118,6 @@ let WebsocketLogsController = class WebsocketLogsController extends tsoa_1.Contr
                 }
                 this.setStatus(constant_1.HTTP_CODES.OK);
                 const t = yield this._websocketLogService.getFromIntervalTime(building, begin, end);
-                console.log(t);
                 return t;
             }
             catch (error) {

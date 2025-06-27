@@ -130,7 +130,6 @@ export class WebsocketLogsController extends Controller {
         begin,
         end
       );
-      console.log(t);
       return t;
     } catch (error) {
       this.setStatus(error.code || HTTP_CODES.INTERNAL_ERROR);

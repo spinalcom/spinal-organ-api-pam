@@ -38,6 +38,7 @@ const services_1 = require("../../services");
 const utils_1 = require("../bos/utils");
 const socket_io_1 = require("socket.io");
 const spinal_service_pubsub_logs_1 = require("spinal-service-pubsub-logs");
+const uuid_1 = require("uuid");
 const SocketClient = require('socket.io-client');
 const logInstance = services_1.WebsocketLogsService.getInstance();
 class WebSocketServer {
@@ -61,8 +62,8 @@ class WebSocketServer {
         });
     }
     _initNameSpace() {
-        this._io.on("connection", (socket) => {
-            console.log(socket.id, "is connected");
+        this._io.on('connection', (socket) => {
+            console.log(socket.id, 'is connected');
         });
         this._io.of(/.*/).use((socket, next) => __awaiter(this, void 0, void 0, function* () {
             let err;
@@ -130,8 +131,8 @@ class WebSocketServer {
         });
     }
     _createClient(building, socket, tokenInfo) {
-        var _a;
-        const sessionId = (_a = tokenInfo.userInfo) === null || _a === void 0 ? void 0 : _a.id;
+        // const sessionId = tokenInfo.userInfo?.id;
+        const sessionId = (0, uuid_1.v4)();
         const token = tokenInfo.token;
         if (sessionId)
             this._sessionToUserInfo.set(sessionId, tokenInfo.userInfo);
@@ -141,11 +142,11 @@ class WebSocketServer {
             const client = SocketClient(api_url, {
                 auth: { token, sessionId, building: (_a = building === null || building === void 0 ? void 0 : building.info) === null || _a === void 0 ? void 0 : _a.get() },
                 transports: ['websocket'],
-                reconnection: false
+                reconnection: false,
             });
-            client.on("connect", () => {
+            client.on('connect', () => {
                 var _a, _b;
-                console.log(((_a = tokenInfo === null || tokenInfo === void 0 ? void 0 : tokenInfo.userInfo) === null || _a === void 0 ? void 0 : _a.name) || ((_b = tokenInfo === null || tokenInfo === void 0 ? void 0 : tokenInfo.userInfo) === null || _b === void 0 ? void 0 : _b.id), "is connected");
+                console.log(((_a = tokenInfo === null || tokenInfo === void 0 ? void 0 : tokenInfo.userInfo) === null || _a === void 0 ? void 0 : _a.name) || ((_b = tokenInfo === null || tokenInfo === void 0 ? void 0 : tokenInfo.userInfo) === null || _b === void 0 ? void 0 : _b.id), 'is connected');
             });
             client.on('session_created', (id) => __awaiter(this, void 0, void 0, function* () {
                 this._sessionToUserInfo.set(id, tokenInfo.userInfo);
@@ -209,7 +210,7 @@ class WebSocketServer {
             const emitter = this._clientToServer.get(pamToBosSocket.sessionId || pamToBosSocket.id);
             if (emitter) {
                 const emitterInfo = this._sessionToUserInfo.get(emitter.sessionId);
-                console.log(emitterInfo.userName || emitter.sessionId, "is disconnected", reason);
+                console.log(emitterInfo.userName || emitter.sessionId, 'is disconnected', reason);
                 emitter.disconnect();
             }
         }));
@@ -232,7 +233,7 @@ class WebSocketServer {
             const emitter = this._serverToClient.get(clientToPamSocket.sessionId || clientToPamSocket.id);
             if (emitter) {
                 const emitterInfo = this._sessionToUserInfo.get(emitter.sessionId);
-                console.log(emitterInfo.userName || emitter.sessionId, "is disconnected", reason);
+                console.log(emitterInfo.userName || emitter.sessionId, 'is disconnected', reason);
                 emitter.disconnect();
                 yield this._createWebsocketLog(emitter, spinal_service_pubsub_logs_1.DISCONNECTION_EVENT, undefined, emitterInfo, spinal_service_pubsub_logs_1.DISCONNECTION_EVENT);
             }

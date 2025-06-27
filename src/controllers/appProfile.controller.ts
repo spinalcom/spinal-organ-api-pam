@@ -151,7 +151,7 @@ export class AppProfileController extends Controller {
     public async getAuthorizedPortofolio(@Request() req: express.Request, @Path() profileId: string): Promise<IPortofolioData[] | { message: string }> {
         try {
             const id = await getProfileId(req);
-            const isAdmin = AdminProfileService.getInstance().adminNode.getId().get() === id;
+            const isAdmin = AdminProfileService.getInstance().isAdmin(id);
 
             if (!isAdmin && profileId !== id) throw new AuthError(SECURITY_MESSAGES.UNAUTHORIZED);
 
@@ -203,7 +203,7 @@ export class AppProfileController extends Controller {
         try {
 
             const id = await getProfileId(req);
-            const isAdmin = AdminProfileService.getInstance().adminNode.getId().get() === id;
+            const isAdmin = AdminProfileService.getInstance().isAdmin(id);
 
             if (!isAdmin && profileId !== id) throw new AuthError(SECURITY_MESSAGES.UNAUTHORIZED);
 
@@ -256,7 +256,7 @@ export class AppProfileController extends Controller {
     public async getAuthorizedBos(@Request() req: express.Request, @Path() profileId: string, @Path() portofolioId: string): Promise<IBosData | { message: string }> {
         try {
             const id = await getProfileId(req);
-            const isAdmin = AdminProfileService.getInstance().adminNode.getId().get() === id;
+            const isAdmin = AdminProfileService.getInstance().isAdmin(id);
 
             if (!isAdmin && profileId !== id) throw new AuthError(SECURITY_MESSAGES.UNAUTHORIZED);
 
@@ -307,7 +307,7 @@ export class AppProfileController extends Controller {
     public async getAuthorizedBosApis(@Request() req: express.Request, @Path() profileId: string, @Path() portofolioId: string, @Path() bosId: string): Promise<IApiRoute[] | { message: string }> {
         try {
             const id = await getProfileId(req);
-            const isAdmin = AdminProfileService.getInstance().adminNode.getId().get() === id;
+            const isAdmin = AdminProfileService.getInstance().isAdmin(id);
 
             if (!isAdmin && profileId !== id) throw new AuthError(SECURITY_MESSAGES.UNAUTHORIZED);
 

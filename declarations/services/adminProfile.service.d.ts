@@ -12,6 +12,7 @@ export declare class AdminProfileService {
     removeFromAdminProfile(data: IPortofolioAuthEdit): Promise<any>;
     syncAdminProfile(): Promise<IPortofolioAuthRes[]>;
     getAdminProfile(argContext?: SpinalContext): Promise<SpinalNode>;
+    isAdmin(profileId: string): boolean;
     private _createAdminProfile;
     private _getPortofoliosStructure;
     private _createOrGetAdminPortofolio;
