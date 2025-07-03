@@ -309,6 +309,38 @@
 				"type": "object",
 				"additionalProperties": false
 			},
+			"IApplicationToken": {
+				"properties": {
+					"name": {
+						"type": "string"
+					},
+					"type": {
+						"type": "string"
+					},
+					"token": {
+						"type": "string"
+					},
+					"createdToken": {
+						"type": "number",
+						"format": "double"
+					},
+					"expieredToken": {
+						"type": "number",
+						"format": "double"
+					},
+					"applicationId": {
+						"type": "string"
+					},
+					"applicationProfileList": {
+						"items": {
+							"type": "string"
+						},
+						"type": "array"
+					}
+				},
+				"type": "object",
+				"additionalProperties": false
+			},
 			"IPamCredential": {
 				"properties": {
 					"id": {
@@ -406,38 +438,6 @@
 					302
 				],
 				"type": "number"
-			},
-			"IApplicationToken": {
-				"properties": {
-					"name": {
-						"type": "string"
-					},
-					"type": {
-						"type": "string"
-					},
-					"token": {
-						"type": "string"
-					},
-					"createdToken": {
-						"type": "number",
-						"format": "double"
-					},
-					"expieredToken": {
-						"type": "number",
-						"format": "double"
-					},
-					"applicationId": {
-						"type": "string"
-					},
-					"applicationProfileList": {
-						"items": {
-							"type": "string"
-						},
-						"type": "array"
-					}
-				},
-				"type": "object",
-				"additionalProperties": false
 			},
 			"ILocation": {
 				"properties": {
@@ -3502,6 +3502,67 @@
 						"application/json": {
 							"schema": {
 								"$ref": "#/components/schemas/IUserCredential"
+							}
+						}
+					}
+				}
+			}
+		},
+		"/api/v1/pam/consume/code": {
+			"post": {
+				"operationId": "ConsumeCodeUnique",
+				"responses": {
+					"200": {
+						"description": "Ok",
+						"content": {
+							"application/json": {
+								"schema": {
+									"anyOf": [
+										{
+											"type": "string"
+										},
+										{
+											"$ref": "#/components/schemas/IApplicationToken"
+										},
+										{
+											"$ref": "#/components/schemas/IUserToken"
+										},
+										{
+											"properties": {
+												"message": {
+													"type": "string"
+												}
+											},
+											"required": [
+												"message"
+											],
+											"type": "object"
+										}
+									]
+								}
+							}
+						}
+					}
+				},
+				"tags": [
+					"Auth"
+				],
+				"security": [],
+				"parameters": [],
+				"requestBody": {
+					"required": true,
+					"content": {
+						"application/json": {
+							"schema": {
+								"properties": {
+									"code": {
+										"type": "string"
+									}
+								},
+								"required": [
+									"code"
+								],
+								"type": "object"
 							}
 						}
 					}

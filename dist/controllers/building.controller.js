@@ -300,7 +300,6 @@ let BuildingController = class BuildingController extends tsoa_1.Controller {
         }
     }
 };
-exports.BuildingController = BuildingController;
 __decorate([
     (0, tsoa_1.Security)(constant_1.SECURITY_NAME.bearerAuth),
     (0, tsoa_1.Post)("/get_building/{id}"),
@@ -439,10 +438,11 @@ __decorate([
     __metadata("design:paramtypes", [Object, String, String]),
     __metadata("design:returntype", Promise)
 ], BuildingController.prototype, "buildingHasApi", null);
-exports.BuildingController = BuildingController = __decorate([
+BuildingController = __decorate([
     (0, tsoa_1.Route)("/api/v1/pam"),
     (0, tsoa_1.Tags)("Building"),
     __metadata("design:paramtypes", [])
 ], BuildingController);
+exports.BuildingController = BuildingController;
 exports.default = new BuildingController();
 //# sourceMappingURL=building.controller.js.map

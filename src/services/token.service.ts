@@ -229,7 +229,7 @@ export class TokenService {
         let isAdminToken = false;
 
         try {
-            const adminTokenData = this.getTokenData(token);
+            const adminTokenData = await this.getTokenData(token);
             if (!adminTokenData) throw new Error("Token not found in cache or context"); // Check if the token is in the cache or context
 
             isAdminToken = true;

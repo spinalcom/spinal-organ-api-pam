@@ -261,7 +261,6 @@ let APIController = class APIController extends tsoa_1.Controller {
         }
     }
 };
-exports.APIController = APIController;
 __decorate([
     (0, tsoa_1.Security)(constant_1.SECURITY_NAME.bearerAuth),
     (0, tsoa_1.Post)("/create_portofolio_api_route"),
@@ -370,10 +369,11 @@ __decorate([
     __metadata("design:paramtypes", [Object, Object]),
     __metadata("design:returntype", Promise)
 ], APIController.prototype, "uploadBosSwaggerFile", null);
-exports.APIController = APIController = __decorate([
+APIController = __decorate([
     (0, tsoa_1.Route)("/api/v1/pam/"),
     (0, tsoa_1.Tags)("Apis"),
     __metadata("design:paramtypes", [])
 ], APIController);
+exports.APIController = APIController;
 exports.default = new APIController();
 //# sourceMappingURL=apis.controller.js.map

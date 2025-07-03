@@ -59,6 +59,17 @@ let AuthController = class AuthController extends tsoa_1.Controller {
             return { message: error.message };
         }
     }
+    async consumeCodeUnique(data) {
+        try {
+            const resp = await serviceInstance.consumeCodeUnique(data.code);
+            this.setStatus(constant_1.HTTP_CODES.OK);
+            return resp;
+        }
+        catch (error) {
+            this.setStatus(error.code || constant_1.HTTP_CODES.INTERNAL_ERROR);
+            return { message: error.message };
+        }
+    }
     async registerPamInAuthPlatform(req, data) {
         try {
             const isAdmin = await (0, authentication_1.checkIfItIsAdmin)(req);
@@ -176,7 +187,6 @@ let AuthController = class AuthController extends tsoa_1.Controller {
         }
     }
 };
-exports.AuthController = AuthController;
 __decorate([
     (0, tsoa_1.Post)("/auth"),
     __param(0, (0, tsoa_1.Body)()),
@@ -184,6 +194,13 @@ __decorate([
     __metadata("design:paramtypes", [Object]),
     __metadata("design:returntype", Promise)
 ], AuthController.prototype, "authenticate", null);
+__decorate([
+    (0, tsoa_1.Post)("/consume/code"),
+    __param(0, (0, tsoa_1.Body)()),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [Object]),
+    __metadata("design:returntype", Promise)
+], AuthController.prototype, "consumeCodeUnique", null);
 __decorate([
     (0, tsoa_1.Security)(constant_1.SECURITY_NAME.bearerAuth),
     (0, tsoa_1.Post)("/register_admin"),
@@ -241,10 +258,11 @@ __decorate([
     __metadata("design:paramtypes", [Object]),
     __metadata("design:returntype", Promise)
 ], AuthController.prototype, "tokenIsValid", null);
-exports.AuthController = AuthController = __decorate([
+AuthController = __decorate([
     (0, tsoa_1.Route)("/api/v1/pam"),
     (0, tsoa_1.Tags)("Auth"),
     __metadata("design:paramtypes", [])
 ], AuthController);
+exports.AuthController = AuthController;
 exports.default = new AuthController();
 //# sourceMappingURL=auth.controller.js.map

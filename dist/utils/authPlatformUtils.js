@@ -1,7 +1,6 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.getOrCreateContext = getOrCreateContext;
-exports.getRequestBody = getRequestBody;
+exports.getRequestBody = exports.getOrCreateContext = void 0;
 const spinal_model_graph_1 = require("spinal-model-graph");
 const services_1 = require("../services");
 async function getOrCreateContext(graph, contextName, contextType) {
@@ -12,6 +11,7 @@ async function getOrCreateContext(graph, contextName, contextType) {
     }
     return context;
 }
+exports.getOrCreateContext = getOrCreateContext;
 async function getRequestBody(update, bosCredential, adminCredential) {
     return JSON.stringify({
         TokenBosAdmin: bosCredential.tokenPamToAdmin,
@@ -24,6 +24,7 @@ async function getRequestBody(update, bosCredential, adminCredential) {
         }),
     });
 }
+exports.getRequestBody = getRequestBody;
 async function getPlatformInfo() {
     return {
         userProfileList: await _formatUserProfiles(),

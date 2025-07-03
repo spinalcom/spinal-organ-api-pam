@@ -1,6 +1,6 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.initializeDatabase = initializeDatabase;
+exports.initializeDatabase = void 0;
 const spinal_core_connectorjs_type_1 = require("spinal-core-connectorjs_type");
 const spinal_model_graph_1 = require("spinal-model-graph");
 const path = require("path");
@@ -21,6 +21,7 @@ function initializeDatabase(sessionFilesystem, directory_path, configFileName) {
         }));
     });
 }
+exports.initializeDatabase = initializeDatabase;
 function _createFile(directory, configFileName) {
     const graph = new spinal_model_graph_1.SpinalGraph(configFileName);
     directory.force_add_file(configFileName, graph, { model_type: constant_1.CONFIG_FILE_MODEl_TYPE });

@@ -7,6 +7,11 @@ export declare class AuthController extends Controller {
     authenticate(credential: IUserCredential): Promise<string | IUserToken | {
         message: string;
     }>;
+    consumeCodeUnique(data: {
+        code: string;
+    }): Promise<string | IApplicationToken | IUserToken | {
+        message: string;
+    }>;
     registerPamInAuthPlatform(req: express.Request, data: IAdmin): Promise<IPamCredential | {
         message: string;
     }>;

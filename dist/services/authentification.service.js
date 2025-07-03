@@ -29,6 +29,8 @@ const constant_1 = require("../constant");
 const uuid_1 = require("uuid");
 const userList_services_1 = require("./userList.services");
 const authPlatformUtils_1 = require("../utils/authPlatformUtils");
+const spinalCodeUnique_service_1 = require("./spinalCodeUnique.service");
+const AuthError_1 = require("../security/AuthError");
 const tokenKey = '9b1deb4d-3b7d-4bad-9bdd-2b0d7b3dcb6d';
 const jwt = require('jsonwebtoken');
 class AuthentificationService {
@@ -42,6 +44,14 @@ class AuthentificationService {
     }
     async init(graph) {
         this.graph = graph;
+    }
+    consumeCodeUnique(code) {
+        try {
+            return spinalCodeUnique_service_1.SpinalCodeUniqueService.getInstance().consumeCode(code);
+        }
+        catch (error) {
+            throw new AuthError_1.OtherError(constant_1.HTTP_CODES.BAD_REQUEST, "Code unique not valid");
+        }
     }
     /**
      * Authenticates a user based on the provided credentials.

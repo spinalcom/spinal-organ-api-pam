@@ -23,19 +23,7 @@
  * <http://resources.spinalcom.com/licenses.pdf>.
  */
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.proxyOptions = void 0;
-exports.isTryingToDownloadSvf = isTryingToDownloadSvf;
-exports._formatBuildingResponse = _formatBuildingResponse;
-exports.getBuildingsAuthorizedToProfile = getBuildingsAuthorizedToProfile;
-exports.getAppProfileBuildings = getAppProfileBuildings;
-exports.getUserProfileBuildings = getUserProfileBuildings;
-exports.formatUri = formatUri;
-exports.canAccess = canAccess;
-exports.tryToAccessBuildingInfo = tryToAccessBuildingInfo;
-exports.profileHasAccessToBuilding = profileHasAccessToBuilding;
-exports.profileHasAccessToApi = profileHasAccessToApi;
-exports._get_method = _get_method;
-exports.getProfileIdInTokenInfo = getProfileIdInTokenInfo;
+exports.getProfileIdInTokenInfo = exports._get_method = exports.profileHasAccessToApi = exports.profileHasAccessToBuilding = exports.proxyOptions = exports.tryToAccessBuildingInfo = exports.canAccess = exports.formatUri = exports.getUserProfileBuildings = exports.getAppProfileBuildings = exports.getBuildingsAuthorizedToProfile = exports._formatBuildingResponse = exports.isTryingToDownloadSvf = void 0;
 const constant_1 = require("../../constant");
 const services_1 = require("../../services");
 const utils_1 = require("../../utils/pam_v1_utils/utils");
@@ -50,6 +38,7 @@ function isTryingToDownloadSvf(req) {
     }
     return false;
 }
+exports.isTryingToDownloadSvf = isTryingToDownloadSvf;
 function _formatBuildingResponse(building) {
     return {
         name: building.name,
@@ -62,23 +51,27 @@ function _formatBuildingResponse(building) {
         localisation: building.location,
     };
 }
+exports._formatBuildingResponse = _formatBuildingResponse;
 async function getBuildingsAuthorizedToProfile(tokenInfo) {
     if (services_1.TokenService.getInstance().isAppToken(tokenInfo))
         return getAppProfileBuildings(tokenInfo);
     return getUserProfileBuildings(tokenInfo);
 }
+exports.getBuildingsAuthorizedToProfile = getBuildingsAuthorizedToProfile;
 async function getAppProfileBuildings(tokenInfo) {
     const instance = services_1.AppProfileService.getInstance();
     const profileId = tokenInfo.profile.appProfileBosConfigId;
     const buildings = await instance.getAllAuthorizedBos(profileId);
     return buildings.map((el) => el.info.get());
 }
+exports.getAppProfileBuildings = getAppProfileBuildings;
 async function getUserProfileBuildings(tokenInfo) {
     const instance = services_1.UserProfileService.getInstance();
     const profileId = tokenInfo.profile.userProfileBosConfigId || tokenInfo.profile.profileId;
     const buildings = await instance.getAllAuthorizedBos(profileId);
     return buildings.map((el) => el.info.get());
 }
+exports.getUserProfileBuildings = getUserProfileBuildings;
 function formatUri(argUrl, uri) {
     const base = argUrl.replace(new RegExp(`^${uri}*/`), (el) => ""); // Remove the base URI from the start of the URL
     let url = base.split("/").slice(1).join("/"); // Remove the first segment of the URL, which is the building ID
@@ -92,6 +85,7 @@ function formatUri(argUrl, uri) {
     // Reconstruct the URL with the base path and query string if it exists
     return (/^api\/v1/.test(correspondance) ? "/" + correspondance : apiServerEndpoint + correspondance) + query;
 }
+exports.formatUri = formatUri;
 async function canAccess(buildingId, api, profileId, isAppProfile) {
     const buildingAccess = await profileHasAccessToBuilding(profileId, buildingId, isAppProfile);
     if (!buildingAccess)
@@ -117,12 +111,14 @@ async function canAccess(buildingId, api, profileId, isAppProfile) {
     // if (!routeFound) return false;
     // return true;
 }
+exports.canAccess = canAccess;
 function tryToAccessBuildingInfo(api) {
     if (api.method.toUpperCase() !== "GET")
         return false;
     const reqWithOutApi = api.route.replace("/api/v1", "");
     return reqWithOutApi === "/" || reqWithOutApi.length == 0;
 }
+exports.tryToAccessBuildingInfo = tryToAccessBuildingInfo;
 const proxyOptions = (useV1) => {
     return {
         memoizeHost: false,
@@ -159,12 +155,14 @@ async function profileHasAccessToBuilding(profileId, buildingId, isAppProfile) {
     // return _hasAccessToBuilding(profile, buildingId);
     return authorization_service_1.default.getInstance().profileHasAccessToNode(profile, buildingId);
 }
+exports.profileHasAccessToBuilding = profileHasAccessToBuilding;
 async function profileHasAccessToApi(profileId, buildingId, isAppProfile) {
     const instance = isAppProfile ? services_1.AppProfileService.getInstance() : services_1.UserProfileService.getInstance();
     const profile = await instance.getProfileNode(profileId);
     // return _hasAccessToBuilding(profile, buildingId);
     return authorization_service_1.default.getInstance().profileHasAccessToNode(profile, buildingId);
 }
+exports.profileHasAccessToApi = profileHasAccessToApi;
 ///////////////////////////////////
 //            PRIVATES           //
 ///////////////////////////////////
@@ -223,6 +221,7 @@ function _get_method(method, statusCode) {
             return "READ";
     }
 }
+exports._get_method = _get_method;
 function getProfileIdInTokenInfo(tokenInfo) {
     if (services_1.TokenService.getInstance().isAppToken(tokenInfo))
         return tokenInfo.profile.appProfileBosConfigId;
@@ -230,4 +229,5 @@ function getProfileIdInTokenInfo(tokenInfo) {
         return tokenInfo.profile.userProfileBosConfigId;
     return tokenInfo.profile.profileId;
 }
+exports.getProfileIdInTokenInfo = getProfileIdInTokenInfo;
 //# sourceMappingURL=utils.js.map

@@ -161,6 +161,20 @@ const models: TsoaRoute.Models = {
         "additionalProperties": false,
     },
     // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
+    "IApplicationToken": {
+        "dataType": "refObject",
+        "properties": {
+            "name": {"dataType":"string"},
+            "type": {"dataType":"string"},
+            "token": {"dataType":"string"},
+            "createdToken": {"dataType":"double"},
+            "expieredToken": {"dataType":"double"},
+            "applicationId": {"dataType":"string"},
+            "applicationProfileList": {"dataType":"array","array":{"dataType":"string"}},
+        },
+        "additionalProperties": false,
+    },
+    // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
     "IPamCredential": {
         "dataType": "refObject",
         "properties": {
@@ -201,20 +215,6 @@ const models: TsoaRoute.Models = {
     "HTTP_CODES": {
         "dataType": "refEnum",
         "enums": [200,201,202,400,401,403,404,500,302],
-    },
-    // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
-    "IApplicationToken": {
-        "dataType": "refObject",
-        "properties": {
-            "name": {"dataType":"string"},
-            "type": {"dataType":"string"},
-            "token": {"dataType":"string"},
-            "createdToken": {"dataType":"double"},
-            "expieredToken": {"dataType":"double"},
-            "applicationId": {"dataType":"string"},
-            "applicationProfileList": {"dataType":"array","array":{"dataType":"string"}},
-        },
-        "additionalProperties": false,
     },
     // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
     "ILocation": {
@@ -1673,6 +1673,31 @@ export function RegisterRoutes(app: express.Router) {
 
 
               const promise = controller.authenticate.apply(controller, validatedArgs as any);
+              promiseHandler(controller, promise, response, undefined, next);
+            } catch (err) {
+                return next(err);
+            }
+        });
+        // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
+        app.post('/api/v1/pam/consume/code',
+            ...(fetchMiddlewares<RequestHandler>(AuthController)),
+            ...(fetchMiddlewares<RequestHandler>(AuthController.prototype.consumeCodeUnique)),
+
+            function AuthController_consumeCodeUnique(request: any, response: any, next: any) {
+            const args = {
+                    data: {"in":"body","name":"data","required":true,"dataType":"nestedObjectLiteral","nestedProperties":{"code":{"dataType":"string","required":true}}},
+            };
+
+            // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
+
+            let validatedArgs: any[] = [];
+            try {
+                validatedArgs = getValidatedArgs(args, request, response);
+
+                const controller = new AuthController();
+
+
+              const promise = controller.consumeCodeUnique.apply(controller, validatedArgs as any);
               promiseHandler(controller, promise, response, undefined, next);
             } catch (err) {
                 return next(err);

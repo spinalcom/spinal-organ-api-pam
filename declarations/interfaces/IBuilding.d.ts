@@ -16,7 +16,7 @@ export interface IBuilding {
     location?: ILocation;
     [key: string]: any;
 }
-export type IBuildingCreation = IBuilding & {
+export declare type IBuildingCreation = IBuilding & {
     appIds?: string[];
     apiIds?: string[];
 };
@@ -25,7 +25,7 @@ export interface IBuildingDetails {
     apps: SpinalNode[];
     apis: SpinalNode[];
 }
-export type IEditBuilding = IBuilding & {
+export declare type IEditBuilding = IBuilding & {
     authorizeAppIds?: string[];
     authorizeApiIds?: string[];
     unauthorizeAppIds?: string[];

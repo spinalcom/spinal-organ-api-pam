@@ -66,7 +66,6 @@ let DigitaltwinController = class DigitaltwinController extends tsoa_1.Controlle
         }
     }
 };
-exports.DigitaltwinController = DigitaltwinController;
 __decorate([
     (0, tsoa_1.Security)(constant_1.SECURITY_NAME.bearerAuth),
     (0, tsoa_1.Post)("/create_digitaltwin"),
@@ -76,10 +75,11 @@ __decorate([
     __metadata("design:paramtypes", [Object, Object]),
     __metadata("design:returntype", Promise)
 ], DigitaltwinController.prototype, "createDigitalTwin", null);
-exports.DigitaltwinController = DigitaltwinController = __decorate([
+DigitaltwinController = __decorate([
     (0, tsoa_1.Route)("/api/v1/pam"),
     (0, tsoa_1.Tags)("DigitalTwin"),
     __metadata("design:paramtypes", [])
 ], DigitaltwinController);
+exports.DigitaltwinController = DigitaltwinController;
 exports.default = new DigitaltwinController();
 //# sourceMappingURL=digitalTwin.controller.js.map

@@ -50,7 +50,8 @@ class ServicesInitializer {
             services_1.PortofolioService,
             services_1.TokenService,
             services_1.LogService,
-            services_1.AuthentificationService
+            services_1.AuthentificationService,
+            services_1.SpinalCodeUniqueService
         ];
         return this._initServicesList(services);
     }
