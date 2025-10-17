@@ -23,6 +23,7 @@
  * <http://resources.spinalcom.com/licenses.pdf>.
  */
 Object.defineProperty(exports, "__esModule", { value: true });
+exports.default = configureProxy;
 const constant_1 = require("../../constant");
 const services_1 = require("../../services");
 const proxy = require("express-http-proxy");
@@ -85,7 +86,6 @@ function configureProxy(app, useV1 = false) {
     if (useV1)
         _useV1Routes(app);
 }
-exports.default = configureProxy;
 function _useV1Routes(app) {
     app.get("/v1/building_list", async (req, res) => {
         try {

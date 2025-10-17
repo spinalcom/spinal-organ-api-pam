@@ -465,6 +465,7 @@ let AppsController = class AppsController extends tsoa_1.Controller {
         }
     }
 };
+exports.AppsController = AppsController;
 __decorate([
     (0, tsoa_1.Security)(constant_1.SECURITY_NAME.bearerAuth),
     (0, tsoa_1.Post)("/create_admin_app"),
@@ -688,11 +689,10 @@ __decorate([
     __metadata("design:paramtypes", [Object, String, String]),
     __metadata("design:returntype", Promise)
 ], AppsController.prototype, "getBuildingFavoriteApps", null);
-AppsController = __decorate([
+exports.AppsController = AppsController = __decorate([
     (0, tsoa_1.Route)("/api/v1/pam"),
     (0, tsoa_1.Tags)("Applications"),
     __metadata("design:paramtypes", [])
 ], AppsController);
-exports.AppsController = AppsController;
 exports.default = new AppsController();
 //# sourceMappingURL=apps.controller.js.map

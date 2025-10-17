@@ -1,4 +1,4 @@
-import { IAdminCredential, IPamCredential, IUserCredential, IUserToken } from "../interfaces";
+import { IAdminCredential, IBuilding, IPamCredential, IUserCredential, IUserToken } from "../interfaces";
 import { SpinalGraph } from "spinal-env-viewer-graph-service";
 export declare class AuthentificationService {
     private static instance;
@@ -7,6 +7,7 @@ export declare class AuthentificationService {
     private constructor();
     static getInstance(): AuthentificationService;
     init(graph: SpinalGraph): Promise<void>;
+    createRedirectLinkToBosConfig(buildIngInfo: IBuilding, token: string): Promise<string>;
     consumeCodeUnique(code: string): Promise<any>;
     /**
      * Authenticates a user based on the provided credentials.

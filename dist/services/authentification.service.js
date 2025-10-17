@@ -45,6 +45,29 @@ class AuthentificationService {
     async init(graph) {
         this.graph = graph;
     }
+    async createRedirectLinkToBosConfig(buildIngInfo, token) {
+        const body = {};
+        const pamCredential = await this.getPamCredentials();
+        if (!pamCredential)
+            throw new Error("No auth platform registered, register one and retry !");
+        if (pamCredential.urlAdmin.endsWith("/"))
+            pamCredential.urlAdmin = pamCredential.urlAdmin.replace(/\/$/, () => ""); // Ensure the URL does not end with a slash
+        const data = {
+            // TokenBosAdmin: pamCredential.tokenPamToAdmin,
+            // platformId: pamCredential.idPlateform,
+            bosurl: buildIngInfo.bosUrl,
+            bosApiUrl: buildIngInfo.apiUrl,
+            // buildingId: buildIngInfo.id,
+            token
+        };
+        return axios_1.default.post(`${pamCredential.urlAdmin}/tokens/generate_redirect_url`, data).then((result) => {
+            // console.log("result data", result.data)
+            const sessionId = result.data.sessionId;
+            if (!sessionId)
+                return pamCredential.urlAdmin + "/tokens/redirect/error"; // edit this to return an error url
+            return `${pamCredential.urlAdmin}/tokens/redirect/${sessionId}`; // edit this to return result.data.url
+        });
+    }
     consumeCodeUnique(code) {
         try {
             return spinalCodeUnique_service_1.SpinalCodeUniqueService.getInstance().consumeCode(code);
@@ -80,11 +103,13 @@ class AuthentificationService {
         if (!clientSecret)
             throw new Error("AUTH_CLIENT_SECRET is not valid!");
         authApiUrl = authApiUrl.endsWith("/") ? authApiUrl.replace(/\/$/, () => "") : authApiUrl; // Ensure the URL ends with a slash
-        return axios_1.default.post(authApiUrl + "/register", { clientId, clientSecret }).then((result) => {
+        return axios_1.default.post(authApiUrl + "/register", { clientId, clientSecret })
+            .then(async (result) => {
             this.authPlatformIsConnected = true;
             const responseData = Object.assign({}, result.data, { url: authApiUrl, clientId });
             // save PAM credential in the graph, it will be used to send data to auth platform
-            return this._saveOrEditPamCredentials(responseData);
+            const pamInfo = await this._saveOrEditPamCredentials(responseData);
+            return pamInfo;
         }).catch((e) => {
             this.authPlatformIsConnected = false;
             throw new Error(e.message);
@@ -179,7 +204,7 @@ class AuthentificationService {
      */
     async deleteAuthCredentialsFromGraph() {
         let adminContext = await this.graph.getContext(constant_1.ADMIN_CREDENTIAL_CONTEXT_NAME);
-        if (!adminContext)
+        if (adminContext)
             await adminContext.removeFromGraph();
     }
     /**
@@ -230,7 +255,7 @@ class AuthentificationService {
         const pamCredential = await this.getPamCredentials();
         if (!pamCredential)
             throw new Error("No auth platform registered, register one and retry !");
-        const authCredential = await this.getAuthCredentials();
+        const authCredential = await this._getOrCreateAdminCredential(true); // create admin credential if not exist;
         if (!authCredential)
             throw new Error("No admin registered, register an admin and retry !");
         const data = await (0, authPlatformUtils_1.getRequestBody)(update, pamCredential, authCredential);

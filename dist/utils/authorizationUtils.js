@@ -23,7 +23,19 @@
  * <http://resources.spinalcom.com/licenses.pdf>.
  */
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.CleanReferenceTree = exports._getAuthorizedPortofolioContext = exports.removeRelationFromReference = exports.removeReferenceFromOriginalNode = exports.removeReferenceNode = exports.createNodeReference = exports.findNodeReferenceInProfileTree = exports.referenceIsMatchingToNode = exports.getReferenceFromOriginalNode = exports.getNodeReferencesAsSpinalLst = exports.removeNodeReferences = exports.getNodeReferences = exports.getOriginalNodeFromReference = void 0;
+exports.getOriginalNodeFromReference = getOriginalNodeFromReference;
+exports.getNodeReferences = getNodeReferences;
+exports.removeNodeReferences = removeNodeReferences;
+exports.getNodeReferencesAsSpinalLst = getNodeReferencesAsSpinalLst;
+exports.getReferenceFromOriginalNode = getReferenceFromOriginalNode;
+exports.referenceIsMatchingToNode = referenceIsMatchingToNode;
+exports.findNodeReferenceInProfileTree = findNodeReferenceInProfileTree;
+exports.createNodeReference = createNodeReference;
+exports.removeReferenceNode = removeReferenceNode;
+exports.removeReferenceFromOriginalNode = removeReferenceFromOriginalNode;
+exports.removeRelationFromReference = removeRelationFromReference;
+exports._getAuthorizedPortofolioContext = _getAuthorizedPortofolioContext;
+exports.CleanReferenceTree = CleanReferenceTree;
 const spinal_core_connectorjs_type_1 = require("spinal-core-connectorjs_type");
 const spinal_env_viewer_graph_service_1 = require("spinal-env-viewer-graph-service");
 const constant_1 = require("../constant");
@@ -32,7 +44,6 @@ async function getOriginalNodeFromReference(referenceNode) {
     if (nodeElement)
         return nodeElement;
 }
-exports.getOriginalNodeFromReference = getOriginalNodeFromReference;
 async function getNodeReferences(originalNode) {
     if (!originalNode.info?.references || !(originalNode.info.references instanceof spinal.Ptr))
         return Promise.resolve([]);
@@ -42,7 +53,6 @@ async function getNodeReferences(originalNode) {
         });
     });
 }
-exports.getNodeReferences = getNodeReferences;
 async function removeNodeReferences(originalNode) {
     const references = await getNodeReferences(originalNode);
     if (!references || references.length === 0)
@@ -50,7 +60,6 @@ async function removeNodeReferences(originalNode) {
     const promises = references.map((ref) => removeReferenceNode(ref));
     return Promise.all(promises);
 }
-exports.removeNodeReferences = removeNodeReferences;
 async function getNodeReferencesAsSpinalLst(originalNode) {
     if (!originalNode.info?.references || !(originalNode.info.references instanceof spinal.Ptr))
         return Promise.resolve([]);
@@ -60,12 +69,10 @@ async function getNodeReferencesAsSpinalLst(originalNode) {
         });
     });
 }
-exports.getNodeReferencesAsSpinalLst = getNodeReferencesAsSpinalLst;
 async function getReferenceFromOriginalNode(node, referenceId) {
     const references = await getNodeReferences(node);
     return references.find((ref) => ref.getId().get() === referenceId) || null;
 }
-exports.getReferenceFromOriginalNode = getReferenceFromOriginalNode;
 async function referenceIsMatchingToNode(referenceNode, originalNodeId) {
     if (referenceNode.info?.originalId)
         return referenceNode.info.originalId.get() === originalNodeId;
@@ -74,7 +81,6 @@ async function referenceIsMatchingToNode(referenceNode, originalNodeId) {
         return false;
     return originalNode.getId().get() === originalNodeId;
 }
-exports.referenceIsMatchingToNode = referenceIsMatchingToNode;
 async function findNodeReferenceInProfileTree(profileContext, startNode, originalNodeId) {
     const found = await startNode.findInContextAsyncPredicate(profileContext, (async (node, stop) => {
         const isReference = await referenceIsMatchingToNode(node, originalNodeId);
@@ -88,20 +94,17 @@ async function findNodeReferenceInProfileTree(profileContext, startNode, origina
         return null;
     return found[0];
 }
-exports.findNodeReferenceInProfileTree = findNodeReferenceInProfileTree;
 async function createNodeReference(originalNode) {
     const referenceNode = new spinal_env_viewer_graph_service_1.SpinalNode(originalNode.getName().get(), originalNode.getType().get(), originalNode);
     referenceNode.info.name.set(originalNode.info.name); // use the same model as the original node, it will rename itself when the original node is renamed
     await _linkReferenceToOriginalNode(originalNode, referenceNode);
     return referenceNode;
 }
-exports.createNodeReference = createNodeReference;
 async function removeReferenceNode(referenceNode) {
     await removeReferenceFromOriginalNode(referenceNode);
     await referenceNode.removeFromGraph();
     return referenceNode;
 }
-exports.removeReferenceNode = removeReferenceNode;
 async function removeReferenceFromOriginalNode(referenceNode) {
     const originalNode = await getOriginalNodeFromReference(referenceNode);
     if (!originalNode)
@@ -115,7 +118,6 @@ async function removeReferenceFromOriginalNode(referenceNode) {
     }
     return referenceNode;
 }
-exports.removeReferenceFromOriginalNode = removeReferenceFromOriginalNode;
 async function findReferenceNodeInReferences(references, originalNodeId) {
     for (const reference of references) {
         const isMatch = await referenceIsMatchingToNode(reference, originalNodeId);
@@ -153,7 +155,6 @@ async function removeRelationFromReference(parentNode, childNode, relationName, 
     //     }
     // }
 }
-exports.removeRelationFromReference = removeRelationFromReference;
 function _linkReferenceToOriginalNode(originalNode, referenceNode) {
     // If the original node has no references, we create a new list and add the reference node to it
     if (!originalNode.info.references) {
@@ -172,7 +173,6 @@ function _linkReferenceToOriginalNode(originalNode, referenceNode) {
 async function _getAuthorizedPortofolioContext(profile, createIfNotExist = false) {
     return _getOrCreateContext(profile, constant_1.AUTHORIZED_PORTOFOLIO_CONTEXT_NAME, createIfNotExist, constant_1.AUTHORIZED_PORTOFOLIO_CONTEXT_TYPE);
 }
-exports._getAuthorizedPortofolioContext = _getAuthorizedPortofolioContext;
 async function _getAuthorizedApisRoutesContext(profile, createIfNotExist = false) {
     return _getOrCreateContext(profile, constant_1.AUTHORIZED_API_CONTEXT_NAME, createIfNotExist, constant_1.AUTHORIZED_API_CONTEXT_TYPE);
 }
@@ -220,7 +220,6 @@ function CleanReferenceTree(context, startReferenceNode) {
         return true;
     }));
 }
-exports.CleanReferenceTree = CleanReferenceTree;
 // export async function findRefNodeFromProfile(profileContext: SpinalContext, profile: SpinalNode, node: string | SpinalNode): Promise<SpinalNode | null> {
 //     const spinalNodeId = typeof node === "string" ? node : node.getId().get();
 //     const found = await profile.findInContextAsyncPredicate(profileContext, (async (node, stop) => {

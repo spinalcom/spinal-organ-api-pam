@@ -1,6 +1,6 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.getBuildingList = void 0;
+exports.getBuildingList = getBuildingList;
 const authentication_1 = require("../../security/authentication");
 const constant_1 = require("../../constant");
 const utils_1 = require("./utils");
@@ -21,5 +21,4 @@ async function getBuildingList(req, res) {
         });
     }
 }
-exports.getBuildingList = getBuildingList;
 //# sourceMappingURL=controllers.js.map

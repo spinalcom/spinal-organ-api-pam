@@ -31,5 +31,5 @@ var HTTP_METHODS;
     HTTP_METHODS["PUT"] = "PUT";
     HTTP_METHODS["PATCH"] = "PATCH";
     HTTP_METHODS["DELETE"] = "DELETE";
-})(HTTP_METHODS = exports.HTTP_METHODS || (exports.HTTP_METHODS = {}));
+})(HTTP_METHODS || (exports.HTTP_METHODS = HTTP_METHODS = {}));
 //# sourceMappingURL=IRole.js.map

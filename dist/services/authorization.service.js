@@ -682,21 +682,17 @@ class AuthorizationService {
         return (0, authorizationUtils_1.removeReferenceNode)(portofolioRef);
     }
     async _removeEmptyBosFromProfile(profile, portofolioId, bosId, bosReference, portofolioRef) {
-        const createContextIfNotExist = true;
-        const context = await (0, authorizationUtils_1._getAuthorizedPortofolioContext)(profile, !createContextIfNotExist);
-        if (!portofolioRef)
-            portofolioRef = await (0, authorizationUtils_1.findNodeReferenceInProfileTree)(context, context, portofolioId);
-        if (!portofolioRef)
-            return;
-        if (!bosReference)
-            bosReference = await (0, authorizationUtils_1.findNodeReferenceInProfileTree)(context, portofolioRef, bosId);
-        if (!bosReference)
-            return;
-        const childrenList = await bosReference.getChildren();
-        if (childrenList.length > 0)
-            return;
-        await (0, authorizationUtils_1.removeReferenceNode)(bosReference);
-        return this._removeEmptyPortofolioFromProfile(profile, portofolioId, portofolioRef);
+        console.warn("Don't remove empty BOS for now, to be compatible with old behavior");
+        // const createContextIfNotExist = true;
+        // const context = await _getAuthorizedPortofolioContext(profile, !createContextIfNotExist);
+        // if (!portofolioRef) portofolioRef = await findNodeReferenceInProfileTree(context, context, portofolioId);
+        // if (!portofolioRef) return;
+        // if (!bosReference) bosReference = await findNodeReferenceInProfileTree(context, portofolioRef, bosId);
+        // if (!bosReference) return;
+        // const childrenList = await bosReference.getChildren();
+        // if (childrenList.length > 0) return;
+        // await removeReferenceNode(bosReference);
+        // return this._removeEmptyPortofolioFromProfile(profile, portofolioId, portofolioRef);
     }
 }
 exports.default = AuthorizationService;

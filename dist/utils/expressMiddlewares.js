@@ -1,6 +1,10 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.errorHandler = exports.useApiMiddleWare = exports.initSwagger = exports.useViewMiddleWare = exports.useProxyToHub = void 0;
+exports.useProxyToHub = useProxyToHub;
+exports.useViewMiddleWare = useViewMiddleWare;
+exports.initSwagger = initSwagger;
+exports.useApiMiddleWare = useApiMiddleWare;
+exports.errorHandler = errorHandler;
 /////////////////////////////////////
 //          Middleware             //
 /////////////////////////////////////
@@ -21,7 +25,6 @@ function useProxyToHub(app) {
         app.use(routeToProxy, proxyHub);
     }
 }
-exports.useProxyToHub = useProxyToHub;
 function useViewMiddleWare(app) {
     // const oneDay = 1000 * 60 * 60 * 24;
     const root = path.resolve(__dirname, '..');
@@ -30,7 +33,6 @@ function useViewMiddleWare(app) {
         res.redirect('/docs');
     });
 }
-exports.useViewMiddleWare = useViewMiddleWare;
 function initSwagger(app) {
     app.use('/swagger.json', (req, res) => {
         res.sendFile(path.resolve(__dirname, '../swagger/swagger.json'));
@@ -42,12 +44,10 @@ function initSwagger(app) {
         return res.send(swaggerUi.generateHTML(await Promise.resolve().then(() => require('../swagger/swagger.json'))));
     });
 }
-exports.initSwagger = initSwagger;
 function useApiMiddleWare(app) {
     app.use(express.json({ limit: '500mb' }));
     app.use(express.urlencoded({ extended: true, limit: '500mb' }));
 }
-exports.useApiMiddleWare = useApiMiddleWare;
 function errorHandler(err, req, res, next) {
     if (err instanceof tsoa_1.ValidateError) {
         return res.status(constant_1.HTTP_CODES.BAD_REQUEST).send(_formatValidationError(err));
@@ -62,7 +62,6 @@ function errorHandler(err, req, res, next) {
     }
     next();
 }
-exports.errorHandler = errorHandler;
 function _formatValidationError(err) {
     err;
     return {

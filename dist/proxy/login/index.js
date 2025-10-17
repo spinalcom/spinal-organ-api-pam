@@ -1,6 +1,6 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.useLoginProxy = void 0;
+exports.useLoginProxy = useLoginProxy;
 const services_1 = require("../../services");
 const constant_1 = require("../../constant");
 const globalCache = require("global-cache");
@@ -82,5 +82,4 @@ async function useLoginProxy(app) {
         return res.status(constant_1.HTTP_CODES.OK).send(data);
     });
 }
-exports.useLoginProxy = useLoginProxy;
 //# sourceMappingURL=index.js.map

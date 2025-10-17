@@ -1,17 +1,33 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.getRequestBody = exports.getOrCreateContext = void 0;
+exports.getOrCreateContext = getOrCreateContext;
+exports.getRequestBody = getRequestBody;
 const spinal_model_graph_1 = require("spinal-model-graph");
 const services_1 = require("../services");
+const spinal_core_connectorjs_1 = require("spinal-core-connectorjs");
 async function getOrCreateContext(graph, contextName, contextType) {
     let context = await graph.getContext(contextName);
     if (!context) {
         const spinalContext = new spinal_model_graph_1.SpinalContext(contextName, contextType);
         context = await graph.addContext(spinalContext);
     }
+    await waitServerId(context);
     return context;
 }
-exports.getOrCreateContext = getOrCreateContext;
+function waitServerId(context) {
+    let loop = 30 * 1000;
+    return new Promise((resolve, reject) => {
+        if (loop < 0)
+            reject("Timeout");
+        let interval = setInterval(() => {
+            if (spinal_core_connectorjs_1.FileSystem._objects[context._server_id] !== undefined) {
+                clearInterval(interval);
+                resolve(context._server_id);
+            }
+            loop -= 500;
+        }, 500);
+    });
+}
 async function getRequestBody(update, bosCredential, adminCredential) {
     return JSON.stringify({
         TokenBosAdmin: bosCredential.tokenPamToAdmin,
@@ -24,7 +40,6 @@ async function getRequestBody(update, bosCredential, adminCredential) {
         }),
     });
 }
-exports.getRequestBody = getRequestBody;
 async function getPlatformInfo() {
     return {
         userProfileList: await _formatUserProfiles(),

@@ -295,6 +295,7 @@ let UserProfileController = class UserProfileController extends tsoa_1.Controlle
         }
     }
 };
+exports.UserProfileController = UserProfileController;
 __decorate([
     (0, tsoa_1.Security)(constant_1.SECURITY_NAME.bearerAuth),
     (0, tsoa_1.Post)("/create_profile"),
@@ -422,11 +423,10 @@ __decorate([
     __metadata("design:paramtypes", [Object, String, String, Array]),
     __metadata("design:returntype", Promise)
 ], UserProfileController.prototype, "unauthorizeToAccessBosApp", null);
-UserProfileController = __decorate([
+exports.UserProfileController = UserProfileController = __decorate([
     (0, tsoa_1.Route)("/api/v1/pam/user_profile"),
     (0, tsoa_1.Tags)("user Profiles"),
     __metadata("design:paramtypes", [])
 ], UserProfileController);
-exports.UserProfileController = UserProfileController;
 exports.default = new UserProfileController();
 //# sourceMappingURL=userProfile.controller.js.map

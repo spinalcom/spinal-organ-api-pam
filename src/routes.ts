@@ -15,6 +15,8 @@ import { BuildingController } from './controllers/building.controller';
 // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
 import { DigitaltwinController } from './controllers/digitalTwin.controller';
 // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
+import { GenerateUrlToBosController } from './controllers/generateUrlToBos.controller';
+// WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
 import { PortofolioController } from './controllers/portofolio.controller';
 // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
 import { UserProfileController } from './controllers/userProfile.controller';
@@ -2316,6 +2318,33 @@ export function RegisterRoutes(app: express.Router) {
 
 
               const promise = controller.createDigitalTwin.apply(controller, validatedArgs as any);
+              promiseHandler(controller, promise, response, undefined, next);
+            } catch (err) {
+                return next(err);
+            }
+        });
+        // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
+        app.post('/api/v1/pam/generate_url_to_bos/:buildingId',
+            authenticateMiddleware([{"bearerAuth":[]}]),
+            ...(fetchMiddlewares<RequestHandler>(GenerateUrlToBosController)),
+            ...(fetchMiddlewares<RequestHandler>(GenerateUrlToBosController.prototype.generateUrlToBos)),
+
+            function GenerateUrlToBosController_generateUrlToBos(request: any, response: any, next: any) {
+            const args = {
+                    req: {"in":"request","name":"req","required":true,"dataType":"object"},
+                    buildingId: {"in":"path","name":"buildingId","required":true,"dataType":"string"},
+            };
+
+            // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
+
+            let validatedArgs: any[] = [];
+            try {
+                validatedArgs = getValidatedArgs(args, request, response);
+
+                const controller = new GenerateUrlToBosController();
+
+
+              const promise = controller.generateUrlToBos.apply(controller, validatedArgs as any);
               promiseHandler(controller, promise, response, undefined, next);
             } catch (err) {
                 return next(err);

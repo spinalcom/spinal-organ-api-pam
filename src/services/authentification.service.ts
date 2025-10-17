@@ -22,7 +22,7 @@
  * <http://resources.spinalcom.com/licenses.pdf>.
  */
 
-import { IAdminCredential, IPamCredential, IUserCredential, IUserToken } from "../interfaces";
+import { IAdminCredential, IBuilding, IPamCredential, IUserCredential, IUserToken } from "../interfaces";
 import axios from "axios";
 import { SpinalGraph } from "spinal-env-viewer-graph-service";
 import { ADMIN_CREDENTIAL_CONTEXT_NAME, ADMIN_CREDENTIAL_CONTEXT_TYPE, PAM_CREDENTIAL_CONTEXT_NAME, PAM_CREDENTIAL_CONTEXT_TYPE, HTTP_CODES } from "../constant";
@@ -51,6 +51,33 @@ export class AuthentificationService {
 
     async init(graph: SpinalGraph) {
         this.graph = graph;
+    }
+
+    public async createRedirectLinkToBosConfig(buildIngInfo: IBuilding, token: string): Promise<string> {
+        const body = {};
+        const pamCredential = await this.getPamCredentials();
+        if (!pamCredential) throw new Error("No auth platform registered, register one and retry !");
+
+        if (pamCredential.urlAdmin.endsWith("/"))
+            pamCredential.urlAdmin = pamCredential.urlAdmin.replace(/\/$/, () => "") // Ensure the URL does not end with a slash
+
+
+        const data = {
+            // TokenBosAdmin: pamCredential.tokenPamToAdmin,
+            // platformId: pamCredential.idPlateform,
+            bosurl: buildIngInfo.bosUrl,
+            bosApiUrl: buildIngInfo.apiUrl,
+            // buildingId: buildIngInfo.id,
+            token
+        }
+
+        return axios.post(`${pamCredential.urlAdmin}/tokens/generate_redirect_url`, data).then((result) => {
+            // console.log("result data", result.data)
+            const sessionId = result.data.sessionId;
+            if (!sessionId) return pamCredential.urlAdmin + "/tokens/redirect/error" // edit this to return an error url
+
+            return `${pamCredential.urlAdmin}/tokens/redirect/${sessionId}` // edit this to return result.data.url
+        })
     }
 
     public consumeCodeUnique(code: string): Promise<any> {
@@ -90,16 +117,18 @@ export class AuthentificationService {
 
         authApiUrl = authApiUrl.endsWith("/") ? authApiUrl.replace(/\/$/, () => "") : authApiUrl; // Ensure the URL ends with a slash
 
-        return axios.post(authApiUrl + "/register", { clientId, clientSecret }).then((result) => {
-            this.authPlatformIsConnected = true;
-            const responseData = Object.assign({}, result.data, { url: authApiUrl, clientId });
+        return axios.post(authApiUrl + "/register", { clientId, clientSecret })
+            .then(async (result) => {
+                this.authPlatformIsConnected = true;
+                const responseData = Object.assign({}, result.data, { url: authApiUrl, clientId });
 
-            // save PAM credential in the graph, it will be used to send data to auth platform
-            return this._saveOrEditPamCredentials(responseData);
-        }).catch((e) => {
-            this.authPlatformIsConnected = false;
-            throw new Error(e.message);
-        })
+                // save PAM credential in the graph, it will be used to send data to auth platform
+                const pamInfo = await this._saveOrEditPamCredentials(responseData);
+                return pamInfo;
+            }).catch((e) => {
+                this.authPlatformIsConnected = false;
+                throw new Error(e.message);
+            })
     }
 
     /**
@@ -207,7 +236,7 @@ export class AuthentificationService {
      */
     private async deleteAuthCredentialsFromGraph() {
         let adminContext = await this.graph.getContext(ADMIN_CREDENTIAL_CONTEXT_NAME);
-        if (!adminContext) await adminContext.removeFromGraph();
+        if (adminContext) await adminContext.removeFromGraph();
     }
 
 
@@ -270,7 +299,7 @@ export class AuthentificationService {
         const pamCredential = await this.getPamCredentials();
         if (!pamCredential) throw new Error("No auth platform registered, register one and retry !");
 
-        const authCredential = await this.getAuthCredentials();
+        const authCredential = await this._getOrCreateAdminCredential(true); // create admin credential if not exist;
         if (!authCredential) throw new Error("No admin registered, register an admin and retry !");
 
 

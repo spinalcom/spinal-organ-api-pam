@@ -1,6 +1,7 @@
 import { SpinalContext, SpinalGraph, SpinalNode } from "spinal-model-graph"
 import { IAppCredential, IPlatformInfo, IOAuth2Credential, IPamCredential, IAdminCredential, IAdminUserProfile, IAdminAppProfile } from "../interfaces"
 import { AppProfileService, UserProfileService } from "../services";
+import { type Model, FileSystem } from "spinal-core-connectorjs";
 
 
 export async function getOrCreateContext(graph: SpinalGraph, contextName: string, contextType: string): Promise<SpinalContext> {
@@ -9,7 +10,24 @@ export async function getOrCreateContext(graph: SpinalGraph, contextName: string
         const spinalContext = new SpinalContext(contextName, contextType);
         context = await graph.addContext(spinalContext);
     }
+    await waitServerId(context);
     return context;
+}
+
+
+function waitServerId(context: Model) {
+    let loop = 30 * 1000;
+    return new Promise((resolve, reject) => {
+        if (loop < 0) reject("Timeout");
+
+        let interval = setInterval(() => {
+            if (FileSystem._objects[context._server_id] !== undefined) {
+                clearInterval(interval);
+                resolve(context._server_id);
+            }
+            loop -= 500;
+        }, 500);
+    });
 }
 
 

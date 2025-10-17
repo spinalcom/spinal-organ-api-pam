@@ -1,6 +1,11 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.validateBuildingInfo = exports.formatBuildingStructure = exports.getBuildingDetail = exports.formatBuildingNode = exports.createBuildingNode = exports.getBuildingGeoPosition = void 0;
+exports.getBuildingGeoPosition = getBuildingGeoPosition;
+exports.createBuildingNode = createBuildingNode;
+exports.formatBuildingNode = formatBuildingNode;
+exports.getBuildingDetail = getBuildingDetail;
+exports.formatBuildingStructure = formatBuildingStructure;
+exports.validateBuildingInfo = validateBuildingInfo;
 const axios_1 = require("axios");
 const constant_1 = require("../constant");
 const openGeocoder = require("node-open-geocoder");
@@ -10,7 +15,6 @@ async function getBuildingGeoPosition(buildingAddress) {
         return;
     return getLatLngViaAddress(buildingAddress);
 }
-exports.getBuildingGeoPosition = getBuildingGeoPosition;
 async function createBuildingNode(buildingInfo) {
     const { appIds, apiIds, ...buildingNodeInfo } = buildingInfo; // Exclude appIds and apiIds from the node creation info
     buildingNodeInfo.apiUrl = buildingNodeInfo.apiUrl.replace(/\/$/, el => ""); // Remove trailing slash from apiUrl
@@ -19,7 +23,6 @@ async function createBuildingNode(buildingInfo) {
     const nodeId = spinal_env_viewer_graph_service_1.SpinalGraphService.createNode(buildingInfo, undefined);
     return spinal_env_viewer_graph_service_1.SpinalGraphService.getRealNode(nodeId);
 }
-exports.createBuildingNode = createBuildingNode;
 function getLatLngViaAddress(address) {
     return new Promise((resolve, reject) => {
         openGeocoder().geocode(address).end((err, res) => {
@@ -39,7 +42,6 @@ async function formatBuildingNode(buildingNode) {
     const buildingDetail = await getBuildingDetail(buildingInfo);
     return Object.assign({}, buildingInfo, { detail: buildingDetail });
 }
-exports.formatBuildingNode = formatBuildingNode;
 async function getBuildingDetailsByAPI(batimenApiUrl) {
     const detail = await _getBuildingTypeCount(batimenApiUrl);
     detail.area = await _getBuildingArea(batimenApiUrl);
@@ -50,7 +52,6 @@ async function getBuildingDetail(buildingInfo) {
         return buildingInfo.details;
     return getBuildingDetailsByAPI(buildingInfo.apiUrl);
 }
-exports.getBuildingDetail = getBuildingDetail;
 function _getBuildingTypeCount(batimentUrl) {
     return axios_1.default.get(`${batimentUrl}/api/v1/geographicContext/tree`)
         .then(res => _getBuildingItemsOccurance(res.data))
@@ -92,7 +93,6 @@ function formatBuildingStructure(building) {
         apis: building.apis.map(el => el.info.get())
     };
 }
-exports.formatBuildingStructure = formatBuildingStructure;
 function validateBuildingInfo(buildingInfo) {
     if (!buildingInfo.name)
         return { isValid: false, message: "The name is required" };
@@ -100,5 +100,4 @@ function validateBuildingInfo(buildingInfo) {
         return { isValid: false, message: "The address is required" };
     return { isValid: true };
 }
-exports.validateBuildingInfo = validateBuildingInfo;
 //# sourceMappingURL=buildingUtils.js.map

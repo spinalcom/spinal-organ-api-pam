@@ -192,9 +192,10 @@ function removeInvalidPortofolio(items: IPortofolioAuth[]): IPortofolioAuth[] {
 }
 
 function removeEmptyBuildings(items: IPortofolioAuth[]): IPortofolioAuth[] {
-    for (const item of items) {
-        item.building = (item.building || []).filter(building => authorizationItemIsValid(building));
-    }
+    console.warn("Don't remove empty buildings for now, it can be usefull for bos_config compatibility");
+    // for (const item of items) {
+    //     item.building = (item.building || []).filter(building => authorizationItemIsValid(building));
+    // }
 
     return items;
 }

@@ -236,7 +236,7 @@ class TokenService {
      */
     async verifyTokenInAuthPlatform(token, actor = "user") {
         const authAdmin = await authentification_service_1.AuthentificationService.getInstance().getPamCredentials();
-        return axios_1.default.post(`${authAdmin.urlAdmin}/tokens/verifyToken`, { tokenParam: token, actor }).then((result) => {
+        return axios_1.default.post(`${authAdmin.urlAdmin}/tokens/verifyToken`, { tokenParam: token, platformId: authAdmin.idPlateform, actor }).then((result) => {
             return result.data;
         });
     }
