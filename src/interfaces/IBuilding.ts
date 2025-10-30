@@ -41,6 +41,7 @@ export interface IBuilding {
     clientSecret?: string;
     address: string;
     description: string;
+    tokenToUse?: string;
     location?: ILocation;
     [key: string]: any;
 }

@@ -238,6 +238,7 @@ const models = {
             "clientSecret": { "dataType": "string" },
             "address": { "dataType": "string", "required": true },
             "description": { "dataType": "string", "required": true },
+            "tokenToUse": { "dataType": "string" },
             "location": { "ref": "ILocation" },
         },
         "additionalProperties": { "dataType": "any" },

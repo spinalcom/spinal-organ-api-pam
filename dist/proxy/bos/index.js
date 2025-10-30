@@ -35,7 +35,9 @@ const api_exception_1 = require("../../utils/pam_v1_utils/api_exception");
 const bodyParser = require("body-parser");
 const atob = require("atob");
 function configureProxy(app, useV1 = false) {
-    let apiData = { url: "", clientId: "", secretId: "" };
+    if (useV1)
+        _useV1Routes(app);
+    let apiData = { url: "", clientId: "", secretId: "", token: "" };
     const uri = !useV1 ? constant_1.BOS_BASE_URI_V2 : `(${constant_1.BOS_BASE_URI_V1}|${constant_1.BOS_BASE_URI_V1_2})`;
     app.all(`(${uri}/:building_id/*|${uri}/:building_id)`, async (req, res, next) => {
         try {
@@ -47,7 +49,13 @@ function configureProxy(app, useV1 = false) {
             const building = await services_1.BuildingService.getInstance().getBuildingById(building_id);
             if (!building)
                 return new AuthError_1.AuthError(constant_1.SECURITY_MESSAGES.UNAUTHORIZED);
-            apiData.url = building.info.apiUrl.get();
+            // apiData.token = building.info.tokenToUse?.get() || "";
+            const url = building.info.apiUrl.get();
+            const token = building.info.tokenToUse?.get() || "";
+            apiData.url = url;
+            req._bosTargetUrl = url;
+            if (token && token.trim().length > 0)
+                req._tokenToUse = `Bearer ${token}`;
             //////////////////////////////////////////////
             //   Condition to skip .svf file downloading
             //////////////////////////////////////////////
@@ -83,8 +91,6 @@ function configureProxy(app, useV1 = false) {
             return res.status(constant_1.HTTP_CODES.UNAUTHORIZED).send(error.message);
         }
     }, proxy((req) => apiData.url, (0, utils_1.proxyOptions)(useV1)));
-    if (useV1)
-        _useV1Routes(app);
 }
 function _useV1Routes(app) {
     app.get("/v1/building_list", async (req, res) => {

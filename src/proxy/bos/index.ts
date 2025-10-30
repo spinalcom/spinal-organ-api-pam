@@ -39,67 +39,77 @@ interface IApiData {
 	url: string;
 	clientId: string;
 	secretId: string;
+	token?: string;
 }
 
 export default function configureProxy(app: express.Express, useV1: boolean = false) {
-	let apiData: IApiData = { url: "", clientId: "", secretId: "" };
-	const uri = !useV1 ? BOS_BASE_URI_V2 : `(${BOS_BASE_URI_V1}|${BOS_BASE_URI_V1_2})`;
-	app.all(
-		`(${uri}/:building_id/*|${uri}/:building_id)`,
-		async (req: express.Request, res: express.Response, next: express.NextFunction) => {
-			try {
-				const { building_id } = req.params;
-				req["endpoint"] = formatUri(req.url, uri);
-
-				//////////////////////////////////////////////
-				//   Check if user has access to building
-				//////////////////////////////////////////////
-
-				const building = await BuildingService.getInstance().getBuildingById(building_id);
-				if (!building) return new AuthError(SECURITY_MESSAGES.UNAUTHORIZED);
-
-				apiData.url = building.info.apiUrl.get();
-
-				//////////////////////////////////////////////
-				//   Condition to skip .svf file downloading
-				//////////////////////////////////////////////
-				if (isTryingToDownloadSvf(req)) return next();
-
-				const tokenInfo = await checkAndGetTokenInfo(req);
-
-				// if (tokenInfo.userInfo?.type != USER_TYPES.ADMIN) {
-				const isAppProfile = tokenInfo.profile.appProfileBosConfigId ? true : false;
-				const profileId = tokenInfo.profile.appProfileBosConfigId || tokenInfo.profile.userProfileBosConfigId || tokenInfo.profile.profileId;
-				const access = await canAccess(building_id, { method: req.method, route: (<any>req).endpoint }, profileId, isAppProfile);
-				if (!access) throw new AuthError(SECURITY_MESSAGES.UNAUTHORIZED);
-				// }
-
-				//////////////////////////////////////////////
-				//   Condition to check
-				//////////////////////////////////////////////
-				const reqWithOutApi = (<any>req).endpoint.replace("/api/v1", "");
-				if (reqWithOutApi === "/" || reqWithOutApi.length == 0) {
-					let data = building.info.get();
-					if (useV1) data = Utils.getReturnObj(null, _formatBuildingResponse(data), req.method, "READ");
-
-					return res.status(HTTP_CODES.OK).send(data);
-				}
-
-				// apiData.url = building.info.apiUrl.get();
-				next();
-			} catch (error) {
-				if (useV1) {
-					const apiExc = new APIException(error.code || HTTP_CODES.UNAUTHORIZED, error.message);
-					const err = Utils.getErrObj(apiExc, "");
-					return res.status(err.code).send(err.msg);
-				}
-				return res.status(HTTP_CODES.UNAUTHORIZED).send(error.message);
-			}
-		},
-		proxy((req: express.Request) => apiData.url, proxyOptions(useV1))
-	);
 
 	if (useV1) _useV1Routes(app);
+
+
+	let apiData: IApiData = { url: "", clientId: "", secretId: "", token: "" };
+
+	const uri = !useV1 ? BOS_BASE_URI_V2 : `(${BOS_BASE_URI_V1}|${BOS_BASE_URI_V1_2})`;
+
+	app.all(`(${uri}/:building_id/*|${uri}/:building_id)`, async (req: express.Request, res: express.Response, next: express.NextFunction) => {
+		try {
+			const { building_id } = req.params;
+			req["endpoint"] = formatUri(req.url, uri);
+
+			//////////////////////////////////////////////
+			//   Check if user has access to building
+			//////////////////////////////////////////////
+
+			const building = await BuildingService.getInstance().getBuildingById(building_id);
+			if (!building) return new AuthError(SECURITY_MESSAGES.UNAUTHORIZED);
+
+			// apiData.token = building.info.tokenToUse?.get() || "";
+			const url = building.info.apiUrl.get();
+			const token = building.info.tokenToUse?.get() || "";
+
+			apiData.url = url;
+
+			(req as any)._bosTargetUrl = url;
+
+			if (token && token.trim().length > 0) (req as any)._tokenToUse = `Bearer ${token}`;
+
+			//////////////////////////////////////////////
+			//   Condition to skip .svf file downloading
+			//////////////////////////////////////////////
+			if (isTryingToDownloadSvf(req)) return next();
+
+			const tokenInfo = await checkAndGetTokenInfo(req);
+
+			// if (tokenInfo.userInfo?.type != USER_TYPES.ADMIN) {
+			const isAppProfile = tokenInfo.profile.appProfileBosConfigId ? true : false;
+			const profileId = tokenInfo.profile.appProfileBosConfigId || tokenInfo.profile.userProfileBosConfigId || tokenInfo.profile.profileId;
+			const access = await canAccess(building_id, { method: req.method, route: (<any>req).endpoint }, profileId, isAppProfile);
+			if (!access) throw new AuthError(SECURITY_MESSAGES.UNAUTHORIZED);
+			// }
+
+			//////////////////////////////////////////////
+			//   Condition to check
+			//////////////////////////////////////////////
+			const reqWithOutApi = (<any>req).endpoint.replace("/api/v1", "");
+			if (reqWithOutApi === "/" || reqWithOutApi.length == 0) {
+				let data = building.info.get();
+				if (useV1) data = Utils.getReturnObj(null, _formatBuildingResponse(data), req.method, "READ");
+
+				return res.status(HTTP_CODES.OK).send(data);
+			}
+
+			// apiData.url = building.info.apiUrl.get();
+			next();
+		} catch (error) {
+			if (useV1) {
+				const apiExc = new APIException(error.code || HTTP_CODES.UNAUTHORIZED, error.message);
+				const err = Utils.getErrObj(apiExc, "");
+				return res.status(err.code).send(err.msg);
+			}
+			return res.status(HTTP_CODES.UNAUTHORIZED).send(error.message);
+		}
+	}, proxy((req: any) => apiData.url, proxyOptions(useV1)));
+
 }
 
 function _useV1Routes(app: express.Application) {

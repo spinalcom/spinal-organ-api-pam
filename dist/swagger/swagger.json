@@ -479,6 +479,9 @@
                     "description": {
                         "type": "string"
                     },
+                    "tokenToUse": {
+                        "type": "string"
+                    },
                     "location": {
                         "$ref": "#/components/schemas/ILocation"
                     }

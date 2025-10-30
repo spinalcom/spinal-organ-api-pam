@@ -142,11 +142,21 @@ export const proxyOptions = (useV1: boolean): ProxyOptions => {
 		proxyReqPathResolver: (req: express.Request) => {
 			return req["endpoint"];
 		},
+		proxyReqOptDecorator: (proxyReqOpts, srcReq) => {
+
+			// Add authorization header to autenticate inside BOS_Config
+			if ((srcReq as any)._tokenToUse) {
+				proxyReqOpts.headers["authorization"] = (srcReq as any)._tokenToUse;
+			}
+			return proxyReqOpts;
+		},
 		limit: "500gb",
+		// This decorates the response sent to the user (it's used to match PAM V1 response format)
 		userResDecorator: (proxyRes, proxyResData) => {
 			return new Promise((resolve, reject) => {
-				if (!useV1) return resolve(proxyResData);
+				if (!useV1) return resolve(proxyResData); // If not using V1, return the data as is
 
+				// If using V1, format the response
 				try {
 					if (proxyRes.statusCode >= 400 && proxyRes.statusCode <= 599) {
 						throw new APIException(proxyRes.statusCode as any, proxyResData.toString());
@@ -159,7 +169,6 @@ export const proxyOptions = (useV1: boolean): ProxyOptions => {
 					const oErr = Utils.getErrObj(error, "");
 					oErr.msg.datas = { ko: {} };
 					resolve(oErr.msg);
-					// resolve(proxyResData)
 				}
 			});
 		},
