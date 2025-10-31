@@ -19,9 +19,9 @@ export async function createBuildingNode(buildingInfo: IBuildingCreation): Promi
 
     buildingNodeInfo.apiUrl = buildingNodeInfo.apiUrl.replace(/\/$/, el => ""); // Remove trailing slash from apiUrl
     buildingNodeInfo.type = BUILDING_TYPE;
-    buildingNodeInfo.detail = await getBuildingDetailsByAPI(buildingNodeInfo.apiUrl);
+    buildingNodeInfo.detail = await getBuildingDetailsByAPI(buildingNodeInfo.apiUrl, buildingInfo.tokenToUse);
 
-    const nodeId = SpinalGraphService.createNode(buildingInfo, undefined);
+    const nodeId = SpinalGraphService.createNode(buildingNodeInfo, undefined);
     return SpinalGraphService.getRealNode(nodeId);
 }
 
@@ -47,45 +47,50 @@ export async function formatBuildingNode(buildingNode: SpinalNode): Promise<IBui
     return Object.assign({}, buildingInfo, { detail: buildingDetail }) as IBuilding;
 }
 
-async function getBuildingDetailsByAPI(batimenApiUrl: string): Promise<{ [key: string]: number }> {
-    const detail: any = await _getBuildingTypeCount(batimenApiUrl);
-    detail.area = await _getBuildingArea(batimenApiUrl);
+export async function getBuildingDetail(buildingInfo: IBuilding): Promise<any> {
+    // if (buildingInfo.details) return buildingInfo.details;
+
+    return getBuildingDetailsByAPI(buildingInfo.apiUrl, buildingInfo.tokenToUse);
+}
+
+async function getBuildingDetailsByAPI(batimenApiUrl: string, tokenToUse: string): Promise<{ [key: string]: number }> {
+    const detail: any = await _getBuildingTypeCount(batimenApiUrl, tokenToUse);
+    detail.area = await _getBuildingArea(batimenApiUrl, tokenToUse);
 
     return detail;
 }
 
-export async function getBuildingDetail(buildingInfo: IBuilding): Promise<any> {
-    if (buildingInfo.details) return buildingInfo.details;
-
-    return getBuildingDetailsByAPI(buildingInfo.apiUrl);
-}
 
 
-function _getBuildingTypeCount(batimentUrl: string): Promise<{ [key: string]: number }> {
-    return axios.get(`${batimentUrl}/api/v1/geographicContext/tree`)
+
+function _getBuildingTypeCount(batimentUrl: string, tokenToUse?: string): Promise<{ [key: string]: number }> {
+    // return axios.get(`${batimentUrl}/api/v1/geographicContext/tree`)
+    return axios.get(`${batimentUrl}/api/v1/floor/list`, { headers: { 'Authorization': tokenToUse ? `Bearer ${tokenToUse}` : '' } })
         .then(res => _getBuildingItemsOccurance(res.data))
         .catch(error => ({}));
 }
 
-function _getBuildingArea(batimentUrl: string): Promise<number> {
+function _getBuildingArea(batimentUrl: string, tokenToUse?: string): Promise<number> {
     return axios
-        .get(`${batimentUrl}/api/v1/building/read`)
+        .get(`${batimentUrl}/api/v1/building/read`, { headers: { 'Authorization': tokenToUse ? `Bearer ${tokenToUse}` : '' } })
         .then((response) => response.data.area)
         .catch((err) => 0);
 }
 
 
 function _getBuildingItemsOccurance(buildingItems: any): { [key: string]: number } {
-    const obj: { [key: string]: number } = {};
+    const obj: { [key: string]: number } = {
+        "geographicFloor": buildingItems.length || 0,
+    };
 
-    function countItemOccurance(item: any) {
-        if (!item) return;
-        obj[item.type] = obj[item.type] ? obj[item.type] + 1 : 1;
+    // function countItemOccurance(item: any) {
+    //     if (!item) return;
+    //     obj[item.type] = obj[item.type] ? obj[item.type] + 1 : 1;
 
-        (item.children || []).forEach((element: any) => countItemOccurance(element));
-    }
+    //     (item.children || []).forEach((element: any) => countItemOccurance(element));
+    // }
 
-    countItemOccurance(buildingItems);
+    // countItemOccurance(buildingItems);
     return obj;
 }
 

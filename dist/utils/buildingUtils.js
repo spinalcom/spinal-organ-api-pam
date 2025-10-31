@@ -19,8 +19,8 @@ async function createBuildingNode(buildingInfo) {
     const { appIds, apiIds, ...buildingNodeInfo } = buildingInfo; // Exclude appIds and apiIds from the node creation info
     buildingNodeInfo.apiUrl = buildingNodeInfo.apiUrl.replace(/\/$/, el => ""); // Remove trailing slash from apiUrl
     buildingNodeInfo.type = constant_1.BUILDING_TYPE;
-    buildingNodeInfo.detail = await getBuildingDetailsByAPI(buildingNodeInfo.apiUrl);
-    const nodeId = spinal_env_viewer_graph_service_1.SpinalGraphService.createNode(buildingInfo, undefined);
+    buildingNodeInfo.detail = await getBuildingDetailsByAPI(buildingNodeInfo.apiUrl, buildingInfo.tokenToUse);
+    const nodeId = spinal_env_viewer_graph_service_1.SpinalGraphService.createNode(buildingNodeInfo, undefined);
     return spinal_env_viewer_graph_service_1.SpinalGraphService.getRealNode(nodeId);
 }
 function getLatLngViaAddress(address) {
@@ -42,36 +42,37 @@ async function formatBuildingNode(buildingNode) {
     const buildingDetail = await getBuildingDetail(buildingInfo);
     return Object.assign({}, buildingInfo, { detail: buildingDetail });
 }
-async function getBuildingDetailsByAPI(batimenApiUrl) {
-    const detail = await _getBuildingTypeCount(batimenApiUrl);
-    detail.area = await _getBuildingArea(batimenApiUrl);
+async function getBuildingDetail(buildingInfo) {
+    // if (buildingInfo.details) return buildingInfo.details;
+    return getBuildingDetailsByAPI(buildingInfo.apiUrl, buildingInfo.tokenToUse);
+}
+async function getBuildingDetailsByAPI(batimenApiUrl, tokenToUse) {
+    const detail = await _getBuildingTypeCount(batimenApiUrl, tokenToUse);
+    detail.area = await _getBuildingArea(batimenApiUrl, tokenToUse);
     return detail;
 }
-async function getBuildingDetail(buildingInfo) {
-    if (buildingInfo.details)
-        return buildingInfo.details;
-    return getBuildingDetailsByAPI(buildingInfo.apiUrl);
-}
-function _getBuildingTypeCount(batimentUrl) {
-    return axios_1.default.get(`${batimentUrl}/api/v1/geographicContext/tree`)
+function _getBuildingTypeCount(batimentUrl, tokenToUse) {
+    // return axios.get(`${batimentUrl}/api/v1/geographicContext/tree`)
+    return axios_1.default.get(`${batimentUrl}/api/v1/floor/list`, { headers: { 'Authorization': tokenToUse ? `Bearer ${tokenToUse}` : '' } })
         .then(res => _getBuildingItemsOccurance(res.data))
         .catch(error => ({}));
 }
-function _getBuildingArea(batimentUrl) {
+function _getBuildingArea(batimentUrl, tokenToUse) {
     return axios_1.default
-        .get(`${batimentUrl}/api/v1/building/read`)
+        .get(`${batimentUrl}/api/v1/building/read`, { headers: { 'Authorization': tokenToUse ? `Bearer ${tokenToUse}` : '' } })
         .then((response) => response.data.area)
         .catch((err) => 0);
 }
 function _getBuildingItemsOccurance(buildingItems) {
-    const obj = {};
-    function countItemOccurance(item) {
-        if (!item)
-            return;
-        obj[item.type] = obj[item.type] ? obj[item.type] + 1 : 1;
-        (item.children || []).forEach((element) => countItemOccurance(element));
-    }
-    countItemOccurance(buildingItems);
+    const obj = {
+        "geographicFloor": buildingItems.length || 0,
+    };
+    // function countItemOccurance(item: any) {
+    //     if (!item) return;
+    //     obj[item.type] = obj[item.type] ? obj[item.type] + 1 : 1;
+    //     (item.children || []).forEach((element: any) => countItemOccurance(element));
+    // }
+    // countItemOccurance(buildingItems);
     return obj;
 }
 async function _findChildInContext(startNode, nodeIdOrName, context) {
