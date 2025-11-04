@@ -142,10 +142,13 @@ export const proxyOptions = (useV1: boolean): ProxyOptions => {
 		proxyReqPathResolver: (req: express.Request) => {
 			return req["endpoint"];
 		},
+		// to use token in header when calling BOS inside the proxy
 		proxyReqOptDecorator: (proxyReqOpts, srcReq) => {
 
 			// Add authorization header to autenticate inside BOS_Config
-			if ((srcReq as any)._tokenToUse) {
+			const endpoint = srcReq["endpoint"] as string;
+			const endpointIsValid = endpoint.includes("/building/read") || endpoint.includes("control_endpoint_list");
+			if (endpointIsValid && (srcReq as any)._tokenToUse) {
 				proxyReqOpts.headers["authorization"] = (srcReq as any)._tokenToUse;
 			}
 			return proxyReqOpts;

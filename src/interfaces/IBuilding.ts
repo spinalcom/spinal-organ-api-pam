@@ -41,7 +41,8 @@ export interface IBuilding {
     clientSecret?: string;
     address: string;
     description: string;
-    tokenToUse?: string;
+    tokenToUse?: string; // token used to authenticate requests to the building's API
+    cpProfileName?: string; // controlPoint profile used for the building indicators
     location?: ILocation;
     [key: string]: any;
 }

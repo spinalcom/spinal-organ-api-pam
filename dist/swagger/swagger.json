@@ -482,6 +482,9 @@
                     "tokenToUse": {
                         "type": "string"
                     },
+                    "cpProfileName": {
+                        "type": "string"
+                    },
                     "location": {
                         "$ref": "#/components/schemas/ILocation"
                     }

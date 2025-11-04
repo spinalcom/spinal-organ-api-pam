@@ -240,6 +240,7 @@ const models: TsoaRoute.Models = {
             "address": {"dataType":"string","required":true},
             "description": {"dataType":"string","required":true},
             "tokenToUse": {"dataType":"string"},
+            "cpProfileName": {"dataType":"string"},
             "location": {"ref":"ILocation"},
         },
         "additionalProperties": {"dataType":"any"},

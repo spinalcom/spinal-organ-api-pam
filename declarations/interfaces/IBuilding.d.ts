@@ -14,6 +14,7 @@ export interface IBuilding {
     address: string;
     description: string;
     tokenToUse?: string;
+    cpProfileName?: string;
     location?: ILocation;
     [key: string]: any;
 }
