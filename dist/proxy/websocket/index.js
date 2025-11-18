@@ -43,7 +43,11 @@ class WebSocketServer {
         this._serverToClient = new Map();
         this._buildingMap = new Map();
         this._sessionToUserInfo = new Map();
-        this._io = new socket_io_1.Server(server);
+        this._io = new socket_io_1.Server(server, {
+            cors: {
+                origin: "*"
+            },
+        });
         logInstance.setIo(this._io);
     }
     async initialize() {
@@ -119,7 +123,7 @@ class WebSocketServer {
             const api_url = building.info.apiUrl.get();
             const client = SocketClient(api_url, {
                 auth: { token, sessionId, building: building?.info?.get() },
-                transports: ["websocket"],
+                // transports: ["websocket"],
                 reconnection: false,
             });
             client.on("connect", () => {

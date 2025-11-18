@@ -50,7 +50,11 @@ export default class WebSocketServer {
   //   );
 
   constructor(server: HttpServer) {
-    this._io = new Server(server);
+    this._io = new Server(server, {
+      cors: {
+        origin: "*"
+      },
+    });
     logInstance.setIo(this._io);
   }
 
@@ -137,7 +141,7 @@ export default class WebSocketServer {
       const api_url = building.info.apiUrl.get();
       const client = SocketClient(api_url, {
         auth: { token, sessionId, building: building?.info?.get() },
-        transports: ["websocket"],
+        // transports: ["websocket"],
         reconnection: false,
       });
 
