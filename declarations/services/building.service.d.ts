@@ -1,3 +1,4 @@
+/// <reference types="node" />
 import { SpinalContext, SpinalGraph, SpinalNode } from "spinal-env-viewer-graph-service";
 import { IEditBuilding, IBuildingCreation, IBuildingDetails } from "../interfaces";
 export declare class BuildingService {

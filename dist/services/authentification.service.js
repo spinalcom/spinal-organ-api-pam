@@ -31,6 +31,7 @@ const userList_services_1 = require("./userList.services");
 const authPlatformUtils_1 = require("../utils/authPlatformUtils");
 const spinalCodeUnique_service_1 = require("./spinalCodeUnique.service");
 const AuthError_1 = require("../security/AuthError");
+const appConnectedList_service_1 = require("./appConnectedList.service");
 const tokenKey = '9b1deb4d-3b7d-4bad-9bdd-2b0d7b3dcb6d';
 const jwt = require('jsonwebtoken');
 class AuthentificationService {
@@ -76,14 +77,13 @@ class AuthentificationService {
             throw new AuthError_1.OtherError(constant_1.HTTP_CODES.BAD_REQUEST, "Code unique not valid");
         }
     }
-    /**
-     * Authenticates a user based on the provided credentials.
-     *
-     * @param userCredential - The credentials of the user to authenticate.
-     * @returns A promise that resolves to an object containing a status code and either a string or a token object (`IUserToken`).
-     */
-    async authenticate(userCredential) {
-        return userList_services_1.UserListService.getInstance().authenticateUser(userCredential);
+    async authenticate(info) {
+        const isUser = "userName" in info && "password" in info ? true : false;
+        if (isUser) {
+            return userList_services_1.UserListService.getInstance().authenticateUser(info);
+        }
+        const appInfo = this._formatInfo(info);
+        return appConnectedList_service_1.AppListService.getInstance().authenticateApplication(appInfo);
     }
     /**
      * Registers the PAM platform in the authentication platform.
@@ -284,6 +284,20 @@ class AuthentificationService {
             return credentials;
         if (createIfNotExist)
             return this.createAuthPlatformCredentials();
+    }
+    _formatInfo(info) {
+        const obj = { clientId: undefined, clientSecret: undefined };
+        if ("client_id" in info) {
+            // info["clientId"] = info["client_id"]
+            // delete info.client_id;
+            obj.clientId = info["client_id"];
+        }
+        if ("client_secret" in info) {
+            // info["clientSecret"] = info["client_secret"]
+            // delete info.client_secret;
+            obj.clientSecret = info["client_secret"];
+        }
+        return (obj.clientId && obj.clientSecret ? obj : info);
     }
 }
 exports.AuthentificationService = AuthentificationService;

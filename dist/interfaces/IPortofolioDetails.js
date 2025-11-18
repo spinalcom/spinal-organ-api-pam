@@ -23,7 +23,7 @@
  * <http://resources.spinalcom.com/licenses.pdf>.
  */
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.convertIEditPortofolio = convertIEditPortofolio;
+exports.convertIEditPortofolio = void 0;
 function convertIEditPortofolio(portofolioId, editData) {
     return {
         portofolioId,
@@ -33,4 +33,5 @@ function convertIEditPortofolio(portofolioId, editData) {
         unauthorizeApisIds: editData.unauthorizeApiIds || []
     };
 }
+exports.convertIEditPortofolio = convertIEditPortofolio;
 //# sourceMappingURL=IPortofolioDetails.js.map

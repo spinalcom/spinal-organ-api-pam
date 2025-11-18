@@ -22,7 +22,7 @@
  * <http://resources.spinalcom.com/licenses.pdf>.
  */
 
-import { IAdminCredential, IBuilding, IPamCredential, IUserCredential, IUserToken } from "../interfaces";
+import { IAdminCredential, IAppCredential, IApplicationToken, IBuilding, IOAuth2Credential, IPamCredential, IUserCredential, IUserToken } from "../interfaces";
 import axios from "axios";
 import { SpinalGraph } from "spinal-env-viewer-graph-service";
 import { ADMIN_CREDENTIAL_CONTEXT_NAME, ADMIN_CREDENTIAL_CONTEXT_TYPE, PAM_CREDENTIAL_CONTEXT_NAME, PAM_CREDENTIAL_CONTEXT_TYPE, HTTP_CODES } from "../constant";
@@ -31,6 +31,7 @@ import { UserListService } from "./userList.services";
 import { getRequestBody, getOrCreateContext } from "../utils/authPlatformUtils";
 import { SpinalCodeUniqueService } from "./spinalCodeUnique.service";
 import { OtherError } from "../security/AuthError";
+import { AppListService } from "./appConnectedList.service";
 
 
 const tokenKey = '9b1deb4d-3b7d-4bad-9bdd-2b0d7b3dcb6d';
@@ -88,14 +89,14 @@ export class AuthentificationService {
         }
     }
 
-    /**
-     * Authenticates a user based on the provided credentials.
-     *
-     * @param userCredential - The credentials of the user to authenticate.
-     * @returns A promise that resolves to an object containing a status code and either a string or a token object (`IUserToken`).
-     */
-    public async authenticate(userCredential: IUserCredential): Promise<{ code: number; data: string | IUserToken }> {
-        return UserListService.getInstance().authenticateUser(userCredential);
+    public async authenticate(info: IUserCredential | IAppCredential | IOAuth2Credential): Promise<{ code: number; data: string | IApplicationToken | IUserToken }> {
+        const isUser = "userName" in info && "password" in info ? true : false;
+
+        if (isUser) {
+            return UserListService.getInstance().authenticateUser(<IUserCredential>info);
+        }
+        const appInfo: any = this._formatInfo(<any>info);
+        return AppListService.getInstance().authenticateApplication(appInfo)
     }
 
     /**
@@ -332,6 +333,24 @@ export class AuthentificationService {
         if (credentials) return credentials;
 
         if (createIfNotExist) return this.createAuthPlatformCredentials();
+    }
+
+
+    private _formatInfo(info: IAppCredential | IOAuth2Credential): IAppCredential {
+        const obj: any = { clientId: undefined, clientSecret: undefined };
+        if ("client_id" in info) {
+            // info["clientId"] = info["client_id"]
+            // delete info.client_id;
+            obj.clientId = info["client_id"];
+        }
+
+        if ("client_secret" in info) {
+            // info["clientSecret"] = info["client_secret"]
+            // delete info.client_secret;
+            obj.clientSecret = info["client_secret"];
+        }
+
+        return (obj.clientId && obj.clientSecret ? obj : info) as IAppCredential;
     }
 
 }

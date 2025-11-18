@@ -30,7 +30,7 @@ var Events;
 (function (Events) {
     Events["FINISH"] = "finish";
     Events["START"] = "start";
-})(Events || (exports.Events = Events = {}));
+})(Events = exports.Events || (exports.Events = {}));
 class SpinalQueue extends events_1.EventEmitter {
     constructor() {
         super();

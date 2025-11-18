@@ -427,7 +427,6 @@ let PortofolioController = class PortofolioController extends tsoa_1.Controller 
         }
     }
 };
-exports.PortofolioController = PortofolioController;
 __decorate([
     (0, tsoa_1.Security)(constant_1.SECURITY_NAME.bearerAuth),
     (0, tsoa_1.Post)("/add_portofolio"),
@@ -637,10 +636,11 @@ __decorate([
     __metadata("design:paramtypes", [Object, String, String]),
     __metadata("design:returntype", Promise)
 ], PortofolioController.prototype, "portofolioHasApi", null);
-exports.PortofolioController = PortofolioController = __decorate([
+PortofolioController = __decorate([
     (0, tsoa_1.Route)("/api/v1/pam"),
     (0, tsoa_1.Tags)("Portofolio"),
     __metadata("design:paramtypes", [])
 ], PortofolioController);
+exports.PortofolioController = PortofolioController;
 exports.default = new PortofolioController();
 //# sourceMappingURL=portofolio.controller.js.map

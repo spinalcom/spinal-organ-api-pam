@@ -176,18 +176,18 @@ var HTTP_CODES;
     HTTP_CODES[HTTP_CODES["NOT_FOUND"] = 404] = "NOT_FOUND";
     HTTP_CODES[HTTP_CODES["INTERNAL_ERROR"] = 500] = "INTERNAL_ERROR";
     HTTP_CODES[HTTP_CODES["REDIRECT"] = 302] = "REDIRECT";
-})(HTTP_CODES || (exports.HTTP_CODES = HTTP_CODES = {}));
+})(HTTP_CODES = exports.HTTP_CODES || (exports.HTTP_CODES = {}));
 var SECURITY_MESSAGES;
 (function (SECURITY_MESSAGES) {
     SECURITY_MESSAGES["INVALID_TOKEN"] = "Invalid or expired token !";
     SECURITY_MESSAGES["UNAUTHORIZED"] = "Unauthorized";
     SECURITY_MESSAGES["NO_PROFILE_FOUND"] = "No Profile found for this token";
-})(SECURITY_MESSAGES || (exports.SECURITY_MESSAGES = SECURITY_MESSAGES = {}));
+})(SECURITY_MESSAGES = exports.SECURITY_MESSAGES || (exports.SECURITY_MESSAGES = {}));
 var SECURITY_NAME;
 (function (SECURITY_NAME) {
     SECURITY_NAME["admin"] = "admin";
     SECURITY_NAME["profile"] = "profile";
     SECURITY_NAME["bearerAuth"] = "bearerAuth";
     SECURITY_NAME["all"] = "all";
-})(SECURITY_NAME || (exports.SECURITY_NAME = SECURITY_NAME = {}));
+})(SECURITY_NAME = exports.SECURITY_NAME || (exports.SECURITY_NAME = {}));
 //# sourceMappingURL=constant.js.map

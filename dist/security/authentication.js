@@ -23,12 +23,7 @@
  * <http://resources.spinalcom.com/licenses.pdf>.
  */
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.expressAuthentication = expressAuthentication;
-exports.checkIfItIsAdmin = checkIfItIsAdmin;
-exports.checkIfItIsAuthPlateform = checkIfItIsAuthPlateform;
-exports.getProfileId = getProfileId;
-exports.getProfileNode = getProfileNode;
-exports.checkAndGetTokenInfo = checkAndGetTokenInfo;
+exports.checkAndGetTokenInfo = exports.getProfileNode = exports.getProfileId = exports.checkIfItIsAuthPlateform = exports.checkIfItIsAdmin = exports.expressAuthentication = void 0;
 const constant_1 = require("../constant");
 const services_1 = require("../services");
 const utils_1 = require("./utils");
@@ -42,6 +37,7 @@ async function expressAuthentication(request, securityName, scopes) {
         throw new AuthError_1.AuthError(constant_1.SECURITY_MESSAGES.INVALID_TOKEN);
     return token;
 }
+exports.expressAuthentication = expressAuthentication;
 async function checkIfItIsAdmin(request) {
     try {
         let profileId = await getProfileId(request);
@@ -51,6 +47,7 @@ async function checkIfItIsAdmin(request) {
         return false;
     }
 }
+exports.checkIfItIsAdmin = checkIfItIsAdmin;
 async function checkIfItIsAuthPlateform(request) {
     const token = (0, utils_1.getToken)(request);
     if (!token)
@@ -58,6 +55,7 @@ async function checkIfItIsAuthPlateform(request) {
     const authAdmin = await services_1.AuthentificationService.getInstance().getAuthCredentials();
     return token === authAdmin.TokenAdminToPam;
 }
+exports.checkIfItIsAuthPlateform = checkIfItIsAuthPlateform;
 async function getProfileId(request) {
     const tokenInfo = await checkAndGetTokenInfo(request);
     let profileId = tokenInfo.profile.profileId || tokenInfo.profile.userProfileBosConfigId || tokenInfo.profile.appProfileBosConfigId;
@@ -65,6 +63,7 @@ async function getProfileId(request) {
         throw new AuthError_1.AuthError(constant_1.SECURITY_MESSAGES.NO_PROFILE_FOUND);
     return profileId;
 }
+exports.getProfileId = getProfileId;
 async function getProfileNode(req) {
     const tokenInfo = await checkAndGetTokenInfo(req);
     const profileId = tokenInfo.profile.profileId || tokenInfo.profile.userProfileBosConfigId;
@@ -72,6 +71,7 @@ async function getProfileNode(req) {
     const instance = isApp ? services_1.AppProfileService.getInstance() : services_1.UserProfileService.getInstance();
     return instance.getProfileNode(profileId);
 }
+exports.getProfileNode = getProfileNode;
 async function checkAndGetTokenInfo(request) {
     // check token validity
     const token = await expressAuthentication(request);
@@ -81,6 +81,7 @@ async function checkAndGetTokenInfo(request) {
         throw new AuthError_1.AuthError(constant_1.SECURITY_MESSAGES.INVALID_TOKEN);
     return tokenInfo;
 }
+exports.checkAndGetTokenInfo = checkAndGetTokenInfo;
 // export async function expressAuthentication(
 //   request: express.Request,
 //   securityName: string,

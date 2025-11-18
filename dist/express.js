@@ -23,7 +23,6 @@
  * <http://resources.spinalcom.com/licenses.pdf>.
  */
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.default = launchExpressServer;
 const cors = require("cors");
 const express = require("express");
 const morgan = require("morgan");
@@ -61,4 +60,5 @@ async function launchExpressServer(serverPort, serverProtocol = "http") {
     await websocketServer.initialize();
     return { server, app };
 }
+exports.default = launchExpressServer;
 //# sourceMappingURL=express.js.map

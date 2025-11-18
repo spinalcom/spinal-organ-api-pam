@@ -23,18 +23,7 @@
  * <http://resources.spinalcom.com/licenses.pdf>.
  */
 Object.defineProperty(exports, "__esModule", { value: true });
-exports._formatProfile = _formatProfile;
-exports._formatPortofolioAuthRes = _formatPortofolioAuthRes;
-exports._formatBosAuthRes = _formatBosAuthRes;
-exports._getNodeListInfo = _getNodeListInfo;
-exports._formatProfileKeys = _formatProfileKeys;
-exports.formatAndMergeBosAuthorization = formatAndMergeBosAuthorization;
-exports.formatAndMergePortofolioAuthorization = formatAndMergePortofolioAuthorization;
-exports._findChildInContext = _findChildInContext;
-exports._createProfileNode = _createProfileNode;
-exports._getProfileNode = _getProfileNode;
-exports._renameProfile = _renameProfile;
-exports._getProfileNodeGraph = _getProfileNodeGraph;
+exports._getProfileNodeGraph = exports._renameProfile = exports._getProfileNode = exports._createProfileNode = exports._findChildInContext = exports.formatAndMergePortofolioAuthorization = exports.formatAndMergeBosAuthorization = exports._formatProfileKeys = exports._getNodeListInfo = exports._formatBosAuthRes = exports._formatPortofolioAuthRes = exports._formatProfile = void 0;
 const constant_1 = require("../constant");
 const spinal_env_viewer_graph_service_1 = require("spinal-env-viewer-graph-service");
 function _formatProfile(data) {
@@ -43,6 +32,7 @@ function _formatProfile(data) {
         authorized: data.authorized.map(el => _formatPortofolioAuthRes(el))
     };
 }
+exports._formatProfile = _formatProfile;
 function _formatPortofolioAuthRes(data) {
     return {
         ...data.portofolio.info.get(),
@@ -51,6 +41,7 @@ function _formatPortofolioAuthRes(data) {
         buildings: data.buildings.map(el => _formatBosAuthRes(el))
     };
 }
+exports._formatPortofolioAuthRes = _formatPortofolioAuthRes;
 function _formatBosAuthRes(data) {
     return {
         ...data.building.info.get(),
@@ -58,9 +49,11 @@ function _formatBosAuthRes(data) {
         apis: _getNodeListInfo(data.apis)
     };
 }
+exports._formatBosAuthRes = _formatBosAuthRes;
 function _getNodeListInfo(nodes = []) {
     return nodes.map(el => el.info.get());
 }
+exports._getNodeListInfo = _getNodeListInfo;
 function _formatProfileKeys(profile) {
     const res = {};
     for (const key in profile) {
@@ -71,10 +64,12 @@ function _formatProfileKeys(profile) {
     }
     return res;
 }
+exports._formatProfileKeys = _formatProfileKeys;
 function formatAndMergeBosAuthorization(itemsToAuthorize) {
     const buildingValids = itemsToAuthorize.filter(item => authorizationItemIsValid(item));
     return mergeBosAuth(buildingValids);
 }
+exports.formatAndMergeBosAuthorization = formatAndMergeBosAuthorization;
 function formatAndMergePortofolioAuthorization(itemsToAuthorize) {
     itemsToAuthorize = removeEmptyBuildings(itemsToAuthorize);
     itemsToAuthorize = removeInvalidPortofolio(itemsToAuthorize);
@@ -90,6 +85,7 @@ function formatAndMergePortofolioAuthorization(itemsToAuthorize) {
     //     return liste;
     // }, [])
 }
+exports.formatAndMergePortofolioAuthorization = formatAndMergePortofolioAuthorization;
 async function _findChildInContext(startNode, nodeIdOrName, context) {
     const children = await startNode.getChildrenInContext(context);
     return children.find(el => {
@@ -101,6 +97,7 @@ async function _findChildInContext(startNode, nodeIdOrName, context) {
         return false;
     });
 }
+exports._findChildInContext = _findChildInContext;
 async function _createProfileNode(profile) {
     const info = {
         name: profile.name,
@@ -111,21 +108,25 @@ async function _createProfileNode(profile) {
     const node = spinal_env_viewer_graph_service_1.SpinalGraphService.getRealNode(profileId);
     return node;
 }
+exports._createProfileNode = _createProfileNode;
 async function _getProfileNode(profileId, context) {
     const node = spinal_env_viewer_graph_service_1.SpinalGraphService.getRealNode(profileId);
     if (node)
         return node;
     return _findChildInContext(context, profileId, context);
 }
+exports._getProfileNode = _getProfileNode;
 function _renameProfile(node, newName) {
     if (newName && newName.trim())
         node.info.name.set(newName);
 }
+exports._renameProfile = _renameProfile;
 async function _getProfileNodeGraph(profileId, context) {
     const profile = await _getProfileNode(profileId, context);
     if (profile)
         return profile.getElement();
 }
+exports._getProfileNodeGraph = _getProfileNodeGraph;
 function mergePortofolioAuth(authorizedPortofolio) {
     const mergedObj = {};
     for (const portofolio of authorizedPortofolio) {

@@ -1,4 +1,4 @@
-import { IAdminCredential, IBuilding, IPamCredential, IUserCredential, IUserToken } from "../interfaces";
+import { IAdminCredential, IAppCredential, IApplicationToken, IBuilding, IOAuth2Credential, IPamCredential, IUserCredential, IUserToken } from "../interfaces";
 import { SpinalGraph } from "spinal-env-viewer-graph-service";
 export declare class AuthentificationService {
     private static instance;
@@ -9,15 +9,9 @@ export declare class AuthentificationService {
     init(graph: SpinalGraph): Promise<void>;
     createRedirectLinkToBosConfig(buildIngInfo: IBuilding, token: string): Promise<string>;
     consumeCodeUnique(code: string): Promise<any>;
-    /**
-     * Authenticates a user based on the provided credentials.
-     *
-     * @param userCredential - The credentials of the user to authenticate.
-     * @returns A promise that resolves to an object containing a status code and either a string or a token object (`IUserToken`).
-     */
-    authenticate(userCredential: IUserCredential): Promise<{
+    authenticate(info: IUserCredential | IAppCredential | IOAuth2Credential): Promise<{
         code: number;
-        data: string | IUserToken;
+        data: string | IApplicationToken | IUserToken;
     }>;
     /**
      * Registers the PAM platform in the authentication platform.
@@ -110,4 +104,5 @@ export declare class AuthentificationService {
      * @memberof AuthentificationService
      */
     private _getOrCreateAdminCredential;
+    private _formatInfo;
 }

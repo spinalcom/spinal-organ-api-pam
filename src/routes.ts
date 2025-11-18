@@ -138,6 +138,20 @@ const models: TsoaRoute.Models = {
         "additionalProperties": false,
     },
     // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
+    "IApplicationToken": {
+        "dataType": "refObject",
+        "properties": {
+            "name": {"dataType":"string"},
+            "type": {"dataType":"string"},
+            "token": {"dataType":"string"},
+            "createdToken": {"dataType":"double"},
+            "expieredToken": {"dataType":"double"},
+            "applicationId": {"dataType":"string"},
+            "applicationProfileList": {"dataType":"array","array":{"dataType":"string"}},
+        },
+        "additionalProperties": false,
+    },
+    // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
     "IUserToken": {
         "dataType": "refObject",
         "properties": {
@@ -163,18 +177,22 @@ const models: TsoaRoute.Models = {
         "additionalProperties": false,
     },
     // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
-    "IApplicationToken": {
+    "IAppCredential": {
         "dataType": "refObject",
         "properties": {
-            "name": {"dataType":"string"},
-            "type": {"dataType":"string"},
-            "token": {"dataType":"string"},
-            "createdToken": {"dataType":"double"},
-            "expieredToken": {"dataType":"double"},
-            "applicationId": {"dataType":"string"},
-            "applicationProfileList": {"dataType":"array","array":{"dataType":"string"}},
+            "clientId": {"dataType":"string","required":true},
+            "clientSecret": {"dataType":"string","required":true},
         },
         "additionalProperties": false,
+    },
+    // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
+    "IOAuth2Credential": {
+        "dataType": "refObject",
+        "properties": {
+            "client_id": {"dataType":"string","required":true},
+            "client_secret": {"dataType":"string","required":true},
+        },
+        "additionalProperties": {"dataType":"string"},
     },
     // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
     "IPamCredential": {
@@ -1664,7 +1682,7 @@ export function RegisterRoutes(app: express.Router) {
 
             function AuthController_authenticate(request: any, response: any, next: any) {
             const args = {
-                    credential: {"in":"body","name":"credential","required":true,"ref":"IUserCredential"},
+                    credential: {"in":"body","name":"credential","required":true,"dataType":"union","subSchemas":[{"ref":"IUserCredential"},{"ref":"IAppCredential"},{"ref":"IOAuth2Credential"}]},
             };
 
             // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa

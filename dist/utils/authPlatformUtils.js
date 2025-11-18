@@ -1,7 +1,6 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.getOrCreateContext = getOrCreateContext;
-exports.getRequestBody = getRequestBody;
+exports.getRequestBody = exports.getOrCreateContext = void 0;
 const spinal_model_graph_1 = require("spinal-model-graph");
 const services_1 = require("../services");
 const spinal_core_connectorjs_1 = require("spinal-core-connectorjs");
@@ -14,6 +13,7 @@ async function getOrCreateContext(graph, contextName, contextType) {
     await waitServerId(context);
     return context;
 }
+exports.getOrCreateContext = getOrCreateContext;
 function waitServerId(context) {
     let loop = 30 * 1000;
     return new Promise((resolve, reject) => {
@@ -40,6 +40,7 @@ async function getRequestBody(update, bosCredential, adminCredential) {
         }),
     });
 }
+exports.getRequestBody = getRequestBody;
 async function getPlatformInfo() {
     return {
         userProfileList: await _formatUserProfiles(),

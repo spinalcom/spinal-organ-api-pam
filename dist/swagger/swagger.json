@@ -252,6 +252,38 @@
                 "type": "object",
                 "additionalProperties": false
             },
+            "IApplicationToken": {
+                "properties": {
+                    "name": {
+                        "type": "string"
+                    },
+                    "type": {
+                        "type": "string"
+                    },
+                    "token": {
+                        "type": "string"
+                    },
+                    "createdToken": {
+                        "type": "number",
+                        "format": "double"
+                    },
+                    "expieredToken": {
+                        "type": "number",
+                        "format": "double"
+                    },
+                    "applicationId": {
+                        "type": "string"
+                    },
+                    "applicationProfileList": {
+                        "items": {
+                            "type": "string"
+                        },
+                        "type": "array"
+                    }
+                },
+                "type": "object",
+                "additionalProperties": false
+            },
             "IUserToken": {
                 "properties": {
                     "name": {
@@ -309,37 +341,39 @@
                 "type": "object",
                 "additionalProperties": false
             },
-            "IApplicationToken": {
+            "IAppCredential": {
                 "properties": {
-                    "name": {
+                    "clientId": {
                         "type": "string"
                     },
-                    "type": {
+                    "clientSecret": {
                         "type": "string"
-                    },
-                    "token": {
-                        "type": "string"
-                    },
-                    "createdToken": {
-                        "type": "number",
-                        "format": "double"
-                    },
-                    "expieredToken": {
-                        "type": "number",
-                        "format": "double"
-                    },
-                    "applicationId": {
-                        "type": "string"
-                    },
-                    "applicationProfileList": {
-                        "items": {
-                            "type": "string"
-                        },
-                        "type": "array"
                     }
                 },
+                "required": [
+                    "clientId",
+                    "clientSecret"
+                ],
                 "type": "object",
                 "additionalProperties": false
+            },
+            "IOAuth2Credential": {
+                "properties": {
+                    "client_id": {
+                        "type": "string"
+                    },
+                    "client_secret": {
+                        "type": "string"
+                    }
+                },
+                "required": [
+                    "client_id",
+                    "client_secret"
+                ],
+                "type": "object",
+                "additionalProperties": {
+                    "type": "string"
+                }
             },
             "IPamCredential": {
                 "properties": {
@@ -3478,6 +3512,9 @@
                                             "type": "string"
                                         },
                                         {
+                                            "$ref": "#/components/schemas/IApplicationToken"
+                                        },
+                                        {
                                             "$ref": "#/components/schemas/IUserToken"
                                         },
                                         {
@@ -3507,7 +3544,17 @@
                     "content": {
                         "application/json": {
                             "schema": {
-                                "$ref": "#/components/schemas/IUserCredential"
+                                "anyOf": [
+                                    {
+                                        "$ref": "#/components/schemas/IUserCredential"
+                                    },
+                                    {
+                                        "$ref": "#/components/schemas/IAppCredential"
+                                    },
+                                    {
+                                        "$ref": "#/components/schemas/IOAuth2Credential"
+                                    }
+                                ]
                             }
                         }
                     }
@@ -3846,10 +3893,10 @@
                                                 "data": {
                                                     "anyOf": [
                                                         {
-                                                            "$ref": "#/components/schemas/IUserToken"
+                                                            "$ref": "#/components/schemas/IApplicationToken"
                                                         },
                                                         {
-                                                            "$ref": "#/components/schemas/IApplicationToken"
+                                                            "$ref": "#/components/schemas/IUserToken"
                                                         }
                                                     ]
                                                 },

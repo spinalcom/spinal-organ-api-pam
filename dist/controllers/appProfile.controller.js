@@ -298,7 +298,6 @@ let AppProfileController = class AppProfileController extends tsoa_1.Controller 
         }
     }
 };
-exports.AppProfileController = AppProfileController;
 __decorate([
     (0, tsoa_1.Security)(constant_1.SECURITY_NAME.bearerAuth),
     (0, tsoa_1.Post)("/create_profile"),
@@ -426,10 +425,11 @@ __decorate([
     __metadata("design:paramtypes", [Object, String, String, Array]),
     __metadata("design:returntype", Promise)
 ], AppProfileController.prototype, "unauthorizeToAccessBosApis", null);
-exports.AppProfileController = AppProfileController = __decorate([
+AppProfileController = __decorate([
     (0, tsoa_1.Route)("/api/v1/pam/app_profile"),
     (0, tsoa_1.Tags)("App Profiles"),
     __metadata("design:paramtypes", [])
 ], AppProfileController);
+exports.AppProfileController = AppProfileController;
 exports.default = new AppProfileController();
 //# sourceMappingURL=appProfile.controller.js.map

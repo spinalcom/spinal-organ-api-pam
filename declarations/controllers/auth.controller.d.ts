@@ -1,10 +1,10 @@
 import * as express from "express";
 import { HTTP_CODES } from "../constant";
 import { Controller } from "tsoa";
-import { IAdmin, IAdminCredential, IApplicationToken, IPamCredential, IUserCredential, IUserToken } from "../interfaces";
+import { IAdmin, IAdminCredential, IAppCredential, IApplicationToken, IOAuth2Credential, IPamCredential, IUserCredential, IUserToken } from "../interfaces";
 export declare class AuthController extends Controller {
     constructor();
-    authenticate(credential: IUserCredential): Promise<string | IUserToken | {
+    authenticate(credential: IUserCredential | IAppCredential | IOAuth2Credential): Promise<string | IApplicationToken | IUserToken | {
         message: string;
     }>;
     consumeCodeUnique(data: {

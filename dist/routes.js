@@ -1,6 +1,6 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.RegisterRoutes = RegisterRoutes;
+exports.RegisterRoutes = void 0;
 /* tslint:disable */
 /* eslint-disable */
 // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
@@ -137,6 +137,20 @@ const models = {
         "additionalProperties": false,
     },
     // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
+    "IApplicationToken": {
+        "dataType": "refObject",
+        "properties": {
+            "name": { "dataType": "string" },
+            "type": { "dataType": "string" },
+            "token": { "dataType": "string" },
+            "createdToken": { "dataType": "double" },
+            "expieredToken": { "dataType": "double" },
+            "applicationId": { "dataType": "string" },
+            "applicationProfileList": { "dataType": "array", "array": { "dataType": "string" } },
+        },
+        "additionalProperties": false,
+    },
+    // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
     "IUserToken": {
         "dataType": "refObject",
         "properties": {
@@ -162,18 +176,22 @@ const models = {
         "additionalProperties": false,
     },
     // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
-    "IApplicationToken": {
+    "IAppCredential": {
         "dataType": "refObject",
         "properties": {
-            "name": { "dataType": "string" },
-            "type": { "dataType": "string" },
-            "token": { "dataType": "string" },
-            "createdToken": { "dataType": "double" },
-            "expieredToken": { "dataType": "double" },
-            "applicationId": { "dataType": "string" },
-            "applicationProfileList": { "dataType": "array", "array": { "dataType": "string" } },
+            "clientId": { "dataType": "string", "required": true },
+            "clientSecret": { "dataType": "string", "required": true },
         },
         "additionalProperties": false,
+    },
+    // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
+    "IOAuth2Credential": {
+        "dataType": "refObject",
+        "properties": {
+            "client_id": { "dataType": "string", "required": true },
+            "client_secret": { "dataType": "string", "required": true },
+        },
+        "additionalProperties": { "dataType": "string" },
     },
     // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
     "IPamCredential": {
@@ -1211,7 +1229,7 @@ function RegisterRoutes(app) {
     // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
     app.post('/api/v1/pam/auth', ...((0, runtime_1.fetchMiddlewares)(auth_controller_1.AuthController)), ...((0, runtime_1.fetchMiddlewares)(auth_controller_1.AuthController.prototype.authenticate)), function AuthController_authenticate(request, response, next) {
         const args = {
-            credential: { "in": "body", "name": "credential", "required": true, "ref": "IUserCredential" },
+            credential: { "in": "body", "name": "credential", "required": true, "dataType": "union", "subSchemas": [{ "ref": "IUserCredential" }, { "ref": "IAppCredential" }, { "ref": "IOAuth2Credential" }] },
         };
         // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
         let validatedArgs = [];
@@ -2566,5 +2584,6 @@ function RegisterRoutes(app) {
     }
     // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
 }
+exports.RegisterRoutes = RegisterRoutes;
 // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
 //# sourceMappingURL=routes.js.map

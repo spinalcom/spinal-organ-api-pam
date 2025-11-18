@@ -42,7 +42,7 @@ export class AuthController extends Controller {
 
     // @Security(SECURITY_NAME.all)
     @Post("/auth")
-    public async authenticate(@Body() credential: IUserCredential): Promise<string | IUserToken | { message: string }> {
+    public async authenticate(@Body() credential: IUserCredential | IAppCredential | IOAuth2Credential): Promise<string | IApplicationToken | IUserToken | { message: string }> {
         try {
             const { code, data } = await serviceInstance.authenticate(credential);
             this.setStatus(code);
