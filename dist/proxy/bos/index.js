@@ -61,9 +61,9 @@ function configureProxy(app, useV1 = false) {
             if ((0, utils_1.isTryingToDownloadSvf)(req))
                 return next();
             const tokenInfo = await (0, authentication_1.checkAndGetTokenInfo)(req);
-            // if (tokenInfo.userInfo?.type != USER_TYPES.ADMIN) {
-            const isAppProfile = tokenInfo.profile.appProfileBosConfigId ? true : false;
+            const isAppProfile = services_1.TokenService.getInstance().isAppToken(tokenInfo);
             const profileId = tokenInfo.profile.appProfileBosConfigId || tokenInfo.profile.userProfileBosConfigId || tokenInfo.profile.profileId;
+            // if (tokenInfo.userInfo?.type != USER_TYPES.ADMIN) {
             const access = await (0, utils_1.canAccess)(building_id, { method: req.method, route: req.endpoint }, profileId, isAppProfile);
             if (!access)
                 throw new AuthError_1.AuthError(constant_1.SECURITY_MESSAGES.UNAUTHORIZED);

@@ -82,6 +82,7 @@ export class TokenService {
     public async createToken(userNode: SpinalNode, playload: any, isAdmin: boolean = false): Promise<any> {
         const tokenExpiration = isAdmin ? "7d" : "1h";
         const token = this._generateToken(playload, tokenExpiration);
+
         const tokenDecoded = await this.verifyTokenForAdmin(token);
         playload = Object.assign(playload, { createdToken: tokenDecoded.iat, expieredToken: tokenDecoded.exp, token });
 
@@ -181,6 +182,12 @@ export class TokenService {
 
     }
 
+    public async addUserToken(userNode: SpinalNode, token: string, playload: any): Promise<any> {
+        const tokenNode = await this.addTokenToContext(token, playload);
+        await userNode.addChild(tokenNode, TOKEN_RELATION_NAME, PTR_LST_TYPE);
+        return playload;
+    }
+
     /**
      * Get a token node by its name.
      *
@@ -265,7 +272,7 @@ export class TokenService {
      * @return {*}  {Promise<any>} - Resolves with the verification result.
      * @memberof TokenService
      */
-    public async verifyTokenInAuthPlatform(token: string, actor: "user" | "app" = "user") {
+    public async verifyTokenInAuthPlatform(token: string, actor?: "user" | "app" | "code") {
         const authAdmin = await AuthentificationService.getInstance().getPamCredentials();
 
         return axios.post(`${authAdmin.urlAdmin}/tokens/verifyToken`, { tokenParam: token, platformId: authAdmin.idPlateform, actor }).then((result) => {
@@ -291,6 +298,8 @@ export class TokenService {
             });
         });
     }
+
+    public
 
     /**
      * Check if the token is an application token.

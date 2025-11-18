@@ -24,7 +24,7 @@
 
 import { BOS_BASE_URI_V2, BOS_BASE_URI_V1, BOS_BASE_URI_V1_2, HTTP_CODES, SECURITY_NAME, USER_TYPES, SECURITY_MESSAGES, PAM_BASE_URI } from "../../constant";
 import * as express from "express";
-import { AuthentificationService, BuildingService } from "../../services";
+import { AuthentificationService, BuildingService, TokenService } from "../../services";
 import * as proxy from "express-http-proxy";
 import { checkAndGetTokenInfo } from "../../security/authentication";
 import { _formatBuildingResponse, canAccess, formatUri, getBuildingsAuthorizedToProfile, proxyOptions, isTryingToDownloadSvf } from "./utils";
@@ -80,9 +80,9 @@ export default function configureProxy(app: express.Express, useV1: boolean = fa
 
 			const tokenInfo = await checkAndGetTokenInfo(req);
 
-			// if (tokenInfo.userInfo?.type != USER_TYPES.ADMIN) {
-			const isAppProfile = tokenInfo.profile.appProfileBosConfigId ? true : false;
+			const isAppProfile = TokenService.getInstance().isAppToken(tokenInfo);
 			const profileId = tokenInfo.profile.appProfileBosConfigId || tokenInfo.profile.userProfileBosConfigId || tokenInfo.profile.profileId;
+			// if (tokenInfo.userInfo?.type != USER_TYPES.ADMIN) {
 			const access = await canAccess(building_id, { method: req.method, route: (<any>req).endpoint }, profileId, isAppProfile);
 			if (!access) throw new AuthError(SECURITY_MESSAGES.UNAUTHORIZED);
 			// }

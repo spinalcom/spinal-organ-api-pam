@@ -156,6 +156,11 @@ class TokenService {
             return nodeElement.get();
         }
     }
+    async addUserToken(userNode, token, playload) {
+        const tokenNode = await this.addTokenToContext(token, playload);
+        await userNode.addChild(tokenNode, constant_1.TOKEN_RELATION_NAME, constant_1.PTR_LST_TYPE);
+        return playload;
+    }
     /**
      * Get a token node by its name.
      *
@@ -234,7 +239,7 @@ class TokenService {
      * @return {*}  {Promise<any>} - Resolves with the verification result.
      * @memberof TokenService
      */
-    async verifyTokenInAuthPlatform(token, actor = "user") {
+    async verifyTokenInAuthPlatform(token, actor) {
         const authAdmin = await authentification_service_1.AuthentificationService.getInstance().getPamCredentials();
         return axios_1.default.post(`${authAdmin.urlAdmin}/tokens/verifyToken`, { tokenParam: token, platformId: authAdmin.idPlateform, actor }).then((result) => {
             return result.data;

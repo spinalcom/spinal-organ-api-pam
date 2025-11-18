@@ -24,10 +24,11 @@
 
 import axios from "axios";
 import { SpinalContext, SpinalGraph, SpinalGraphService, SpinalNode } from "spinal-env-viewer-graph-service";
-import { PTR_LST_TYPE, APP_CONNECTED_LIST_CONTEXT_TYPE, APP_CONNECTED_LIST_CONTEXT_NAME, CONTEXT_TO_APP_RELATION_NAME } from "../constant";
+import { PTR_LST_TYPE, APP_CONNECTED_LIST_CONTEXT_TYPE, APP_CONNECTED_LIST_CONTEXT_NAME, CONTEXT_TO_APP_RELATION_NAME, USER_TYPES, HTTP_CODES } from "../constant";
 import { IAppCredential, IApplicationToken, IOAuth2Credential, IPamCredential } from "../interfaces";
 import { AuthentificationService } from './authentification.service'
 import { AuthError } from "../security/AuthError";
+import { TokenService } from "./token.service";
 
 
 /**
@@ -73,33 +74,33 @@ export class AppListService {
      */
     public async authenticateApplication(application: IAppCredential | IOAuth2Credential): Promise<{ code: number; data: string | IApplicationToken }> {
 
-        throw new AuthError(`This authentication method is deprecated. Please use the new authentication method.`);
+        // throw new AuthError(`This authentication method is deprecated. Please use the new authentication method.`);
 
 
-        // const authPlatformInfo = await this._getAuthPlateformInfo();
-        // const url = `${authPlatformInfo.urlAdmin}/applications/login`;
-        // return axios.post(url, application).then(async (result) => {
-        //     const data = result.data;
-        //     data.profile = await this._getProfileInfoInAuth(data.token, authPlatformInfo);
-        //     data.userInfo = await this._getApplicationInfoInAuth(data.applicationId, authPlatformInfo, data.token);
+        const authPlatformInfo = await this._getAuthPlateformInfo();
+        const url = `${authPlatformInfo.urlAdmin}/applications/login`;
+        return axios.post(url, application).then(async (result) => {
+            const data = result.data;
+            data.profile = await this._getProfileInfoInAuth(data.token, authPlatformInfo);
+            data.userInfo = await this._getApplicationInfoInAuth(data.applicationId, authPlatformInfo, data.token);
 
-        //     const type = USER_TYPES.APP;
-        //     const info = { name: data.userInfo?.name || application.clientId, applicationId: data.applicationId, clientId: application.clientId, type, userType: type }
+            // const type = USER_TYPES.APP;
+            // const info = { name: data.userInfo?.name || application.clientId, applicationId: data.applicationId, clientId: application.clientId, type, userType: type }
 
-        //     const node = await this._addApplicationToAppConnectedContext(info);
-        //     await TokenService.getInstance().createToken(node, data.token, data);
+            // const node = await this._addApplicationToAppConnectedContext(info);
+            // await TokenService.getInstance().addUserToken(node, data.token, data);
 
-        //     return {
-        //         code: HTTP_CODES.OK,
-        //         data
-        //     }
-        // }).catch(err => {
-        //     console.error(err)
-        //     return {
-        //         code: HTTP_CODES.UNAUTHORIZED,
-        //         data: "bad credential"
-        //     }
-        // })
+            return {
+                code: HTTP_CODES.OK,
+                data
+            }
+        }).catch(err => {
+            console.error(err)
+            return {
+                code: HTTP_CODES.UNAUTHORIZED,
+                data: "bad credential"
+            }
+        })
     }
 
 

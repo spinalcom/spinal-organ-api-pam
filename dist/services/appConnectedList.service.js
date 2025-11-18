@@ -28,7 +28,6 @@ const axios_1 = require("axios");
 const spinal_env_viewer_graph_service_1 = require("spinal-env-viewer-graph-service");
 const constant_1 = require("../constant");
 const authentification_service_1 = require("./authentification.service");
-const AuthError_1 = require("../security/AuthError");
 /**
  * Service class to manage the list of connected applications.
  * Handles initialization of the application context, authentication of applications,
@@ -65,28 +64,28 @@ class AppListService {
      * @returns An object containing the HTTP code and either the token data or an error message
      */
     async authenticateApplication(application) {
-        throw new AuthError_1.AuthError(`This authentication method is deprecated. Please use the new authentication method.`);
-        // const authPlatformInfo = await this._getAuthPlateformInfo();
-        // const url = `${authPlatformInfo.urlAdmin}/applications/login`;
-        // return axios.post(url, application).then(async (result) => {
-        //     const data = result.data;
-        //     data.profile = await this._getProfileInfoInAuth(data.token, authPlatformInfo);
-        //     data.userInfo = await this._getApplicationInfoInAuth(data.applicationId, authPlatformInfo, data.token);
-        //     const type = USER_TYPES.APP;
-        //     const info = { name: data.userInfo?.name || application.clientId, applicationId: data.applicationId, clientId: application.clientId, type, userType: type }
-        //     const node = await this._addApplicationToAppConnectedContext(info);
-        //     await TokenService.getInstance().createToken(node, data.token, data);
-        //     return {
-        //         code: HTTP_CODES.OK,
-        //         data
-        //     }
-        // }).catch(err => {
-        //     console.error(err)
-        //     return {
-        //         code: HTTP_CODES.UNAUTHORIZED,
-        //         data: "bad credential"
-        //     }
-        // })
+        // throw new AuthError(`This authentication method is deprecated. Please use the new authentication method.`);
+        const authPlatformInfo = await this._getAuthPlateformInfo();
+        const url = `${authPlatformInfo.urlAdmin}/applications/login`;
+        return axios_1.default.post(url, application).then(async (result) => {
+            const data = result.data;
+            data.profile = await this._getProfileInfoInAuth(data.token, authPlatformInfo);
+            data.userInfo = await this._getApplicationInfoInAuth(data.applicationId, authPlatformInfo, data.token);
+            // const type = USER_TYPES.APP;
+            // const info = { name: data.userInfo?.name || application.clientId, applicationId: data.applicationId, clientId: application.clientId, type, userType: type }
+            // const node = await this._addApplicationToAppConnectedContext(info);
+            // await TokenService.getInstance().addUserToken(node, data.token, data);
+            return {
+                code: constant_1.HTTP_CODES.OK,
+                data
+            };
+        }).catch(err => {
+            console.error(err);
+            return {
+                code: constant_1.HTTP_CODES.UNAUTHORIZED,
+                data: "bad credential"
+            };
+        });
     }
     //////////////////////////////////////////////////
     //                    PRIVATE                   //

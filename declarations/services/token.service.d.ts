@@ -60,6 +60,7 @@ export declare class TokenService {
      * @memberof TokenService
      */
     getTokenData(token: string): Promise<any>;
+    addUserToken(userNode: SpinalNode, token: string, playload: any): Promise<any>;
     /**
      * Get a token node by its name.
      *
@@ -101,7 +102,7 @@ export declare class TokenService {
      * @return {*}  {Promise<any>} - Resolves with the verification result.
      * @memberof TokenService
      */
-    verifyTokenInAuthPlatform(token: string, actor?: "user" | "app"): Promise<any>;
+    verifyTokenInAuthPlatform(token: string, actor?: "user" | "app" | "code"): Promise<any>;
     /**
      * Verify a token using the admin secret key.
      *
@@ -110,6 +111,7 @@ export declare class TokenService {
      * @memberof TokenService
      */
     verifyTokenForAdmin(token: string): Promise<any>;
+    public: any;
     /**
      * Check if the token is an application token.
      *
