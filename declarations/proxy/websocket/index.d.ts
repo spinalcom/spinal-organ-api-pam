@@ -1,4 +1,3 @@
-/// <reference types="node" />
 import { Server as HttpServer } from "http";
 export default class WebSocketServer {
     private _io;

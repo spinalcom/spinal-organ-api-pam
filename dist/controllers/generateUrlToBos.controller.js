@@ -43,6 +43,7 @@ let GenerateUrlToBosController = class GenerateUrlToBosController extends tsoa_1
         }
     }
 };
+exports.GenerateUrlToBosController = GenerateUrlToBosController;
 __decorate([
     (0, tsoa_1.Security)(constant_1.SECURITY_NAME.bearerAuth),
     (0, tsoa_1.Post)("/generate_url_to_bos/{buildingId}"),
@@ -52,10 +53,9 @@ __decorate([
     __metadata("design:paramtypes", [Object, String]),
     __metadata("design:returntype", Promise)
 ], GenerateUrlToBosController.prototype, "generateUrlToBos", null);
-GenerateUrlToBosController = __decorate([
+exports.GenerateUrlToBosController = GenerateUrlToBosController = __decorate([
     (0, tsoa_1.Route)("/api/v1/pam"),
     (0, tsoa_1.Tags)("Auth"),
     __metadata("design:paramtypes", [])
 ], GenerateUrlToBosController);
-exports.GenerateUrlToBosController = GenerateUrlToBosController;
 //# sourceMappingURL=generateUrlToBos.controller.js.map

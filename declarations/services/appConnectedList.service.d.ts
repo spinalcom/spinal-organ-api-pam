@@ -1,5 +1,5 @@
 import { SpinalContext, SpinalGraph } from "spinal-env-viewer-graph-service";
-import { IAppCredential, IApplicationToken, IOAuth2Credential } from "../interfaces";
+import { IAppCredential, IApplicationToken, IOAuth2Credential, IPamCredential } from "../interfaces";
 /**
  * Service class to manage the list of connected applications.
  * Handles initialization of the application context, authentication of applications,
@@ -52,7 +52,7 @@ export declare class AppListService {
      * @param userToken The user's token
      * @returns The application information object
      */
-    private _getApplicationInfoInAuth;
+    _getApplicationInfoInAuth(applicationId: string, adminCredential: IPamCredential, appToken: string): Promise<any>;
     /**
      * Retrieves the authentication platform information from the AuthentificationService.
      * @returns The admin platform credentials

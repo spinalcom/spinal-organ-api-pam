@@ -26,17 +26,6 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.APIException = void 0;
 const config = require("./config.json");
 class APIException {
-    constructor(codeMsg = "OK", customErr) {
-        this._aCodes = config.RESULT_CODE;
-        for (const type in this._aCodes) {
-            for (const codes of this._aCodes[type]) {
-                if (codes.code === codeMsg || codes.message === codeMsg) {
-                    this.setAll(codes, customErr);
-                    return;
-                }
-            }
-        }
-    }
     getCode() {
         return this._code;
     }
@@ -81,6 +70,17 @@ class APIException {
             result.datas = this.getData();
         }
         return result;
+    }
+    constructor(codeMsg = "OK", customErr) {
+        this._aCodes = config.RESULT_CODE;
+        for (const type in this._aCodes) {
+            for (const codes of this._aCodes[type]) {
+                if (codes.code === codeMsg || codes.message === codeMsg) {
+                    this.setAll(codes, customErr);
+                    return;
+                }
+            }
+        }
     }
 }
 exports.APIException = APIException;

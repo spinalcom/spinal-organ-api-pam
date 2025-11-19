@@ -31,8 +31,8 @@ export interface IBosAuthRes {
     apps?: SpinalNode[];
     apis?: SpinalNode[];
 }
-export declare type IPortofolioAuthEdit = IPortofolioAuth;
-export declare type IBosAuthEdit = IBosAuth;
+export type IPortofolioAuthEdit = IPortofolioAuth;
+export type IBosAuthEdit = IBosAuth;
 export interface IProfileEdit {
     name?: string;
     authorize?: IPortofolioAuthEdit[];

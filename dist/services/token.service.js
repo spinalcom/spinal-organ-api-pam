@@ -33,6 +33,7 @@ const globalCache = require("global-cache");
 const cron = require("node-cron");
 const authentification_service_1 = require("./authentification.service");
 const axios_1 = require("axios");
+const appConnectedList_service_1 = require("./appConnectedList.service");
 class TokenService {
     constructor() { }
     static getInstance() {
@@ -241,8 +242,11 @@ class TokenService {
      */
     async verifyTokenInAuthPlatform(token, actor) {
         const authAdmin = await authentification_service_1.AuthentificationService.getInstance().getPamCredentials();
-        return axios_1.default.post(`${authAdmin.urlAdmin}/tokens/verifyToken`, { tokenParam: token, platformId: authAdmin.idPlateform, actor }).then((result) => {
-            return result.data;
+        return axios_1.default.post(`${authAdmin.urlAdmin}/tokens/verifyToken`, { tokenParam: token, platformId: authAdmin.idPlateform, actor }).then(async (result) => {
+            let data = result.data;
+            if (data.applicationId)
+                data.userInfo = await appConnectedList_service_1.AppListService.getInstance()._getApplicationInfoInAuth(data.applicationId, authAdmin, data.token);
+            return data;
         });
     }
     /**

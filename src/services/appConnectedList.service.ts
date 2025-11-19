@@ -163,7 +163,7 @@ export class AppListService {
      * @param userToken The user's token
      * @returns The application information object
      */
-    private _getApplicationInfoInAuth(applicationId: string, adminCredential: IPamCredential, appToken: string) {
+    public _getApplicationInfoInAuth(applicationId: string, adminCredential: IPamCredential, appToken: string) {
         const config = {
             headers: {
                 'Content-Type': 'application/json',

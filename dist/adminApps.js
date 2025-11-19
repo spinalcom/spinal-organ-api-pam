@@ -23,7 +23,7 @@
  * <http://resources.spinalcom.com/licenses.pdf>.
  */
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.createDefaultAdminApps = void 0;
+exports.createDefaultAdminApps = createDefaultAdminApps;
 const services_1 = require("./services");
 const ADMIN_APPS = [
     {
@@ -98,5 +98,4 @@ function createDefaultAdminApps() {
         return liste;
     }, Promise.resolve([]));
 }
-exports.createDefaultAdminApps = createDefaultAdminApps;
 //# sourceMappingURL=adminApps.js.map

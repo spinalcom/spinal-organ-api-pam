@@ -23,6 +23,7 @@
  * <http://resources.spinalcom.com/licenses.pdf>.
  */
 Object.defineProperty(exports, "__esModule", { value: true });
+exports.default = launchExpressServer;
 const cors = require("cors");
 const express = require("express");
 const morgan = require("morgan");
@@ -35,7 +36,9 @@ const bos_1 = require("./proxy/bos");
 const expressMiddlewares_1 = require("./utils/expressMiddlewares");
 async function launchExpressServer(serverPort, serverProtocol = "http") {
     var app = express();
-    app.use(morgan('dev')); // Log HTTP requests to the console
+    app.use(morgan(':method :url :status :response-time ms', {
+        stream: process.stdout, // UTF-8 already
+    })); // Log HTTP requests to the console
     app.use(cors({ origin: '*' })); // Enable CORS for all origins
     (0, bos_1.default)(app); // use proxy to redirect all /building/* routes to the specific BOS API server
     (0, bos_1.default)(app, true);
@@ -60,5 +63,4 @@ async function launchExpressServer(serverPort, serverProtocol = "http") {
     await websocketServer.initialize();
     return { server, app };
 }
-exports.default = launchExpressServer;
 //# sourceMappingURL=express.js.map

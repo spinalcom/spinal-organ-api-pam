@@ -38,7 +38,10 @@ import { errorHandler, initSwagger, useApiMiddleWare, useProxyToHub, useViewMidd
 export default async function launchExpressServer(serverPort: string, serverProtocol: "http" | "https" = "http") {
 
 	var app = express();
-	app.use(morgan('dev')); // Log HTTP requests to the console
+	app.use(morgan(':method :url :status :response-time ms', {
+    stream: process.stdout, // UTF-8 already
+	})); // Log HTTP requests to the console
+
 	app.use(cors({ origin: '*' })); // Enable CORS for all origins
 
 	configureBosProxy(app); // use proxy to redirect all /building/* routes to the specific BOS API server

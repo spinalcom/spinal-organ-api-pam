@@ -32,6 +32,7 @@ import { IApplicationToken, IUserToken } from "../interfaces";
 import * as cron from 'node-cron';
 import { AuthentificationService } from "./authentification.service";
 import axios from "axios";
+import { AppListService } from "./appConnectedList.service";
 
 export class TokenService {
     private static instance: TokenService;
@@ -275,8 +276,10 @@ export class TokenService {
     public async verifyTokenInAuthPlatform(token: string, actor?: "user" | "app" | "code") {
         const authAdmin = await AuthentificationService.getInstance().getPamCredentials();
 
-        return axios.post(`${authAdmin.urlAdmin}/tokens/verifyToken`, { tokenParam: token, platformId: authAdmin.idPlateform, actor }).then((result) => {
-            return result.data;
+        return axios.post(`${authAdmin.urlAdmin}/tokens/verifyToken`, { tokenParam: token, platformId: authAdmin.idPlateform, actor }).then(async(result) => {
+            let data = result.data;
+            if(data.applicationId) data.userInfo = await AppListService.getInstance()._getApplicationInfoInAuth(data.applicationId, authAdmin, data.token);
+            return data;
         })
     }
 

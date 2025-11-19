@@ -1,12 +1,11 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.convertAndFormatFileUploaded = void 0;
+exports.convertAndFormatFileUploaded = convertAndFormatFileUploaded;
 const spinal_env_viewer_plugin_excel_manager_service_1 = require("spinal-env-viewer-plugin-excel-manager-service");
 async function convertAndFormatFileUploaded(fileData, isExcel = false) {
     let data = isExcel ? await _convertExcelToJson(fileData) : JSON.parse(JSON.stringify(fileData.toString()));
     return _formatAppsJson(data);
 }
-exports.convertAndFormatFileUploaded = convertAndFormatFileUploaded;
 async function _convertExcelToJson(excelData) {
     const data = await spinal_env_viewer_plugin_excel_manager_service_1.SpinalExcelManager.convertExcelToJson(excelData);
     return Object.values(data).flat();
