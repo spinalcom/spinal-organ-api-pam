@@ -25,7 +25,7 @@
 import * as express from "express";
 import { ProxyOptions } from "express-http-proxy";
 import { SpinalNode } from "spinal-env-viewer-graph-service";
-import { BUILDING_API_GROUP_NAME, HTTP_CODES } from "../../constant";
+import { BUILDING_API_GROUP_NAME, BUILDING_API_GROUP_TYPE, HTTP_CODES } from "../../constant";
 import { IBosAuthRes, IBuilding, IProfileRes } from "../../interfaces";
 import { APIService, AppProfileService, BuildingService, TokenService, UserProfileService } from "../../services";
 import { Utils } from "../../utils/pam_v1_utils/utils";
@@ -102,8 +102,9 @@ export async function canAccess(buildingId: string, api: { method: string; route
 	if (!buildingAccess) return false;
 	if (!isAppProfile || tryToAccessBuildingInfo(api)) return true;
 
-	const apiNode = await APIService.getInstance().getApiRouteByRoute(api, BUILDING_API_GROUP_NAME);
+	const apiNode = await APIService.getInstance().getApiRouteByRoute(api, BUILDING_API_GROUP_TYPE);
 	if (!apiNode) return false;
+
 	const buildingHasApi = await BuildingService.getInstance().buildingHasApi(buildingId, apiNode.getId().get());
 	if (!buildingHasApi) return false;
 

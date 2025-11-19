@@ -92,7 +92,7 @@ async function canAccess(buildingId, api, profileId, isAppProfile) {
         return false;
     if (!isAppProfile || tryToAccessBuildingInfo(api))
         return true;
-    const apiNode = await services_1.APIService.getInstance().getApiRouteByRoute(api, constant_1.BUILDING_API_GROUP_NAME);
+    const apiNode = await services_1.APIService.getInstance().getApiRouteByRoute(api, constant_1.BUILDING_API_GROUP_TYPE);
     if (!apiNode)
         return false;
     const buildingHasApi = await services_1.BuildingService.getInstance().buildingHasApi(buildingId, apiNode.getId().get());
