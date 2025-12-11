@@ -27,7 +27,7 @@ import { ADMIN_PROFILE_NAME, ADMIN_PROFILE_TYPE, APP_RELATION_NAME, CONTEXT_TO_U
 import { IPortofolioAuth, IPortofolioAuthEdit, IPortofolioAuthRes } from '../interfaces';
 import { PortofolioService } from './portofolio.service';
 import { UserProfileService } from './userProfile.service';
-import { _getAuthorizedPortofolioContext, createNodeReference } from '../utils/authorizationUtils';
+import { _getAuthorizedPortofolioContext, createNodeReference, referenceIsMatchingToNode } from '../utils/authorizationUtils';
 
 export class AdminProfileService {
   private static instance: AdminProfileService;
@@ -69,10 +69,15 @@ export class AdminProfileService {
   async addAppToAdminProfil(app: SpinalNode): Promise<SpinalNode> {
     const { context, portofolio } = await this._createOrGetAdminPortofolio();
 
-    const appReference = await createNodeReference(app);
+    const applications = await portofolio.getChildren(APP_RELATION_NAME);
 
+    const appExists = applications.find(node => node.getName().get().toLowerCase() === app.getName().get().toLowerCase());
+    if (appExists) return appExists;
+
+    const appReference = await createNodeReference(app);
     return portofolio.addChildInContext(appReference, APP_RELATION_NAME, PTR_LST_TYPE, context);
   }
+
 
 
   /**
@@ -85,8 +90,8 @@ export class AdminProfileService {
    *               to determine access rights.
    * @returns A promise that resolves with the result of the authorization operation.
    */
-  public async authorizeAdminProfileToAccessPortofolio(data: IPortofolioAuth) {
-    return UserProfileService.getInstance().authorizeProfileToAccessPortofolio(this._adminNode, data);
+  public async authorizeAdminProfileToAccessPortofolio(data: IPortofolioAuth, isCompatibleWithBosC: boolean) {
+    return UserProfileService.getInstance().authorizeProfileToAccessPortofolio(this._adminNode, data, isCompatibleWithBosC);
   }
 
 
@@ -96,8 +101,8 @@ export class AdminProfileService {
    * @param profileInfo - The profile information containing authorization details to be removed.
    * @returns A promise that resolves when the profile has been unauthorized from accessing the portfolio.
    */
-  public async removeFromAdminProfile(profileInfo: IPortofolioAuthEdit) {
-    return UserProfileService.getInstance().unauthorizeProfileToAccessPortofolio(this._adminNode, profileInfo);
+  public async removeFromAdminProfile(profileInfo: IPortofolioAuthEdit, isCompatibleWithBosC: boolean) {
+    return UserProfileService.getInstance().unauthorizeProfileToAccessPortofolio(this._adminNode, profileInfo, isCompatibleWithBosC);
   }
 
 
@@ -106,10 +111,10 @@ export class AdminProfileService {
    * For each portofolio, ensures the admin profile is authorized to access it.
    * @returns A promise resolving to an array of authorization results for each portofolio.
    */
-  public async syncAdminProfile(): Promise<IPortofolioAuthRes[]> {
+  public async syncAdminProfile(isCompatibleWithBosC: boolean = true): Promise<IPortofolioAuthRes[]> {
     const data = await this._getPortofoliosStructure();
 
-    const promises = data.map(async (el: IPortofolioAuth) => UserProfileService.getInstance().authorizeProfileToAccessPortofolio(this._adminNode, el));
+    const promises = data.map(async (el: IPortofolioAuth) => UserProfileService.getInstance().authorizeProfileToAccessPortofolio(this._adminNode, el, isCompatibleWithBosC));
 
     return Promise.all(promises);
   }

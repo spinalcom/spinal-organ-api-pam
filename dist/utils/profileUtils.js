@@ -75,8 +75,8 @@ function formatAndMergeBosAuthorization(itemsToAuthorize) {
     const buildingValids = itemsToAuthorize.filter(item => authorizationItemIsValid(item));
     return mergeBosAuth(buildingValids);
 }
-function formatAndMergePortofolioAuthorization(itemsToAuthorize) {
-    itemsToAuthorize = removeEmptyBuildings(itemsToAuthorize);
+function formatAndMergePortofolioAuthorization(itemsToAuthorize, isCompatibleWithBosC) {
+    itemsToAuthorize = removeEmptyBuildings(itemsToAuthorize, isCompatibleWithBosC);
     itemsToAuthorize = removeInvalidPortofolio(itemsToAuthorize);
     return mergePortofolioAuth(itemsToAuthorize);
     // return profileData.authorize.reduce((liste, item: IPortofolioAuth) => {
@@ -166,15 +166,17 @@ function removeInvalidPortofolio(items) {
         return item.portofolioId && item.portofolioId.trim() && authorizationItemIsValid(item);
     });
 }
-function removeEmptyBuildings(items) {
-    console.warn("Don't remove empty buildings for now, it can be usefull for bos_config compatibility");
-    // for (const item of items) {
-    //     item.building = (item.building || []).filter(building => authorizationItemIsValid(building));
-    // }
+function removeEmptyBuildings(items, isCompatibleWithBosC) {
+    // console.warn("Don't remove empty buildings for now, it can be usefull for bos_config compatibility");
+    if (isCompatibleWithBosC)
+        return items;
+    for (const item of items) {
+        item.building = (item.building || []).filter(building => authorizationItemIsValid(building));
+    }
     return items;
 }
 function authorizationItemIsValid(item) {
-    const globalCondition = item.appsIds?.length > 0 || item.apisIds?.length > 0 || item.unauthorizeApisIds?.length > 0 || item.unauthorizeAppsIds?.length > 0;
+    const globalCondition = item.appsIds?.length > 0 || item.apisIds?.length > 0 || item.unauthorizeApisIds?.length > 0 || item.unauthorizeAppsIds?.length > 0 || item.unauthorizeBuildingIds?.length > 0;
     if (isBuildingAuth(item)) {
         return globalCondition;
     }

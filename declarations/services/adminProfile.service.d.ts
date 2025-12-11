@@ -24,20 +24,20 @@ export declare class AdminProfileService {
      *               to determine access rights.
      * @returns A promise that resolves with the result of the authorization operation.
      */
-    authorizeAdminProfileToAccessPortofolio(data: IPortofolioAuth): Promise<IPortofolioAuthRes>;
+    authorizeAdminProfileToAccessPortofolio(data: IPortofolioAuth, isCompatibleWithBosC: boolean): Promise<IPortofolioAuthRes>;
     /**
      * Removes authorization for a profile to access a portfolio from the admin profile.
      *
      * @param profileInfo - The profile information containing authorization details to be removed.
      * @returns A promise that resolves when the profile has been unauthorized from accessing the portfolio.
      */
-    removeFromAdminProfile(profileInfo: IPortofolioAuthEdit): Promise<any>;
+    removeFromAdminProfile(profileInfo: IPortofolioAuthEdit, isCompatibleWithBosC: boolean): Promise<any>;
     /**
      * Synchronizes the admin profile's access to all existing portofolios.
      * For each portofolio, ensures the admin profile is authorized to access it.
      * @returns A promise resolving to an array of authorization results for each portofolio.
      */
-    syncAdminProfile(): Promise<IPortofolioAuthRes[]>;
+    syncAdminProfile(isCompatibleWithBosC?: boolean): Promise<IPortofolioAuthRes[]>;
     /**
      * Retrieves the admin profile node from the specified context or from the default user profile context.
      *

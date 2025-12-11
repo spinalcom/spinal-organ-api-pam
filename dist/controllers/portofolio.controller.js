@@ -66,12 +66,12 @@ let PortofolioController = class PortofolioController extends tsoa_1.Controller 
             return { message: error.message };
         }
     }
-    async updatePortofolio(req, portofolioId, data) {
+    async updatePortofolio(req, portofolioId, data, isCompatibleWithBosC) {
         try {
             const isAdmin = await (0, authentication_1.checkIfItIsAdmin)(req);
             if (!isAdmin)
                 throw new AuthError_1.AuthError(constant_1.SECURITY_MESSAGES.UNAUTHORIZED);
-            const res = await portofolioInstance.updatePortofolio(portofolioId, data);
+            const res = await portofolioInstance.updatePortofolio(portofolioId, data, isCompatibleWithBosC);
             const details = portofolioInstance._formatDetails(res);
             this.setStatus(constant_1.HTTP_CODES.OK);
             return details;
@@ -443,8 +443,9 @@ __decorate([
     __param(0, (0, tsoa_1.Request)()),
     __param(1, (0, tsoa_1.Path)()),
     __param(2, (0, tsoa_1.Body)()),
+    __param(3, (0, tsoa_1.Query)()),
     __metadata("design:type", Function),
-    __metadata("design:paramtypes", [Object, String, Object]),
+    __metadata("design:paramtypes", [Object, String, Object, Boolean]),
     __metadata("design:returntype", Promise)
 ], PortofolioController.prototype, "updatePortofolio", null);
 __decorate([

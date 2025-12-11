@@ -76,6 +76,11 @@ export async function referenceIsMatchingToNode(referenceNode: SpinalNode, origi
 
 
 export async function findNodeReferenceInProfileTree(profileContext: SpinalContext, startNode: SpinalNode, originalNodeId: string): Promise<SpinalNode> {
+
+    // findInContextAsyncPredicate doesn't include the start node in the search, so we checked it before
+    const startNodeIsMatch = await referenceIsMatchingToNode(startNode, originalNodeId);
+    if (startNodeIsMatch) return startNode;
+
     const found = await startNode.findInContextAsyncPredicate(profileContext, (async (node, stop) => {
         const isReference = await referenceIsMatchingToNode(node, originalNodeId)
         if (isReference) {
@@ -243,7 +248,10 @@ function converLstToJsArray(lst: spinal.Lst<any>) {
 }
 
 
-export function CleanReferenceTree(context: SpinalContext, startReferenceNode: SpinalNode) {
+export async function CleanReferenceTree(context: SpinalContext, startReferenceNode: SpinalNode) {
+    // remove the start node itself because findInContextAsyncPredicate doesn't include it in the search
+    await removeReferenceNode(startReferenceNode);
+
     return startReferenceNode.findInContextAsyncPredicate(context, (async (node) => {
         await removeReferenceNode(node);
         return true;

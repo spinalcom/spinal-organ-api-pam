@@ -65,14 +65,15 @@ class AppService {
         if (!groupNode)
             return;
         const applications = await groupNode.getChildren([constant_1.APP_RELATION_NAME]);
-        const appExist = applications.find(app => app.getName().get().toLowerCase() === appInfo.name.toLowerCase());
-        if (appExist)
-            return appExist;
-        appInfo = Object.assign({}, appInfo, { type: constant_1.ADMIN_APP_TYPE });
-        const appId = spinal_env_viewer_graph_service_1.SpinalGraphService.createNode(appInfo, undefined); // Create the app node with the provided info
-        const appNode = spinal_env_viewer_graph_service_1.SpinalGraphService.getRealNode(appId);
-        await adminProfile_service_1.AdminProfileService.getInstance().addAppToAdminProfil(appNode);
-        return groupNode.addChildInContext(appNode, constant_1.APP_RELATION_NAME, constant_1.PTR_LST_TYPE, this.context);
+        let appExist = applications.find(app => app.getName().get().toLowerCase() === appInfo.name.toLowerCase());
+        if (!appExist) {
+            appInfo = Object.assign({}, appInfo, { type: constant_1.ADMIN_APP_TYPE });
+            const appId = spinal_env_viewer_graph_service_1.SpinalGraphService.createNode(appInfo, undefined); // Create the app node with the provided info
+            const appNode = spinal_env_viewer_graph_service_1.SpinalGraphService.getRealNode(appId);
+            appExist = await groupNode.addChildInContext(appNode, constant_1.APP_RELATION_NAME, constant_1.PTR_LST_TYPE, this.context);
+        }
+        await adminProfile_service_1.AdminProfileService.getInstance().addAppToAdminProfil(appExist);
+        return appExist;
     }
     /**
      * Creates a new Portofolio App node if it does not already exist.

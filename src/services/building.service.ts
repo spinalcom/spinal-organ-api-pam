@@ -214,8 +214,8 @@ export class BuildingService {
         for (const key in buildingNewData) {
             if (Object.prototype.hasOwnProperty.call(buildingNewData, key)) {
                 const newValue = buildingNewData[key];
-                buildingNode.info.mod_attr(key, newValue);
-
+                if (typeof buildingNode.info[key] === "undefined") buildingNode.info.add_attr({ [key]: newValue });
+                else buildingNode.info[key].set(newValue);
             }
         }
 

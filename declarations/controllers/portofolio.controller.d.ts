@@ -6,7 +6,7 @@ export declare class PortofolioController extends Controller {
     addPortofolio(req: express.Request, data: IPortofolioInfo): Promise<IPortofolioData | {
         message: string;
     }>;
-    updatePortofolio(req: express.Request, portofolioId: string, data: IEditPortofolio): Promise<IPortofolioData | {
+    updatePortofolio(req: express.Request, portofolioId: string, data: IEditPortofolio, isCompatibleWithBosC?: boolean): Promise<IPortofolioData | {
         message: string;
     }>;
     renamePortofolio(req: express.Request, id: string, data: {

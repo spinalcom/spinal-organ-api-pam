@@ -75,15 +75,19 @@ export class AppService {
     if (!groupNode) return;
 
     const applications = await groupNode.getChildren([APP_RELATION_NAME]);
-    const appExist = applications.find(app => app.getName().get().toLowerCase() === appInfo.name.toLowerCase());
-    if (appExist) return appExist;
+    let appExist = applications.find(app => app.getName().get().toLowerCase() === appInfo.name.toLowerCase());
 
-    appInfo = Object.assign({}, appInfo, { type: ADMIN_APP_TYPE });
+    if (!appExist) {
+      appInfo = Object.assign({}, appInfo, { type: ADMIN_APP_TYPE });
 
-    const appId = SpinalGraphService.createNode(appInfo, undefined); // Create the app node with the provided info
-    const appNode = SpinalGraphService.getRealNode(appId);
-    await AdminProfileService.getInstance().addAppToAdminProfil(appNode);
-    return groupNode.addChildInContext(appNode, APP_RELATION_NAME, PTR_LST_TYPE, this.context);
+      const appId = SpinalGraphService.createNode(appInfo, undefined); // Create the app node with the provided info
+      const appNode = SpinalGraphService.getRealNode(appId);
+      appExist = await groupNode.addChildInContext(appNode, APP_RELATION_NAME, PTR_LST_TYPE, this.context);
+    }
+
+    await AdminProfileService.getInstance().addAppToAdminProfil(appExist);
+    return appExist;
+
   }
 
   /**

@@ -74,10 +74,12 @@ class APIService {
         for (const key in routeInfoFormatted) {
             if (Object.prototype.hasOwnProperty.call(routeInfoFormatted, key)) {
                 const element = routeInfoFormatted[key];
-                routeNode.info.mod_attr(key, element);
+                if (typeof routeNode.info[key] === "undefined")
+                    routeNode.info.add_attr({ [key]: element });
+                else
+                    routeNode.info[key].set(element);
             }
         }
-        // routeNode.mod_attr("info", routeInfoFormatted);
         return routeGroup.addChildInContext(routeNode, constant_1.API_RELATION_NAME, constant_1.PTR_LST_TYPE, this.context);
     }
     /**

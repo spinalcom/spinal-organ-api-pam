@@ -49,7 +49,7 @@ let UserProfileController = class UserProfileController extends tsoa_1.Controlle
     constructor() {
         super();
     }
-    async createUserProfile(req, data) {
+    async createUserProfile(req, data, isCompatibleWithBosC) {
         try {
             const isAdmin = await (0, authentication_1.checkIfItIsAdmin)(req);
             if (!isAdmin)
@@ -58,7 +58,7 @@ let UserProfileController = class UserProfileController extends tsoa_1.Controlle
                 this.setStatus(constant_1.HTTP_CODES.BAD_REQUEST);
                 return { message: "The profile name is required" };
             }
-            const profile = await serviceInstance.createProfile(data);
+            const profile = await serviceInstance.createProfile(data, isCompatibleWithBosC);
             this.setStatus(constant_1.HTTP_CODES.CREATED);
             return (0, profileUtils_1._formatProfile)(profile);
         }
@@ -100,12 +100,12 @@ let UserProfileController = class UserProfileController extends tsoa_1.Controlle
             return { message: error.message };
         }
     }
-    async updateUserProfile(req, id, data) {
+    async updateUserProfile(req, id, data, isCompatibleWithBosC) {
         try {
             const isAdmin = await (0, authentication_1.checkIfItIsAdmin)(req);
             if (!isAdmin)
                 throw new AuthError_1.AuthError(constant_1.SECURITY_MESSAGES.UNAUTHORIZED);
-            const node = await serviceInstance.updateProfile(id, data);
+            const node = await serviceInstance.updateProfile(id, data, isCompatibleWithBosC);
             if (node) {
                 this.setStatus(constant_1.HTTP_CODES.OK);
                 return (0, profileUtils_1._formatProfile)(node);
@@ -154,12 +154,12 @@ let UserProfileController = class UserProfileController extends tsoa_1.Controlle
             return { message: error.message };
         }
     }
-    async authorizeToAccessPortofolioApps(req, profileId, data) {
+    async authorizeToAccessPortofolioApps(req, profileId, data, isCompatibleWithBosC) {
         try {
             const isAdmin = await (0, authentication_1.checkIfItIsAdmin)(req);
             if (!isAdmin)
                 throw new AuthError_1.AuthError(constant_1.SECURITY_MESSAGES.UNAUTHORIZED);
-            const nodes = await serviceInstance.authorizeProfileToAccessPortofolioApp(profileId, data);
+            const nodes = await serviceInstance.authorizeProfileToAccessPortofolioApp(profileId, data, isCompatibleWithBosC);
             if (nodes) {
                 this.setStatus(constant_1.HTTP_CODES.OK);
                 return nodes.map(value => (0, profileUtils_1._formatPortofolioAuthRes)(value));
@@ -191,12 +191,12 @@ let UserProfileController = class UserProfileController extends tsoa_1.Controlle
             return { message: error.message };
         }
     }
-    async unauthorizeToAccessPortofolioApps(req, profileId, data) {
+    async unauthorizeToAccessPortofolioApps(req, profileId, data, isCompatibleWithBosC) {
         try {
             const isAdmin = await (0, authentication_1.checkIfItIsAdmin)(req);
             if (!isAdmin)
                 throw new AuthError_1.AuthError(constant_1.SECURITY_MESSAGES.UNAUTHORIZED);
-            const nodes = await serviceInstance.unauthorizeProfileToAccessPortofolioApp(profileId, data);
+            const nodes = await serviceInstance.unauthorizeProfileToAccessPortofolioApp(profileId, data, isCompatibleWithBosC);
             if (nodes) {
                 this.setStatus(constant_1.HTTP_CODES.OK);
                 return nodes.reduce((liste, item) => {
@@ -235,12 +235,12 @@ let UserProfileController = class UserProfileController extends tsoa_1.Controlle
             return { message: error.message };
         }
     }
-    async authorizeToAccessBosApps(req, profileId, portofolioId, data) {
+    async authorizeToAccessBosApps(req, profileId, portofolioId, data, isCompatibleWithBosC) {
         try {
             const isAdmin = await (0, authentication_1.checkIfItIsAdmin)(req);
             if (!isAdmin)
                 throw new AuthError_1.AuthError(constant_1.SECURITY_MESSAGES.UNAUTHORIZED);
-            const nodes = await serviceInstance.authorizeProfileToAccessBosApp(profileId, portofolioId, data);
+            const nodes = await serviceInstance.authorizeProfileToAccessBosApp(profileId, portofolioId, data, isCompatibleWithBosC);
             if (nodes) {
                 this.setStatus(constant_1.HTTP_CODES.OK);
                 return nodes.map(node => (0, profileUtils_1._formatBosAuthRes)(node));
@@ -272,12 +272,12 @@ let UserProfileController = class UserProfileController extends tsoa_1.Controlle
             return { message: error.message };
         }
     }
-    async unauthorizeToAccessBosApp(req, profileId, portofolioId, data) {
+    async unauthorizeToAccessBosApp(req, profileId, portofolioId, data, isCompatibleWithBosC) {
         try {
             const isAdmin = await (0, authentication_1.checkIfItIsAdmin)(req);
             if (!isAdmin)
                 throw new AuthError_1.AuthError(constant_1.SECURITY_MESSAGES.UNAUTHORIZED);
-            const nodes = await serviceInstance.unauthorizeProfileToAccessBosApp(profileId, portofolioId, data);
+            const nodes = await serviceInstance.unauthorizeProfileToAccessBosApp(profileId, portofolioId, data, isCompatibleWithBosC);
             if (nodes) {
                 this.setStatus(constant_1.HTTP_CODES.OK);
                 return nodes.reduce((liste, item) => {
@@ -301,8 +301,9 @@ __decorate([
     (0, tsoa_1.Post)("/create_profile"),
     __param(0, (0, tsoa_1.Request)()),
     __param(1, (0, tsoa_1.Body)()),
+    __param(2, (0, tsoa_1.Query)()),
     __metadata("design:type", Function),
-    __metadata("design:paramtypes", [Object, Object]),
+    __metadata("design:paramtypes", [Object, Object, Boolean]),
     __metadata("design:returntype", Promise)
 ], UserProfileController.prototype, "createUserProfile", null);
 __decorate([
@@ -328,8 +329,9 @@ __decorate([
     __param(0, (0, tsoa_1.Request)()),
     __param(1, (0, tsoa_1.Path)()),
     __param(2, (0, tsoa_1.Body)()),
+    __param(3, (0, tsoa_1.Query)()),
     __metadata("design:type", Function),
-    __metadata("design:paramtypes", [Object, String, Object]),
+    __metadata("design:paramtypes", [Object, String, Object, Boolean]),
     __metadata("design:returntype", Promise)
 ], UserProfileController.prototype, "updateUserProfile", null);
 __decorate([
@@ -356,8 +358,9 @@ __decorate([
     __param(0, (0, tsoa_1.Request)()),
     __param(1, (0, tsoa_1.Path)()),
     __param(2, (0, tsoa_1.Body)()),
+    __param(3, (0, tsoa_1.Query)()),
     __metadata("design:type", Function),
-    __metadata("design:paramtypes", [Object, String, Array]),
+    __metadata("design:paramtypes", [Object, String, Array, Boolean]),
     __metadata("design:returntype", Promise)
 ], UserProfileController.prototype, "authorizeToAccessPortofolioApps", null);
 __decorate([
@@ -376,8 +379,9 @@ __decorate([
     __param(0, (0, tsoa_1.Request)()),
     __param(1, (0, tsoa_1.Path)()),
     __param(2, (0, tsoa_1.Body)()),
+    __param(3, (0, tsoa_1.Query)()),
     __metadata("design:type", Function),
-    __metadata("design:paramtypes", [Object, String, Array]),
+    __metadata("design:paramtypes", [Object, String, Array, Boolean]),
     __metadata("design:returntype", Promise)
 ], UserProfileController.prototype, "unauthorizeToAccessPortofolioApps", null);
 __decorate([
@@ -397,8 +401,9 @@ __decorate([
     __param(1, (0, tsoa_1.Path)()),
     __param(2, (0, tsoa_1.Path)()),
     __param(3, (0, tsoa_1.Body)()),
+    __param(4, (0, tsoa_1.Query)()),
     __metadata("design:type", Function),
-    __metadata("design:paramtypes", [Object, String, String, Array]),
+    __metadata("design:paramtypes", [Object, String, String, Array, Boolean]),
     __metadata("design:returntype", Promise)
 ], UserProfileController.prototype, "authorizeToAccessBosApps", null);
 __decorate([
@@ -419,8 +424,9 @@ __decorate([
     __param(1, (0, tsoa_1.Path)()),
     __param(2, (0, tsoa_1.Path)()),
     __param(3, (0, tsoa_1.Body)()),
+    __param(4, (0, tsoa_1.Query)()),
     __metadata("design:type", Function),
-    __metadata("design:paramtypes", [Object, String, String, Array]),
+    __metadata("design:paramtypes", [Object, String, String, Array, Boolean]),
     __metadata("design:returntype", Promise)
 ], UserProfileController.prototype, "unauthorizeToAccessBosApp", null);
 exports.UserProfileController = UserProfileController = __decorate([

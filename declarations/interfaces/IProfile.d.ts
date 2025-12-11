@@ -35,5 +35,7 @@ export type IPortofolioAuthEdit = IPortofolioAuth;
 export type IBosAuthEdit = IBosAuth;
 export interface IProfileEdit {
     name?: string;
-    authorize?: IPortofolioAuthEdit[];
+    authorize?: (IPortofolioAuthEdit & {
+        unauthorizeBuildingIds?: string[];
+    })[];
 }

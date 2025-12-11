@@ -171,7 +171,7 @@ export default class AuthorizationService {
      * @param appIds - The IDs of the apps to authorize access to.
      * @returns An array of real SpinalNode apps that were authorized.
      */
-    authorizeProfileToAccessBosApp(profile: SpinalNode, portofolioId: string, BosId: string, appIds: string | string[]): Promise<SpinalNode[]>;
+    authorizeProfileToAccessBosApp(profile: SpinalNode, portofolioId: string, BosId: string, appIds: string | string[], isCompatibleWithBosC: boolean): Promise<SpinalNode[]>;
     /**
      * Revokes a profile's authorization to access a specific BOS (Building Operating System) within a given portfolio.
      *
@@ -198,7 +198,7 @@ export default class AuthorizationService {
      * @param appIds - The ID(s) of the app(s) to unauthorize.
      * @returns A promise that resolves to an array of removed app references.
      */
-    unauthorizeProfileToAccessBosApp(profile: SpinalNode, portofolioId: string, BosId: string, appIds: string | string[]): Promise<SpinalNode[]>;
+    unauthorizeProfileToAccessBosApp(profile: SpinalNode, portofolioId: string, BosId: string, appIds: string | string[], isCompatibleWithBosC: boolean): Promise<SpinalNode[]>;
     /**
      * Retrieves the list of authorized BOS (Building Operating System) nodes within a specific portfolio for a given profile.
      *
@@ -245,7 +245,7 @@ export default class AuthorizationService {
      * @param apiRoutesIds - The IDs of the API routes to authorize access to.
      * @returns An array of real SpinalNode API routes that were authorized.
      */
-    authorizeProfileToAccessBosApisRoutes(profile: SpinalNode, portofolioId: string, bosId: string, apiRoutesIds: string | string[]): Promise<SpinalNode[]>;
+    authorizeProfileToAccessBosApisRoutes(profile: SpinalNode, portofolioId: string, bosId: string, apiRoutesIds: string | string[], isCompatibleWithBosC: boolean): Promise<SpinalNode[]>;
     /**
      * Revokes a profile's authorization to access specific API routes within a BOS (Building Operating System).
      *
@@ -259,7 +259,7 @@ export default class AuthorizationService {
      * @param apiRoutesIds - The ID(s) of the API route(s) to unauthorize.
      * @returns A promise that resolves to an array of removed API route references.
      */
-    unauthorizeProfileToAccessBosApisRoutes(profile: SpinalNode, portofolioId: string, bosId: string, apiRoutesIds: string | string[]): Promise<SpinalNode[]>;
+    unauthorizeProfileToAccessBosApisRoutes(profile: SpinalNode, portofolioId: string, bosId: string, apiRoutesIds: string | string[], isCompatibleWithBosC: boolean): Promise<SpinalNode[]>;
     /**
      * Retrieves the list of authorized BOS API route nodes for a given profile, portfolio, and BOS ID.
      *

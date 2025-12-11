@@ -25,7 +25,7 @@
 import { BuildingService, PortofolioService } from "../services";
 
 import { IApiRoute, IApp, IBuilding, IBuildingCreation, IEditPortofolio, IPortofolioData, IPortofolioInfo } from "../interfaces";
-import { Body, Controller, Path, Post, Route, Tags, Put, Get, Delete, UploadedFile, Security, Request } from "tsoa";
+import { Body, Controller, Path, Post, Route, Tags, Put, Get, Delete, UploadedFile, Security, Request, Query } from "tsoa";
 import { HTTP_CODES, SECURITY_MESSAGES, SECURITY_NAME } from "../constant";
 import * as express from 'express';
 import { checkIfItIsAdmin, getProfileNode } from "../security/authentication";
@@ -69,12 +69,12 @@ export class PortofolioController extends Controller {
 
     @Security(SECURITY_NAME.bearerAuth)
     @Put("/update_portofolio/{portofolioId}")
-    public async updatePortofolio(@Request() req: express.Request, @Path() portofolioId: string, @Body() data: IEditPortofolio): Promise<IPortofolioData | { message: string }> {
+    public async updatePortofolio(@Request() req: express.Request, @Path() portofolioId: string, @Body() data: IEditPortofolio, @Query() isCompatibleWithBosC?: boolean): Promise<IPortofolioData | { message: string }> {
         try {
             const isAdmin = await checkIfItIsAdmin(req);
             if (!isAdmin) throw new AuthError(SECURITY_MESSAGES.UNAUTHORIZED);
 
-            const res = await portofolioInstance.updatePortofolio(portofolioId, data);
+            const res = await portofolioInstance.updatePortofolio(portofolioId, data, isCompatibleWithBosC);
             const details = portofolioInstance._formatDetails(res);
             this.setStatus(HTTP_CODES.OK)
             return details;

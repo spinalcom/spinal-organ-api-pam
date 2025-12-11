@@ -10,7 +10,7 @@ export declare class ProfileBase {
  * @param profileData The profile data to create.
  * @returns The created profile node and its authorized portofolios.
  */
-    createProfile(profileData: IProfile): Promise<IProfileRes>;
+    createProfile(profileData: IProfile, isCompatibleWithBosC: boolean): Promise<IProfileRes>;
     /**
      * Retrieves the profile node associated with the given profile ID.
      *
@@ -33,7 +33,7 @@ export declare class ProfileBase {
      * @param newData The new profile data.
      * @returns The updated profile node and its authorized portofolios.
      */
-    updateProfile(profileId: string, newData: IProfileEdit): Promise<IProfileRes>;
+    updateProfile(profileId: string, newData: IProfileEdit, isCompatibleWithBosC: boolean): Promise<IProfileRes>;
     /**
      * Retrieves all application profile nodes and their associated authorization structures.
      * @returns A promise that resolves to an array of profile objects, each containing the profile node and its authorization structure.
@@ -71,28 +71,28 @@ export declare class ProfileBase {
      * @param portofolioAuth - A single or array of IPortofolioAuth objects specifying portfolio and app IDs.
      * @returns A promise resolving to an array of authorized portfolio-app structures.
      */
-    authorizeProfileToAccessPortofolioApp(profile: string | SpinalNode, portofolioAuth: IPortofolioAuth | IPortofolioAuth[]): Promise<IPortofolioAuthRes[]>;
+    authorizeProfileToAccessPortofolioApp(profile: string | SpinalNode, portofolioAuth: IPortofolioAuth | IPortofolioAuth[], isCompatibleWithBosC: boolean): Promise<IPortofolioAuthRes[]>;
     /**
      * Revokes a profile's authorization to access specific applications within one or more portfolios.
      * @param profile - The profile node or its ID.
      * @param portofolioAuth - A single or array of IPortofolioAuth objects specifying portfolio and app IDs to unauthorize.
      * @returns A promise resolving to an array of SpinalNode instances representing the unauthorizations.
      */
-    unauthorizeProfileToAccessPortofolioApp(profile: string | SpinalNode, portofolioAuth: IPortofolioAuth | IPortofolioAuth[]): Promise<SpinalNode[]>;
+    unauthorizeProfileToAccessPortofolioApp(profile: string | SpinalNode, portofolioAuth: IPortofolioAuth | IPortofolioAuth[], isCompatibleWithBosC: boolean): Promise<SpinalNode[]>;
     /**
      * Authorizes a profile to access specific API routes within one or more portfolios.
      * @param profile - The profile node or its ID.
      * @param portofolioAuth - A single or array of IPortofolioAuth objects specifying portfolio and API IDs.
      * @returns A promise resolving to an array of authorized portfolio-API structures.
      */
-    authorizeProfileToAccessPortofolioApisRoute(profile: string | SpinalNode, portofolioAuth: IPortofolioAuth | IPortofolioAuth[]): Promise<IPortofolioAuthRes[]>;
+    authorizeProfileToAccessPortofolioApisRoute(profile: string | SpinalNode, portofolioAuth: IPortofolioAuth | IPortofolioAuth[], isCompatibleWithBosC: boolean): Promise<IPortofolioAuthRes[]>;
     /**
      * Revokes a profile's authorization to access specific API routes within one or more portfolios.
      * @param profile - The profile node or its ID.
      * @param portofolioAuth - A single or array of IPortofolioAuth objects specifying portfolio and API IDs to unauthorize.
      * @returns A promise resolving to an array of IDs of the unauthorized API routes.
      */
-    unauthorizeProfileToAccessPortofolioApisRoute(profile: string | SpinalNode, portofolioAuth: IPortofolioAuth | IPortofolioAuth[]): Promise<string[]>;
+    unauthorizeProfileToAccessPortofolioApisRoute(profile: string | SpinalNode, portofolioAuth: IPortofolioAuth | IPortofolioAuth[], isCompatibleWithBosC: boolean): Promise<string[]>;
     /**
      * Retrieves the authorized portfolios for a given profile.
      *
@@ -152,7 +152,7 @@ export declare class ProfileBase {
      * @param {IBosAuth | IBosAuth[]} bosAuth - A single or array of IBosAuth objects specifying building and app IDs.
      * @returns {Promise<IBosAuthRes[]>} - A promise resolving to an array of authorized building-app structures.
      */
-    authorizeProfileToAccessBosApp(profile: SpinalNode | string, portofolioId: string, bosAuth: IBosAuth | IBosAuth[]): Promise<IBosAuthRes[]>;
+    authorizeProfileToAccessBosApp(profile: SpinalNode | string, portofolioId: string, bosAuth: IBosAuth | IBosAuth[], isCompatibleWithBosC: boolean): Promise<IBosAuthRes[]>;
     /**
      * Revokes a profile's authorization to access specific applications within one or more BOS (Building Operating System) nodes.
      *
@@ -161,7 +161,7 @@ export declare class ProfileBase {
      * @param {IBosAuth | IBosAuth[]} bosAuth - A single or array of IBosAuth objects specifying building and app IDs to unauthorize.
      * @returns {Promise<SpinalNode[]>} - A promise resolving to an array of SpinalNode instances representing the unauthorizations.
      */
-    unauthorizeProfileToAccessBosApp(profile: SpinalNode | string, portofolioId: string, bosAuth: IBosAuth | IBosAuth[]): Promise<SpinalNode[]>;
+    unauthorizeProfileToAccessBosApp(profile: SpinalNode | string, portofolioId: string, bosAuth: IBosAuth | IBosAuth[], isCompatibleWithBosC: boolean): Promise<SpinalNode[]>;
     /**
      * Authorizes a profile to access specific API routes within one or more BOS (Building Operating System) nodes.
      *
@@ -170,7 +170,7 @@ export declare class ProfileBase {
      * @param {IBosAuth | IBosAuth[]} bosAuth - A single or array of IBosAuth objects specifying building and API IDs.
      * @returns A promise resolving to an array of authorized building-API structures.
      */
-    authorizeProfileToAccessBosApiRoute(profile: SpinalNode | string, portofolioId: string, bosAuth: IBosAuth | IBosAuth[]): Promise<IBosAuthRes[]>;
+    authorizeProfileToAccessBosApiRoute(profile: SpinalNode | string, portofolioId: string, bosAuth: IBosAuth | IBosAuth[], isCompatibleWithBosC: boolean): Promise<IBosAuthRes[]>;
     /**
      * Revokes a profile's authorization to access specific API routes within one or more BOS (Building Operating System) nodes.
      *
@@ -179,7 +179,7 @@ export declare class ProfileBase {
      * @param {IBosAuth | IBosAuth[]} bosAuth - A single or array of IBosAuth objects specifying building and API IDs to unauthorize.
      * @returns {Promise<string[]>} - A promise resolving to an array of IDs of the unauthorized API routes.
      */
-    unauthorizeProfileToAccessBosApiRoute(profile: SpinalNode | string, portofolioId: string, bosAuth: IBosAuth | IBosAuth[]): Promise<string[]>;
+    unauthorizeProfileToAccessBosApiRoute(profile: SpinalNode | string, portofolioId: string, bosAuth: IBosAuth | IBosAuth[], isCompatibleWithBosC: boolean): Promise<string[]>;
     /**
      * Retrieves the authorized BOS (Building Operating System) nodes for a given profile and portfolio.
      *
@@ -241,8 +241,10 @@ export declare class ProfileBase {
      * @param portofolioAuth - The portfolio authorization object containing portfolio ID, APIs, and building access details.
      * @returns A promise resolving to an object containing the authorized portfolio node, APIs, and buildings structure.
      */
-    authorizeProfileToAccessPortofolio(profile: SpinalNode, portofolioAuth: IPortofolioAuth): Promise<IPortofolioAuthRes>;
-    unauthorizeProfileToAccessPortofolio(profile: SpinalNode, portofolioAuth: IPortofolioAuthEdit): Promise<any>;
+    authorizeProfileToAccessPortofolio(profile: SpinalNode, portofolioAuth: IPortofolioAuth, isCompatibleWithBosC: boolean): Promise<IPortofolioAuthRes>;
+    unauthorizeProfileToAccessPortofolio(profile: SpinalNode, portofolioAuth: IPortofolioAuthEdit & {
+        unauthorizeBuildingIds?: string[];
+    }, isCompatibleWithBosC: boolean): Promise<any>;
     private _authorizeIBosAuth;
     private _unauthorizeIBosAuth;
 }

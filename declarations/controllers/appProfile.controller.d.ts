@@ -3,7 +3,7 @@ import { IApiRoute, IBosAuth, IBosData, IPortofolioAuth, IPortofolioData, IProfi
 import { Controller } from 'tsoa';
 export declare class AppProfileController extends Controller {
     constructor();
-    createAppProfile(req: express.Request, data: IProfile): Promise<IProfileData | {
+    createAppProfile(req: express.Request, data: IProfile, isCompatibleWithBosC?: boolean): Promise<IProfileData | {
         message: string;
     }>;
     getAppProfile(req: express.Request, id: string): Promise<IProfileData | {
@@ -12,7 +12,7 @@ export declare class AppProfileController extends Controller {
     getAllAppProfile(req: express.Request): Promise<IProfileData[] | {
         message: string;
     }>;
-    updateAppProfile(req: express.Request, id: string, data: IProfileEdit): Promise<IProfileData | {
+    updateAppProfile(req: express.Request, id: string, data: IProfileEdit, isCompatibleWithBosC?: boolean): Promise<IProfileData | {
         message: string;
     }>;
     deleteAppProfile(req: express.Request, id: string): Promise<{
@@ -21,7 +21,7 @@ export declare class AppProfileController extends Controller {
     getAuthorizedPortofolio(req: express.Request, profileId: string): Promise<IPortofolioData[] | {
         message: string;
     }>;
-    authorizeToAccessPortofolioApis(req: express.Request, profileId: string, data: IPortofolioAuth): Promise<IApiRoute[] | {
+    authorizeToAccessPortofolioApis(req: express.Request, profileId: string, data: IPortofolioAuth, isCompatibleWithBosC?: boolean): Promise<IApiRoute[] | {
         message: string;
     }>;
     getAuthorizedPortofolioApis(req: express.Request, profileId: string, portofolioId: string): Promise<IApiRoute[] | {
@@ -30,13 +30,13 @@ export declare class AppProfileController extends Controller {
     unauthorizeToAccessPortofolioApis(req: express.Request, profileId: string, data: {
         apisIds: string[];
         portofolioId: string;
-    }[]): Promise<string[] | {
+    }[], isCompatibleWithBosC?: boolean): Promise<string[] | {
         message: string;
     }>;
     getAuthorizedBos(req: express.Request, profileId: string, portofolioId: string): Promise<IBosData | {
         message: string;
     }>;
-    authorizeToAccessBosApis(req: express.Request, profileId: string, portofolioId: string, data: IBosAuth): Promise<IApiRoute[] | {
+    authorizeToAccessBosApis(req: express.Request, profileId: string, portofolioId: string, data: IBosAuth, isCompatibleWithBosC?: boolean): Promise<IApiRoute[] | {
         message: string;
     }>;
     getAuthorizedBosApis(req: express.Request, profileId: string, portofolioId: string, bosId: string): Promise<IApiRoute[] | {
@@ -45,7 +45,7 @@ export declare class AppProfileController extends Controller {
     unauthorizeToAccessBosApis(req: express.Request, profileId: string, portofolioId: string, data: {
         apisIds: string[];
         buildingId: string;
-    }[]): Promise<string[] | {
+    }[], isCompatibleWithBosC?: boolean): Promise<string[] | {
         message: string;
     }>;
 }

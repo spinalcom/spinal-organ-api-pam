@@ -111,13 +111,13 @@ export class PortofolioService {
    * @param newData - The new data to apply to the portfolio.
    * @returns A promise that resolves to the updated portfolio details, or undefined if the portfolio does not exist.
    */
-  public async updatePortofolio(portofolioId: string, newData: IEditPortofolio): Promise<IPortofolioDetails> {
+  public async updatePortofolio(portofolioId: string, newData: IEditPortofolio, isCompatibleWithBosC: boolean): Promise<IPortofolioDetails> {
 
     const portofolioNode = await this.getPortofolioNode(portofolioId);
     if (!portofolioNode) return;
 
     const convertedData = convertIEditPortofolio(portofolioId, newData);
-    const [dataFormatted] = formatAndMergePortofolioAuthorization([convertedData]);
+    const [dataFormatted] = formatAndMergePortofolioAuthorization([convertedData], isCompatibleWithBosC);
 
     if (dataFormatted) return;
 

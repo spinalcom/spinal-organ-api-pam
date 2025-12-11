@@ -58,6 +58,10 @@ class AdminProfileService {
      */
     async addAppToAdminProfil(app) {
         const { context, portofolio } = await this._createOrGetAdminPortofolio();
+        const applications = await portofolio.getChildren(constant_1.APP_RELATION_NAME);
+        const appExists = applications.find(node => node.getName().get().toLowerCase() === app.getName().get().toLowerCase());
+        if (appExists)
+            return appExists;
         const appReference = await (0, authorizationUtils_1.createNodeReference)(app);
         return portofolio.addChildInContext(appReference, constant_1.APP_RELATION_NAME, constant_1.PTR_LST_TYPE, context);
     }
@@ -71,8 +75,8 @@ class AdminProfileService {
      *               to determine access rights.
      * @returns A promise that resolves with the result of the authorization operation.
      */
-    async authorizeAdminProfileToAccessPortofolio(data) {
-        return userProfile_service_1.UserProfileService.getInstance().authorizeProfileToAccessPortofolio(this._adminNode, data);
+    async authorizeAdminProfileToAccessPortofolio(data, isCompatibleWithBosC) {
+        return userProfile_service_1.UserProfileService.getInstance().authorizeProfileToAccessPortofolio(this._adminNode, data, isCompatibleWithBosC);
     }
     /**
      * Removes authorization for a profile to access a portfolio from the admin profile.
@@ -80,17 +84,17 @@ class AdminProfileService {
      * @param profileInfo - The profile information containing authorization details to be removed.
      * @returns A promise that resolves when the profile has been unauthorized from accessing the portfolio.
      */
-    async removeFromAdminProfile(profileInfo) {
-        return userProfile_service_1.UserProfileService.getInstance().unauthorizeProfileToAccessPortofolio(this._adminNode, profileInfo);
+    async removeFromAdminProfile(profileInfo, isCompatibleWithBosC) {
+        return userProfile_service_1.UserProfileService.getInstance().unauthorizeProfileToAccessPortofolio(this._adminNode, profileInfo, isCompatibleWithBosC);
     }
     /**
      * Synchronizes the admin profile's access to all existing portofolios.
      * For each portofolio, ensures the admin profile is authorized to access it.
      * @returns A promise resolving to an array of authorization results for each portofolio.
      */
-    async syncAdminProfile() {
+    async syncAdminProfile(isCompatibleWithBosC = true) {
         const data = await this._getPortofoliosStructure();
-        const promises = data.map(async (el) => userProfile_service_1.UserProfileService.getInstance().authorizeProfileToAccessPortofolio(this._adminNode, el));
+        const promises = data.map(async (el) => userProfile_service_1.UserProfileService.getInstance().authorizeProfileToAccessPortofolio(this._adminNode, el, isCompatibleWithBosC));
         return Promise.all(promises);
     }
     /**

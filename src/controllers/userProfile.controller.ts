@@ -25,7 +25,7 @@ import * as express from 'express';
 import { HTTP_CODES, SECURITY_MESSAGES, SECURITY_NAME } from "../constant";
 import { IBosAuth, IBosData, IPortofolioData, IProfile, IProfileData, IProfileEdit } from "../interfaces";
 import { UserProfileService } from "../services";
-import { Route, Tags, Controller, Post, Get, Put, Delete, Body, Path, Security, Request } from "tsoa";
+import { Route, Tags, Controller, Post, Get, Put, Delete, Body, Path, Security, Request, Query } from "tsoa";
 import { _formatProfile, _getNodeListInfo, _formatProfileKeys, _formatPortofolioAuthRes, _formatBosAuthRes } from '../utils/profileUtils'
 import { AuthError } from '../security/AuthError';
 import { checkIfItIsAdmin, getProfileId } from '../security/authentication';
@@ -43,7 +43,7 @@ export class UserProfileController extends Controller {
 
     @Security(SECURITY_NAME.bearerAuth)
     @Post("/create_profile")
-    public async createUserProfile(@Request() req: express.Request, @Body() data: IProfile): Promise<IProfileData | { message: string }> {
+    public async createUserProfile(@Request() req: express.Request, @Body() data: IProfile, @Query() isCompatibleWithBosC?: boolean): Promise<IProfileData | { message: string }> {
         try {
             const isAdmin = await checkIfItIsAdmin(req);
             if (!isAdmin) throw new AuthError(SECURITY_MESSAGES.UNAUTHORIZED);
@@ -53,7 +53,7 @@ export class UserProfileController extends Controller {
                 return { message: "The profile name is required" };
             }
 
-            const profile = await serviceInstance.createProfile(data);
+            const profile = await serviceInstance.createProfile(data, isCompatibleWithBosC);
             this.setStatus(HTTP_CODES.CREATED)
             return _formatProfile(profile);
 
@@ -104,12 +104,12 @@ export class UserProfileController extends Controller {
 
     @Security(SECURITY_NAME.bearerAuth)
     @Put("/edit_profile/{id}")
-    public async updateUserProfile(@Request() req: express.Request, @Path() id: string, @Body() data: IProfileEdit): Promise<IProfileData | { message: string }> {
+    public async updateUserProfile(@Request() req: express.Request, @Path() id: string, @Body() data: IProfileEdit, @Query() isCompatibleWithBosC?: boolean): Promise<IProfileData | { message: string }> {
         try {
             const isAdmin = await checkIfItIsAdmin(req);
             if (!isAdmin) throw new AuthError(SECURITY_MESSAGES.UNAUTHORIZED);
 
-            const node = await serviceInstance.updateProfile(id, data);
+            const node = await serviceInstance.updateProfile(id, data, isCompatibleWithBosC);
             if (node) {
                 this.setStatus(HTTP_CODES.OK);
                 return _formatProfile(node);
@@ -171,12 +171,12 @@ export class UserProfileController extends Controller {
 
     @Security(SECURITY_NAME.bearerAuth)
     @Post("/authorize_portofolio_apps/{profileId}")
-    public async authorizeToAccessPortofolioApps(@Request() req: express.Request, @Path() profileId: string, @Body() data: { appsIds: string[], portofolioId: string }[]): Promise<IPortofolioData[] | { message: string }> {
+    public async authorizeToAccessPortofolioApps(@Request() req: express.Request, @Path() profileId: string, @Body() data: { appsIds: string[], portofolioId: string }[], @Query() isCompatibleWithBosC?: boolean): Promise<IPortofolioData[] | { message: string }> {
         try {
             const isAdmin = await checkIfItIsAdmin(req);
             if (!isAdmin) throw new AuthError(SECURITY_MESSAGES.UNAUTHORIZED);
 
-            const nodes = await serviceInstance.authorizeProfileToAccessPortofolioApp(profileId, data);
+            const nodes = await serviceInstance.authorizeProfileToAccessPortofolioApp(profileId, data, isCompatibleWithBosC);
             if (nodes) {
                 this.setStatus(HTTP_CODES.OK)
                 return nodes.map(value => _formatPortofolioAuthRes(value));
@@ -216,12 +216,12 @@ export class UserProfileController extends Controller {
 
     @Security(SECURITY_NAME.bearerAuth)
     @Post("/unauthorize_portofolio_apps/{profileId}")
-    public async unauthorizeToAccessPortofolioApps(@Request() req: express.Request, @Path() profileId: string, @Body() data: { appsIds: string[], portofolioId: string }[]): Promise<any | { message: string }> {
+    public async unauthorizeToAccessPortofolioApps(@Request() req: express.Request, @Path() profileId: string, @Body() data: { appsIds: string[], portofolioId: string }[], @Query() isCompatibleWithBosC?: boolean): Promise<any | { message: string }> {
         try {
             const isAdmin = await checkIfItIsAdmin(req);
             if (!isAdmin) throw new AuthError(SECURITY_MESSAGES.UNAUTHORIZED);
 
-            const nodes = await serviceInstance.unauthorizeProfileToAccessPortofolioApp(profileId, data);
+            const nodes = await serviceInstance.unauthorizeProfileToAccessPortofolioApp(profileId, data, isCompatibleWithBosC);
             if (nodes) {
                 this.setStatus(HTTP_CODES.OK);
                 return nodes.reduce((liste: any[], item) => {
@@ -270,12 +270,12 @@ export class UserProfileController extends Controller {
 
     @Security(SECURITY_NAME.bearerAuth)
     @Post("/authorize_bos_apps/{profileId}/{portofolioId}")
-    public async authorizeToAccessBosApps(@Request() req: express.Request, @Path() profileId: string, @Path() portofolioId: string, @Body() data: IBosAuth[]): Promise<IBosData[] | { message: string }> {
+    public async authorizeToAccessBosApps(@Request() req: express.Request, @Path() profileId: string, @Path() portofolioId: string, @Body() data: IBosAuth[], @Query() isCompatibleWithBosC?: boolean): Promise<IBosData[] | { message: string }> {
         try {
             const isAdmin = await checkIfItIsAdmin(req);
             if (!isAdmin) throw new AuthError(SECURITY_MESSAGES.UNAUTHORIZED);
 
-            const nodes = await serviceInstance.authorizeProfileToAccessBosApp(profileId, portofolioId, data);
+            const nodes = await serviceInstance.authorizeProfileToAccessBosApp(profileId, portofolioId, data, isCompatibleWithBosC);
             if (nodes) {
                 this.setStatus(HTTP_CODES.OK)
                 return nodes.map(node => _formatBosAuthRes(node));
@@ -316,12 +316,12 @@ export class UserProfileController extends Controller {
 
     @Security(SECURITY_NAME.bearerAuth)
     @Post("/unauthorize_bos_apps/{profileId}/{portofolioId}")
-    public async unauthorizeToAccessBosApp(@Request() req: express.Request, @Path() profileId: string, @Path() portofolioId: string, @Body() data: { appsIds: string[], buildingId: string }[]): Promise<any | { message: string }> {
+    public async unauthorizeToAccessBosApp(@Request() req: express.Request, @Path() profileId: string, @Path() portofolioId: string, @Body() data: { appsIds: string[], buildingId: string }[], @Query() isCompatibleWithBosC?: boolean): Promise<any | { message: string }> {
         try {
             const isAdmin = await checkIfItIsAdmin(req);
             if (!isAdmin) throw new AuthError(SECURITY_MESSAGES.UNAUTHORIZED);
 
-            const nodes = await serviceInstance.unauthorizeProfileToAccessBosApp(profileId, portofolioId, data);
+            const nodes = await serviceInstance.unauthorizeProfileToAccessBosApp(profileId, portofolioId, data, isCompatibleWithBosC);
             if (nodes) {
                 this.setStatus(HTTP_CODES.OK)
                 return nodes.reduce((liste: any[], item) => {

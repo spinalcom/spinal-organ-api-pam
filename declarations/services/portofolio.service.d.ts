@@ -32,7 +32,7 @@ export declare class PortofolioService {
      * @param newData - The new data to apply to the portfolio.
      * @returns A promise that resolves to the updated portfolio details, or undefined if the portfolio does not exist.
      */
-    updatePortofolio(portofolioId: string, newData: IEditPortofolio): Promise<IPortofolioDetails>;
+    updatePortofolio(portofolioId: string, newData: IEditPortofolio, isCompatibleWithBosC: boolean): Promise<IPortofolioDetails>;
     /**
      * Retrieves all portfolio nodes from the context.
      *

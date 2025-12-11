@@ -410,7 +410,7 @@ class AuthorizationService {
      * @param appIds - The IDs of the apps to authorize access to.
      * @returns An array of real SpinalNode apps that were authorized.
      */
-    async authorizeProfileToAccessBosApp(profile, portofolioId, BosId, appIds) {
+    async authorizeProfileToAccessBosApp(profile, portofolioId, BosId, appIds, isCompatibleWithBosC) {
         if (!Array.isArray(appIds))
             appIds = [appIds];
         let index = 0;
@@ -424,7 +424,9 @@ class AuthorizationService {
         const restAppIds = appIds.slice(index);
         const promises = restAppIds.map((appId) => this.authorizeProfileToAccessOneBosApp(profile, portofolioId, BosId, appId));
         return Promise.all(promises).then(async (apps) => {
-            await this._removeEmptyBosFromProfile(profile, portofolioId, BosId);
+            // if the profile is not compatible with bosConfig we need to check and remove it if empty
+            if (!isCompatibleWithBosC)
+                await this._removeEmptyBosFromProfile(profile, portofolioId, BosId);
             return apps.filter(app => app !== undefined).concat(firstCreated ? [firstCreated] : []);
         });
     }
@@ -470,7 +472,7 @@ class AuthorizationService {
      * @param appIds - The ID(s) of the app(s) to unauthorize.
      * @returns A promise that resolves to an array of removed app references.
      */
-    async unauthorizeProfileToAccessBosApp(profile, portofolioId, BosId, appIds) {
+    async unauthorizeProfileToAccessBosApp(profile, portofolioId, BosId, appIds, isCompatibleWithBosC) {
         if (!Array.isArray(appIds))
             appIds = [appIds];
         // const { bosRef, portofolioRef } = await this._getRefTree(profile, portofolioId, BosId)
@@ -487,7 +489,9 @@ class AuthorizationService {
             return (0, authorizationUtils_1.getOriginalNodeFromReference)(appReference);
         });
         return Promise.all(promises).then(async (removedApps) => {
-            await this._removeEmptyBosFromProfile(profile, portofolioId, BosId, bosRef);
+            // if the profile is not compatible with bosConfig we need to check and remove it if empty
+            if (!isCompatibleWithBosC)
+                await this._removeEmptyBosFromProfile(profile, portofolioId, BosId, bosRef);
             return removedApps.filter(app => app !== null);
         });
     }
@@ -582,7 +586,7 @@ class AuthorizationService {
      * @param apiRoutesIds - The IDs of the API routes to authorize access to.
      * @returns An array of real SpinalNode API routes that were authorized.
      */
-    async authorizeProfileToAccessBosApisRoutes(profile, portofolioId, bosId, apiRoutesIds) {
+    async authorizeProfileToAccessBosApisRoutes(profile, portofolioId, bosId, apiRoutesIds, isCompatibleWithBosC) {
         if (!Array.isArray(apiRoutesIds))
             apiRoutesIds = [apiRoutesIds];
         if (!apiRoutesIds.length)
@@ -598,7 +602,9 @@ class AuthorizationService {
         const restApiRoutesIds = apiRoutesIds.slice(index);
         const promises = restApiRoutesIds.map((apiRouteId) => this.authorizeProfileToAccessOneBosApisRoutes(profile, portofolioId, bosId, apiRouteId));
         return Promise.all(promises).then(async (apis) => {
-            await this._removeEmptyBosFromProfile(profile, portofolioId, bosId);
+            // if the profile is not compatible with bosConfig we need to check and remove it if empty
+            if (!isCompatibleWithBosC)
+                await this._removeEmptyBosFromProfile(profile, portofolioId, bosId);
             return apis.filter(api => api !== undefined).concat(firstCreated ? [firstCreated] : []);
         });
     }
@@ -615,7 +621,7 @@ class AuthorizationService {
      * @param apiRoutesIds - The ID(s) of the API route(s) to unauthorize.
      * @returns A promise that resolves to an array of removed API route references.
      */
-    async unauthorizeProfileToAccessBosApisRoutes(profile, portofolioId, bosId, apiRoutesIds) {
+    async unauthorizeProfileToAccessBosApisRoutes(profile, portofolioId, bosId, apiRoutesIds, isCompatibleWithBosC) {
         const createContextIfNotExist = true;
         const context = await (0, authorizationUtils_1._getAuthorizedPortofolioContext)(profile, !createContextIfNotExist);
         const portofolioRef = await (0, authorizationUtils_1.findNodeReferenceInProfileTree)(context, context, portofolioId);
@@ -636,7 +642,9 @@ class AuthorizationService {
             return (0, authorizationUtils_1.getOriginalNodeFromReference)(apiRouteReference);
         });
         return Promise.all(promises).then(async (removedApis) => {
-            await this._removeEmptyBosFromProfile(profile, portofolioId, bosId, bosRef, portofolioRef);
+            // if the profile is not compatible with bosConfig we need to check and remove it if empty
+            if (!isCompatibleWithBosC)
+                await this._removeEmptyBosFromProfile(profile, portofolioId, bosId, bosRef, portofolioRef);
             return removedApis.filter(api => api !== null);
         });
     }
@@ -682,17 +690,22 @@ class AuthorizationService {
         return (0, authorizationUtils_1.removeReferenceNode)(portofolioRef);
     }
     async _removeEmptyBosFromProfile(profile, portofolioId, bosId, bosReference, portofolioRef) {
-        console.warn("Don't remove empty BOS for now, to be compatible with old behavior");
-        // const createContextIfNotExist = true;
-        // const context = await _getAuthorizedPortofolioContext(profile, !createContextIfNotExist);
-        // if (!portofolioRef) portofolioRef = await findNodeReferenceInProfileTree(context, context, portofolioId);
-        // if (!portofolioRef) return;
-        // if (!bosReference) bosReference = await findNodeReferenceInProfileTree(context, portofolioRef, bosId);
-        // if (!bosReference) return;
-        // const childrenList = await bosReference.getChildren();
-        // if (childrenList.length > 0) return;
-        // await removeReferenceNode(bosReference);
-        // return this._removeEmptyPortofolioFromProfile(profile, portofolioId, portofolioRef);
+        // console.warn("Don't remove empty BOS for now, to be compatible with old behavior");
+        const createContextIfNotExist = true;
+        const context = await (0, authorizationUtils_1._getAuthorizedPortofolioContext)(profile, !createContextIfNotExist);
+        if (!portofolioRef)
+            portofolioRef = await (0, authorizationUtils_1.findNodeReferenceInProfileTree)(context, context, portofolioId);
+        if (!portofolioRef)
+            return;
+        if (!bosReference)
+            bosReference = await (0, authorizationUtils_1.findNodeReferenceInProfileTree)(context, portofolioRef, bosId);
+        if (!bosReference)
+            return;
+        const childrenList = await bosReference.getChildren();
+        if (childrenList.length > 0)
+            return;
+        await (0, authorizationUtils_1.removeReferenceNode)(bosReference);
+        return this._removeEmptyPortofolioFromProfile(profile, portofolioId, portofolioRef);
     }
 }
 exports.default = AuthorizationService;

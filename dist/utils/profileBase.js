@@ -16,14 +16,14 @@ class ProfileBase {
  * @param profileData The profile data to create.
  * @returns The created profile node and its authorized portofolios.
  */
-    async createProfile(profileData) {
-        const authorizationDataFormatted = (0, profileUtils_1.formatAndMergePortofolioAuthorization)(profileData.authorize);
+    async createProfile(profileData, isCompatibleWithBosC) {
+        const authorizationDataFormatted = (0, profileUtils_1.formatAndMergePortofolioAuthorization)(profileData.authorize, isCompatibleWithBosC);
         if (authorizationDataFormatted.length === 0)
             throw new AuthError_1.AuthError("At least one portofolio must be authorized in the profile", constant_1.HTTP_CODES.BAD_REQUEST);
         const profileNode = await (0, profileUtils_1._createProfileNode)(profileData);
         const promises = [];
         for (const portofolio of authorizationDataFormatted) {
-            promises.push(this.authorizeProfileToAccessPortofolio(profileNode, portofolio));
+            promises.push(this.authorizeProfileToAccessPortofolio(profileNode, portofolio, isCompatibleWithBosC));
         }
         return Promise.all(promises).then(async (itemsAuthorized) => {
             await this.context.addChildInContext(profileNode, this.relationName, constant_1.PTR_LST_TYPE, this.context);
@@ -62,18 +62,18 @@ class ProfileBase {
      * @param newData The new profile data.
      * @returns The updated profile node and its authorized portofolios.
      */
-    async updateProfile(profileId, newData) {
+    async updateProfile(profileId, newData, isCompatibleWithBosC) {
         const profileNode = await (0, profileUtils_1._getProfileNode)(profileId, this.context);
         if (!profileNode)
             return;
         if (newData.name && newData.name.trim() !== profileNode.info.name.get()) {
             (0, profileUtils_1._renameProfile)(profileNode, newData.name);
         }
-        const newAuthorizationFormatted = (0, profileUtils_1.formatAndMergePortofolioAuthorization)(newData.authorize);
+        const newAuthorizationFormatted = (0, profileUtils_1.formatAndMergePortofolioAuthorization)(newData.authorize, isCompatibleWithBosC);
         const promises = [];
         for (const portofolio of newAuthorizationFormatted) {
-            promises.push(this.authorizeProfileToAccessPortofolio(profileNode, portofolio));
-            promises.push(this.unauthorizeProfileToAccessPortofolio(profileNode, portofolio));
+            promises.push(this.authorizeProfileToAccessPortofolio(profileNode, portofolio, isCompatibleWithBosC));
+            promises.push(this.unauthorizeProfileToAccessPortofolio(profileNode, portofolio, isCompatibleWithBosC));
         }
         return Promise.all(promises).then(() => {
             return this.getProfileWithAuthorizedPortofolio(profileNode);
@@ -148,12 +148,12 @@ class ProfileBase {
      * @param portofolioAuth - A single or array of IPortofolioAuth objects specifying portfolio and app IDs.
      * @returns A promise resolving to an array of authorized portfolio-app structures.
      */
-    async authorizeProfileToAccessPortofolioApp(profile, portofolioAuth) {
+    async authorizeProfileToAccessPortofolioApp(profile, portofolioAuth, isCompatibleWithBosC) {
         portofolioAuth = Array.isArray(portofolioAuth) ? portofolioAuth : [portofolioAuth];
         const node = profile instanceof spinal_model_graph_1.SpinalNode ? profile : await (0, profileUtils_1._getProfileNode)(profile, this.context);
         if (!(node instanceof spinal_model_graph_1.SpinalNode))
             return;
-        const itemsFormatted = (0, profileUtils_1.formatAndMergePortofolioAuthorization)(portofolioAuth);
+        const itemsFormatted = (0, profileUtils_1.formatAndMergePortofolioAuthorization)(portofolioAuth, isCompatibleWithBosC);
         const promises = itemsFormatted.map(async ({ appsIds, portofolioId }) => {
             if (appsIds && appsIds.length === 0)
                 return null;
@@ -169,12 +169,12 @@ class ProfileBase {
      * @param portofolioAuth - A single or array of IPortofolioAuth objects specifying portfolio and app IDs to unauthorize.
      * @returns A promise resolving to an array of SpinalNode instances representing the unauthorizations.
      */
-    async unauthorizeProfileToAccessPortofolioApp(profile, portofolioAuth) {
+    async unauthorizeProfileToAccessPortofolioApp(profile, portofolioAuth, isCompatibleWithBosC) {
         portofolioAuth = Array.isArray(portofolioAuth) ? portofolioAuth : [portofolioAuth];
         const profileNode = profile instanceof spinal_model_graph_1.SpinalNode ? profile : await (0, profileUtils_1._getProfileNode)(profile, this.context);
         if (!(profileNode instanceof spinal_model_graph_1.SpinalNode))
             return;
-        const formattedData = (0, profileUtils_1.formatAndMergePortofolioAuthorization)(portofolioAuth);
+        const formattedData = (0, profileUtils_1.formatAndMergePortofolioAuthorization)(portofolioAuth, isCompatibleWithBosC);
         const promises = [];
         for (const data of formattedData) {
             if (!data.unauthorizeAppsIds || data.unauthorizeAppsIds.length === 0)
@@ -191,12 +191,12 @@ class ProfileBase {
      * @param portofolioAuth - A single or array of IPortofolioAuth objects specifying portfolio and API IDs.
      * @returns A promise resolving to an array of authorized portfolio-API structures.
      */
-    async authorizeProfileToAccessPortofolioApisRoute(profile, portofolioAuth) {
+    async authorizeProfileToAccessPortofolioApisRoute(profile, portofolioAuth, isCompatibleWithBosC) {
         portofolioAuth = Array.isArray(portofolioAuth) ? portofolioAuth : [portofolioAuth];
         const profileNode = profile instanceof spinal_model_graph_1.SpinalNode ? profile : await (0, profileUtils_1._getProfileNode)(profile, this.context);
         if (!(profileNode instanceof spinal_model_graph_1.SpinalNode))
             return;
-        const itemsFormatted = (0, profileUtils_1.formatAndMergePortofolioAuthorization)(portofolioAuth);
+        const itemsFormatted = (0, profileUtils_1.formatAndMergePortofolioAuthorization)(portofolioAuth, isCompatibleWithBosC);
         const promises = itemsFormatted.map(async ({ apisIds, portofolioId }) => {
             if (apisIds && apisIds.length === 0)
                 return null;
@@ -212,12 +212,12 @@ class ProfileBase {
      * @param portofolioAuth - A single or array of IPortofolioAuth objects specifying portfolio and API IDs to unauthorize.
      * @returns A promise resolving to an array of IDs of the unauthorized API routes.
      */
-    async unauthorizeProfileToAccessPortofolioApisRoute(profile, portofolioAuth) {
+    async unauthorizeProfileToAccessPortofolioApisRoute(profile, portofolioAuth, isCompatibleWithBosC) {
         portofolioAuth = Array.isArray(portofolioAuth) ? portofolioAuth : [portofolioAuth];
         const profileNode = profile instanceof spinal_model_graph_1.SpinalNode ? profile : await (0, profileUtils_1._getProfileNode)(profile, this.context);
         if (!(profileNode instanceof spinal_model_graph_1.SpinalNode))
             return;
-        const itemsFormatted = (0, profileUtils_1.formatAndMergePortofolioAuthorization)(portofolioAuth);
+        const itemsFormatted = (0, profileUtils_1.formatAndMergePortofolioAuthorization)(portofolioAuth, isCompatibleWithBosC);
         const promises = itemsFormatted.map(async ({ unauthorizeApisIds, portofolioId }) => {
             if (!unauthorizeApisIds || unauthorizeApisIds.length === 0)
                 return null;
@@ -307,8 +307,16 @@ class ProfileBase {
         const profileNode = profile instanceof spinal_model_graph_1.SpinalNode ? profile : await (0, profileUtils_1._getProfileNode)(profile, this.context);
         if (!(profileNode instanceof spinal_model_graph_1.SpinalNode))
             return;
-        const promises = BosId.map(id => authorization_service_1.authorizationInstance.authorizeProfileToAccessBos(profileNode, portofolioId, id));
-        return Promise.all(promises);
+        const results = [];
+        // use for loop with await to have sequential execution
+        // else it can duplicate portofolio authorization in some cases
+        for (const id of BosId) {
+            const res = await authorization_service_1.authorizationInstance.authorizeProfileToAccessBos(profileNode, portofolioId, id);
+            results.push(res);
+        }
+        return results;
+        // const promises = BosId.map(id => authorizationInstance.authorizeProfileToAccessBos(profileNode, portofolioId, id))
+        // return Promise.all(promises);
     }
     /**
      * Revokes a profile's authorization to access one or more BOS (Building Operating System) nodes by their IDs.
@@ -334,7 +342,7 @@ class ProfileBase {
      * @param {IBosAuth | IBosAuth[]} bosAuth - A single or array of IBosAuth objects specifying building and app IDs.
      * @returns {Promise<IBosAuthRes[]>} - A promise resolving to an array of authorized building-app structures.
      */
-    async authorizeProfileToAccessBosApp(profile, portofolioId, bosAuth) {
+    async authorizeProfileToAccessBosApp(profile, portofolioId, bosAuth, isCompatibleWithBosC) {
         bosAuth = Array.isArray(bosAuth) ? bosAuth : [bosAuth];
         const profileNode = profile instanceof spinal_model_graph_1.SpinalNode ? profile : await (0, profileUtils_1._getProfileNode)(profile, this.context);
         if (!(profileNode instanceof spinal_model_graph_1.SpinalNode))
@@ -344,7 +352,7 @@ class ProfileBase {
             if (appsIds && appsIds.length === 0)
                 return null;
             const bos = await authorization_service_1.authorizationInstance.authorizeProfileToAccessBos(profileNode, portofolioId, buildingId);
-            const apps = await authorization_service_1.authorizationInstance.authorizeProfileToAccessBosApp(profileNode, portofolioId, buildingId, appsIds);
+            const apps = await authorization_service_1.authorizationInstance.authorizeProfileToAccessBosApp(profileNode, portofolioId, buildingId, appsIds, isCompatibleWithBosC);
             return { building: bos, apps };
         });
         return Promise.all(promises).then((result) => result.filter(Boolean));
@@ -357,14 +365,14 @@ class ProfileBase {
      * @param {IBosAuth | IBosAuth[]} bosAuth - A single or array of IBosAuth objects specifying building and app IDs to unauthorize.
      * @returns {Promise<SpinalNode[]>} - A promise resolving to an array of SpinalNode instances representing the unauthorizations.
      */
-    async unauthorizeProfileToAccessBosApp(profile, portofolioId, bosAuth) {
+    async unauthorizeProfileToAccessBosApp(profile, portofolioId, bosAuth, isCompatibleWithBosC) {
         bosAuth = Array.isArray(bosAuth) ? bosAuth : [bosAuth];
         const profileNode = profile instanceof spinal_model_graph_1.SpinalNode ? profile : await (0, profileUtils_1._getProfileNode)(profile, this.context);
         if (!(profileNode instanceof spinal_model_graph_1.SpinalNode))
             return;
         const itemsFormatted = (0, profileUtils_1.formatAndMergeBosAuthorization)(bosAuth);
         const promises = itemsFormatted.map(({ buildingId, unauthorizeAppsIds }) => {
-            return authorization_service_1.authorizationInstance.unauthorizeProfileToAccessBosApp(profileNode, portofolioId, buildingId, unauthorizeAppsIds);
+            return authorization_service_1.authorizationInstance.unauthorizeProfileToAccessBosApp(profileNode, portofolioId, buildingId, unauthorizeAppsIds, isCompatibleWithBosC);
         });
         return Promise.all(promises).then((result) => result.flat());
     }
@@ -376,7 +384,7 @@ class ProfileBase {
      * @param {IBosAuth | IBosAuth[]} bosAuth - A single or array of IBosAuth objects specifying building and API IDs.
      * @returns A promise resolving to an array of authorized building-API structures.
      */
-    async authorizeProfileToAccessBosApiRoute(profile, portofolioId, bosAuth) {
+    async authorizeProfileToAccessBosApiRoute(profile, portofolioId, bosAuth, isCompatibleWithBosC) {
         bosAuth = Array.isArray(bosAuth) ? bosAuth : [bosAuth];
         const node = profile instanceof spinal_model_graph_1.SpinalNode ? profile : await (0, profileUtils_1._getProfileNode)(profile, this.context);
         if (!(node instanceof spinal_model_graph_1.SpinalNode))
@@ -386,7 +394,7 @@ class ProfileBase {
             if (apisIds && apisIds.length === 0)
                 return null;
             const bos = await authorization_service_1.authorizationInstance.authorizeProfileToAccessBos(node, portofolioId, buildingId);
-            const apis = await authorization_service_1.authorizationInstance.authorizeProfileToAccessBosApisRoutes(node, portofolioId, buildingId, apisIds);
+            const apis = await authorization_service_1.authorizationInstance.authorizeProfileToAccessBosApisRoutes(node, portofolioId, buildingId, apisIds, isCompatibleWithBosC);
             return { building: bos, apis };
         });
         return Promise.all(promises).then((result) => result.filter(Boolean));
@@ -399,14 +407,14 @@ class ProfileBase {
      * @param {IBosAuth | IBosAuth[]} bosAuth - A single or array of IBosAuth objects specifying building and API IDs to unauthorize.
      * @returns {Promise<string[]>} - A promise resolving to an array of IDs of the unauthorized API routes.
      */
-    async unauthorizeProfileToAccessBosApiRoute(profile, portofolioId, bosAuth) {
+    async unauthorizeProfileToAccessBosApiRoute(profile, portofolioId, bosAuth, isCompatibleWithBosC) {
         bosAuth = Array.isArray(bosAuth) ? bosAuth : [bosAuth];
         const profileNode = profile instanceof spinal_model_graph_1.SpinalNode ? profile : await (0, profileUtils_1._getProfileNode)(profile, this.context);
         if (!(profileNode instanceof spinal_model_graph_1.SpinalNode))
             return;
         const itemsFormatted = (0, profileUtils_1.formatAndMergeBosAuthorization)(bosAuth);
         const promises = itemsFormatted.map(({ buildingId, unauthorizeApisIds }) => {
-            return authorization_service_1.authorizationInstance.unauthorizeProfileToAccessBosApisRoutes(profileNode, portofolioId, buildingId, unauthorizeApisIds || []);
+            return authorization_service_1.authorizationInstance.unauthorizeProfileToAccessBosApisRoutes(profileNode, portofolioId, buildingId, unauthorizeApisIds || [], isCompatibleWithBosC);
         });
         return Promise.all(promises).then((result) => {
             const res = result.flat();
@@ -511,39 +519,51 @@ class ProfileBase {
      * @param portofolioAuth - The portfolio authorization object containing portfolio ID, APIs, and building access details.
      * @returns A promise resolving to an object containing the authorized portfolio node, APIs, and buildings structure.
      */
-    async authorizeProfileToAccessPortofolio(profile, portofolioAuth) {
+    async authorizeProfileToAccessPortofolio(profile, portofolioAuth, isCompatibleWithBosC) {
         // Ensure porto
         const [portofolio] = await this.authorizeProfileToAccessPortofolioById(profile, portofolioAuth.portofolioId);
-        const apisData = await this.authorizeProfileToAccessPortofolioApisRoute(profile, portofolioAuth);
-        const appsData = await this.authorizeProfileToAccessPortofolioApp(profile, portofolioAuth);
-        const buildingProm = portofolioAuth.building.map(bos => this._authorizeIBosAuth(profile, bos, portofolioAuth.portofolioId));
+        const apisData = await this.authorizeProfileToAccessPortofolioApisRoute(profile, portofolioAuth, isCompatibleWithBosC);
+        const appsData = await this.authorizeProfileToAccessPortofolioApp(profile, portofolioAuth, isCompatibleWithBosC);
+        // const buildingProm = portofolioAuth.building.map(bos => this._authorizeIBosAuth(profile, bos, portofolioAuth.portofolioId, isCompatibleWithBosC))
+        // use reduce to have sequential execution
+        // else it can duplicate portofolio authorization in some cases
+        const buildingProm = portofolioAuth.building.reduce(async (resultProm, bos) => {
+            const result = await resultProm;
+            const res = await this._authorizeIBosAuth(profile, bos, portofolioAuth.portofolioId, isCompatibleWithBosC);
+            result.push(res);
+            return result;
+        }, Promise.resolve([]));
         return {
             portofolio,
             apis: apisData[0]?.apis,
             apps: appsData[0]?.apps,
-            buildings: await Promise.all(buildingProm)
+            buildings: await buildingProm
         };
     }
     /////////////////// private methods ///////////////////
-    async unauthorizeProfileToAccessPortofolio(profile, portofolioAuth) {
-        await this.unauthorizeProfileToAccessPortofolioApisRoute(profile, { portofolioId: portofolioAuth.portofolioId, unauthorizeApisIds: portofolioAuth.unauthorizeApisIds || [] });
-        await this.unauthorizeProfileToAccessPortofolioApp(profile, { portofolioId: portofolioAuth.portofolioId, unauthorizeAppsIds: portofolioAuth.unauthorizeAppsIds || [] });
-        const buildingProm = portofolioAuth.building.map(bos => this._unauthorizeIBosAuth(profile, bos, portofolioAuth.portofolioId));
+    async unauthorizeProfileToAccessPortofolio(profile, portofolioAuth, isCompatibleWithBosC) {
+        await this.unauthorizeProfileToAccessPortofolioApisRoute(profile, { portofolioId: portofolioAuth.portofolioId, unauthorizeApisIds: portofolioAuth.unauthorizeApisIds || [] }, isCompatibleWithBosC);
+        await this.unauthorizeProfileToAccessPortofolioApp(profile, { portofolioId: portofolioAuth.portofolioId, unauthorizeAppsIds: portofolioAuth.unauthorizeAppsIds || [] }, isCompatibleWithBosC);
+        let buildingProm = [];
+        if (isCompatibleWithBosC)
+            buildingProm = portofolioAuth.unauthorizeBuildingIds?.map(bosId => this.unauthorizeProfileToAccessBos(profile, portofolioAuth.portofolioId, bosId));
+        else
+            buildingProm = portofolioAuth.building.map(bos => this._unauthorizeIBosAuth(profile, bos, portofolioAuth.portofolioId, isCompatibleWithBosC));
         await Promise.all(buildingProm);
     }
-    async _authorizeIBosAuth(profile, bosAuth, portofolioId) {
+    async _authorizeIBosAuth(profile, bosAuth, portofolioId, isCompatibleWithBosC) {
         const [building] = await this.authorizeProfileToAccessBos(profile, portofolioId, bosAuth.buildingId);
-        const apisData = await this.authorizeProfileToAccessBosApiRoute(profile, portofolioId, bosAuth);
-        const appsData = await this.authorizeProfileToAccessBosApp(profile, portofolioId, bosAuth);
+        const apisData = await this.authorizeProfileToAccessBosApiRoute(profile, portofolioId, bosAuth, isCompatibleWithBosC);
+        const appsData = await this.authorizeProfileToAccessBosApp(profile, portofolioId, bosAuth, isCompatibleWithBosC);
         return {
             building,
             apis: apisData[0]?.apis,
             apps: appsData[0]?.apps
         };
     }
-    async _unauthorizeIBosAuth(profile, bosAuth, portofolioId) {
-        const apisData = await this.unauthorizeProfileToAccessBosApiRoute(profile, portofolioId, { buildingId: bosAuth.buildingId, unauthorizeApisIds: bosAuth.unauthorizeApisIds });
-        const appsData = await this.unauthorizeProfileToAccessBosApp(profile, portofolioId, { buildingId: bosAuth.buildingId, unauthorizeAppsIds: bosAuth.unauthorizeAppsIds });
+    async _unauthorizeIBosAuth(profile, bosAuth, portofolioId, isCompatibleWithBosC) {
+        const apisData = await this.unauthorizeProfileToAccessBosApiRoute(profile, portofolioId, { buildingId: bosAuth.buildingId, unauthorizeApisIds: bosAuth.unauthorizeApisIds }, isCompatibleWithBosC);
+        const appsData = await this.unauthorizeProfileToAccessBosApp(profile, portofolioId, { buildingId: bosAuth.buildingId, unauthorizeAppsIds: bosAuth.unauthorizeAppsIds }, isCompatibleWithBosC);
         return [apisData, appsData];
     }
 }

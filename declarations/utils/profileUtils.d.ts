@@ -6,7 +6,7 @@ export declare function _formatBosAuthRes(data: IBosAuthRes): IBosData;
 export declare function _getNodeListInfo(nodes?: SpinalNode[]): any[];
 export declare function _formatProfileKeys(profile: IProfile): IProfile;
 export declare function formatAndMergeBosAuthorization(itemsToAuthorize: IBosAuth[]): IBosAuth[];
-export declare function formatAndMergePortofolioAuthorization(itemsToAuthorize: IPortofolioAuth[]): IPortofolioAuth[];
+export declare function formatAndMergePortofolioAuthorization(itemsToAuthorize: IPortofolioAuth[], isCompatibleWithBosC: boolean): IPortofolioAuth[];
 export declare function _findChildInContext(startNode: SpinalNode, nodeIdOrName: string, context: SpinalContext): Promise<SpinalNode>;
 export declare function _createProfileNode(profile: IProfile): Promise<SpinalNode>;
 export declare function _getProfileNode(profileId: string, context: SpinalContext): Promise<SpinalNode>;

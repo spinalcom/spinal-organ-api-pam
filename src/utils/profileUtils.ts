@@ -75,9 +75,9 @@ export function formatAndMergeBosAuthorization(itemsToAuthorize: IBosAuth[]): IB
 }
 
 
-export function formatAndMergePortofolioAuthorization(itemsToAuthorize: IPortofolioAuth[]): IPortofolioAuth[] {
+export function formatAndMergePortofolioAuthorization(itemsToAuthorize: IPortofolioAuth[], isCompatibleWithBosC: boolean): IPortofolioAuth[] {
 
-    itemsToAuthorize = removeEmptyBuildings(itemsToAuthorize);
+    itemsToAuthorize = removeEmptyBuildings(itemsToAuthorize, isCompatibleWithBosC);
     itemsToAuthorize = removeInvalidPortofolio(itemsToAuthorize);
 
     return mergePortofolioAuth(itemsToAuthorize);
@@ -191,17 +191,19 @@ function removeInvalidPortofolio(items: IPortofolioAuth[]): IPortofolioAuth[] {
     });
 }
 
-function removeEmptyBuildings(items: IPortofolioAuth[]): IPortofolioAuth[] {
-    console.warn("Don't remove empty buildings for now, it can be usefull for bos_config compatibility");
-    // for (const item of items) {
-    //     item.building = (item.building || []).filter(building => authorizationItemIsValid(building));
-    // }
+function removeEmptyBuildings(items: IPortofolioAuth[], isCompatibleWithBosC: boolean): IPortofolioAuth[] {
+    // console.warn("Don't remove empty buildings for now, it can be usefull for bos_config compatibility");
+    if (isCompatibleWithBosC) return items;
+
+    for (const item of items) {
+        item.building = (item.building || []).filter(building => authorizationItemIsValid(building));
+    }
 
     return items;
 }
 
-function authorizationItemIsValid(item: IBosAuth | IPortofolioAuth): boolean {
-    const globalCondition = item.appsIds?.length > 0 || item.apisIds?.length > 0 || item.unauthorizeApisIds?.length > 0 || item.unauthorizeAppsIds?.length > 0;
+function authorizationItemIsValid(item: (IBosAuth | IPortofolioAuth) & { unauthorizeBuildingIds?: string[] }): boolean {
+    const globalCondition = item.appsIds?.length > 0 || item.apisIds?.length > 0 || item.unauthorizeApisIds?.length > 0 || item.unauthorizeAppsIds?.length > 0 || item.unauthorizeBuildingIds?.length > 0;
 
     if (isBuildingAuth(item)) {
         return globalCondition;

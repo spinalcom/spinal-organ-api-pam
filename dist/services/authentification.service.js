@@ -168,8 +168,13 @@ class AuthentificationService {
         for (const key in bosCredential) {
             if (bosCredential.hasOwnProperty(key)) {
                 const mappedKey = keysUsedInGraph[key];
-                if (mappedKey && bosCredential[key] !== undefined)
-                    context.info.mod_attr(mappedKey, bosCredential[key]);
+                if (mappedKey && bosCredential[key] !== undefined) {
+                    const value = bosCredential[key];
+                    if (typeof context.info[mappedKey] === "undefined")
+                        context.info.add_attr({ [mappedKey]: value });
+                    else
+                        context.info[mappedKey].set(value);
+                }
             }
         }
         return context.info.get();
@@ -228,7 +233,10 @@ class AuthentificationService {
         for (const key in authCredentials) {
             if (authCredentials.hasOwnProperty(key)) {
                 const value = authCredentials[key];
-                context.info.mod_attr(key, value);
+                if (typeof context.info[key] === "undefined")
+                    context.info.add_attr({ [key]: value });
+                else
+                    context.info[key].set(value);
             }
         }
         return authCredentials;

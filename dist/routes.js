@@ -132,7 +132,7 @@ const models = {
         "dataType": "refObject",
         "properties": {
             "name": { "dataType": "string" },
-            "authorize": { "dataType": "array", "array": { "dataType": "refAlias", "ref": "IPortofolioAuthEdit" } },
+            "authorize": { "dataType": "array", "array": { "dataType": "intersection", "subSchemas": [{ "ref": "IPortofolioAuthEdit" }, { "dataType": "nestedObjectLiteral", "nestedProperties": { "unauthorizeBuildingIds": { "dataType": "array", "array": { "dataType": "string" } } } }] } },
         },
         "additionalProperties": false,
     },
@@ -548,6 +548,7 @@ function RegisterRoutes(app) {
         const args = {
             req: { "in": "request", "name": "req", "required": true, "dataType": "object" },
             data: { "in": "body", "name": "data", "required": true, "ref": "IProfile" },
+            isCompatibleWithBosC: { "in": "query", "name": "isCompatibleWithBosC", "dataType": "boolean" },
         };
         // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
         let validatedArgs = [];
@@ -602,6 +603,7 @@ function RegisterRoutes(app) {
             req: { "in": "request", "name": "req", "required": true, "dataType": "object" },
             id: { "in": "path", "name": "id", "required": true, "dataType": "string" },
             data: { "in": "body", "name": "data", "required": true, "ref": "IProfileEdit" },
+            isCompatibleWithBosC: { "in": "query", "name": "isCompatibleWithBosC", "dataType": "boolean" },
         };
         // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
         let validatedArgs = [];
@@ -657,6 +659,7 @@ function RegisterRoutes(app) {
             req: { "in": "request", "name": "req", "required": true, "dataType": "object" },
             profileId: { "in": "path", "name": "profileId", "required": true, "dataType": "string" },
             data: { "in": "body", "name": "data", "required": true, "ref": "IPortofolioAuth" },
+            isCompatibleWithBosC: { "in": "query", "name": "isCompatibleWithBosC", "dataType": "boolean" },
         };
         // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
         let validatedArgs = [];
@@ -695,6 +698,7 @@ function RegisterRoutes(app) {
             req: { "in": "request", "name": "req", "required": true, "dataType": "object" },
             profileId: { "in": "path", "name": "profileId", "required": true, "dataType": "string" },
             data: { "in": "body", "name": "data", "required": true, "dataType": "array", "array": { "dataType": "nestedObjectLiteral", "nestedProperties": { "portofolioId": { "dataType": "string", "required": true }, "apisIds": { "dataType": "array", "array": { "dataType": "string" }, "required": true } } } },
+            isCompatibleWithBosC: { "in": "query", "name": "isCompatibleWithBosC", "dataType": "boolean" },
         };
         // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
         let validatedArgs = [];
@@ -734,6 +738,7 @@ function RegisterRoutes(app) {
             profileId: { "in": "path", "name": "profileId", "required": true, "dataType": "string" },
             portofolioId: { "in": "path", "name": "portofolioId", "required": true, "dataType": "string" },
             data: { "in": "body", "name": "data", "required": true, "ref": "IBosAuth" },
+            isCompatibleWithBosC: { "in": "query", "name": "isCompatibleWithBosC", "dataType": "boolean" },
         };
         // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
         let validatedArgs = [];
@@ -774,6 +779,7 @@ function RegisterRoutes(app) {
             profileId: { "in": "path", "name": "profileId", "required": true, "dataType": "string" },
             portofolioId: { "in": "path", "name": "portofolioId", "required": true, "dataType": "string" },
             data: { "in": "body", "name": "data", "required": true, "dataType": "array", "array": { "dataType": "nestedObjectLiteral", "nestedProperties": { "buildingId": { "dataType": "string", "required": true }, "apisIds": { "dataType": "array", "array": { "dataType": "string" }, "required": true } } } },
+            isCompatibleWithBosC: { "in": "query", "name": "isCompatibleWithBosC", "dataType": "boolean" },
         };
         // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
         let validatedArgs = [];
@@ -1718,6 +1724,7 @@ function RegisterRoutes(app) {
             req: { "in": "request", "name": "req", "required": true, "dataType": "object" },
             portofolioId: { "in": "path", "name": "portofolioId", "required": true, "dataType": "string" },
             data: { "in": "body", "name": "data", "required": true, "ref": "IEditPortofolio" },
+            isCompatibleWithBosC: { "in": "query", "name": "isCompatibleWithBosC", "dataType": "boolean" },
         };
         // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
         let validatedArgs = [];
@@ -2106,6 +2113,7 @@ function RegisterRoutes(app) {
         const args = {
             req: { "in": "request", "name": "req", "required": true, "dataType": "object" },
             data: { "in": "body", "name": "data", "required": true, "ref": "IProfile" },
+            isCompatibleWithBosC: { "in": "query", "name": "isCompatibleWithBosC", "dataType": "boolean" },
         };
         // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
         let validatedArgs = [];
@@ -2160,6 +2168,7 @@ function RegisterRoutes(app) {
             req: { "in": "request", "name": "req", "required": true, "dataType": "object" },
             id: { "in": "path", "name": "id", "required": true, "dataType": "string" },
             data: { "in": "body", "name": "data", "required": true, "ref": "IProfileEdit" },
+            isCompatibleWithBosC: { "in": "query", "name": "isCompatibleWithBosC", "dataType": "boolean" },
         };
         // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
         let validatedArgs = [];
@@ -2215,6 +2224,7 @@ function RegisterRoutes(app) {
             req: { "in": "request", "name": "req", "required": true, "dataType": "object" },
             profileId: { "in": "path", "name": "profileId", "required": true, "dataType": "string" },
             data: { "in": "body", "name": "data", "required": true, "dataType": "array", "array": { "dataType": "nestedObjectLiteral", "nestedProperties": { "portofolioId": { "dataType": "string", "required": true }, "appsIds": { "dataType": "array", "array": { "dataType": "string" }, "required": true } } } },
+            isCompatibleWithBosC: { "in": "query", "name": "isCompatibleWithBosC", "dataType": "boolean" },
         };
         // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
         let validatedArgs = [];
@@ -2253,6 +2263,7 @@ function RegisterRoutes(app) {
             req: { "in": "request", "name": "req", "required": true, "dataType": "object" },
             profileId: { "in": "path", "name": "profileId", "required": true, "dataType": "string" },
             data: { "in": "body", "name": "data", "required": true, "dataType": "array", "array": { "dataType": "nestedObjectLiteral", "nestedProperties": { "portofolioId": { "dataType": "string", "required": true }, "appsIds": { "dataType": "array", "array": { "dataType": "string" }, "required": true } } } },
+            isCompatibleWithBosC: { "in": "query", "name": "isCompatibleWithBosC", "dataType": "boolean" },
         };
         // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
         let validatedArgs = [];
@@ -2292,6 +2303,7 @@ function RegisterRoutes(app) {
             profileId: { "in": "path", "name": "profileId", "required": true, "dataType": "string" },
             portofolioId: { "in": "path", "name": "portofolioId", "required": true, "dataType": "string" },
             data: { "in": "body", "name": "data", "required": true, "dataType": "array", "array": { "dataType": "refObject", "ref": "IBosAuth" } },
+            isCompatibleWithBosC: { "in": "query", "name": "isCompatibleWithBosC", "dataType": "boolean" },
         };
         // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
         let validatedArgs = [];
@@ -2332,6 +2344,7 @@ function RegisterRoutes(app) {
             profileId: { "in": "path", "name": "profileId", "required": true, "dataType": "string" },
             portofolioId: { "in": "path", "name": "portofolioId", "required": true, "dataType": "string" },
             data: { "in": "body", "name": "data", "required": true, "dataType": "array", "array": { "dataType": "nestedObjectLiteral", "nestedProperties": { "buildingId": { "dataType": "string", "required": true }, "appsIds": { "dataType": "array", "array": { "dataType": "string" }, "required": true } } } },
+            isCompatibleWithBosC: { "in": "query", "name": "isCompatibleWithBosC", "dataType": "boolean" },
         };
         // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
         let validatedArgs = [];
